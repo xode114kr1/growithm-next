@@ -1,3 +1,5 @@
+import { signIn } from "@/lib/auth/auth";
+
 const trustBadges = ["GITHUB VERIFIED", "SECURE SYNC", "REAL-TIME REVIEW"];
 
 export default function GrowthCtaSection() {
@@ -17,12 +19,19 @@ export default function GrowthCtaSection() {
             Growithm과 함께라면 알고리즘 정복은 더 이상 막막한 과제가 아닙니다.
           </p>
           <div className="flex justify-center">
-            <a
-              className="inline-flex min-h-16 items-center justify-center rounded-2xl bg-secondary-fixed px-10 text-body-lg font-bold text-on-secondary-container shadow-xl transition-transform hover:scale-[1.03]"
-              href="/problem"
+            <form
+              action={async () => {
+                "use server";
+                await signIn("github");
+              }}
             >
-              오늘의 문제 풀기
-            </a>
+              <button
+                className="inline-flex min-h-16 items-center justify-center rounded-2xl bg-secondary-fixed px-10 text-body-lg font-bold text-on-secondary-container shadow-xl transition-transform hover:scale-[1.03]"
+                type="submit"
+              >
+                오늘의 문제 풀기
+              </button>
+            </form>
           </div>
           <div className="mt-8 flex flex-wrap justify-center gap-8 border-t border-on-primary-container/30 pt-8 text-label-caps text-on-primary-container sm:gap-12">
             {trustBadges.map((badge) => (

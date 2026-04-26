@@ -1,3 +1,5 @@
+import { signIn } from "@/lib/auth/auth";
+
 export default function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-surface px-4 pb-20 pt-32 sm:px-10">
@@ -15,12 +17,19 @@ export default function HeroSection() {
             환경을 제공합니다.
           </p>
           <div className="flex flex-wrap gap-4">
-            <a
-              className="btn-primary min-h-14 rounded-xl px-8 text-base"
-              href="/problem"
+            <form
+              action={async () => {
+                "use server";
+                await signIn("github");
+              }}
             >
-              시작하기
-            </a>
+              <button
+                className="btn-primary min-h-14 rounded-xl px-8 text-base"
+                type="submit"
+              >
+                시작하기
+              </button>
+            </form>
             <a
               className="btn-secondary min-h-14 rounded-xl px-8 text-base"
               href="#features"
