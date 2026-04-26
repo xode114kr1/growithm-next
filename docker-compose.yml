@@ -1,0 +1,32 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: growithm-app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://growithm:growithm1234@postgres:5432/growithm_db?schema=public
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: growithm-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: growithm
+      POSTGRES_PASSWORD: growithm1234
+      POSTGRES_DB: growithm_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
