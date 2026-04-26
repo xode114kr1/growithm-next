@@ -14,4 +14,8 @@ Before making code changes, review the relevant Markdown files in `docs/`.
 When the user asks Codex to create a commit, follow `docs/commit-convention.md`.
 
 한국어 설명: 사용자가 Codex에게 커밋 생성을 요청하면 `docs/commit-convention.md`를 따른다.
+
+When the user asks Codex to create or describe a pull request, follow `docs/pr-convention.md`.
+
+한국어 설명: 사용자가 Codex에게 PR 생성 또는 PR 설명 작성을 요청하면 `docs/pr-convention.md`를 따른다.
 <!-- END:project-docs-agent-rules -->
