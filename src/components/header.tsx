@@ -27,10 +27,10 @@ function Brand() {
 
 function Navigation() {
   const links = [
-    { href: "", label: "Home", isActive: true },
+    { href: "/dashboard", label: "Home", isActive: true },
     { href: "/problem", label: "Problem" },
-    { href: "study", label: "Study" },
-    { href: "friend", label: "Friend" },
+    { href: "/study", label: "Study" },
+    { href: "/friend", label: "Friend" },
   ];
 
   return (
