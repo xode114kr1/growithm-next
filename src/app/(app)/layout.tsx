@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Newsreader } from "next/font/google";
 import "./globals.css";
+import Header from "@/components/header";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -32,7 +33,10 @@ export default function RootLayout({
       lang="ko"
       className={`${inter.variable} ${newsreader.variable} ${jetBrainsMono.variable}`}
     >
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <Header />
+        {children}
+      </body>
     </html>
   );
 }
