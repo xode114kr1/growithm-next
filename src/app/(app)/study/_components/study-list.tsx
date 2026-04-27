@@ -1,127 +1,155 @@
+type StudyTier = "Bronze" | "Silver" | "Gold" | "Platinum" | "Diamond" | "Ruby";
+
 const studies = [
   {
     active: true,
-    icon: "GT",
-    iconClass: "bg-primary-fixed text-primary",
     members: "8 Members",
     progress: "68%",
     progressClass: "w-[68%]",
     status: "Active 2m ago",
     statusClass: "text-secondary",
     subtitle: "Target: Platinum Tier",
+    tier: "Platinum",
     title: "Graph Theory Deep Dive",
   },
   {
-    icon: "FP",
-    iconClass: "bg-secondary-fixed text-secondary",
     members: "12 Members",
     progress: "42 / 75",
     progressClass: "w-[56%]",
     status: "Last active 1h ago",
     statusClass: "text-outline",
     subtitle: "Blind 75 & Grind 169",
+    tier: "Gold",
     title: "FAANG Interview Prep",
   },
   {
-    icon: "IC",
-    iconClass: "bg-surface-container text-tertiary",
     members: "5 Members",
     progress: "90%",
     progressClass: "w-[90%]",
     status: "Meeting at 8:00 PM",
     statusClass: "text-secondary",
     subtitle: "Advanced Data Structures",
+    tier: "Diamond",
     title: "ICPC Training Crew",
   },
   {
-    icon: "DP",
-    iconClass: "bg-primary-fixed text-primary",
     members: "9 Members",
     progress: "35%",
     progressClass: "w-[35%]",
     status: "Active 12m ago",
     statusClass: "text-secondary",
     subtitle: "Dynamic Programming Patterns",
+    tier: "Silver",
     title: "DP Mastery Circle",
   },
   {
-    icon: "SD",
-    iconClass: "bg-secondary-fixed text-secondary",
     members: "15 Members",
     progress: "18 / 40",
     progressClass: "w-[45%]",
     status: "Last active 30m ago",
     statusClass: "text-outline",
     subtitle: "Scalable Architecture Practice",
+    tier: "Platinum",
     title: "System Design Sprint",
   },
   {
-    icon: "GR",
-    iconClass: "bg-surface-container text-tertiary",
     members: "7 Members",
     progress: "74%",
     progressClass: "w-[74%]",
     status: "Meeting tomorrow",
     statusClass: "text-secondary",
     subtitle: "Greedy & Interval Problems",
+    tier: "Gold",
     title: "Greedy Strategy Lab",
   },
   {
-    icon: "BT",
-    iconClass: "bg-primary-fixed text-primary",
     members: "6 Members",
     progress: "22 / 50",
     progressClass: "w-[44%]",
     status: "Last active 2h ago",
     statusClass: "text-outline",
     subtitle: "Backtracking and Search",
+    tier: "Bronze",
     title: "Backtracking Workshop",
   },
   {
-    icon: "DB",
-    iconClass: "bg-secondary-fixed text-secondary",
     members: "11 Members",
     progress: "81%",
     progressClass: "w-[81%]",
     status: "Active now",
     statusClass: "text-secondary",
     subtitle: "SQL, Indexes, Transactions",
+    tier: "Ruby",
     title: "Database Interview Club",
   },
   {
-    icon: "OS",
-    iconClass: "bg-surface-container text-tertiary",
     members: "10 Members",
     progress: "29%",
     progressClass: "w-[29%]",
     status: "Last active yesterday",
     statusClass: "text-outline",
     subtitle: "Threads, Memory, Scheduling",
+    tier: "Silver",
     title: "Operating Systems Crew",
   },
   {
-    icon: "NW",
-    iconClass: "bg-primary-fixed text-primary",
     members: "8 Members",
     progress: "63%",
     progressClass: "w-[63%]",
     status: "Meeting at 9:30 PM",
     statusClass: "text-secondary",
     subtitle: "TCP/IP and Web Protocols",
+    tier: "Diamond",
     title: "Network Fundamentals",
   },
   {
-    icon: "TS",
-    iconClass: "bg-secondary-fixed text-secondary",
     members: "13 Members",
     progress: "51 / 100",
     progressClass: "w-[51%]",
     status: "Active 5m ago",
     statusClass: "text-secondary",
     subtitle: "TypeScript Coding Practice",
+    tier: "Gold",
     title: "Frontend Problem Solving",
   },
-];
+] satisfies Array<{
+  active?: boolean;
+  members: string;
+  progress: string;
+  progressClass: string;
+  status: string;
+  statusClass: string;
+  subtitle: string;
+  tier: StudyTier;
+  title: string;
+}>;
+
+const tierThumbnails: Record<StudyTier, { className: string; label: string }> = {
+  Bronze: {
+    className: "border-amber-700/20 bg-amber-700 text-white shadow-amber-900/10",
+    label: "B",
+  },
+  Silver: {
+    className: "border-slate-300 bg-slate-200 text-slate-700 shadow-slate-400/10",
+    label: "S",
+  },
+  Gold: {
+    className: "border-yellow-400/30 bg-yellow-400 text-yellow-950 shadow-yellow-500/10",
+    label: "G",
+  },
+  Platinum: {
+    className: "border-cyan-200 bg-primary-fixed text-primary shadow-cyan-500/10",
+    label: "P",
+  },
+  Diamond: {
+    className: "border-sky-300 bg-sky-100 text-sky-800 shadow-sky-500/10",
+    label: "D",
+  },
+  Ruby: {
+    className: "border-rose-300 bg-rose-600 text-white shadow-rose-700/10",
+    label: "R",
+  },
+};
 
 export default function StudyList() {
   return (
@@ -156,14 +184,12 @@ function StudyCard({ study }: { study: (typeof studies)[number] }) {
         </div>
       ) : null}
       <div className="mb-6 flex items-center gap-4">
-        <div
-          className={`flex size-12 items-center justify-center rounded-lg text-sm font-black ${study.iconClass}`}
-        >
-          {study.icon}
-        </div>
+        <TierThumbnail tier={study.tier} />
         <div>
           <h3 className="text-lg font-bold text-primary">{study.title}</h3>
-          <p className="text-body-sm text-outline">{study.subtitle}</p>
+          <p className="text-body-sm text-outline">
+            {study.subtitle} · {study.tier}
+          </p>
         </div>
       </div>
       <div className="space-y-4">
@@ -204,6 +230,20 @@ function StudyCard({ study }: { study: (typeof studies)[number] }) {
         </button>
       </div>
     </article>
+  );
+}
+
+function TierThumbnail({ tier }: { tier: StudyTier }) {
+  const thumbnail = tierThumbnails[tier];
+
+  return (
+    <div
+      aria-label={`${tier} tier`}
+      className={`flex size-12 shrink-0 items-center justify-center rounded-lg border text-base font-black shadow-sm ${thumbnail.className}`}
+      title={`${tier} tier`}
+    >
+      {thumbnail.label}
+    </div>
   );
 }
 
