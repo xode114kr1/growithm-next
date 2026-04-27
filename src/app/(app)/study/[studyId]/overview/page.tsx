@@ -121,8 +121,8 @@ export default async function StudyOverviewPage({
   const { studyId } = await params;
 
   return (
-    <main className="min-h-screen bg-surface px-4 pb-16 pt-28 text-on-surface sm:px-8 lg:px-12">
-      <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-8 lg:flex-row lg:items-start">
+    <main className="page-shell">
+      <div className="workspace-container">
         <StudyLocalNav
           active="overview"
           studyId={studyId}
@@ -162,10 +162,10 @@ function StudyOverviewHeader({ study }: { study: Study }) {
       </div>
       <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
-          <h1 className="text-h1-editorial text-primary">
+          <h1 className="page-title text-primary">
             {study.name} Overview
           </h1>
-          <p className="mt-2 max-w-2xl text-body-lg text-on-surface-variant">
+          <p className="mt-2 max-w-2xl text-body-md text-on-surface-variant">
             {study.description}
           </p>
         </div>
@@ -179,7 +179,7 @@ function StudyTierCard({ study }: { study: Study }) {
   const remainingScore = Math.max(study.nextTierScore - study.score, 0);
 
   return (
-    <section className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm xl:col-span-2">
+    <section className="app-card p-6 xl:col-span-2">
       <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
           <p className="text-label-caps text-slate-400">현재 스터디 티어</p>
@@ -230,7 +230,7 @@ function StudyStatsCard({ study }: { study: Study }) {
   return (
     <section className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
       <div className="mb-6">
-        <h2 className="text-h3-ui text-primary">스터디 풀이 통계</h2>
+        <h2 className="section-title">스터디 풀이 통계</h2>
         <p className="text-body-sm text-slate-500">최근 활동 기준</p>
       </div>
       <div className="space-y-5">
@@ -255,10 +255,10 @@ function ContributionSection({
   contribution: Study["contribution"];
 }) {
   return (
-    <section className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm xl:col-span-2">
+    <section className="app-card p-6 xl:col-span-2">
       <div className="mb-6 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
         <div>
-          <h2 className="text-h3-ui text-primary">기여도 분석</h2>
+          <h2 className="section-title">기여도 분석</h2>
           <p className="text-body-sm text-slate-500">스터디원별 풀이 기여도</p>
         </div>
         <span className="text-label-caps text-slate-400">Max 4 members</span>
@@ -270,9 +270,9 @@ function ContributionSection({
 
 function StudyMembersCard({ members }: { members: Study["members"] }) {
   return (
-    <section className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+    <section className="app-card p-6">
       <div className="mb-6">
-        <h2 className="text-h3-ui text-primary">스터디 멤버</h2>
+        <h2 className="section-title">스터디 멤버</h2>
         <p className="text-body-sm text-slate-500">
           {members.length}명 참여 중
         </p>
@@ -333,7 +333,7 @@ function RecentSolvedProblems({
     <section>
       <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
-          <h2 className="text-h3-ui text-primary">최근에 푼 문제</h2>
+          <h2 className="section-title">최근에 푼 문제</h2>
           <p className="text-body-sm text-slate-500">
             스터디원들이 풀이한 문제들
           </p>
@@ -345,7 +345,7 @@ function RecentSolvedProblems({
           View All
         </Link>
       </div>
-      <div className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm">
+      <div className="app-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left">
             <thead>

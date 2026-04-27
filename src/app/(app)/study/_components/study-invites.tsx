@@ -24,9 +24,9 @@ const activities = [
 
 export default function StudyInvites() {
   return (
-    <section className="flex h-[min(520px,calc(100vh-9rem))] flex-col overflow-hidden rounded-xl border border-slate-100 bg-white">
+    <section className="app-card flex h-[min(520px,calc(100vh-9rem))] flex-col overflow-hidden">
       <div className="flex shrink-0 items-center justify-between border-b border-slate-50 p-6">
-        <h2 className="font-bold text-primary">Invites & Requests</h2>
+        <h2 className="section-title">Invites & Requests</h2>
         <span className="rounded-full bg-error px-1.5 py-0.5 text-[10px] font-bold text-white">
           2
         </span>

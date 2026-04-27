@@ -23,11 +23,11 @@ export default function ReviewMemo({
   }
 
   return (
-    <section className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+    <section className="app-card p-6">
       <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <p className="text-label-caps text-slate-400">Review Memo</p>
-          <h2 className="text-h3-ui text-primary">풀이 아이디어 정리</h2>
+          <h2 className="section-title">풀이 아이디어 정리</h2>
         </div>
         <span
           className={

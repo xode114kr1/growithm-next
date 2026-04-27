@@ -76,7 +76,7 @@ export default async function ProblemDetailPage({
   await params;
 
   return (
-    <main className="min-h-screen bg-surface px-4 pb-16 pt-28 text-on-surface sm:px-8 lg:px-12">
+    <main className="page-shell">
       <div className="mx-auto w-full max-w-[1120px] space-y-8">
         <ProblemHeader problem={problem} />
         <ProblemMetadata problem={problem} />
@@ -117,7 +117,7 @@ function ProblemHeader({ problem }: { problem: Problem }) {
           <p className="mb-2 text-label-caps text-slate-400">
             Problem {problem.problemId}
           </p>
-          <h1 className="text-pretty break-words text-h1-editorial text-primary">
+          <h1 className="page-title text-pretty break-words text-primary">
             {problem.title}
           </h1>
         </div>
@@ -151,7 +151,7 @@ function ProblemMetadata({ problem }: { problem: Problem }) {
   ];
 
   return (
-    <section className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+    <section className="app-card p-6">
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {metadata.map((item) => (
           <div key={item.label}>
@@ -178,10 +178,10 @@ function ProblemMetadata({ problem }: { problem: Problem }) {
 
 function ProblemDescription({ description }: { description: string }) {
   return (
-    <section className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm md:p-8">
+    <section className="app-card p-6 md:p-8">
       <div className="mb-6 flex items-center gap-3">
         <span className="h-8 w-1 rounded-full bg-secondary-fixed-dim" />
-        <h2 className="text-h3-ui text-primary">문제 설명</h2>
+        <h2 className="section-title">문제 설명</h2>
       </div>
       <div
         className="problem-description text-body-md text-on-surface-variant"

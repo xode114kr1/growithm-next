@@ -6,8 +6,8 @@ import QuickLaunch from "@/app/(app)/dashboard/_components/quick-launch";
 
 export default function DashboardPage() {
   return (
-    <main className="min-h-screen bg-surface px-4 pb-16 pt-28 text-on-surface sm:px-8 lg:px-12">
-      <div className="mx-auto max-w-container">
+    <main className="page-shell">
+      <div className="page-container">
         <DashboardHeader />
         <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
           <DashboardStats />

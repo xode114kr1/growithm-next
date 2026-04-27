@@ -24,10 +24,10 @@ const pendingProblems = [
 
 export default function PendingAnalysis() {
   return (
-    <section className="mb-12 overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm md:col-span-12">
-      <div className="flex items-center justify-between border-b border-slate-50 p-8">
-        <h2 className="text-h3-ui text-on-background">Pending Analysis</h2>
-        <button className="text-sm font-semibold text-secondary hover:underline">
+    <section className="app-card mb-12 overflow-hidden md:col-span-12">
+      <div className="flex items-center justify-between border-b border-slate-50 p-6 lg:p-8">
+        <h2 className="section-title">Pending Analysis</h2>
+        <button className="text-body-sm font-semibold text-secondary hover:underline">
           View All Backlog
         </button>
       </div>
@@ -61,11 +61,11 @@ export default function PendingAnalysis() {
                     {problem.tier}
                   </span>
                 </td>
-                <td className="px-8 py-5 text-sm text-slate-500">
+                <td className="px-8 py-5 text-body-sm text-slate-500">
                   {problem.time}
                 </td>
                 <td className="px-8 py-5 text-right">
-                  <button className="rounded-xl bg-secondary-container px-4 py-2 text-sm font-bold text-secondary">
+                  <button className="rounded-lg bg-secondary-container px-4 py-2 text-body-sm font-bold text-secondary">
                     Write Analysis
                   </button>
                 </td>

@@ -48,8 +48,8 @@ export default function HeroSection() {
 function CodePreview() {
   return (
     <div className="relative flex-1">
-      <div className="absolute inset-0 aspect-square scale-95 rounded-[40px] bg-gradient-to-br from-primary-fixed to-surface-container-highest opacity-50 -rotate-6" />
-      <div className="surface-card relative rounded-[40px] border-slate-100 p-8">
+      <div className="absolute inset-0 aspect-square scale-95 rounded-xl bg-gradient-to-br from-primary-fixed to-surface-container-highest opacity-50 -rotate-6" />
+      <div className="surface-card relative rounded-xl border-slate-100 p-8">
         <div className="mb-8 flex items-center justify-between">
           <div className="flex gap-2">
             <span className="size-3 rounded-full bg-red-400" />

@@ -5,8 +5,8 @@ import StudyList from "@/app/(app)/study/_components/study-list";
 
 export default function StudyPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-surface to-surface-container-low px-4 pb-16 pt-28 text-on-surface sm:px-8 lg:px-12">
-      <div className="mx-auto max-w-container">
+    <main className="page-shell bg-gradient-to-b from-surface to-surface-container-low">
+      <div className="page-container">
         <StudyHeader />
         <div className="grid grid-cols-1 gap-gutter xl:grid-cols-12">
           <div className="space-y-gutter xl:col-span-8">

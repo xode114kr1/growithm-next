@@ -49,8 +49,8 @@ export default async function StudyOwnerPage({
   const { studyId } = await params;
 
   return (
-    <main className="min-h-screen bg-surface px-4 pb-16 pt-28 text-on-surface sm:px-8 lg:px-12">
-      <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-8 lg:flex-row lg:items-start">
+    <main className="page-shell">
+      <div className="workspace-container">
         <StudyLocalNav active="owner" studyId={studyId} studyName={study.name} />
         <div className="min-w-0 flex-1">
           <StudyOwnerHeading />
@@ -78,7 +78,7 @@ function StudyOwnerHeading() {
         <span>스터디 - Owner</span>
       </div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <h1 className="text-h2-editorial text-on-background">
+        <h1 className="page-title">
           Study Owner Console
         </h1>
         <span className="w-fit rounded bg-primary px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-on-primary">

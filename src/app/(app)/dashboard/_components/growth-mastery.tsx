@@ -35,11 +35,11 @@ export default function GrowthMastery() {
   }, []);
 
   return (
-    <section className="rounded-3xl border border-slate-100 bg-white p-8 shadow-sm md:col-span-12">
+    <section className="app-card p-6 md:col-span-12 lg:p-8">
       <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h2 className="mb-1 text-h3-ui text-on-background">Growth Mastery</h2>
-          <p className="text-sm text-on-surface-variant">
+          <h2 className="section-title mb-1">Growth Mastery</h2>
+          <p className="text-body-sm text-on-surface-variant">
             Problem distribution across six difficulty tiers.
           </p>
         </div>
@@ -79,7 +79,7 @@ export default function GrowthMastery() {
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <div className="h-full rounded-2xl bg-surface-container-low" />
+          <div className="h-full rounded-xl bg-surface-container-low" />
         )}
       </div>
     </section>

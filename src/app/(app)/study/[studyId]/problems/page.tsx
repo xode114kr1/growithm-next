@@ -98,8 +98,8 @@ export default async function StudyProblemsPage({
   const { studyId } = await params;
 
   return (
-    <main className="min-h-screen bg-surface px-4 pb-16 pt-28 text-on-surface sm:px-8 lg:px-12">
-      <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-8 lg:flex-row lg:items-start">
+    <main className="page-shell">
+      <div className="workspace-container">
         <StudyLocalNav active="problems" studyId={studyId} studyName={study.name} />
         <div className="min-w-0 flex-1">
           <StudyProblemsHeading />
@@ -124,7 +124,7 @@ function StudyProblemsHeading() {
           <span>/</span>
           <span>스터디 - 문제 리스트</span>
         </div>
-        <h1 className="mb-2 text-h2-editorial text-on-background">
+        <h1 className="page-title mb-2">
           Study Problem List
         </h1>
         <p className="max-w-xl text-body-md text-on-surface-variant">
@@ -198,7 +198,7 @@ function StudyProblemFilters() {
 
 function StudyProblemTable() {
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+    <section className="app-card overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-left">
           <thead>
@@ -319,7 +319,7 @@ function FilterCard({
 }) {
   return (
     <div
-      className={`min-w-0 rounded-xl border border-slate-100 bg-white p-4 shadow-sm ${className ?? ""}`}
+      className={`app-card min-w-0 p-4 ${className ?? ""}`}
     >
       <h2 className="mb-3 block text-label-caps text-slate-500">{title}</h2>
       {children}

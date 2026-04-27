@@ -3,8 +3,8 @@ import ProblemTable from "@/app/(app)/problem/_components/problem-table";
 
 export default function ProblemPage() {
   return (
-    <main className="min-h-screen bg-surface px-4 pb-16 pt-28 text-on-surface sm:px-8 lg:px-12">
-      <div className="mx-auto w-full max-w-[1400px]">
+    <main className="page-shell">
+      <div className="page-container">
         <ProblemHeading />
         <ProblemFilters />
         <ProblemTable />
@@ -15,9 +15,9 @@ export default function ProblemPage() {
 
 function ProblemHeading() {
   return (
-    <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+    <div className="page-header flex flex-col justify-between gap-4 md:flex-row md:items-end">
       <div>
-        <h1 className="mb-2 text-h2-editorial text-on-background">
+        <h1 className="page-title mb-2">
           Algorithm Repository
         </h1>
         <p className="max-w-xl text-body-md text-on-surface-variant">

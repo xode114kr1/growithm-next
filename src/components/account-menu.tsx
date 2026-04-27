@@ -18,7 +18,7 @@ export default function AccountMenu({ user }: AccountMenuProps) {
         }}
       >
         <button
-          className="px-4 py-2 font-serif text-sm tracking-tight text-slate-500 transition-colors hover:text-teal-800"
+          className="px-4 py-2 text-body-sm font-semibold text-slate-500 transition-colors hover:text-primary"
           type="submit"
         >
           Log In
@@ -42,7 +42,7 @@ export default function AccountMenu({ user }: AccountMenuProps) {
         }}
       >
         <button
-          className="w-full rounded-md px-3 py-2 text-left font-serif text-sm tracking-tight text-slate-600 transition-colors hover:bg-slate-50 hover:text-teal-800"
+          className="w-full rounded-md px-3 py-2 text-left text-body-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-primary"
           role="menuitem"
           type="submit"
         >

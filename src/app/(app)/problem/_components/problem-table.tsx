@@ -41,7 +41,7 @@ const problems = [
 
 export default function ProblemTable() {
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+    <section className="app-card overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-left">
           <thead>

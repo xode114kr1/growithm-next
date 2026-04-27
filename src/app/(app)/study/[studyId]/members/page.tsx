@@ -32,8 +32,8 @@ export default async function StudyMembersPage({
   const { studyId } = await params;
 
   return (
-    <main className="min-h-screen bg-surface px-4 pb-16 pt-28 text-on-surface sm:px-8 lg:px-12">
-      <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-8 lg:flex-row lg:items-start">
+    <main className="page-shell">
+      <div className="workspace-container">
         <StudyLocalNav active="members" studyId={studyId} studyName={study.name} />
         <div className="min-w-0 flex-1">
           <StudyMembersHeading memberCount={members.length} />
@@ -57,14 +57,14 @@ function StudyMembersHeading({ memberCount }: { memberCount: number }) {
           <span>/</span>
           <span>스터디 - 멤버</span>
         </div>
-        <h1 className="mb-2 text-h2-editorial text-on-background">
+        <h1 className="page-title mb-2">
           Study Members
         </h1>
         <p className="max-w-xl text-body-md text-on-surface-variant">
           {study.description}
         </p>
       </div>
-      <div className="rounded-xl border border-slate-100 bg-white px-5 py-3 shadow-sm">
+      <div className="app-card px-5 py-3">
         <p className="text-label-caps text-slate-400">Members</p>
         <p className="text-h3-ui text-primary">{memberCount}명</p>
       </div>

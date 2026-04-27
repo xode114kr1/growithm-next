@@ -5,7 +5,7 @@ const trustBadges = ["GITHUB VERIFIED", "SECURE SYNC", "REAL-TIME REVIEW"];
 export default function GrowthCtaSection() {
   return (
     <section className="relative bg-surface px-4 py-24 sm:px-10">
-      <div className="relative mx-auto max-w-container overflow-hidden rounded-[48px] bg-primary-container p-8 text-center sm:p-16">
+      <div className="relative mx-auto max-w-container overflow-hidden rounded-xl bg-primary-container p-8 text-center sm:p-16">
         <div className="absolute inset-0 opacity-10">
           <div className="size-full bg-[linear-gradient(135deg,transparent_0_24px,var(--primary-fixed)_24px_25px,transparent_25px_48px)] bg-[length:48px_48px]" />
         </div>
@@ -26,7 +26,7 @@ export default function GrowthCtaSection() {
               }}
             >
               <button
-                className="inline-flex min-h-16 items-center justify-center rounded-2xl bg-secondary-fixed px-10 text-body-lg font-bold text-on-secondary-container shadow-xl transition-transform hover:scale-[1.03]"
+                className="inline-flex min-h-14 items-center justify-center rounded-xl bg-secondary-fixed px-8 text-base font-bold text-on-secondary-container shadow-lg transition-transform hover:scale-[1.03]"
                 type="submit"
               >
                 오늘의 문제 풀기

@@ -170,7 +170,7 @@ export default function StudyList() {
   return (
     <section>
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-h3-ui text-on-surface">Participating Studies</h2>
+        <h2 className="section-title text-on-surface">Participating Studies</h2>
         <StudyCreateModal />
       </div>
       <div className="grid grid-cols-1 gap-gutter md:grid-cols-2">
@@ -185,7 +185,7 @@ export default function StudyList() {
 
 function StudyCard({ study }: { study: (typeof studies)[number] }) {
   return (
-    <article className="relative overflow-hidden rounded-xl border border-slate-100 bg-white p-6 transition-all duration-300 hover:shadow-xl hover:shadow-teal-900/5">
+    <article className="app-card relative overflow-hidden p-6 transition-all duration-300 hover:shadow-lg hover:shadow-teal-900/5">
       {study.active ? (
         <div className="absolute right-0 top-0 p-4">
           <span className="rounded-full bg-secondary-container px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-on-secondary-container">
@@ -199,7 +199,7 @@ function StudyCard({ study }: { study: (typeof studies)[number] }) {
       >
         <TierThumbnail tier={study.tier} />
         <div className="min-w-0">
-          <h3 className="truncate text-lg font-bold text-primary">
+          <h3 className="truncate text-base font-bold text-primary">
             {study.title}
           </h3>
           <p className="text-body-sm text-outline">
@@ -236,7 +236,7 @@ function StudyCard({ study }: { study: (typeof studies)[number] }) {
       <div className="mt-6 flex gap-2 border-t border-slate-50 pt-6">
         <Link
           href={`/study/${study.id}/overview`}
-          className="flex-1 rounded-lg bg-primary py-2 text-sm font-semibold text-on-primary transition-all hover:opacity-90"
+          className="flex-1 rounded-lg bg-primary py-2 text-body-sm font-semibold text-on-primary transition-all hover:opacity-90"
         >
           Enter Room
         </Link>

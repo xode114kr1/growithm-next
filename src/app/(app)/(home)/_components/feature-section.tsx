@@ -61,10 +61,10 @@ export default function FeatureSection() {
 
 function GitHubSyncCard() {
   return (
-    <article className="surface-card flex flex-col items-center gap-8 rounded-3xl p-10 md:col-span-8 md:flex-row">
+    <article className="surface-card flex flex-col items-center gap-8 rounded-xl p-8 md:col-span-8 md:flex-row lg:p-10">
       <div className="flex-1 space-y-4">
         <FeatureIcon label="↻" tone="primary" />
-        <h3 className="text-h3-ui text-primary">GitHub 자동 연동</h3>
+        <h3 className="section-title">GitHub 자동 연동</h3>
         <p className="text-body-md text-on-surface-variant">
           문제를 해결하는 즉시 당신의 깃허브 레포지토리에 코드가 자동으로
           푸시됩니다.
@@ -86,10 +86,10 @@ function GitHubSyncCard() {
 
 function StudyGroupCard() {
   return (
-    <article className="relative overflow-hidden rounded-3xl bg-primary p-10 text-on-primary md:col-span-4">
+    <article className="relative overflow-hidden rounded-xl bg-primary p-8 text-on-primary md:col-span-4 lg:p-10">
       <div className="relative z-10 space-y-4">
         <FeatureIcon label="👥" tone="inverse" />
-        <h3 className="text-h3-ui">함께하는 스터디</h3>
+        <h3 className="section-title text-on-primary">함께하는 스터디</h3>
         <p className="text-body-md text-white/80">
           혼자하면 힘들지만 함께하면 즐겁습니다. 실시간 코드 리뷰와 주간
           랭킹으로 경쟁하며 성장하세요.
@@ -104,10 +104,10 @@ function StudyGroupCard() {
 
 function GrowthMetricsCard() {
   return (
-    <article className="surface-card flex flex-col justify-between rounded-3xl p-10 md:col-span-12">
+    <article className="surface-card flex flex-col justify-between rounded-xl p-8 md:col-span-12 lg:p-10">
       <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <div className="space-y-2">
-          <h3 className="text-h3-ui text-primary">데이터로 확인하는 성장</h3>
+          <h3 className="section-title">데이터로 확인하는 성장</h3>
           <p className="text-body-md text-on-surface-variant">
             문제 풀이 효율과 알고리즘 습득도를 시각화합니다.
           </p>

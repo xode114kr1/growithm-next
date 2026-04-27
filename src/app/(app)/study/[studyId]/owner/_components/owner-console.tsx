@@ -78,10 +78,10 @@ function InviteMembersCard({
   }
 
   return (
-    <section className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+    <section className="app-card p-6">
       <div className="mb-6 flex flex-col justify-between gap-2 border-b border-slate-100 pb-4 sm:flex-row sm:items-end">
         <div>
-          <h2 className="text-h3-ui text-primary">멤버 초대</h2>
+          <h2 className="section-title">멤버 초대</h2>
           <p className="text-body-sm text-slate-500">
             사용자 이름 또는 이메일로 스터디에 초대합니다.
           </p>
@@ -164,10 +164,10 @@ function InviteMembersCard({
 
 function ManageMembersCard({ members }: { members: Member[] }) {
   return (
-    <section className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+    <section className="app-card p-6">
       <div className="mb-6 flex flex-col justify-between gap-2 border-b border-slate-100 pb-4 sm:flex-row sm:items-end">
         <div>
-          <h2 className="text-h3-ui text-primary">멤버 관리</h2>
+          <h2 className="section-title">멤버 관리</h2>
           <p className="text-body-sm text-slate-500">
             역할을 변경하거나 스터디에서 내보낼 수 있습니다.
           </p>
@@ -244,10 +244,10 @@ function ManageMembersCard({ members }: { members: Member[] }) {
 
 function StudySettingsCard({ study }: { study: Study }) {
   return (
-    <section className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
+    <section className="app-card p-6">
       <div className="mb-6 flex flex-col justify-between gap-2 border-b border-slate-100 pb-4 sm:flex-row sm:items-end">
         <div>
-          <h2 className="text-h3-ui text-primary">스터디 설정</h2>
+          <h2 className="section-title">스터디 설정</h2>
           <p className="text-body-sm text-slate-500">
             스터디 이름과 설명을 관리합니다.
           </p>
@@ -282,7 +282,7 @@ function DangerZoneCard({ studyName }: { studyName: string }) {
     <section className="rounded-xl border border-error-container bg-error-container/20 p-6 shadow-sm">
       <div className="mb-6">
         <p className="text-label-caps text-error">Danger Zone</p>
-        <h2 className="text-h3-ui text-error">스터디 삭제</h2>
+        <h2 className="section-title text-error">스터디 삭제</h2>
         <p className="mt-2 max-w-2xl text-body-sm text-on-surface-variant">
           스터디를 삭제하면 문제 풀이 내역과 멤버 정보가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
         </p>

@@ -209,7 +209,7 @@ function ProfileCard({
 }) {
   return (
     <article
-      className={`flex flex-col items-center gap-6 rounded-2xl border border-transparent bg-white p-6 shadow-sm transition-all hover:border-slate-100 md:flex-row ${
+      className={`app-card flex flex-col items-center gap-6 p-6 transition-all hover:border-slate-200 md:flex-row ${
         profile.offline ? "opacity-80 hover:opacity-100" : ""
       }`}
     >
@@ -231,7 +231,7 @@ function ProfileCard({
       </div>
       <div className="min-w-0 flex-1 text-center md:text-left">
         <div className="mb-1 flex flex-col gap-2 md:flex-row md:items-center">
-          <h2 className="text-h3-ui text-on-background">{profile.name}</h2>
+          <h2 className="section-title text-on-background">{profile.name}</h2>
           <span
             className={`mx-auto w-fit rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-widest md:mx-0 ${profile.tierClass}`}
           >

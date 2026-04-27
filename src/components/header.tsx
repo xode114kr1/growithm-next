@@ -5,13 +5,15 @@ export default async function Header() {
   const session = await auth();
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-8 h-16 bg-white/80 backdrop-blur-md shadow-sm border-b border-slate-100">
-      <div className="flex items-center gap-8">
-        <Brand />
-        <Navigation />
-      </div>
-      <div className="flex items-center gap-4">
-        <AccountMenu user={session?.user} />
+    <nav className="fixed left-0 top-0 z-50 w-full border-b border-slate-100 bg-white/85 backdrop-blur-md shadow-sm">
+      <div className="mx-auto flex h-16 w-full max-w-container items-center justify-between px-4 sm:px-8 lg:px-10">
+        <div className="flex items-center gap-8">
+          <Brand />
+          <Navigation />
+        </div>
+        <div className="flex items-center gap-4">
+          <AccountMenu user={session?.user} />
+        </div>
       </div>
     </nav>
   );
@@ -19,7 +21,7 @@ export default async function Header() {
 
 function Brand() {
   return (
-    <span className="text-2xl font-bold text-teal-900 italic font-h1-editorial">
+    <span className="font-serif text-2xl font-semibold italic text-primary">
       Growithm
     </span>
   );
@@ -39,8 +41,8 @@ function Navigation() {
         <a
           className={
             link.isActive
-              ? "font-serif text-sm tracking-tight text-teal-900 font-semibold border-b-2 border-teal-900"
-              : "font-serif text-sm tracking-tight text-slate-500 hover:text-teal-800 transition-colors"
+              ? "border-b-2 border-primary text-body-sm font-semibold text-primary"
+              : "text-body-sm font-medium text-slate-500 transition-colors hover:text-primary"
           }
           href={link.href}
           key={link.href || link.label}

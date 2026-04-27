@@ -33,7 +33,7 @@ export default function StudyMemberList({
 
   return (
     <section className="space-y-5">
-      <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+      <div className="app-card p-4">
         <label className="block">
           <span className="mb-2 block text-label-caps text-slate-500">
             Search Members
@@ -67,7 +67,7 @@ function MemberCard({ member }: { member: StudyMember }) {
   const isLeader = member.role === "LEADER";
 
   return (
-    <article className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:shadow-xl hover:shadow-teal-900/5">
+    <article className="app-card p-6 transition-all hover:shadow-lg hover:shadow-teal-900/5">
       <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <div className="flex min-w-0 items-center gap-4">
           <div
@@ -80,7 +80,7 @@ function MemberCard({ member }: { member: StudyMember }) {
             {member.name[0]?.toUpperCase()}
           </div>
           <div className="min-w-0">
-            <h2 className="truncate text-lg font-bold text-primary">
+            <h2 className="truncate text-base font-bold text-primary">
               {member.name}
             </h2>
             <span
@@ -102,7 +102,7 @@ function MemberCard({ member }: { member: StudyMember }) {
       <div className="grid grid-cols-1 gap-4 border-t border-slate-100 pt-5 sm:grid-cols-2">
         <div>
           <p className="text-label-caps text-slate-400">Contribution</p>
-          <p className="mt-1 text-h3-ui text-secondary">
+          <p className="mt-1 section-title text-secondary">
             {member.contribution.toLocaleString()} XP
           </p>
         </div>

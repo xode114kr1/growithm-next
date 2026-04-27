@@ -57,7 +57,7 @@ function FilterCard({
 }) {
   return (
     <div
-      className={`min-w-0 rounded-xl border border-slate-100 bg-white p-4 shadow-sm ${className ?? ""}`}
+      className={`app-card min-w-0 p-4 ${className ?? ""}`}
     >
       <h2 className="mb-3 block text-label-caps text-slate-500">{title}</h2>
       {children}

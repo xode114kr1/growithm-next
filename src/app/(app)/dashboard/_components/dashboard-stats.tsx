@@ -25,8 +25,8 @@ export default function DashboardStats() {
         <article
           className={
             stat.dark
-              ? "flex flex-col justify-between rounded-3xl bg-primary p-6 text-on-primary shadow-xl shadow-primary/20 md:col-span-4"
-              : "flex flex-col justify-between rounded-3xl border border-slate-100 bg-white p-6 shadow-sm md:col-span-4"
+              ? "flex flex-col justify-between rounded-xl bg-primary p-6 text-on-primary shadow-lg shadow-primary/15 md:col-span-4"
+              : "app-card flex flex-col justify-between p-6 md:col-span-4"
           }
           key={stat.label}
         >
@@ -50,7 +50,9 @@ export default function DashboardStats() {
             >
               {stat.label}
             </h2>
-            <p className="text-h1-editorial">{stat.value}</p>
+            <p className="font-serif text-[2rem] font-semibold leading-tight">
+              {stat.value}
+            </p>
           </div>
         </article>
       ))}
