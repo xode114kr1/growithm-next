@@ -59,7 +59,7 @@ export default function WebhookGuidePage() {
               2. 백준 허브 설치
             </span>
             <span className="rounded-full bg-primary-fixed px-3 py-1">
-              3. Repo 정보 등록
+              3. 웹훅 연결
             </span>
           </div>
         </header>
@@ -115,16 +115,16 @@ function RepoRegistrationSection() {
     <section className="app-card grid grid-cols-1 gap-8 p-6 lg:grid-cols-[1fr_420px] lg:p-8">
       <div>
         <p className="mb-3 text-label-caps text-secondary">STEP 3</p>
-        <h2 className="section-title mb-3">서비스에 Repo 정보 등록하기</h2>
+        <h2 className="section-title mb-3">서비스에 GitHub 웹훅 연결하기</h2>
         <p className="text-body-md text-on-surface-variant">
-          이 서비스가 사용자의 GitHub Repo를 인식할 수 있도록 깃허브 ID와 Repo
-          주소를 등록합니다. 등록 후에는 백준 허브가 올린 커밋 정보를 바탕으로
-          풀이 기록과 통계가 자동으로 갱신됩니다.
+          이 서비스가 사용자의 GitHub Repo에 웹훅을 연결할 수 있도록 깃허브
+          ID와 Repository 이름을 입력합니다. 연결 후에는 백준 허브가 올린 커밋
+          정보를 바탕으로 풀이 기록과 통계가 자동으로 갱신됩니다.
         </p>
         <ol className="mt-5 grid gap-2 text-body-sm text-on-surface-variant">
-          <li>1. 본인의 깃허브 ID와 GitHub Repo URL을 입력합니다.</li>
-          <li>2. Repo 등록하기 버튼을 클릭해 정보를 전송합니다.</li>
-          <li>3. 등록 완료 후 풀이 기록과 통계가 자동으로 갱신됩니다.</li>
+          <li>1. 본인의 깃허브 ID와 Repository 이름을 입력합니다.</li>
+          <li>2. 웹훅 연결하기 버튼을 클릭해 연결을 요청합니다.</li>
+          <li>3. 연결 완료 후 풀이 기록과 통계가 자동으로 갱신됩니다.</li>
         </ol>
       </div>
 
@@ -136,7 +136,7 @@ function RepoRegistrationSection() {
           <input
             className="input-field"
             name="githubId"
-            placeholder="예: github123"
+            placeholder="예: octocat"
             type="text"
           />
           <span className="mt-2 block text-body-sm text-slate-500">
@@ -146,21 +146,21 @@ function RepoRegistrationSection() {
 
         <label className="block">
           <span className="mb-2 block text-label-caps text-slate-500">
-            GitHub Repo 주소
+            Repository 이름
           </span>
           <input
             className="input-field"
-            name="repoUrl"
-            placeholder="예: https://github.com/github123/algorithm-solutions"
-            type="url"
+            name="repositoryName"
+            placeholder="예: algorithm-solutions"
+            type="text"
           />
           <span className="mt-2 block text-body-sm text-slate-500">
-            백준 허브가 연동되어 있는 Repository의 주소를 입력합니다.
+            백준 허브가 연동되어 있는 Repository 이름만 입력합니다.
           </span>
         </label>
 
         <button className="btn-primary w-full" type="button">
-          Repo 등록하기
+          웹훅 연결하기
         </button>
       </form>
     </section>
