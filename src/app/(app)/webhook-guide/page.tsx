@@ -1,5 +1,7 @@
 import { ExternalLink } from "lucide-react";
 
+import { WebhookRegistrationForm } from "./_components/webhook-registration-form";
+
 const githubNewRepoUrl = "https://github.com/new";
 const baekjoonHubUrl =
   "https://chromewebstore.google.com/detail/%EB%B0%B1%EC%A4%80%ED%97%88%EB%B8%8Cbaekjoonhub/ccammcjdkpgjmcpijpahlehmapgmphmk";
@@ -128,41 +130,7 @@ function RepoRegistrationSection() {
         </ol>
       </div>
 
-      <form className="grid gap-5 rounded-xl border border-slate-100 bg-slate-50/60 p-5">
-        <label className="block">
-          <span className="mb-2 block text-label-caps text-slate-500">
-            깃허브 ID
-          </span>
-          <input
-            className="input-field"
-            name="githubId"
-            placeholder="예: octocat"
-            type="text"
-          />
-          <span className="mt-2 block text-body-sm text-slate-500">
-            깃허브 프로필 상단에 표시되는 닉네임(아이디)을 입력해주세요.
-          </span>
-        </label>
-
-        <label className="block">
-          <span className="mb-2 block text-label-caps text-slate-500">
-            Repository 이름
-          </span>
-          <input
-            className="input-field"
-            name="repositoryName"
-            placeholder="예: algorithm-solutions"
-            type="text"
-          />
-          <span className="mt-2 block text-body-sm text-slate-500">
-            백준 허브가 연동되어 있는 Repository 이름만 입력합니다.
-          </span>
-        </label>
-
-        <button className="btn-primary w-full" type="button">
-          웹훅 연결하기
-        </button>
-      </form>
+      <WebhookRegistrationForm />
     </section>
   );
 }
