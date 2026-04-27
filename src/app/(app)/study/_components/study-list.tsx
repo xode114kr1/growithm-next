@@ -1,4 +1,5 @@
 import Link from "next/link";
+import StudyCreateModal from "@/app/(app)/study/_components/study-create-modal";
 
 type StudyTier = "Bronze" | "Silver" | "Gold" | "Platinum" | "Diamond" | "Ruby";
 
@@ -170,12 +171,7 @@ export default function StudyList() {
     <section>
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-h3-ui text-on-surface">Participating Studies</h2>
-        <button
-          className="rounded-lg bg-primary px-4 py-2 text-body-sm font-semibold text-on-primary transition-all hover:opacity-90"
-          type="button"
-        >
-          스터디 생성
-        </button>
+        <StudyCreateModal />
       </div>
       <div className="grid grid-cols-1 gap-gutter md:grid-cols-2">
         {studies.map((study) => (
