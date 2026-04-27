@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth/auth";
 import AccountMenu from "@/components/account-menu";
+import Navigation from "@/components/navigation";
 
 export default async function Header() {
   const session = await auth();
@@ -24,32 +25,5 @@ function Brand() {
     <span className="font-serif text-2xl font-semibold italic text-primary">
       Growithm
     </span>
-  );
-}
-
-function Navigation() {
-  const links = [
-    { href: "/dashboard", label: "Home", isActive: true },
-    { href: "/problem", label: "Problem" },
-    { href: "/study", label: "Study" },
-    { href: "/friend", label: "Friend" },
-  ];
-
-  return (
-    <div className="hidden md:flex gap-6">
-      {links.map((link) => (
-        <a
-          className={
-            link.isActive
-              ? "border-b-2 border-primary text-body-sm font-semibold text-primary"
-              : "text-body-sm font-medium text-slate-500 transition-colors hover:text-primary"
-          }
-          href={link.href}
-          key={link.href || link.label}
-        >
-          {link.label}
-        </a>
-      ))}
-    </div>
   );
 }

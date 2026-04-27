@@ -217,6 +217,16 @@ body {
     background: var(--surface-container-low);
   }
 
+  .nav-label {
+    display: none;
+  }
+
+  @media (width >= 56rem) {
+    .nav-label {
+      display: inline;
+    }
+  }
+
   .section-editorial {
     padding-block: clamp(48px, 8vw, 104px);
   }
