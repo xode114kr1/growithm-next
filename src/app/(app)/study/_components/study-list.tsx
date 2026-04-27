@@ -1,8 +1,11 @@
+import Link from "next/link";
+
 type StudyTier = "Bronze" | "Silver" | "Gold" | "Platinum" | "Diamond" | "Ruby";
 
 const studies = [
   {
     active: true,
+    id: "study-1",
     members: "8 Members",
     progress: "68%",
     progressClass: "w-[68%]",
@@ -13,6 +16,7 @@ const studies = [
     title: "Graph Theory Deep Dive",
   },
   {
+    id: "study-faang",
     members: "12 Members",
     progress: "42 / 75",
     progressClass: "w-[56%]",
@@ -23,6 +27,7 @@ const studies = [
     title: "FAANG Interview Prep",
   },
   {
+    id: "study-icpc",
     members: "5 Members",
     progress: "90%",
     progressClass: "w-[90%]",
@@ -33,6 +38,7 @@ const studies = [
     title: "ICPC Training Crew",
   },
   {
+    id: "study-dp",
     members: "9 Members",
     progress: "35%",
     progressClass: "w-[35%]",
@@ -43,6 +49,7 @@ const studies = [
     title: "DP Mastery Circle",
   },
   {
+    id: "study-system-design",
     members: "15 Members",
     progress: "18 / 40",
     progressClass: "w-[45%]",
@@ -53,6 +60,7 @@ const studies = [
     title: "System Design Sprint",
   },
   {
+    id: "study-greedy",
     members: "7 Members",
     progress: "74%",
     progressClass: "w-[74%]",
@@ -63,6 +71,7 @@ const studies = [
     title: "Greedy Strategy Lab",
   },
   {
+    id: "study-backtracking",
     members: "6 Members",
     progress: "22 / 50",
     progressClass: "w-[44%]",
@@ -73,6 +82,7 @@ const studies = [
     title: "Backtracking Workshop",
   },
   {
+    id: "study-database",
     members: "11 Members",
     progress: "81%",
     progressClass: "w-[81%]",
@@ -83,6 +93,7 @@ const studies = [
     title: "Database Interview Club",
   },
   {
+    id: "study-os",
     members: "10 Members",
     progress: "29%",
     progressClass: "w-[29%]",
@@ -93,6 +104,7 @@ const studies = [
     title: "Operating Systems Crew",
   },
   {
+    id: "study-network",
     members: "8 Members",
     progress: "63%",
     progressClass: "w-[63%]",
@@ -103,6 +115,7 @@ const studies = [
     title: "Network Fundamentals",
   },
   {
+    id: "study-frontend",
     members: "13 Members",
     progress: "51 / 100",
     progressClass: "w-[51%]",
@@ -114,6 +127,7 @@ const studies = [
   },
 ] satisfies Array<{
   active?: boolean;
+  id: string;
   members: string;
   progress: string;
   progressClass: string;
@@ -183,16 +197,24 @@ function StudyCard({ study }: { study: (typeof studies)[number] }) {
           </span>
         </div>
       ) : null}
-      <div className="mb-6 flex items-center gap-4">
+      <Link
+        className="mb-6 flex items-center gap-4 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-secondary-container"
+        href={`/study/${study.id}/overview`}
+      >
         <TierThumbnail tier={study.tier} />
-        <div>
-          <h3 className="text-lg font-bold text-primary">{study.title}</h3>
+        <div className="min-w-0">
+          <h3 className="truncate text-lg font-bold text-primary">
+            {study.title}
+          </h3>
           <p className="text-body-sm text-outline">
             {study.subtitle} · {study.tier}
           </p>
         </div>
-      </div>
-      <div className="space-y-4">
+      </Link>
+      <Link
+        className="block rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-secondary-container"
+        href={`/study/${study.id}/overview`}
+      >
         <div>
           <div className="mb-1.5 flex justify-between text-xs">
             <span className="font-semibold text-on-surface">
@@ -214,14 +236,14 @@ function StudyCard({ study }: { study: (typeof studies)[number] }) {
             {study.status}
           </span>
         </div>
-      </div>
+      </Link>
       <div className="mt-6 flex gap-2 border-t border-slate-50 pt-6">
-        <button
+        <Link
+          href={`/study/${study.id}/overview`}
           className="flex-1 rounded-lg bg-primary py-2 text-sm font-semibold text-on-primary transition-all hover:opacity-90"
-          type="button"
         >
           Enter Room
-        </button>
+        </Link>
         <button
           className="rounded-lg bg-surface-container-low px-3 py-2 text-primary transition-all hover:bg-surface-container"
           type="button"

@@ -1,8 +1,11 @@
+import Link from "next/link";
+
 const problems = [
   {
     code: "BJ-1920",
     icon: "★",
     iconClass: "badge-tier-platinum",
+    id: "6946c40ab3c5f0c6ca7e5850",
     name: "Finding Numbers",
     state: "Completed",
     tags: ["Binary Search", "Sorting"],
@@ -11,6 +14,7 @@ const problems = [
     code: "PG-42888",
     icon: "◆",
     iconClass: "badge-tier-gold",
+    id: "pg-42888",
     name: "Open Chat Room With User Record Replacement And Notification History",
     state: "Pending",
     tags: ["Implementation", "Hash Map"],
@@ -19,6 +23,7 @@ const problems = [
     code: "BJ-1260",
     icon: "◆",
     iconClass: "badge-tier-silver",
+    id: "bj-1260",
     name: "DFS and BFS",
     state: "Completed",
     tags: ["Graph Theory", "BFS", "DFS"],
@@ -27,6 +32,7 @@ const problems = [
     code: "BJ-1753",
     icon: "★",
     iconClass: "badge-tier-platinum",
+    id: "bj-1753",
     name: "Shortest Path",
     state: "Pending",
     tags: ["Dijkstra", "Priority Queue"],
@@ -52,7 +58,10 @@ export default function ProblemTable() {
                 key={problem.code}
               >
                 <td className="min-w-[360px] max-w-[560px] px-6 py-5">
-                  <div className="flex items-start gap-4">
+                  <Link
+                    className="flex items-start gap-4 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-secondary-container"
+                    href={`/problem/${problem.id}`}
+                  >
                     <span
                       className={`mt-1 flex size-10 shrink-0 items-center justify-center rounded-full shadow-sm ${problem.iconClass}`}
                     >
@@ -68,7 +77,7 @@ export default function ProblemTable() {
                         {problem.name}
                       </h3>
                     </div>
-                  </div>
+                  </Link>
                 </td>
                 <td className="px-6 py-5">
                   <div className="flex flex-wrap gap-1.5">
