@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 type StudyLocalNavProps = {
-  active: "overview" | "problems" | "members";
+  active: "overview" | "problems" | "members" | "owner";
   studyId: string;
   studyName: string;
 };
@@ -19,6 +19,7 @@ export default function StudyLocalNav({
       label: "Problem List",
     },
     { href: `/study/${studyId}/members`, id: "members", label: "Members" },
+    { href: `/study/${studyId}/owner`, id: "owner", label: "Owner" },
   ] as const;
 
   return (
