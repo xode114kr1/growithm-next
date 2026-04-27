@@ -342,4 +342,45 @@ body {
     padding: 1rem;
     vertical-align: middle;
   }
+
+  .problem-description {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .problem-description h3 {
+    color: var(--primary);
+    font-size: 1rem;
+    font-weight: 800;
+    margin-top: 1rem;
+  }
+
+  .problem-description p,
+  .problem-description li {
+    line-height: 1.8;
+  }
+
+  .problem-description ol,
+  .problem-description ul {
+    display: grid;
+    gap: 0.5rem;
+    padding-left: 1.5rem;
+  }
+
+  .problem-description ol {
+    list-style: decimal;
+  }
+
+  .problem-description ul {
+    list-style: disc;
+  }
+
+  .problem-description code {
+    border-radius: 0.25rem;
+    background: var(--surface-container-low);
+    color: var(--primary);
+    font-family: var(--font-jetbrains-mono), "SFMono-Regular", Consolas, monospace;
+    font-size: 0.875em;
+    padding: 0.125rem 0.25rem;
+  }
 }
