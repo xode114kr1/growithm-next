@@ -1,10 +1,10 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-type GitHubWebhookPayload = {
-  repository?: {
-    full_name?: unknown;
-  };
-};
+import {
+  getReadmeChangesFromPushPayload,
+  getRepositoryFullName,
+  type GitHubWebhookPayload,
+} from "@/lib/github/webhook-payload";
 
 const signaturePrefix = "sha256=";
 
@@ -58,6 +58,7 @@ export async function POST(request: Request) {
   return Response.json({
     deliveryId,
     message: "GitHub push 웹훅을 수신했습니다.",
+    readmeChanges: getReadmeChangesFromPushPayload(payload),
     repository: getRepositoryFullName(payload),
   });
 }
@@ -88,8 +89,3 @@ function isValidSignature(
   return timingSafeEqual(signatureBuffer, expectedSignatureBuffer);
 }
 
-function getRepositoryFullName(payload: GitHubWebhookPayload) {
-  return typeof payload.repository?.full_name === "string"
-    ? payload.repository.full_name
-    : null;
-}
