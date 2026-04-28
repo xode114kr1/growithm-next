@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { Prisma } from "@/generated/prisma/client";
+import { fetchGitHubReadmeContent } from "@/lib/github/readme-content";
 import {
   getReadmeChangesFromPushPayload,
   getRepositoryFullName,
@@ -82,11 +83,144 @@ export async function POST(request: Request) {
     });
   }
 
+  if (!repositoryFullName) {
+    await updateWebhookDeliveryStatus({
+      deliveryId,
+      errorMessage: "GitHub repository 정보를 찾을 수 없습니다.",
+      status: "FETCH_FAILED",
+    });
+
+    return Response.json(
+      {
+        deliveryId,
+        message: "GitHub repository 정보를 찾을 수 없습니다.",
+      },
+      { status: 400 },
+    );
+  }
+
+  const readmeChanges = getReadmeChangesFromPushPayload(webhookPayload);
+
+  if (readmeChanges.length === 0) {
+    await updateWebhookDeliveryStatus({
+      deliveryId,
+      status: "NO_README",
+    });
+
+    return Response.json({
+      deliveryId,
+      message: "README 변경이 없는 GitHub push 웹훅입니다.",
+      readmeChanges,
+      repository: repositoryFullName,
+    });
+  }
+
+  const accessToken = await getRepositoryAccessToken(repositoryFullName);
+
+  if (!accessToken) {
+    await updateWebhookDeliveryStatus({
+      deliveryId,
+      errorMessage: "Repository에 연결된 GitHub access token을 찾을 수 없습니다.",
+      status: "FETCH_FAILED",
+    });
+
+    return Response.json(
+      {
+        deliveryId,
+        message: "Repository에 연결된 GitHub access token을 찾을 수 없습니다.",
+      },
+      { status: 404 },
+    );
+  }
+
+  try {
+    await Promise.all(
+      readmeChanges.map((change) =>
+        fetchGitHubReadmeContent({
+          accessToken,
+          commitSha: change.commitSha,
+          path: change.path,
+          repositoryFullName,
+        }),
+      ),
+    );
+  } catch (error) {
+    await updateWebhookDeliveryStatus({
+      deliveryId,
+      errorMessage:
+        error instanceof Error ? error.message : "GitHub README 조회 실패",
+      status: "FETCH_FAILED",
+    });
+
+    return Response.json(
+      {
+        deliveryId,
+        message: "GitHub README 조회에 실패했습니다.",
+      },
+      { status: 502 },
+    );
+  }
+
   return Response.json({
     deliveryId,
     message: "GitHub push 웹훅을 수신했습니다.",
-    readmeChanges: getReadmeChangesFromPushPayload(webhookPayload),
+    readmeChanges,
     repository: repositoryFullName,
+  });
+}
+
+async function getRepositoryAccessToken(repositoryFullName: string) {
+  const repositoryWebhook = await prisma.gitHubRepositoryWebhook.findUnique({
+    select: {
+      userId: true,
+    },
+    where: {
+      repositoryFullName,
+    },
+  });
+
+  if (!repositoryWebhook) {
+    return null;
+  }
+
+  const account = await prisma.account.findFirst({
+    select: {
+      access_token: true,
+    },
+    where: {
+      provider: "github",
+      userId: repositoryWebhook.userId,
+    },
+  });
+
+  return account?.access_token ?? null;
+}
+
+async function updateWebhookDeliveryStatus({
+  deliveryId,
+  errorMessage,
+  status,
+}: {
+  deliveryId: string;
+  errorMessage?: string;
+  status:
+    | "FETCH_FAILED"
+    | "FAILED"
+    | "IGNORED"
+    | "NO_README"
+    | "PARSE_FAILED"
+    | "PROCESSED"
+    | "RECEIVED";
+}) {
+  await prisma.webhookDelivery.update({
+    data: {
+      errorMessage,
+      processedAt: new Date(),
+      status,
+    },
+    where: {
+      deliveryId,
+    },
   });
 }
 
