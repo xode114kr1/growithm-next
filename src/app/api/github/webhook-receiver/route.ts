@@ -1,13 +1,17 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { Prisma } from "@/generated/prisma/client";
-import { fetchGitHubReadmeContent } from "@/lib/github/readme-content";
+import {
+  fetchGitHubReadmeContent,
+  type GitHubReadmeContent,
+} from "@/lib/github/readme-content";
 import {
   getReadmeChangesFromPushPayload,
   getRepositoryFullName,
   type GitHubWebhookPayload,
 } from "@/lib/github/webhook-payload";
 import { prisma } from "@/lib/prisma";
+import { parseProblemReadme } from "@/lib/problem-readme/parse";
 
 const signaturePrefix = "sha256=";
 
@@ -115,9 +119,9 @@ export async function POST(request: Request) {
     });
   }
 
-  const accessToken = await getRepositoryAccessToken(repositoryFullName);
+  const repositoryOwner = await getRepositoryOwner(repositoryFullName);
 
-  if (!accessToken) {
+  if (!repositoryOwner) {
     await updateWebhookDeliveryStatus({
       deliveryId,
       errorMessage: "Repository에 연결된 GitHub access token을 찾을 수 없습니다.",
@@ -133,11 +137,13 @@ export async function POST(request: Request) {
     );
   }
 
+  let readmes: GitHubReadmeContent[];
+
   try {
-    await Promise.all(
+    readmes = await Promise.all(
       readmeChanges.map((change) =>
         fetchGitHubReadmeContent({
-          accessToken,
+          accessToken: repositoryOwner.accessToken,
           commitSha: change.commitSha,
           path: change.path,
           repositoryFullName,
@@ -161,15 +167,46 @@ export async function POST(request: Request) {
     );
   }
 
+  const result = await saveProblemSubmissions({
+    webhookDeliveryId: delivery.id,
+    readmes,
+    repositoryFullName,
+    userId: repositoryOwner.userId,
+  });
+
+  if (result.savedCount === 0) {
+    await updateWebhookDeliveryStatus({
+      deliveryId,
+      errorMessage: "파싱 가능한 README를 찾을 수 없습니다.",
+      status: "PARSE_FAILED",
+    });
+
+    return Response.json(
+      {
+        deliveryId,
+        message: "파싱 가능한 README를 찾을 수 없습니다.",
+        parseFailedCount: result.parseFailedCount,
+      },
+      { status: 422 },
+    );
+  }
+
+  await updateWebhookDeliveryStatus({
+    deliveryId,
+    status: "PROCESSED",
+  });
+
   return Response.json({
     deliveryId,
-    message: "GitHub push 웹훅을 수신했습니다.",
+    message: "GitHub push 웹훅 처리가 완료되었습니다.",
+    parseFailedCount: result.parseFailedCount,
     readmeChanges,
     repository: repositoryFullName,
+    savedCount: result.savedCount,
   });
 }
 
-async function getRepositoryAccessToken(repositoryFullName: string) {
+async function getRepositoryOwner(repositoryFullName: string) {
   const repositoryWebhook = await prisma.gitHubRepositoryWebhook.findUnique({
     select: {
       userId: true,
@@ -193,7 +230,92 @@ async function getRepositoryAccessToken(repositoryFullName: string) {
     },
   });
 
-  return account?.access_token ?? null;
+  if (!account?.access_token) {
+    return null;
+  }
+
+  return {
+    accessToken: account.access_token,
+    userId: repositoryWebhook.userId,
+  };
+}
+
+async function saveProblemSubmissions({
+  readmes,
+  repositoryFullName,
+  userId,
+  webhookDeliveryId,
+}: {
+  readmes: GitHubReadmeContent[];
+  repositoryFullName: string;
+  userId: string;
+  webhookDeliveryId: string;
+}) {
+  let parseFailedCount = 0;
+  let savedCount = 0;
+
+  for (const readme of readmes) {
+    const parsedReadme = parseProblemReadme(readme.text);
+
+    if (!parsedReadme) {
+      parseFailedCount += 1;
+      continue;
+    }
+
+    await prisma.problemSubmission.upsert({
+      create: {
+        accuracy: parsedReadme.accuracy,
+        categories: parsedReadme.categories,
+        commitSha: readme.commitSha,
+        description: parsedReadme.description,
+        link: parsedReadme.link,
+        memory: parsedReadme.memory,
+        platform: parsedReadme.platform,
+        problemId: parsedReadme.problemId,
+        readmePath: readme.path,
+        repositoryFullName,
+        score: parsedReadme.score,
+        scoreMax: parsedReadme.scoreMax,
+        submittedAtText: parsedReadme.submittedAtText,
+        tier: parsedReadme.tier,
+        time: parsedReadme.time,
+        title: parsedReadme.title,
+        userId,
+        webhookDeliveryId,
+      },
+      update: {
+        accuracy: parsedReadme.accuracy,
+        categories: parsedReadme.categories,
+        description: parsedReadme.description,
+        link: parsedReadme.link,
+        memory: parsedReadme.memory,
+        platform: parsedReadme.platform,
+        problemId: parsedReadme.problemId,
+        score: parsedReadme.score,
+        scoreMax: parsedReadme.scoreMax,
+        submittedAtText: parsedReadme.submittedAtText,
+        tier: parsedReadme.tier,
+        time: parsedReadme.time,
+        title: parsedReadme.title,
+        userId,
+        webhookDeliveryId,
+      },
+      where: {
+        repositoryFullName_commitSha_readmePath: {
+          commitSha: readme.commitSha,
+          readmePath: readme.path,
+          repositoryFullName,
+        },
+      },
+    });
+
+    savedCount += 1;
+  }
+
+  return {
+    parseFailedCount,
+    savedCount,
+  };
 }
 
 async function updateWebhookDeliveryStatus({
@@ -246,6 +368,7 @@ async function saveWebhookDelivery({
 }) {
   const existingDelivery = await prisma.webhookDelivery.findUnique({
     select: {
+      id: true,
       status: true,
     },
     where: {
@@ -256,6 +379,7 @@ async function saveWebhookDelivery({
   if (existingDelivery) {
     return {
       created: false,
+      id: existingDelivery.id,
       status: existingDelivery.status,
     };
   }
@@ -269,12 +393,14 @@ async function saveWebhookDelivery({
       status,
     },
     select: {
+      id: true,
       status: true,
     },
   });
 
   return {
     created: true,
+    id: delivery.id,
     status: delivery.status,
   };
 }
