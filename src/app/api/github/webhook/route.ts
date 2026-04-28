@@ -59,7 +59,6 @@ export async function POST(request: Request) {
   const account = await prisma.account.findFirst({
     select: {
       access_token: true,
-      scope: true,
     },
     where: {
       provider: "github",
@@ -74,16 +73,6 @@ export async function POST(request: Request) {
           "GitHub access token을 찾을 수 없습니다. GitHub로 다시 로그인해주세요.",
       },
       { status: 401 },
-    );
-  }
-
-  if (!hasRequiredScope(account.scope, "admin:repo_hook")) {
-    return Response.json(
-      {
-        message:
-          "GitHub 웹훅 권한이 없습니다. GitHub로 다시 로그인해 권한을 갱신해주세요.",
-      },
-      { status: 403 },
     );
   }
 
@@ -313,10 +302,6 @@ function parseRepositoryUrl(value: string) {
   } catch {
     return null;
   }
-}
-
-function hasRequiredScope(scope: string | null, requiredScope: string) {
-  return scope?.split(/\s+/).includes(requiredScope) ?? false;
 }
 
 function getGitHubErrorMessage(status: number, message: unknown) {
