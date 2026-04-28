@@ -7,6 +7,7 @@ import {
 } from "@/lib/github/readme-content";
 import {
   getReadmeChangesFromPushPayload,
+  getRepositoryOwnerId,
   getRepositoryFullName,
   type GitHubWebhookPayload,
 } from "@/lib/github/webhook-payload";
@@ -119,7 +120,10 @@ export async function POST(request: Request) {
     });
   }
 
-  const repositoryOwner = await getRepositoryOwner(repositoryFullName);
+  const repositoryOwner = await getRepositoryOwner(
+    repositoryFullName,
+    webhookPayload,
+  );
 
   if (!repositoryOwner) {
     await updateWebhookDeliveryStatus({
@@ -206,7 +210,10 @@ export async function POST(request: Request) {
   });
 }
 
-async function getRepositoryOwner(repositoryFullName: string) {
+async function getRepositoryOwner(
+  repositoryFullName: string,
+  payload: GitHubWebhookPayload,
+) {
   const repositoryWebhook = await prisma.gitHubRepositoryWebhook.findUnique({
     select: {
       userId: true,
@@ -217,7 +224,7 @@ async function getRepositoryOwner(repositoryFullName: string) {
   });
 
   if (!repositoryWebhook) {
-    return null;
+    return getRepositoryOwnerFromPayload(repositoryFullName, payload);
   }
 
   const account = await prisma.account.findFirst({
@@ -237,6 +244,50 @@ async function getRepositoryOwner(repositoryFullName: string) {
   return {
     accessToken: account.access_token,
     userId: repositoryWebhook.userId,
+  };
+}
+
+async function getRepositoryOwnerFromPayload(
+  repositoryFullName: string,
+  payload: GitHubWebhookPayload,
+) {
+  const ownerId = getRepositoryOwnerId(payload);
+
+  if (!ownerId) {
+    return null;
+  }
+
+  const account = await prisma.account.findFirst({
+    select: {
+      access_token: true,
+      userId: true,
+    },
+    where: {
+      provider: "github",
+      providerAccountId: ownerId,
+    },
+  });
+
+  if (!account?.access_token) {
+    return null;
+  }
+
+  await prisma.gitHubRepositoryWebhook.upsert({
+    create: {
+      repositoryFullName,
+      userId: account.userId,
+    },
+    update: {
+      userId: account.userId,
+    },
+    where: {
+      repositoryFullName,
+    },
+  });
+
+  return {
+    accessToken: account.access_token,
+    userId: account.userId,
   };
 }
 
@@ -377,6 +428,28 @@ async function saveWebhookDelivery({
   });
 
   if (existingDelivery) {
+    if (isRetryableDeliveryStatus(existingDelivery.status)) {
+      await prisma.webhookDelivery.update({
+        data: {
+          errorMessage: null,
+          event,
+          payload,
+          processedAt: null,
+          repositoryFullName,
+          status,
+        },
+        where: {
+          deliveryId,
+        },
+      });
+
+      return {
+        created: true,
+        id: existingDelivery.id,
+        status,
+      };
+    }
+
     return {
       created: false,
       id: existingDelivery.id,
@@ -403,6 +476,14 @@ async function saveWebhookDelivery({
     id: delivery.id,
     status: delivery.status,
   };
+}
+
+function isRetryableDeliveryStatus(status: string) {
+  return (
+    status === "FAILED" ||
+    status === "FETCH_FAILED" ||
+    status === "PARSE_FAILED"
+  );
 }
 
 function isValidSignature(

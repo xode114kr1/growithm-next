@@ -3,6 +3,9 @@ export type GitHubWebhookPayload = {
   commits?: unknown;
   repository?: {
     full_name?: unknown;
+    owner?: {
+      id?: unknown;
+    };
   };
 };
 
@@ -25,6 +28,16 @@ export function getRepositoryFullName(payload: GitHubWebhookPayload) {
 
 export function getAfterCommitSha(payload: GitHubWebhookPayload) {
   return typeof payload.after === "string" && payload.after ? payload.after : null;
+}
+
+export function getRepositoryOwnerId(payload: GitHubWebhookPayload) {
+  const ownerId = payload.repository?.owner?.id;
+
+  if (typeof ownerId === "number") {
+    return ownerId.toString();
+  }
+
+  return typeof ownerId === "string" && ownerId ? ownerId : null;
 }
 
 export function getReadmeChangesFromPushPayload(
