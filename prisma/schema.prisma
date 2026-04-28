@@ -12,6 +12,21 @@ datasource db {
   provider = "postgresql"
 }
 
+enum ProblemPlatform {
+  BAEKJOON    @map("baekjoon")
+  PROGRAMMERS @map("programmers")
+}
+
+enum WebhookDeliveryStatus {
+  RECEIVED     @map("received")
+  IGNORED      @map("ignored")
+  PROCESSED    @map("processed")
+  NO_README    @map("no_readme")
+  PARSE_FAILED @map("parse_failed")
+  FETCH_FAILED @map("fetch_failed")
+  FAILED       @map("failed")
+}
+
 model Account {
   id                String  @id @default(cuid())
   userId            String  @map("user_id")
@@ -50,10 +65,63 @@ model User {
   emailVerified DateTime? @map("email_verified")
   image         String?
 
-  accounts Account[]
-  sessions Session[]
+  accounts           Account[]
+  sessions           Session[]
+  problemSubmissions ProblemSubmission[]
 
   @@map("users")
+}
+
+model WebhookDelivery {
+  id                 String                @id @default(cuid())
+  deliveryId         String                @unique @map("delivery_id")
+  event              String
+  repositoryFullName String?               @map("repository_full_name")
+  payload            Json
+  status             WebhookDeliveryStatus @default(RECEIVED)
+  errorMessage       String?               @map("error_message") @db.Text
+  receivedAt         DateTime              @default(now()) @map("received_at")
+  processedAt        DateTime?             @map("processed_at")
+
+  problemSubmissions ProblemSubmission[]
+
+  @@index([event])
+  @@index([repositoryFullName])
+  @@index([status])
+  @@map("webhook_deliveries")
+}
+
+model ProblemSubmission {
+  id                 String          @id @default(cuid())
+  userId             String?         @map("user_id")
+  webhookDeliveryId  String?         @map("webhook_delivery_id")
+  repositoryFullName String          @map("repository_full_name")
+  commitSha          String          @map("commit_sha")
+  readmePath         String          @map("readme_path")
+  platform           ProblemPlatform
+  problemId          String          @map("problem_id")
+  title              String
+  tier               String?
+  link               String?
+  memory             String?
+  time               String?
+  categories         Json?
+  accuracy           Float?
+  score              Float?
+  scoreMax           Float?          @map("score_max")
+  submittedAtText    String?         @map("submitted_at_text")
+  description        String?         @db.Text
+  createdAt          DateTime        @default(now()) @map("created_at")
+  updatedAt          DateTime        @updatedAt @map("updated_at")
+
+  user            User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  webhookDelivery WebhookDelivery? @relation(fields: [webhookDeliveryId], references: [id], onDelete: SetNull)
+
+  @@unique([repositoryFullName, commitSha, readmePath])
+  @@index([userId])
+  @@index([webhookDeliveryId])
+  @@index([platform, problemId])
+  @@map("problem_submissions")
 }
 
 model VerificationToken {
