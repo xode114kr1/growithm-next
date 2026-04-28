@@ -65,11 +65,26 @@ model User {
   emailVerified DateTime? @map("email_verified")
   image         String?
 
-  accounts           Account[]
-  sessions           Session[]
-  problemSubmissions ProblemSubmission[]
+  accounts                 Account[]
+  sessions                 Session[]
+  githubRepositoryWebhooks GitHubRepositoryWebhook[]
+  problemSubmissions       ProblemSubmission[]
 
   @@map("users")
+}
+
+model GitHubRepositoryWebhook {
+  id                 String   @id @default(cuid())
+  userId             String   @map("user_id")
+  repositoryFullName String   @unique @map("repository_full_name")
+  hookId             Int?     @map("hook_id")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("github_repository_webhooks")
 }
 
 model WebhookDelivery {

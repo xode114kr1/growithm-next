@@ -91,6 +91,23 @@ export async function POST(request: Request) {
     );
   }
 
+  const repositoryFullName = `${repository.owner}/${repository.repo}`;
+
+  await prisma.gitHubRepositoryWebhook.upsert({
+    create: {
+      hookId: webhook.hookId,
+      repositoryFullName,
+      userId: session.user.id,
+    },
+    update: {
+      hookId: webhook.hookId,
+      userId: session.user.id,
+    },
+    where: {
+      repositoryFullName,
+    },
+  });
+
   return Response.json({
     hookId: webhook.hookId,
     message: "GitHub 웹훅 연결이 완료되었습니다.",
