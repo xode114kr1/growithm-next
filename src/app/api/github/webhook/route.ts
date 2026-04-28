@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth/auth";
+import { prisma } from "@/lib/prisma";
 
 type WebhookRequestBody = {
   owner?: unknown;
@@ -35,6 +36,37 @@ export async function POST(request: Request) {
     return Response.json(
       { message: "GitHub ID와 Repository 정보를 올바르게 입력해주세요." },
       { status: 400 },
+    );
+  }
+
+  const account = await prisma.account.findFirst({
+    select: {
+      access_token: true,
+      scope: true,
+    },
+    where: {
+      provider: "github",
+      userId: session.user.id,
+    },
+  });
+
+  if (!account?.access_token) {
+    return Response.json(
+      {
+        message:
+          "GitHub access token을 찾을 수 없습니다. GitHub로 다시 로그인해주세요.",
+      },
+      { status: 401 },
+    );
+  }
+
+  if (!hasRequiredScope(account.scope, "admin:repo_hook")) {
+    return Response.json(
+      {
+        message:
+          "GitHub 웹훅 권한이 없습니다. GitHub로 다시 로그인해 권한을 갱신해주세요.",
+      },
+      { status: 403 },
     );
   }
 
@@ -102,4 +134,8 @@ function parseRepositoryUrl(value: string) {
   } catch {
     return null;
   }
+}
+
+function hasRequiredScope(scope: string | null, requiredScope: string) {
+  return scope?.split(/\s+/).includes(requiredScope) ?? false;
 }
