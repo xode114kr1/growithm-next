@@ -10,6 +10,16 @@ type WebhookRequestBody = {
 const repositoryNamePattern = /^[A-Za-z0-9_.-]+$/;
 
 export async function POST(request: Request) {
+  const webhookUrl = process.env.GITHUB_WEBHOOK_URL;
+  const webhookSecret = process.env.GITHUB_WEBHOOK_SECRET;
+
+  if (!webhookUrl || !webhookSecret) {
+    return Response.json(
+      { message: "GitHub 웹훅 환경변수가 설정되지 않았습니다." },
+      { status: 500 },
+    );
+  }
+
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -70,13 +80,82 @@ export async function POST(request: Request) {
     );
   }
 
-  return Response.json(
+  const webhook = await createGitHubWebhook({
+    accessToken: account.access_token,
+    owner: repository.owner,
+    repo: repository.repo,
+    webhookSecret,
+    webhookUrl,
+  });
+
+  if (!webhook.ok) {
+    return Response.json(
+      { message: webhook.message },
+      { status: webhook.status },
+    );
+  }
+
+  return Response.json({
+    hookId: webhook.hookId,
+    message: "GitHub 웹훅 연결이 완료되었습니다.",
+    repository,
+  });
+}
+
+async function createGitHubWebhook({
+  accessToken,
+  owner,
+  repo,
+  webhookSecret,
+  webhookUrl,
+}: {
+  accessToken: string;
+  owner: string;
+  repo: string;
+  webhookSecret: string;
+  webhookUrl: string;
+}) {
+  const response = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/hooks`,
     {
-      message: "웹훅 생성 API 호출 구현이 아직 필요합니다.",
-      repository,
+      body: JSON.stringify({
+        active: true,
+        config: {
+          content_type: "json",
+          insecure_ssl: "0",
+          secret: webhookSecret,
+          url: webhookUrl,
+        },
+        events: ["push"],
+        name: "web",
+      }),
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+      method: "POST",
     },
-    { status: 501 },
   );
+
+  const data = (await response.json().catch(() => null)) as {
+    id?: unknown;
+    message?: unknown;
+  } | null;
+
+  if (!response.ok) {
+    return {
+      message: getGitHubErrorMessage(response.status, data?.message),
+      ok: false as const,
+      status: response.status === 404 ? 404 : 502,
+    };
+  }
+
+  return {
+    hookId: typeof data?.id === "number" ? data.id : null,
+    ok: true as const,
+  };
 }
 
 function parseRepository(body: WebhookRequestBody) {
@@ -138,4 +217,24 @@ function parseRepositoryUrl(value: string) {
 
 function hasRequiredScope(scope: string | null, requiredScope: string) {
   return scope?.split(/\s+/).includes(requiredScope) ?? false;
+}
+
+function getGitHubErrorMessage(status: number, message: unknown) {
+  if (status === 401 || status === 403) {
+    return "GitHub 웹훅을 생성할 권한이 없습니다. GitHub로 다시 로그인해주세요.";
+  }
+
+  if (status === 404) {
+    return "GitHub Repository를 찾을 수 없습니다.";
+  }
+
+  if (status === 422) {
+    return "GitHub 웹훅 요청이 유효하지 않습니다. 이미 등록된 웹훅인지 확인해주세요.";
+  }
+
+  if (typeof message === "string" && message) {
+    return `GitHub 웹훅 생성에 실패했습니다: ${message}`;
+  }
+
+  return "GitHub 웹훅 생성에 실패했습니다.";
 }
