@@ -16,12 +16,14 @@ export default function ProblemTable({
   currentPage,
   pageSize,
   problems,
+  queryString,
   totalCount,
   totalPages,
 }: {
   currentPage: number;
   pageSize: number;
   problems: ProblemListItem[];
+  queryString: string;
   totalCount: number;
   totalPages: number;
 }) {
@@ -97,6 +99,7 @@ export default function ProblemTable({
       <Pagination
         currentPage={currentPage}
         pageSize={pageSize}
+        queryString={queryString}
         showingCount={problems.length}
         totalCount={totalCount}
         totalPages={totalPages}
@@ -117,12 +120,14 @@ function ProblemState({ submittedAtText }: { submittedAtText: string | null }) {
 function Pagination({
   currentPage,
   pageSize,
+  queryString,
   showingCount,
   totalCount,
   totalPages,
 }: {
   currentPage: number;
   pageSize: number;
+  queryString: string;
   showingCount: number;
   totalCount: number;
   totalPages: number;
@@ -140,13 +145,13 @@ function Pagination({
       <div className="flex items-center gap-1">
         <PaginationLink
           disabled={currentPage === 1}
-          href={getPageHref(currentPage - 1)}
+          href={getPageHref(currentPage - 1, queryString)}
           label="‹"
         />
         <div className="flex items-center px-2">
           {pages[0] > 1 ? (
             <>
-              <PaginationLink href={getPageHref(1)} label="1" />
+              <PaginationLink href={getPageHref(1, queryString)} label="1" />
               {pages[0] > 2 ? (
                 <span className="px-2 text-sm text-slate-400">...</span>
               ) : null}
@@ -160,7 +165,7 @@ function Pagination({
                   ? "flex size-9 items-center justify-center rounded-lg bg-primary text-body-sm font-semibold text-on-primary"
                   : "flex size-9 items-center justify-center rounded-lg text-body-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
               }
-              href={getPageHref(page)}
+              href={getPageHref(page, queryString)}
               key={page}
             >
               {page}
@@ -171,13 +176,16 @@ function Pagination({
               {pages[pages.length - 1] < totalPages - 1 ? (
                 <span className="px-2 text-sm text-slate-400">...</span>
               ) : null}
-              <PaginationLink href={getPageHref(totalPages)} label={totalPages} />
+              <PaginationLink
+                href={getPageHref(totalPages, queryString)}
+                label={totalPages}
+              />
             </>
           ) : null}
         </div>
         <PaginationLink
           disabled={currentPage === totalPages}
-          href={getPageHref(currentPage + 1)}
+          href={getPageHref(currentPage + 1, queryString)}
           label="›"
         />
       </div>
@@ -239,12 +247,18 @@ function PaginationLink({
   );
 }
 
-function getPageHref(page: number) {
-  if (page <= 1) {
-    return "/problem";
+function getPageHref(page: number, queryString: string) {
+  const params = new URLSearchParams(queryString);
+
+  if (page > 1) {
+    params.set("page", String(page));
+  } else {
+    params.delete("page");
   }
 
-  return `/problem?page=${page}`;
+  const nextQueryString = params.toString();
+
+  return nextQueryString ? `/problem?${nextQueryString}` : "/problem";
 }
 
 function getVisiblePages(currentPage: number, totalPages: number) {
