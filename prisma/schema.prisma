@@ -113,6 +113,7 @@ model ProblemSubmission {
   repositoryFullName String          @map("repository_full_name")
   commitSha          String          @map("commit_sha")
   readmePath         String          @map("readme_path")
+  code               String?         @db.Text
   platform           ProblemPlatform
   problemId          String          @map("problem_id")
   title              String
