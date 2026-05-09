@@ -13,6 +13,7 @@ type ProblemPageProps = {
 export default async function ProblemPage({ searchParams }: ProblemPageProps) {
   const {
     currentPage,
+    emptyStateReason,
     filters,
     pageSize,
     problems,
@@ -29,6 +30,7 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
         <ProblemFilters filters={filters} tiers={tiers} />
         <ProblemTable
           currentPage={currentPage}
+          emptyStateReason={emptyStateReason}
           pageSize={pageSize}
           problems={problems}
           queryString={queryString}

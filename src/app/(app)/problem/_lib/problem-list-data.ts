@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 import type {
   ProblemFiltersState,
+  ProblemEmptyStateReason,
   ProblemListItem,
   ProblemPageSearchParams,
   ProblemSort,
@@ -20,7 +21,7 @@ export async function getProblemListPageData(params: ProblemPageSearchParams) {
   const orderBy = buildProblemOrderBy(filters.sort);
   const queryString = buildQueryString(params);
 
-  const [availableTiers, totalCount] = await Promise.all([
+  const [availableTiers, unfilteredTotalCount, totalCount] = await Promise.all([
     prisma.problemSubmission.findMany({
       distinct: ["tier"],
       orderBy: {
@@ -35,6 +36,7 @@ export async function getProblemListPageData(params: ProblemPageSearchParams) {
         },
       },
     }),
+    prisma.problemSubmission.count(),
     prisma.problemSubmission.count({ where }),
   ]);
 
@@ -72,6 +74,10 @@ export async function getProblemListPageData(params: ProblemPageSearchParams) {
 
   return {
     currentPage,
+    emptyStateReason: getEmptyStateReason({
+      totalCount,
+      unfilteredTotalCount,
+    }),
     filters,
     pageSize: PAGE_SIZE,
     problems,
@@ -80,6 +86,21 @@ export async function getProblemListPageData(params: ProblemPageSearchParams) {
     totalCount,
     totalPages,
   };
+}
+
+// Chooses the empty state copy based on whether data exists before filtering.
+function getEmptyStateReason({
+  totalCount,
+  unfilteredTotalCount,
+}: {
+  totalCount: number;
+  unfilteredTotalCount: number;
+}): ProblemEmptyStateReason | null {
+  if (totalCount > 0) {
+    return null;
+  }
+
+  return unfilteredTotalCount > 0 ? "no-filter-results" : "no-submissions";
 }
 
 // Converts the Prisma JSON categories field into a string list for rendering.

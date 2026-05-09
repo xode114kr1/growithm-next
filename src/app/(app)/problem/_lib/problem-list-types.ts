@@ -9,6 +9,8 @@ export type ProblemFiltersState = {
   tier: string;
 };
 
+export type ProblemEmptyStateReason = "no-submissions" | "no-filter-results";
+
 export type ProblemListItem = {
   categories: string[];
   code: string;

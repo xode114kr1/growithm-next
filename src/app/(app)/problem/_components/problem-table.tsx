@@ -1,9 +1,13 @@
 import Link from "next/link";
 
-import type { ProblemListItem } from "@/app/(app)/problem/_lib/problem-list-types";
+import type {
+  ProblemEmptyStateReason,
+  ProblemListItem,
+} from "@/app/(app)/problem/_lib/problem-list-types";
 
 export default function ProblemTable({
   currentPage,
+  emptyStateReason,
   pageSize,
   problems,
   queryString,
@@ -11,6 +15,7 @@ export default function ProblemTable({
   totalPages,
 }: {
   currentPage: number;
+  emptyStateReason: ProblemEmptyStateReason | null;
   pageSize: number;
   problems: ProblemListItem[];
   queryString: string;
@@ -85,7 +90,7 @@ export default function ProblemTable({
           </tbody>
         </table>
       </div>
-      {problems.length === 0 ? <EmptyState /> : null}
+      {emptyStateReason ? <EmptyState reason={emptyStateReason} /> : null}
       <Pagination
         currentPage={currentPage}
         pageSize={pageSize}
@@ -186,7 +191,21 @@ function Pagination({
 }
 
 // Shows a clear fallback when the current query has no rows.
-function EmptyState() {
+function EmptyState({ reason }: { reason: ProblemEmptyStateReason }) {
+  if (reason === "no-filter-results") {
+    return (
+      <div className="border-t border-slate-100 px-6 py-14 text-center">
+        <p className="font-semibold text-on-surface">No matching problems</p>
+        <p className="mt-2 text-body-sm text-slate-500">
+          Adjust the platform, tier, or search text to broaden the result set.
+        </p>
+        <Link className="btn-secondary mt-5" href="/problem">
+          Clear filters
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="border-t border-slate-100 px-6 py-14 text-center">
       <p className="font-semibold text-on-surface">No problems submitted yet</p>
