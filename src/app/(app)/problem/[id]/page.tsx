@@ -36,7 +36,7 @@ export default async function ProblemDetailPage({
 
   return (
     <main className="page-shell">
-      <div className="mx-auto w-full max-w-[1120px] space-y-8">
+      <div className="page-container max-w-[1120px] space-y-8">
         <ProblemHeader problem={problem} />
         <ProblemMetadata problem={problem} />
         <ProblemDescription description={problem.description} />
@@ -96,15 +96,15 @@ function ProblemHeader({ problem }: { problem: Problem }) {
 
       <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
         <div className="min-w-0">
-          <div className="mb-4 flex flex-wrap gap-2">
+          <div className="mb-4 flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-primary px-3 py-1 text-body-sm font-semibold text-on-primary">
               {problem.platform}
             </span>
             {problem.tier ? (
               <span className={getTierBadgeClass(problem.tier)}>{problem.tier}</span>
             ) : null}
-            <span className="inline-flex rounded-full bg-secondary-fixed px-3 py-1 text-body-sm font-semibold text-on-secondary-fixed">
-              Submitted
+            <span className="badge-solved">
+              {getSubmittedLabel(problem.submittedAtText)}
             </span>
           </div>
           <p className="mb-2 text-label-caps text-slate-400">
@@ -113,6 +113,9 @@ function ProblemHeader({ problem }: { problem: Problem }) {
           <h1 className="page-title text-pretty break-words text-primary">
             {problem.title}
           </h1>
+          <p className="mt-3 max-w-2xl text-body-md text-on-surface-variant">
+            제출 기록에서 수집한 문제 정보와 풀이 메타데이터를 확인합니다.
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -137,31 +140,31 @@ function ProblemHeader({ problem }: { problem: Problem }) {
 
 function ProblemMetadata({ problem }: { problem: Problem }) {
   const metadata = [
-    { label: "Memory", value: problem.memory },
-    { label: "Time", value: problem.time },
-    { label: "Submitted", value: problem.submittedAtText },
-    { label: "Accuracy", value: formatAccuracy(problem.accuracy) },
-    { label: "Score", value: formatScore(problem.score, problem.scoreMax) },
+    { label: "Memory", value: problem.memory ?? "기록 없음" },
+    { label: "Time", value: problem.time ?? "기록 없음" },
+    { label: "Accuracy", value: formatAccuracy(problem.accuracy) ?? "기록 없음" },
+    { label: "Score", value: formatScore(problem.score, problem.scoreMax) ?? "기록 없음" },
+    { label: "Submitted", value: problem.submittedAtText ?? "제출 완료" },
     { label: "Updated", value: formatDate(problem.updatedAt) },
   ].filter((item): item is { label: string; value: string } => Boolean(item.value));
 
   return (
-    <section className="app-card p-6">
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+    <section className="space-y-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
         {metadata.map((item) => (
-          <div key={item.label}>
+          <div className="app-card p-4" key={item.label}>
             <p className="text-label-caps text-slate-400">{item.label}</p>
-            <p className="mt-1 text-body-md font-semibold text-on-surface">
+            <p className="mt-2 break-words text-body-md font-semibold text-on-surface">
               {item.value}
             </p>
           </div>
         ))}
       </div>
       {problem.categories.length > 0 ? (
-        <div className="mt-5 flex flex-wrap gap-2 border-t border-slate-100 pt-5">
+        <div className="app-card flex flex-wrap gap-2 p-4">
           {problem.categories.map((category) => (
             <span
-              className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-body-sm font-medium text-slate-600"
+              className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-body-sm font-semibold text-slate-600"
               key={category}
             >
               {category}
@@ -223,6 +226,10 @@ function formatScore(score: number | null, scoreMax: number | null) {
   }
 
   return scoreMax === null ? String(score) : `${score} / ${scoreMax}`;
+}
+
+function getSubmittedLabel(submittedAtText: string | null) {
+  return submittedAtText ?? "Submitted";
 }
 
 function formatDate(date: Date) {
