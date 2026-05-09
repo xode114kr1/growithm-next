@@ -1,19 +1,56 @@
 import ProblemFilters from "@/app/(app)/problem/_components/problem-filters";
+import ProblemSortSelect from "@/app/(app)/problem/_components/problem-sort-select";
 import ProblemTable from "@/app/(app)/problem/_components/problem-table";
+import { getProblemListPageData } from "@/app/(app)/problem/_lib/problem-list-data";
+import type {
+  ProblemFiltersState,
+  ProblemPageSearchParams,
+} from "@/app/(app)/problem/_lib/problem-list-types";
 
-export default function ProblemPage() {
+type ProblemPageProps = {
+  searchParams: Promise<ProblemPageSearchParams>;
+};
+
+export default async function ProblemPage({ searchParams }: ProblemPageProps) {
+  const {
+    currentPage,
+    emptyStateReason,
+    filters,
+    pageSize,
+    problems,
+    queryString,
+    tiers,
+    totalCount,
+    totalPages,
+  } = await getProblemListPageData(await searchParams);
+
   return (
     <main className="page-shell">
       <div className="page-container">
-        <ProblemHeading />
-        <ProblemFilters />
-        <ProblemTable />
+        <ProblemHeading filters={filters} totalCount={totalCount} />
+        <ProblemFilters filters={filters} tiers={tiers} />
+        <ProblemTable
+          currentPage={currentPage}
+          emptyStateReason={emptyStateReason}
+          pageSize={pageSize}
+          problems={problems}
+          queryString={queryString}
+          totalCount={totalCount}
+          totalPages={totalPages}
+        />
       </div>
     </main>
   );
 }
 
-function ProblemHeading() {
+// 현재 필터를 유지하면서 페이지 제목과 정렬 컨트롤을 렌더링한다.
+function ProblemHeading({
+  filters,
+  totalCount,
+}: {
+  filters: ProblemFiltersState;
+  totalCount: number;
+}) {
   return (
     <div className="page-header flex flex-col justify-between gap-4 md:flex-row md:items-end">
       <div>
@@ -21,21 +58,11 @@ function ProblemHeading() {
           Algorithm Repository
         </h1>
         <p className="max-w-xl text-body-md text-on-surface-variant">
-          Curated collection of 1,248 challenges across major competitive
-          platforms. Filter by tier to match your current training level.
+          Curated collection of {totalCount.toLocaleString()} submitted
+          challenges across major competitive platforms.
         </p>
       </div>
-      <label className="flex items-center gap-2">
-        <span className="text-body-sm font-medium text-slate-400">
-          Sort by:
-        </span>
-        <select className="cursor-pointer border-none bg-transparent text-body-sm font-semibold text-primary outline-none">
-          <option>Latest Published</option>
-          <option>Difficulty (Low-High)</option>
-          <option>Difficulty (High-Low)</option>
-          <option>Success Rate</option>
-        </select>
-      </label>
+      <ProblemSortSelect sort={filters.sort} />
     </div>
   );
 }
