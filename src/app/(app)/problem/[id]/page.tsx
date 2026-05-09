@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import ProblemMemoEditor from "@/app/(app)/problem/[id]/_components/problem-memo-editor";
 import { prisma } from "@/lib/prisma";
 
 type Problem = {
@@ -12,6 +13,7 @@ type Problem = {
   id: string;
   link: string | null;
   memory: string | null;
+  memo: string | null;
   platform: string;
   problemId: string;
   score: number | null;
@@ -40,6 +42,7 @@ export default async function ProblemDetailPage({
       <div className="page-container max-w-[1120px] space-y-8">
         <ProblemHeader problem={problem} />
         <ProblemMetadata problem={problem} />
+        <ProblemMemoEditor initialMemo={problem.memo} problemId={problem.id} />
         <ProblemSolutionCode code={problem.code} />
         <ProblemDescription description={problem.description} />
       </div>
@@ -59,6 +62,7 @@ async function getProblem(id: string): Promise<Problem | null> {
       id: true,
       link: true,
       memory: true,
+      memo: true,
       platform: true,
       problemId: true,
       score: true,
