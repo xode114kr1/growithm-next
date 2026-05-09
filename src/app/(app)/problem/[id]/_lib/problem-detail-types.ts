@@ -1,0 +1,20 @@
+export type ProblemDetail = {
+  accuracy: number | null;
+  categories: string[];
+  code: string | null;
+  createdAt: Date;
+  description: string | null;
+  id: string;
+  link: string | null;
+  memory: string | null;
+  memo: string | null;
+  platform: string;
+  problemId: string;
+  score: number | null;
+  scoreMax: number | null;
+  submittedAtText: string | null;
+  tier: string | null;
+  time: string | null;
+  title: string;
+  updatedAt: Date;
+};
