@@ -13,13 +13,17 @@ export type ProblemListItem = {
 };
 
 export default function ProblemTable({
+  currentPage,
   pageSize,
   problems,
   totalCount,
+  totalPages,
 }: {
+  currentPage: number;
   pageSize: number;
   problems: ProblemListItem[];
   totalCount: number;
+  totalPages: number;
 }) {
   return (
     <section className="app-card overflow-hidden">
@@ -91,9 +95,11 @@ export default function ProblemTable({
       </div>
       {problems.length === 0 ? <EmptyState /> : null}
       <Pagination
+        currentPage={currentPage}
         pageSize={pageSize}
         showingCount={problems.length}
         totalCount={totalCount}
+        totalPages={totalPages}
       />
     </section>
   );
@@ -109,16 +115,21 @@ function ProblemState({ submittedAtText }: { submittedAtText: string | null }) {
 }
 
 function Pagination({
+  currentPage,
   pageSize,
   showingCount,
   totalCount,
+  totalPages,
 }: {
+  currentPage: number;
   pageSize: number;
   showingCount: number;
   totalCount: number;
+  totalPages: number;
 }) {
-  const start = showingCount > 0 ? 1 : 0;
-  const end = Math.min(showingCount, pageSize);
+  const start = showingCount > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+  const end = Math.min((currentPage - 1) * pageSize + showingCount, totalCount);
+  const pages = getVisiblePages(currentPage, totalPages);
 
   return (
     <div className="flex flex-col items-start justify-between gap-4 border-t border-slate-100 bg-slate-50/30 px-6 py-4 sm:flex-row sm:items-center">
@@ -127,33 +138,48 @@ function Pagination({
         of {totalCount.toLocaleString()} problems
       </p>
       <div className="flex items-center gap-1">
-        <button
-          className="rounded-lg border border-slate-200 p-2 text-slate-300"
-          disabled
-        >
-          ‹
-        </button>
+        <PaginationLink
+          disabled={currentPage === 1}
+          href={getPageHref(currentPage - 1)}
+          label="‹"
+        />
         <div className="flex items-center px-2">
-          {[1, 2, 3].map((page) => (
-            <button
+          {pages[0] > 1 ? (
+            <>
+              <PaginationLink href={getPageHref(1)} label="1" />
+              {pages[0] > 2 ? (
+                <span className="px-2 text-sm text-slate-400">...</span>
+              ) : null}
+            </>
+          ) : null}
+          {pages.map((page) => (
+            <Link
+              aria-current={page === currentPage ? "page" : undefined}
               className={
-                page === 1
+                page === currentPage
                   ? "flex size-9 items-center justify-center rounded-lg bg-primary text-body-sm font-semibold text-on-primary"
                   : "flex size-9 items-center justify-center rounded-lg text-body-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
               }
+              href={getPageHref(page)}
               key={page}
             >
               {page}
-            </button>
+            </Link>
           ))}
-          <span className="px-2 text-sm text-slate-400">...</span>
-          <button className="flex size-9 items-center justify-center rounded-lg text-body-sm font-medium text-slate-600 transition-colors hover:bg-slate-100">
-            50
-          </button>
+          {pages[pages.length - 1] < totalPages ? (
+            <>
+              {pages[pages.length - 1] < totalPages - 1 ? (
+                <span className="px-2 text-sm text-slate-400">...</span>
+              ) : null}
+              <PaginationLink href={getPageHref(totalPages)} label={totalPages} />
+            </>
+          ) : null}
         </div>
-        <button className="rounded-lg border border-slate-200 p-2 text-slate-400 transition-all hover:bg-white">
-          ›
-        </button>
+        <PaginationLink
+          disabled={currentPage === totalPages}
+          href={getPageHref(currentPage + 1)}
+          label="›"
+        />
       </div>
     </div>
   );
@@ -184,6 +210,53 @@ function getTierBadgeClass(tier: string | null) {
   }
 
   return "badge-tier-silver";
+}
+
+function PaginationLink({
+  disabled = false,
+  href,
+  label,
+}: {
+  disabled?: boolean;
+  href: string;
+  label: number | string;
+}) {
+  if (disabled) {
+    return (
+      <span className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-body-sm font-medium text-slate-300">
+        {label}
+      </span>
+    );
+  }
+
+  return (
+    <Link
+      className="flex size-9 items-center justify-center rounded-lg text-body-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
+      href={href}
+    >
+      {label}
+    </Link>
+  );
+}
+
+function getPageHref(page: number) {
+  if (page <= 1) {
+    return "/problem";
+  }
+
+  return `/problem?page=${page}`;
+}
+
+function getVisiblePages(currentPage: number, totalPages: number) {
+  const start = Math.max(1, currentPage - 1);
+  const end = Math.min(totalPages, currentPage + 1);
+  const pages = [];
+
+  for (let page = start; page <= end; page += 1) {
+    pages.push(page);
+  }
+
+  return pages;
 }
 
 function TableHead({

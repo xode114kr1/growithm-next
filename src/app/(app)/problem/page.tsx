@@ -5,26 +5,35 @@ import { prisma } from "@/lib/prisma";
 
 const PAGE_SIZE = 25;
 
-export default async function ProblemPage() {
-  const [problemSubmissions, totalCount] = await Promise.all([
-    prisma.problemSubmission.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
-      select: {
-        categories: true,
-        createdAt: true,
-        id: true,
-        platform: true,
-        problemId: true,
-        submittedAtText: true,
-        tier: true,
-        title: true,
-      },
-      take: PAGE_SIZE,
-    }),
-    prisma.problemSubmission.count(),
-  ]);
+type ProblemPageProps = {
+  searchParams: Promise<{
+    page?: string | string[];
+  }>;
+};
+
+export default async function ProblemPage({ searchParams }: ProblemPageProps) {
+  const requestedPage = parsePageParam((await searchParams).page);
+  const totalCount = await prisma.problemSubmission.count();
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const currentPage = Math.min(requestedPage, totalPages);
+
+  const problemSubmissions = await prisma.problemSubmission.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      categories: true,
+      createdAt: true,
+      id: true,
+      platform: true,
+      problemId: true,
+      submittedAtText: true,
+      tier: true,
+      title: true,
+    },
+    skip: (currentPage - 1) * PAGE_SIZE,
+    take: PAGE_SIZE,
+  });
 
   const problems: ProblemListItem[] = problemSubmissions.map((problem) => ({
     categories: normalizeCategories(problem.categories),
@@ -44,9 +53,11 @@ export default async function ProblemPage() {
         <ProblemHeading totalCount={totalCount} />
         <ProblemFilters />
         <ProblemTable
+          currentPage={currentPage}
           pageSize={PAGE_SIZE}
           problems={problems}
           totalCount={totalCount}
+          totalPages={totalPages}
         />
       </div>
     </main>
@@ -88,4 +99,15 @@ function normalizeCategories(categories: unknown): string[] {
   return categories.filter(
     (category): category is string => typeof category === "string",
   );
+}
+
+function parsePageParam(page: string | string[] | undefined) {
+  const value = Array.isArray(page) ? page[0] : page;
+  const parsedPage = Number(value);
+
+  if (!Number.isInteger(parsedPage) || parsedPage < 1) {
+    return 1;
+  }
+
+  return parsedPage;
 }
