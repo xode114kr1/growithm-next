@@ -1,4 +1,6 @@
-import Link from "next/link";
+"use client";
+
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import type { ProblemPlatform } from "@/generated/prisma/enums";
 import type { ProblemFiltersState } from "@/app/(app)/problem/_lib/problem-list-types";
@@ -16,6 +18,29 @@ export default function ProblemFilters({
   filters: ProblemFiltersState;
   tiers: string[];
 }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  function replaceQuery(updates: Record<string, string | null>) {
+    const params = new URLSearchParams(searchParams.toString());
+
+    for (const [key, value] of Object.entries(updates)) {
+      if (value) {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+    }
+
+    params.delete("page");
+
+    const queryString = params.toString();
+    router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
+      scroll: false,
+    });
+  }
+
   return (
     <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
       <FilterCard title="Platform">
@@ -27,70 +52,52 @@ export default function ProblemFilters({
                 : filters.platform === platform;
 
             return (
-              <Link
+              <button
                 className={
                   isActive
                     ? "rounded-lg border border-primary-container/20 bg-primary-container px-3 py-1.5 text-body-sm font-medium text-on-primary-container"
                     : "rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-body-sm font-medium text-slate-600 transition-colors hover:border-primary-container"
                 }
-                href={getPlatformHref(platform, filters)}
                 key={platform}
+                onClick={() =>
+                  replaceQuery({
+                    platform: platform === "All" ? null : platform,
+                  })
+                }
+                type="button"
               >
                 {platform}
-              </Link>
+              </button>
             );
           })}
         </div>
       </FilterCard>
       <FilterCard title="Difficulty Tier">
-        <form className="space-y-3" method="get">
-          {filters.platform ? (
-            <input name="platform" type="hidden" value={filters.platform} />
-          ) : null}
-          {filters.q ? <input name="q" type="hidden" value={filters.q} /> : null}
-          <input name="sort" type="hidden" value={filters.sort} />
-          <select
-            className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
-            defaultValue={filters.tier}
-            name="tier"
-          >
-            <option value="">All Tiers</option>
-            {tiers.map((tier) => (
-              <option key={tier} value={tier}>
-                {tier}
-              </option>
-            ))}
-          </select>
-          <button className="btn-secondary min-h-10 w-full" type="submit">
-            Apply
-          </button>
-        </form>
+        <select
+          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
+          onChange={(event) => replaceQuery({ tier: event.target.value || null })}
+          value={filters.tier}
+        >
+          <option value="">All Tiers</option>
+          {tiers.map((tier) => (
+            <option key={tier} value={tier}>
+              {tier}
+            </option>
+          ))}
+        </select>
       </FilterCard>
       <FilterCard className="md:col-span-2 xl:col-span-1" title="Search">
-        <form className="space-y-3" method="get">
-          {filters.platform ? (
-            <input name="platform" type="hidden" value={filters.platform} />
-          ) : null}
-          {filters.tier ? (
-            <input name="tier" type="hidden" value={filters.tier} />
-          ) : null}
-          <input name="sort" type="hidden" value={filters.sort} />
-          <input
-            className="input-field min-h-10"
-            defaultValue={filters.q}
-            name="q"
-            placeholder="Title or problem ID"
-            type="search"
-          />
-          <div className="grid grid-cols-2 gap-2">
-            <button className="btn-secondary min-h-10" type="submit">
-              Search
-            </button>
-            <Link className="btn-secondary min-h-10" href="/problem">
-              Reset
-            </Link>
-          </div>
-        </form>
+        <input
+          className="input-field min-h-10"
+          defaultValue={filters.q}
+          key={filters.q}
+          onChange={(event) => {
+            const value = event.target.value;
+            replaceQuery({ q: value.trim() || null });
+          }}
+          placeholder="Title or problem ID"
+          type="search"
+        />
       </FilterCard>
     </section>
   );
@@ -114,32 +121,4 @@ function FilterCard({
       {children}
     </div>
   );
-}
-
-// Builds a platform filter link while preserving the other active filters.
-function getPlatformHref(
-  platform: ProblemPlatform | "All",
-  filters: ProblemFiltersState,
-) {
-  const params = new URLSearchParams();
-
-  if (platform !== "All") {
-    params.set("platform", platform);
-  }
-
-  if (filters.tier) {
-    params.set("tier", filters.tier);
-  }
-
-  if (filters.q) {
-    params.set("q", filters.q);
-  }
-
-  if (filters.sort !== "newest") {
-    params.set("sort", filters.sort);
-  }
-
-  const queryString = params.toString();
-
-  return queryString ? `/problem?${queryString}` : "/problem";
 }

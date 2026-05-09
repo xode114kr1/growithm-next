@@ -1,4 +1,5 @@
 import ProblemFilters from "@/app/(app)/problem/_components/problem-filters";
+import ProblemSortSelect from "@/app/(app)/problem/_components/problem-sort-select";
 import ProblemTable from "@/app/(app)/problem/_components/problem-table";
 import { getProblemListPageData } from "@/app/(app)/problem/_lib/problem-list-data";
 import type {
@@ -61,35 +62,7 @@ function ProblemHeading({
           challenges across major competitive platforms.
         </p>
       </div>
-      <form className="flex items-center gap-2" method="get">
-        {filters.platform ? (
-          <input name="platform" type="hidden" value={filters.platform} />
-        ) : null}
-        {filters.tier ? (
-          <input name="tier" type="hidden" value={filters.tier} />
-        ) : null}
-        {filters.q ? <input name="q" type="hidden" value={filters.q} /> : null}
-        <label
-          className="text-body-sm font-medium text-slate-400"
-          htmlFor="problem-sort"
-        >
-          Sort by:
-        </label>
-        <select
-          className="cursor-pointer border-none bg-transparent text-body-sm font-semibold text-primary outline-none"
-          defaultValue={filters.sort}
-          id="problem-sort"
-          name="sort"
-        >
-          <option value="newest">Latest Published</option>
-          <option value="oldest">Oldest Published</option>
-          <option value="title">Title</option>
-          <option value="platform">Platform</option>
-        </select>
-        <button className="btn-secondary min-h-10" type="submit">
-          Apply
-        </button>
-      </form>
+      <ProblemSortSelect sort={filters.sort} />
     </div>
   );
 }
