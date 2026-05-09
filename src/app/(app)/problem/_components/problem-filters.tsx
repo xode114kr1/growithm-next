@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import type { ProblemPlatform } from "@/generated/prisma/enums";
 
+export type ProblemSort = "newest" | "oldest" | "title" | "platform";
+
 const platforms: Array<ProblemPlatform | "All"> = [
   "All",
   "BAEKJOON",
@@ -11,6 +13,7 @@ const platforms: Array<ProblemPlatform | "All"> = [
 export type ProblemFiltersState = {
   platform: ProblemPlatform | null;
   q: string;
+  sort: ProblemSort;
   tier: string;
 };
 
@@ -33,15 +36,15 @@ export default function ProblemFilters({
 
             return (
               <Link
-              className={
-                isActive
-                  ? "rounded-lg border border-primary-container/20 bg-primary-container px-3 py-1.5 text-body-sm font-medium text-on-primary-container"
-                  : "rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-body-sm font-medium text-slate-600 transition-colors hover:border-primary-container"
-              }
-              href={getPlatformHref(platform, filters)}
-              key={platform}
-            >
-              {platform}
+                className={
+                  isActive
+                    ? "rounded-lg border border-primary-container/20 bg-primary-container px-3 py-1.5 text-body-sm font-medium text-on-primary-container"
+                    : "rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-body-sm font-medium text-slate-600 transition-colors hover:border-primary-container"
+                }
+                href={getPlatformHref(platform, filters)}
+                key={platform}
+              >
+                {platform}
               </Link>
             );
           })}
@@ -53,6 +56,7 @@ export default function ProblemFilters({
             <input name="platform" type="hidden" value={filters.platform} />
           ) : null}
           {filters.q ? <input name="q" type="hidden" value={filters.q} /> : null}
+          <input name="sort" type="hidden" value={filters.sort} />
           <select
             className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
             defaultValue={filters.tier}
@@ -78,6 +82,7 @@ export default function ProblemFilters({
           {filters.tier ? (
             <input name="tier" type="hidden" value={filters.tier} />
           ) : null}
+          <input name="sort" type="hidden" value={filters.sort} />
           <input
             className="input-field min-h-10"
             defaultValue={filters.q}
@@ -134,6 +139,10 @@ function getPlatformHref(
 
   if (filters.q) {
     params.set("q", filters.q);
+  }
+
+  if (filters.sort !== "newest") {
+    params.set("sort", filters.sort);
   }
 
   const queryString = params.toString();

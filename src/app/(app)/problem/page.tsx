@@ -1,5 +1,6 @@
 import ProblemFilters from "@/app/(app)/problem/_components/problem-filters";
 import type { ProblemFiltersState } from "@/app/(app)/problem/_components/problem-filters";
+import type { ProblemSort } from "@/app/(app)/problem/_components/problem-filters";
 import ProblemTable from "@/app/(app)/problem/_components/problem-table";
 import type { ProblemListItem } from "@/app/(app)/problem/_components/problem-table";
 import { ProblemPlatform } from "@/generated/prisma/enums";
@@ -7,13 +8,14 @@ import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
 const PAGE_SIZE = 25;
-const SEARCH_PARAMS_TO_KEEP = ["platform", "tier", "q"] as const;
+const SEARCH_PARAMS_TO_KEEP = ["platform", "tier", "q", "sort"] as const;
 
 type ProblemPageProps = {
   searchParams: Promise<{
     page?: string | string[];
     platform?: string | string[];
     q?: string | string[];
+    sort?: string | string[];
     tier?: string | string[];
   }>;
 };
@@ -23,6 +25,7 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
   const filters = parseFilters(params);
   const requestedPage = parsePageParam(params.page);
   const where = buildProblemWhere(filters);
+  const orderBy = buildProblemOrderBy(filters.sort);
   const queryString = buildQueryString(params);
 
   const [availableTiers, totalCount] = await Promise.all([
@@ -47,9 +50,7 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
   const currentPage = Math.min(requestedPage, totalPages);
 
   const problemSubmissions = await prisma.problemSubmission.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
+    orderBy,
     select: {
       categories: true,
       createdAt: true,
@@ -80,7 +81,7 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
   return (
     <main className="page-shell">
       <div className="page-container">
-        <ProblemHeading totalCount={totalCount} />
+        <ProblemHeading filters={filters} totalCount={totalCount} />
         <ProblemFilters
           filters={filters}
           tiers={availableTiers.flatMap((item) => item.tier ?? [])}
@@ -98,7 +99,13 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
   );
 }
 
-function ProblemHeading({ totalCount }: { totalCount: number }) {
+function ProblemHeading({
+  filters,
+  totalCount,
+}: {
+  filters: ProblemFiltersState;
+  totalCount: number;
+}) {
   return (
     <div className="page-header flex flex-col justify-between gap-4 md:flex-row md:items-end">
       <div>
@@ -110,17 +117,35 @@ function ProblemHeading({ totalCount }: { totalCount: number }) {
           challenges across major competitive platforms.
         </p>
       </div>
-      <label className="flex items-center gap-2">
-        <span className="text-body-sm font-medium text-slate-400">
+      <form className="flex items-center gap-2" method="get">
+        {filters.platform ? (
+          <input name="platform" type="hidden" value={filters.platform} />
+        ) : null}
+        {filters.tier ? (
+          <input name="tier" type="hidden" value={filters.tier} />
+        ) : null}
+        {filters.q ? <input name="q" type="hidden" value={filters.q} /> : null}
+        <label
+          className="text-body-sm font-medium text-slate-400"
+          htmlFor="problem-sort"
+        >
           Sort by:
-        </span>
-        <select className="cursor-pointer border-none bg-transparent text-body-sm font-semibold text-primary outline-none">
-          <option>Latest Published</option>
-          <option>Difficulty (Low-High)</option>
-          <option>Difficulty (High-Low)</option>
-          <option>Success Rate</option>
+        </label>
+        <select
+          className="cursor-pointer border-none bg-transparent text-body-sm font-semibold text-primary outline-none"
+          defaultValue={filters.sort}
+          id="problem-sort"
+          name="sort"
+        >
+          <option value="newest">Latest Published</option>
+          <option value="oldest">Oldest Published</option>
+          <option value="title">Title</option>
+          <option value="platform">Platform</option>
         </select>
-      </label>
+        <button className="btn-secondary min-h-10" type="submit">
+          Apply
+        </button>
+      </form>
     </div>
   );
 }
@@ -177,14 +202,36 @@ function buildProblemWhere(filters: ProblemFiltersState) {
   return where;
 }
 
-function parseFilters(params: Awaited<ProblemPageProps["searchParams"]>) {
+function buildProblemOrderBy(sort: ProblemFiltersState["sort"]) {
+  const orderBy: Prisma.ProblemSubmissionOrderByWithRelationInput[] = [];
+
+  if (sort === "oldest") {
+    orderBy.push({ createdAt: "asc" });
+  } else if (sort === "title") {
+    orderBy.push({ title: "asc" });
+  } else if (sort === "platform") {
+    orderBy.push({ platform: "asc" });
+  } else {
+    orderBy.push({ createdAt: "desc" });
+  }
+
+  orderBy.push({ id: "asc" });
+
+  return orderBy;
+}
+
+function parseFilters(
+  params: Awaited<ProblemPageProps["searchParams"]>,
+): ProblemFiltersState {
   const platform = parsePlatformParam(params.platform);
   const tier = parseStringParam(params.tier);
   const q = parseStringParam(params.q);
+  const sort = parseSortParam(params.sort);
 
   return {
     platform,
     q,
+    sort,
     tier,
   };
 }
@@ -203,6 +250,21 @@ function parseStringParam(value: string | string[] | undefined) {
   const firstValue = Array.isArray(value) ? value[0] : value;
 
   return firstValue?.trim() ?? "";
+}
+
+function parseSortParam(sort: string | string[] | undefined): ProblemSort {
+  const value = parseStringParam(sort);
+
+  if (
+    value === "newest" ||
+    value === "oldest" ||
+    value === "title" ||
+    value === "platform"
+  ) {
+    return value;
+  }
+
+  return "newest";
 }
 
 function buildQueryString(params: Awaited<ProblemPageProps["searchParams"]>) {
