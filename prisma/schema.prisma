@@ -114,6 +114,7 @@ model ProblemSubmission {
   commitSha          String          @map("commit_sha")
   readmePath         String          @map("readme_path")
   code               String?         @db.Text
+  memo               String?         @db.Text
   platform           ProblemPlatform
   problemId          String          @map("problem_id")
   title              String
