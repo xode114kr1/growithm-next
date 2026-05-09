@@ -106,6 +106,18 @@ export async function POST(request: Request) {
 
   const readmeChanges = getReadmeChangesFromPushPayload(webhookPayload);
 
+  console.log(
+    "[github-webhook] extracted code urls",
+    readmeChanges.map((change) => ({
+      codePath: change.codePath,
+      codeUrl: change.codePath
+        ? `https://raw.githubusercontent.com/${repositoryFullName}/${change.commitSha}/${change.codePath}`
+        : null,
+      commitSha: change.commitSha,
+      readmePath: change.path,
+    })),
+  );
+
   if (readmeChanges.length === 0) {
     await updateWebhookDeliveryStatus({
       deliveryId,
