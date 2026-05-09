@@ -43,7 +43,7 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
   );
 }
 
-// Renders the page title and sort control while preserving active filters.
+// 현재 필터를 유지하면서 페이지 제목과 정렬 컨트롤을 렌더링한다.
 function ProblemHeading({
   filters,
   totalCount,

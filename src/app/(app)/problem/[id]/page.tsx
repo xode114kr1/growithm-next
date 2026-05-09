@@ -45,7 +45,7 @@ export default async function ProblemDetailPage({
   );
 }
 
-// Loads one problem submission and maps nullable JSON fields for the detail UI.
+// 문제 제출 1건을 조회하고 상세 UI에 맞게 nullable JSON 필드를 정리한다.
 async function getProblem(id: string): Promise<Problem | null> {
   const problem = await prisma.problemSubmission.findUnique({
     select: {
@@ -196,7 +196,7 @@ function ProblemDescription({ description }: { description: string | null }) {
       </div>
       <div
         className="problem-description text-body-md text-on-surface-variant"
-        // Server-provided HTML must be sanitized before rendering in production.
+        // 서버에서 받은 HTML은 운영 환경에서 렌더링 전에 반드시 sanitizing 해야 한다.
         dangerouslySetInnerHTML={{ __html: description }}
       />
     </section>

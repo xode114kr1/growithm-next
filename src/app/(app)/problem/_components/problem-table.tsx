@@ -103,7 +103,7 @@ export default function ProblemTable({
   );
 }
 
-// Shows the submission state using the parsed submitted date when available.
+// 제출일이 있으면 제출일을 사용해 제출 상태를 표시한다.
 function ProblemState({ submittedAtText }: { submittedAtText: string | null }) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-3 py-1 text-body-sm font-semibold text-on-secondary-fixed">
@@ -113,7 +113,7 @@ function ProblemState({ submittedAtText }: { submittedAtText: string | null }) {
   );
 }
 
-// Renders page navigation and result range text for the current query.
+// 현재 query 기준의 페이지 이동과 결과 범위 텍스트를 렌더링한다.
 function Pagination({
   currentPage,
   pageSize,
@@ -190,7 +190,7 @@ function Pagination({
   );
 }
 
-// Shows a clear fallback when the current query has no rows.
+// 현재 query에 표시할 행이 없을 때 명확한 대체 화면을 보여준다.
 function EmptyState({ reason }: { reason: ProblemEmptyStateReason }) {
   if (reason === "no-filter-results") {
     return (
@@ -216,12 +216,12 @@ function EmptyState({ reason }: { reason: ProblemEmptyStateReason }) {
   );
 }
 
-// Derives the compact platform mark shown in the leading badge.
+// 앞쪽 배지에 표시할 플랫폼 축약 문자를 만든다.
 function getPlatformInitial(platform: string) {
   return platform.charAt(0);
 }
 
-// Maps tier text to the closest available badge style.
+// tier 텍스트를 가장 가까운 배지 스타일로 매핑한다.
 function getTierBadgeClass(tier: string | null) {
   if (tier?.toLowerCase().includes("platinum")) {
     return "badge-tier-platinum";
@@ -234,7 +234,7 @@ function getTierBadgeClass(tier: string | null) {
   return "badge-tier-silver";
 }
 
-// Renders an enabled link or disabled pagination control with matching size.
+// 활성 링크와 비활성 페이지네이션 컨트롤을 같은 크기로 렌더링한다.
 function PaginationLink({
   disabled = false,
   href,
@@ -262,7 +262,7 @@ function PaginationLink({
   );
 }
 
-// Builds a pagination URL while preserving filters and sort state.
+// 필터와 정렬 상태를 유지한 페이지네이션 URL을 만든다.
 function getPageHref(page: number, queryString: string) {
   const params = new URLSearchParams(queryString);
 
@@ -277,7 +277,7 @@ function getPageHref(page: number, queryString: string) {
   return nextQueryString ? `/problem?${nextQueryString}` : "/problem";
 }
 
-// Keeps the visible page range compact around the current page.
+// 현재 페이지 주변으로 보이는 페이지 범위를 작게 유지한다.
 function getVisiblePages(currentPage: number, totalPages: number) {
   const start = Math.max(1, currentPage - 1);
   const end = Math.min(totalPages, currentPage + 1);
@@ -290,7 +290,7 @@ function getVisiblePages(currentPage: number, totalPages: number) {
   return pages;
 }
 
-// Applies consistent table header styling.
+// 테이블 헤더에 일관된 스타일을 적용한다.
 function TableHead({
   children,
   className,

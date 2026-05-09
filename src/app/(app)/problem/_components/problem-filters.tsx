@@ -103,7 +103,7 @@ export default function ProblemFilters({
   );
 }
 
-// Provides the shared card frame for each filter group.
+// 각 필터 그룹에서 공통으로 쓰는 카드 프레임을 제공한다.
 function FilterCard({
   children,
   className,

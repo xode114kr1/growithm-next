@@ -13,7 +13,7 @@ import type {
 const PAGE_SIZE = 25;
 const SEARCH_PARAMS_TO_KEEP = ["platform", "tier", "q", "sort"] as const;
 
-// Builds every server-side value needed to render the problem list route.
+// 문제 목록 라우트를 렌더링하는 데 필요한 서버 데이터를 모두 만든다.
 export async function getProblemListPageData(params: ProblemPageSearchParams) {
   const filters = parseFilters(params);
   const requestedPage = parsePageParam(params.page);
@@ -88,7 +88,7 @@ export async function getProblemListPageData(params: ProblemPageSearchParams) {
   };
 }
 
-// Chooses the empty state copy based on whether data exists before filtering.
+// 필터 적용 전 데이터 존재 여부에 따라 빈 상태 문구를 고른다.
 function getEmptyStateReason({
   totalCount,
   unfilteredTotalCount,
@@ -103,7 +103,7 @@ function getEmptyStateReason({
   return unfilteredTotalCount > 0 ? "no-filter-results" : "no-submissions";
 }
 
-// Converts the Prisma JSON categories field into a string list for rendering.
+// Prisma JSON categories 필드를 렌더링용 문자열 배열로 변환한다.
 function normalizeCategories(categories: unknown): string[] {
   if (!Array.isArray(categories)) {
     return [];
@@ -114,7 +114,7 @@ function normalizeCategories(categories: unknown): string[] {
   );
 }
 
-// Reads the page query and falls back to the first page for invalid values.
+// page query를 읽고 유효하지 않으면 첫 페이지로 대체한다.
 function parsePageParam(page: string | string[] | undefined) {
   const value = Array.isArray(page) ? page[0] : page;
   const parsedPage = Number(value);
@@ -126,7 +126,7 @@ function parsePageParam(page: string | string[] | undefined) {
   return parsedPage;
 }
 
-// Translates UI filter state into a Prisma where clause.
+// UI 필터 상태를 Prisma where 조건으로 변환한다.
 function buildProblemWhere(filters: ProblemFiltersState) {
   const where: Prisma.ProblemSubmissionWhereInput = {};
 
@@ -158,7 +158,7 @@ function buildProblemWhere(filters: ProblemFiltersState) {
   return where;
 }
 
-// Translates the selected sort option into a stable Prisma orderBy list.
+// 선택한 정렬 옵션을 안정적인 Prisma orderBy 목록으로 변환한다.
 function buildProblemOrderBy(sort: ProblemSort) {
   const orderBy: Prisma.ProblemSubmissionOrderByWithRelationInput[] = [];
 
@@ -177,7 +177,7 @@ function buildProblemOrderBy(sort: ProblemSort) {
   return orderBy;
 }
 
-// Normalizes raw URL query params into strongly typed filter state.
+// URL query 값을 타입이 명확한 필터 상태로 정규화한다.
 function parseFilters(params: ProblemPageSearchParams): ProblemFiltersState {
   const platform = parsePlatformParam(params.platform);
   const tier = parseStringParam(params.tier);
@@ -192,7 +192,7 @@ function parseFilters(params: ProblemPageSearchParams): ProblemFiltersState {
   };
 }
 
-// Accepts only platform values that exist in the Prisma enum.
+// Prisma enum에 존재하는 플랫폼 값만 허용한다.
 function parsePlatformParam(platform: string | string[] | undefined) {
   const value = parseStringParam(platform);
 
@@ -203,14 +203,14 @@ function parsePlatformParam(platform: string | string[] | undefined) {
   return null;
 }
 
-// Extracts the first query param value and trims whitespace.
+// 첫 번째 query 값을 꺼내고 앞뒤 공백을 제거한다.
 function parseStringParam(value: string | string[] | undefined) {
   const firstValue = Array.isArray(value) ? value[0] : value;
 
   return firstValue?.trim() ?? "";
 }
 
-// Accepts only supported sort keys and falls back to newest first.
+// 지원하는 정렬 키만 허용하고 기본값은 최신순으로 둔다.
 function parseSortParam(sort: string | string[] | undefined): ProblemSort {
   const value = parseStringParam(sort);
 
@@ -226,7 +226,7 @@ function parseSortParam(sort: string | string[] | undefined): ProblemSort {
   return "newest";
 }
 
-// Keeps non-page query params available for pagination links.
+// 페이지네이션 링크에서 page 외 query 값을 유지할 문자열을 만든다.
 function buildQueryString(params: ProblemPageSearchParams) {
   const query = new URLSearchParams();
 
