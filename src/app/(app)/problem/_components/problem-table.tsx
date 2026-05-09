@@ -1,45 +1,26 @@
 import Link from "next/link";
 
-const problems = [
-  {
-    code: "BJ-1920",
-    icon: "★",
-    iconClass: "badge-tier-platinum",
-    id: "6946c40ab3c5f0c6ca7e5850",
-    name: "Finding Numbers",
-    state: "Completed",
-    tags: ["Binary Search", "Sorting"],
-  },
-  {
-    code: "PG-42888",
-    icon: "◆",
-    iconClass: "badge-tier-gold",
-    id: "pg-42888",
-    name: "Open Chat Room With User Record Replacement And Notification History",
-    state: "Pending",
-    tags: ["Implementation", "Hash Map"],
-  },
-  {
-    code: "BJ-1260",
-    icon: "◆",
-    iconClass: "badge-tier-silver",
-    id: "bj-1260",
-    name: "DFS and BFS",
-    state: "Completed",
-    tags: ["Graph Theory", "BFS", "DFS"],
-  },
-  {
-    code: "BJ-1753",
-    icon: "★",
-    iconClass: "badge-tier-platinum",
-    id: "bj-1753",
-    name: "Shortest Path",
-    state: "Pending",
-    tags: ["Dijkstra", "Priority Queue"],
-  },
-];
+export type ProblemListItem = {
+  categories: string[];
+  code: string;
+  createdAt: Date;
+  id: string;
+  platform: string;
+  problemId: string;
+  submittedAtText: string | null;
+  tier: string | null;
+  title: string;
+};
 
-export default function ProblemTable() {
+export default function ProblemTable({
+  pageSize,
+  problems,
+  totalCount,
+}: {
+  pageSize: number;
+  problems: ProblemListItem[];
+  totalCount: number;
+}) {
   return (
     <section className="app-card overflow-hidden">
       <div className="overflow-x-auto">
@@ -55,7 +36,7 @@ export default function ProblemTable() {
             {problems.map((problem) => (
               <tr
                 className="group transition-colors hover:bg-slate-50/80"
-                key={problem.code}
+                key={problem.id}
               >
                 <td className="min-w-[360px] max-w-[560px] px-6 py-5">
                   <Link
@@ -63,70 +44,87 @@ export default function ProblemTable() {
                     href={`/problem/${problem.id}`}
                   >
                     <span
-                      className={`mt-1 flex size-10 shrink-0 items-center justify-center rounded-full shadow-sm ${problem.iconClass}`}
+                      className={`mt-1 flex size-10 shrink-0 items-center justify-center rounded-full shadow-sm ${getTierBadgeClass(problem.tier)}`}
                     >
-                      {problem.icon}
+                      {getPlatformInitial(problem.platform)}
                     </span>
                     <div className="min-w-0 space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="rounded bg-slate-100 px-1.5 py-0.5 text-mono-code text-[11px] text-slate-500">
                           {problem.code}
                         </span>
+                        {problem.tier ? (
+                          <span className={getTierBadgeClass(problem.tier)}>
+                            {problem.tier}
+                          </span>
+                        ) : null}
                       </div>
                       <h3 className="text-pretty break-words font-semibold leading-snug text-on-surface transition-colors group-hover:text-secondary">
-                        {problem.name}
+                        {problem.title}
                       </h3>
                     </div>
                   </Link>
                 </td>
                 <td className="px-6 py-5">
                   <div className="flex flex-wrap gap-1.5">
-                    {problem.tags.map((tag) => (
-                      <span
-                        className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-500"
-                        key={tag}
-                      >
-                        {tag}
-                      </span>
-                    ))}
+                    {problem.categories.length > 0 ? (
+                      problem.categories.map((tag) => (
+                        <span
+                          className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-500"
+                          key={tag}
+                        >
+                          {tag}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-body-sm text-slate-400">No tags</span>
+                    )}
                   </div>
                 </td>
                 <td className="px-6 py-5">
-                  <ProblemState state={problem.state} />
+                  <ProblemState submittedAtText={problem.submittedAtText} />
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <Pagination />
+      {problems.length === 0 ? <EmptyState /> : null}
+      <Pagination
+        pageSize={pageSize}
+        showingCount={problems.length}
+        totalCount={totalCount}
+      />
     </section>
   );
 }
 
-function ProblemState({ state }: { state: string }) {
-  if (state === "Completed") {
-    return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-3 py-1 text-body-sm font-semibold text-on-secondary-fixed">
-        <span aria-hidden="true">✓</span>
-        Completed
-      </span>
-    );
-  }
-
+function ProblemState({ submittedAtText }: { submittedAtText: string | null }) {
   return (
-    <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-body-sm font-semibold text-slate-500">
-      Pending
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-3 py-1 text-body-sm font-semibold text-on-secondary-fixed">
+      <span aria-hidden="true">✓</span>
+      {submittedAtText ?? "Submitted"}
     </span>
   );
 }
 
-function Pagination() {
+function Pagination({
+  pageSize,
+  showingCount,
+  totalCount,
+}: {
+  pageSize: number;
+  showingCount: number;
+  totalCount: number;
+}) {
+  const start = showingCount > 0 ? 1 : 0;
+  const end = Math.min(showingCount, pageSize);
+
   return (
     <div className="flex flex-col items-start justify-between gap-4 border-t border-slate-100 bg-slate-50/30 px-6 py-4 sm:flex-row sm:items-center">
       <p className="text-body-sm text-slate-500">
-        Showing <span className="font-semibold text-on-surface">1 - 25</span>{" "}
-        of 1,248 problems
+        Showing <span className="font-semibold text-on-surface">{start} - {end}</span>{" "}
+        of {totalCount.toLocaleString()} problems
       </p>
       <div className="flex items-center gap-1">
         <button
@@ -159,6 +157,33 @@ function Pagination() {
       </div>
     </div>
   );
+}
+
+function EmptyState() {
+  return (
+    <div className="border-t border-slate-100 px-6 py-14 text-center">
+      <p className="font-semibold text-on-surface">No problems submitted yet</p>
+      <p className="mt-2 text-body-sm text-slate-500">
+        Registered submissions will appear here after webhook processing.
+      </p>
+    </div>
+  );
+}
+
+function getPlatformInitial(platform: string) {
+  return platform.charAt(0);
+}
+
+function getTierBadgeClass(tier: string | null) {
+  if (tier?.toLowerCase().includes("platinum")) {
+    return "badge-tier-platinum";
+  }
+
+  if (tier?.toLowerCase().includes("gold")) {
+    return "badge-tier-gold";
+  }
+
+  return "badge-tier-silver";
 }
 
 function TableHead({
