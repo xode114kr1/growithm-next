@@ -16,6 +16,11 @@ import { parseProblemReadme } from "@/lib/problem-readme/parse";
 
 const signaturePrefix = "sha256=";
 
+type GitHubCodeContent = {
+  code: string | null;
+  readmePath: string;
+};
+
 export async function POST(request: Request) {
   const webhookSecret = process.env.GITHUB_WEBHOOK_SECRET;
 
@@ -106,6 +111,35 @@ export async function POST(request: Request) {
 
   const readmeChanges = getReadmeChangesFromPushPayload(webhookPayload);
 
+  const codeContents = await Promise.all(
+    readmeChanges.map(async (change) => {
+      if (!change.codePath) {
+        return {
+          code: null,
+          codePath: null,
+          codeUrl: null,
+          readmePath: change.path,
+          status: null,
+        };
+      }
+
+      const codeUrl = buildRawGitHubContentUrl({
+        commitSha: change.commitSha,
+        path: change.codePath,
+        repositoryFullName,
+      });
+      const response = await fetch(codeUrl);
+
+      return {
+        code: response.ok ? await response.text() : null,
+        codePath: change.codePath,
+        codeUrl,
+        readmePath: change.path,
+        status: response.status,
+      };
+    }),
+  );
+
   if (readmeChanges.length === 0) {
     await updateWebhookDeliveryStatus({
       deliveryId,
@@ -172,6 +206,7 @@ export async function POST(request: Request) {
   }
 
   const result = await saveProblemSubmissions({
+    codeContents,
     webhookDeliveryId: delivery.id,
     readmes,
     repositoryFullName,
@@ -292,11 +327,13 @@ async function getRepositoryOwnerFromPayload(
 }
 
 async function saveProblemSubmissions({
+  codeContents,
   readmes,
   repositoryFullName,
   userId,
   webhookDeliveryId,
 }: {
+  codeContents: GitHubCodeContent[];
   readmes: GitHubReadmeContent[];
   repositoryFullName: string;
   userId: string;
@@ -307,6 +344,9 @@ async function saveProblemSubmissions({
 
   for (const readme of readmes) {
     const parsedReadme = parseProblemReadme(readme.text);
+    const code =
+      codeContents.find((codeContent) => codeContent.readmePath === readme.path)
+        ?.code ?? null;
 
     if (!parsedReadme) {
       parseFailedCount += 1;
@@ -316,6 +356,7 @@ async function saveProblemSubmissions({
     await prisma.problemSubmission.upsert({
       create: {
         accuracy: parsedReadme.accuracy,
+        code,
         categories: parsedReadme.categories,
         commitSha: readme.commitSha,
         description: parsedReadme.description,
@@ -336,6 +377,7 @@ async function saveProblemSubmissions({
       },
       update: {
         accuracy: parsedReadme.accuracy,
+        code,
         categories: parsedReadme.categories,
         description: parsedReadme.description,
         link: parsedReadme.link,
@@ -484,6 +526,22 @@ function isRetryableDeliveryStatus(status: string) {
     status === "FETCH_FAILED" ||
     status === "PARSE_FAILED"
   );
+}
+
+function buildRawGitHubContentUrl({
+  commitSha,
+  path,
+  repositoryFullName,
+}: {
+  commitSha: string;
+  path: string;
+  repositoryFullName: string;
+}) {
+  return `https://raw.githubusercontent.com/${repositoryFullName}/${commitSha}/${encodeGitHubPath(path)}`;
+}
+
+function encodeGitHubPath(path: string) {
+  return path.split("/").map(encodeURIComponent).join("/");
 }
 
 function isValidSignature(

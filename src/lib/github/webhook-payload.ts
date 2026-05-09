@@ -10,6 +10,7 @@ export type GitHubWebhookPayload = {
 };
 
 export type GitHubReadmeChange = {
+  codePath: string | null;
   commitSha: string;
   path: string;
 };
@@ -51,6 +52,7 @@ export function getReadmeChangesFromPushPayload(
 
   for (const commit of payload.commits) {
     const readmePaths = getReadmePathsFromCommit(commit);
+    const codePaths = getCodePathsFromCommit(commit);
     const commitSha = getCommitSha(commit);
 
     if (!commitSha) {
@@ -58,7 +60,11 @@ export function getReadmeChangesFromPushPayload(
     }
 
     for (const path of readmePaths) {
-      changes.set(`${commitSha}:${path}`, { commitSha, path });
+      changes.set(`${commitSha}:${path}`, {
+        codePath: findCodePathForReadme(path, codePaths),
+        commitSha,
+        path,
+      });
     }
   }
 
@@ -73,6 +79,16 @@ function getReadmePathsFromCommit(commit: unknown) {
   return [...getStringArray(commit.added), ...getStringArray(commit.modified)]
     .map((path) => path.trim())
     .filter(isReadmePath);
+}
+
+function getCodePathsFromCommit(commit: unknown) {
+  if (!isPushCommit(commit)) {
+    return [];
+  }
+
+  return [...getStringArray(commit.added), ...getStringArray(commit.modified)]
+    .map((path) => path.trim())
+    .filter(isCodePath);
 }
 
 function getCommitSha(commit: unknown) {
@@ -95,4 +111,23 @@ function getStringArray(value: unknown) {
 
 function isReadmePath(path: string) {
   return /(^|\/)README\.md$/i.test(path);
+}
+
+function isCodePath(path: string) {
+  return path !== "" && !isReadmePath(path) && !path.toLowerCase().endsWith(".md");
+}
+
+function findCodePathForReadme(readmePath: string, codePaths: string[]) {
+  const readmeDirectory = getDirectoryPath(readmePath);
+
+  return (
+    codePaths.find((codePath) => getDirectoryPath(codePath) === readmeDirectory) ??
+    null
+  );
+}
+
+function getDirectoryPath(path: string) {
+  const lastSlashIndex = path.lastIndexOf("/");
+
+  return lastSlashIndex === -1 ? "" : path.slice(0, lastSlashIndex);
 }
