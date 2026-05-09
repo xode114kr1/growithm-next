@@ -1,16 +1,10 @@
-import {
-  formatAccuracy,
-  formatDate,
-  formatScore,
-} from "@/app/(app)/problem/[id]/_lib/problem-detail-format";
+import { formatDate } from "@/app/(app)/problem/[id]/_lib/problem-detail-format";
 import type { ProblemDetail } from "@/app/(app)/problem/[id]/_lib/problem-detail-types";
 
 export default function ProblemMetadata({ problem }: { problem: ProblemDetail }) {
   const metadata = [
     { label: "Memory", value: problem.memory ?? "기록 없음" },
     { label: "Time", value: problem.time ?? "기록 없음" },
-    { label: "Accuracy", value: formatAccuracy(problem.accuracy) ?? "기록 없음" },
-    { label: "Score", value: formatScore(problem.score, problem.scoreMax) ?? "기록 없음" },
     { label: "Submitted", value: problem.submittedAtText ?? "제출 완료" },
     { label: "Updated", value: formatDate(problem.updatedAt) },
   ].filter((item): item is { label: string; value: string } => Boolean(item.value));
