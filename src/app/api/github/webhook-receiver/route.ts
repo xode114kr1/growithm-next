@@ -118,6 +118,37 @@ export async function POST(request: Request) {
     })),
   );
 
+  const codeContents = await Promise.all(
+    readmeChanges.map(async (change) => {
+      if (!change.codePath) {
+        return {
+          code: null,
+          codePath: null,
+          codeUrl: null,
+          readmePath: change.path,
+          status: null,
+        };
+      }
+
+      const codeUrl = buildRawGitHubContentUrl({
+        commitSha: change.commitSha,
+        path: change.codePath,
+        repositoryFullName,
+      });
+      const response = await fetch(codeUrl);
+
+      return {
+        code: response.ok ? await response.text() : null,
+        codePath: change.codePath,
+        codeUrl,
+        readmePath: change.path,
+        status: response.status,
+      };
+    }),
+  );
+
+  console.log("[github-webhook] fetched code contents", codeContents);
+
   if (readmeChanges.length === 0) {
     await updateWebhookDeliveryStatus({
       deliveryId,
@@ -496,6 +527,22 @@ function isRetryableDeliveryStatus(status: string) {
     status === "FETCH_FAILED" ||
     status === "PARSE_FAILED"
   );
+}
+
+function buildRawGitHubContentUrl({
+  commitSha,
+  path,
+  repositoryFullName,
+}: {
+  commitSha: string;
+  path: string;
+  repositoryFullName: string;
+}) {
+  return `https://raw.githubusercontent.com/${repositoryFullName}/${commitSha}/${encodeGitHubPath(path)}`;
+}
+
+function encodeGitHubPath(path: string) {
+  return path.split("/").map(encodeURIComponent).join("/");
 }
 
 function isValidSignature(
