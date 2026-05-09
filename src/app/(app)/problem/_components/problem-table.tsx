@@ -1,16 +1,6 @@
 import Link from "next/link";
 
-export type ProblemListItem = {
-  categories: string[];
-  code: string;
-  createdAt: Date;
-  id: string;
-  platform: string;
-  problemId: string;
-  submittedAtText: string | null;
-  tier: string | null;
-  title: string;
-};
+import type { ProblemListItem } from "@/app/(app)/problem/_lib/problem-list-types";
 
 export default function ProblemTable({
   currentPage,
@@ -108,6 +98,7 @@ export default function ProblemTable({
   );
 }
 
+// Shows the submission state using the parsed submitted date when available.
 function ProblemState({ submittedAtText }: { submittedAtText: string | null }) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-3 py-1 text-body-sm font-semibold text-on-secondary-fixed">
@@ -117,6 +108,7 @@ function ProblemState({ submittedAtText }: { submittedAtText: string | null }) {
   );
 }
 
+// Renders page navigation and result range text for the current query.
 function Pagination({
   currentPage,
   pageSize,
@@ -193,6 +185,7 @@ function Pagination({
   );
 }
 
+// Shows a clear fallback when the current query has no rows.
 function EmptyState() {
   return (
     <div className="border-t border-slate-100 px-6 py-14 text-center">
@@ -204,10 +197,12 @@ function EmptyState() {
   );
 }
 
+// Derives the compact platform mark shown in the leading badge.
 function getPlatformInitial(platform: string) {
   return platform.charAt(0);
 }
 
+// Maps tier text to the closest available badge style.
 function getTierBadgeClass(tier: string | null) {
   if (tier?.toLowerCase().includes("platinum")) {
     return "badge-tier-platinum";
@@ -220,6 +215,7 @@ function getTierBadgeClass(tier: string | null) {
   return "badge-tier-silver";
 }
 
+// Renders an enabled link or disabled pagination control with matching size.
 function PaginationLink({
   disabled = false,
   href,
@@ -247,6 +243,7 @@ function PaginationLink({
   );
 }
 
+// Builds a pagination URL while preserving filters and sort state.
 function getPageHref(page: number, queryString: string) {
   const params = new URLSearchParams(queryString);
 
@@ -261,6 +258,7 @@ function getPageHref(page: number, queryString: string) {
   return nextQueryString ? `/problem?${nextQueryString}` : "/problem";
 }
 
+// Keeps the visible page range compact around the current page.
 function getVisiblePages(currentPage: number, totalPages: number) {
   const start = Math.max(1, currentPage - 1);
   const end = Math.min(totalPages, currentPage + 1);
@@ -273,6 +271,7 @@ function getVisiblePages(currentPage: number, totalPages: number) {
   return pages;
 }
 
+// Applies consistent table header styling.
 function TableHead({
   children,
   className,

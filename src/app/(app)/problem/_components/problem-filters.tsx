@@ -1,21 +1,13 @@
 import Link from "next/link";
 
 import type { ProblemPlatform } from "@/generated/prisma/enums";
-
-export type ProblemSort = "newest" | "oldest" | "title" | "platform";
+import type { ProblemFiltersState } from "@/app/(app)/problem/_lib/problem-list-types";
 
 const platforms: Array<ProblemPlatform | "All"> = [
   "All",
   "BAEKJOON",
   "PROGRAMMERS",
 ];
-
-export type ProblemFiltersState = {
-  platform: ProblemPlatform | null;
-  q: string;
-  sort: ProblemSort;
-  tier: string;
-};
 
 export default function ProblemFilters({
   filters,
@@ -104,6 +96,7 @@ export default function ProblemFilters({
   );
 }
 
+// Provides the shared card frame for each filter group.
 function FilterCard({
   children,
   className,
@@ -123,6 +116,7 @@ function FilterCard({
   );
 }
 
+// Builds a platform filter link while preserving the other active filters.
 function getPlatformHref(
   platform: ProblemPlatform | "All",
   filters: ProblemFiltersState,
