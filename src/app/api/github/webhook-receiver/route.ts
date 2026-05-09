@@ -16,6 +16,11 @@ import { parseProblemReadme } from "@/lib/problem-readme/parse";
 
 const signaturePrefix = "sha256=";
 
+type GitHubCodeContent = {
+  code: string | null;
+  readmePath: string;
+};
+
 export async function POST(request: Request) {
   const webhookSecret = process.env.GITHUB_WEBHOOK_SECRET;
 
@@ -215,6 +220,7 @@ export async function POST(request: Request) {
   }
 
   const result = await saveProblemSubmissions({
+    codeContents,
     webhookDeliveryId: delivery.id,
     readmes,
     repositoryFullName,
@@ -335,11 +341,13 @@ async function getRepositoryOwnerFromPayload(
 }
 
 async function saveProblemSubmissions({
+  codeContents,
   readmes,
   repositoryFullName,
   userId,
   webhookDeliveryId,
 }: {
+  codeContents: GitHubCodeContent[];
   readmes: GitHubReadmeContent[];
   repositoryFullName: string;
   userId: string;
@@ -350,6 +358,9 @@ async function saveProblemSubmissions({
 
   for (const readme of readmes) {
     const parsedReadme = parseProblemReadme(readme.text);
+    const code =
+      codeContents.find((codeContent) => codeContent.readmePath === readme.path)
+        ?.code ?? null;
 
     if (!parsedReadme) {
       parseFailedCount += 1;
@@ -359,6 +370,7 @@ async function saveProblemSubmissions({
     await prisma.problemSubmission.upsert({
       create: {
         accuracy: parsedReadme.accuracy,
+        code,
         categories: parsedReadme.categories,
         commitSha: readme.commitSha,
         description: parsedReadme.description,
@@ -379,6 +391,7 @@ async function saveProblemSubmissions({
       },
       update: {
         accuracy: parsedReadme.accuracy,
+        code,
         categories: parsedReadme.categories,
         description: parsedReadme.description,
         link: parsedReadme.link,
