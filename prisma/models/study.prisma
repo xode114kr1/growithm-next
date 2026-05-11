@@ -1,0 +1,16 @@
+model Study {
+  id          String   @id @default(cuid())
+  ownerId     String   @map("owner_id")
+  title       String
+  description String?  @db.Text
+  score       Float    @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  owner         User                @relation("StudyOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members       StudyMember[]
+  problemShares StudyProblemShare[]
+
+  @@index([ownerId])
+  @@map("studies")
+}

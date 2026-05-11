@@ -1,143 +1,32 @@
 import Link from "next/link";
+
 import StudyCreateModal from "@/app/(app)/study/_components/study-create-modal";
+import { auth } from "@/lib/auth/auth";
+import { prisma } from "@/lib/prisma";
 
 type StudyTier = "Bronze" | "Silver" | "Gold" | "Platinum" | "Diamond" | "Ruby";
 
-const studies = [
-  {
-    active: true,
-    id: "study-1",
-    members: "8 Members",
-    progress: "68%",
-    progressClass: "w-[68%]",
-    status: "Active 2m ago",
-    statusClass: "text-secondary",
-    subtitle: "Target: Platinum Tier",
-    tier: "Platinum",
-    title: "Graph Theory Deep Dive",
-  },
-  {
-    id: "study-faang",
-    members: "12 Members",
-    progress: "42 / 75",
-    progressClass: "w-[56%]",
-    status: "Last active 1h ago",
-    statusClass: "text-outline",
-    subtitle: "Blind 75 & Grind 169",
-    tier: "Gold",
-    title: "FAANG Interview Prep",
-  },
-  {
-    id: "study-icpc",
-    members: "5 Members",
-    progress: "90%",
-    progressClass: "w-[90%]",
-    status: "Meeting at 8:00 PM",
-    statusClass: "text-secondary",
-    subtitle: "Advanced Data Structures",
-    tier: "Diamond",
-    title: "ICPC Training Crew",
-  },
-  {
-    id: "study-dp",
-    members: "9 Members",
-    progress: "35%",
-    progressClass: "w-[35%]",
-    status: "Active 12m ago",
-    statusClass: "text-secondary",
-    subtitle: "Dynamic Programming Patterns",
-    tier: "Silver",
-    title: "DP Mastery Circle",
-  },
-  {
-    id: "study-system-design",
-    members: "15 Members",
-    progress: "18 / 40",
-    progressClass: "w-[45%]",
-    status: "Last active 30m ago",
-    statusClass: "text-outline",
-    subtitle: "Scalable Architecture Practice",
-    tier: "Platinum",
-    title: "System Design Sprint",
-  },
-  {
-    id: "study-greedy",
-    members: "7 Members",
-    progress: "74%",
-    progressClass: "w-[74%]",
-    status: "Meeting tomorrow",
-    statusClass: "text-secondary",
-    subtitle: "Greedy & Interval Problems",
-    tier: "Gold",
-    title: "Greedy Strategy Lab",
-  },
-  {
-    id: "study-backtracking",
-    members: "6 Members",
-    progress: "22 / 50",
-    progressClass: "w-[44%]",
-    status: "Last active 2h ago",
-    statusClass: "text-outline",
-    subtitle: "Backtracking and Search",
-    tier: "Bronze",
-    title: "Backtracking Workshop",
-  },
-  {
-    id: "study-database",
-    members: "11 Members",
-    progress: "81%",
-    progressClass: "w-[81%]",
-    status: "Active now",
-    statusClass: "text-secondary",
-    subtitle: "SQL, Indexes, Transactions",
-    tier: "Ruby",
-    title: "Database Interview Club",
-  },
-  {
-    id: "study-os",
-    members: "10 Members",
-    progress: "29%",
-    progressClass: "w-[29%]",
-    status: "Last active yesterday",
-    statusClass: "text-outline",
-    subtitle: "Threads, Memory, Scheduling",
-    tier: "Silver",
-    title: "Operating Systems Crew",
-  },
-  {
-    id: "study-network",
-    members: "8 Members",
-    progress: "63%",
-    progressClass: "w-[63%]",
-    status: "Meeting at 9:30 PM",
-    statusClass: "text-secondary",
-    subtitle: "TCP/IP and Web Protocols",
-    tier: "Diamond",
-    title: "Network Fundamentals",
-  },
-  {
-    id: "study-frontend",
-    members: "13 Members",
-    progress: "51 / 100",
-    progressClass: "w-[51%]",
-    status: "Active 5m ago",
-    statusClass: "text-secondary",
-    subtitle: "TypeScript Coding Practice",
-    tier: "Gold",
-    title: "Frontend Problem Solving",
-  },
-] satisfies Array<{
-  active?: boolean;
+type StudyListItem = {
+  description: string;
   id: string;
-  members: string;
-  progress: string;
-  progressClass: string;
-  status: string;
-  statusClass: string;
-  subtitle: string;
+  isOwner: boolean;
+  memberCount: number;
+  ownerName: string;
+  progress: number;
+  progressLabel: string;
+  score: number;
   tier: StudyTier;
   title: string;
-}>;
+};
+
+const tierThresholds = [
+  { minScore: 3000, tier: "Ruby" },
+  { minScore: 1500, tier: "Diamond" },
+  { minScore: 700, tier: "Platinum" },
+  { minScore: 300, tier: "Gold" },
+  { minScore: 100, tier: "Silver" },
+  { minScore: 0, tier: "Bronze" },
+] satisfies Array<{ minScore: number; tier: StudyTier }>;
 
 const tierThumbnails: Record<StudyTier, { className: string; label: string }> = {
   Bronze: {
@@ -166,7 +55,11 @@ const tierThumbnails: Record<StudyTier, { className: string; label: string }> = 
   },
 };
 
-export default function StudyList() {
+export default async function StudyList() {
+  const session = await auth();
+  const userId = session?.user?.id;
+  const studies = userId ? await getUserStudies(userId) : [];
+
   return (
     <section>
       <div className="mb-6 flex items-center justify-between">
@@ -175,21 +68,74 @@ export default function StudyList() {
       </div>
       <div className="grid grid-cols-1 gap-gutter md:grid-cols-2">
         {studies.map((study) => (
-          <StudyCard key={study.title} study={study} />
+          <StudyCard key={study.id} study={study} />
         ))}
+        {studies.length === 0 ? <EmptyStudyCard isSignedIn={Boolean(userId)} /> : null}
         <FindStudyCard />
       </div>
     </section>
   );
 }
 
-function StudyCard({ study }: { study: (typeof studies)[number] }) {
+async function getUserStudies(userId: string): Promise<StudyListItem[]> {
+  const studies = await prisma.study.findMany({
+    include: {
+      _count: {
+        select: {
+          members: true,
+        },
+      },
+      owner: {
+        select: {
+          name: true,
+        },
+      },
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+    where: {
+      OR: [
+        {
+          ownerId: userId,
+        },
+        {
+          members: {
+            some: {
+              userId,
+            },
+          },
+        },
+      ],
+    },
+  });
+
+  return studies.map((study) => {
+    const tier = getStudyTier(study.score);
+    const progress = getTierProgress(study.score, tier);
+
+    return {
+      description: study.description ?? "아직 스터디 설명이 없습니다.",
+      id: study.id,
+      isOwner: study.ownerId === userId,
+      memberCount: study._count.members,
+      ownerName: study.owner.name ?? "Unknown",
+      progress,
+      progressLabel: getProgressLabel(study.score, tier),
+      score: study.score,
+      tier,
+      title: study.title,
+    };
+  });
+}
+
+function StudyCard({ study }: { study: StudyListItem }) {
   return (
     <article className="app-card relative overflow-hidden p-6 transition-all duration-300 hover:shadow-lg hover:shadow-teal-900/5">
-      {study.active ? (
+      {study.isOwner ? (
         <div className="absolute right-0 top-0 p-4">
           <span className="rounded-full bg-secondary-container px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-on-secondary-container">
-            Active
+            Owner
           </span>
         </div>
       ) : null}
@@ -203,7 +149,7 @@ function StudyCard({ study }: { study: (typeof studies)[number] }) {
             {study.title}
           </h3>
           <p className="text-body-sm text-outline">
-            {study.subtitle} · {study.tier}
+            {study.ownerName} · {study.tier} Tier
           </p>
         </div>
       </Link>
@@ -211,41 +157,43 @@ function StudyCard({ study }: { study: (typeof studies)[number] }) {
         className="block rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-secondary-container"
         href={`/study/${study.id}/overview`}
       >
+        <p className="mb-5 line-clamp-2 min-h-10 text-body-sm text-on-surface-variant">
+          {study.description}
+        </p>
         <div>
           <div className="mb-1.5 flex justify-between text-xs">
-            <span className="font-semibold text-on-surface">
-              Curriculum Progress
-            </span>
-            <span className="text-secondary">{study.progress}</span>
+            <span className="font-semibold text-on-surface">Study Score</span>
+            <span className="text-secondary">{study.progressLabel}</span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-container">
             <div
-              className={`h-full rounded-full bg-secondary ${study.progressClass}`}
+              className="h-full rounded-full bg-secondary"
+              style={{ width: `${study.progress}%` }}
             />
           </div>
         </div>
         <div className="flex items-center justify-between gap-3 pt-2">
           <span className="text-xs font-medium text-on-surface-variant">
-            {study.members}
+            {study.memberCount.toLocaleString()} Members
           </span>
-          <span className={`text-xs font-medium ${study.statusClass}`}>
-            {study.status}
+          <span className="text-xs font-medium text-secondary">
+            {study.score.toLocaleString()} XP
           </span>
         </div>
       </Link>
       <div className="mt-6 flex gap-2 border-t border-slate-50 pt-6">
         <Link
           href={`/study/${study.id}/overview`}
-          className="flex-1 rounded-lg bg-primary py-2 text-body-sm font-semibold text-on-primary transition-all hover:opacity-90"
+          className="flex-1 rounded-lg bg-primary py-2 text-center text-body-sm font-semibold text-on-primary transition-all hover:opacity-90"
         >
           Enter Room
         </Link>
-        <button
+        <Link
           className="rounded-lg bg-surface-container-low px-3 py-2 text-primary transition-all hover:bg-surface-container"
-          type="button"
+          href={`/study/${study.id}/members`}
         >
-          More
-        </button>
+          Members
+        </Link>
       </div>
     </article>
   );
@@ -265,6 +213,22 @@ function TierThumbnail({ tier }: { tier: StudyTier }) {
   );
 }
 
+function EmptyStudyCard({ isSignedIn }: { isSignedIn: boolean }) {
+  return (
+    <div className="app-card flex min-h-[282px] flex-col justify-center p-6">
+      <p className="text-label-caps text-slate-400">No Studies</p>
+      <h3 className="mt-2 text-base font-bold text-primary">
+        {isSignedIn ? "참여 중인 스터디가 없습니다." : "로그인이 필요합니다."}
+      </h3>
+      <p className="mt-2 text-body-sm leading-relaxed text-on-surface-variant">
+        {isSignedIn
+          ? "새 스터디를 만들면 이곳에서 바로 확인할 수 있습니다."
+          : "스터디를 만들거나 참여하려면 먼저 GitHub로 로그인해주세요."}
+      </p>
+    </div>
+  );
+}
+
 function FindStudyCard() {
   return (
     <button
@@ -280,4 +244,41 @@ function FindStudyCard() {
       </p>
     </button>
   );
+}
+
+function getStudyTier(score: number): StudyTier {
+  return (
+    tierThresholds.find((threshold) => score >= threshold.minScore)?.tier ??
+    "Bronze"
+  );
+}
+
+function getTierProgress(score: number, tier: StudyTier) {
+  const currentTierIndex = tierThresholds.findIndex(
+    (threshold) => threshold.tier === tier,
+  );
+  const currentThreshold = tierThresholds[currentTierIndex];
+  const nextThreshold = tierThresholds[currentTierIndex - 1];
+
+  if (!currentThreshold || !nextThreshold) {
+    return 100;
+  }
+
+  const currentTierScore = score - currentThreshold.minScore;
+  const nextTierScore = nextThreshold.minScore - currentThreshold.minScore;
+
+  return Math.max(0, Math.min((currentTierScore / nextTierScore) * 100, 100));
+}
+
+function getProgressLabel(score: number, tier: StudyTier) {
+  const currentTierIndex = tierThresholds.findIndex(
+    (threshold) => threshold.tier === tier,
+  );
+  const nextThreshold = tierThresholds[currentTierIndex - 1];
+
+  if (!nextThreshold) {
+    return "Max tier";
+  }
+
+  return `${score.toLocaleString()} / ${nextThreshold.minScore.toLocaleString()} XP`;
 }

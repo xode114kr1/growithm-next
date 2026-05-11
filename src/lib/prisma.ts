@@ -27,6 +27,9 @@ function isCurrentPrismaClient(prismaClient: PrismaClient) {
   return (
     "gitHubRepositoryWebhook" in prismaClient &&
     "problemSubmission" in prismaClient &&
+    "study" in prismaClient &&
+    "studyMember" in prismaClient &&
+    "studyProblemShare" in prismaClient &&
     "webhookDelivery" in prismaClient
   );
 }
