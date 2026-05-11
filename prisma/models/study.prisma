@@ -14,39 +14,3 @@ model Study {
   @@index([ownerId])
   @@map("studies")
 }
-
-model StudyMember {
-  id        String   @id @default(cuid())
-  studyId   String   @map("study_id")
-  userId    String   @map("user_id")
-  joinedAt  DateTime @default(now()) @map("joined_at")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  study Study @relation(fields: [studyId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([studyId, userId])
-  @@index([userId])
-  @@map("study_members")
-}
-
-model StudyProblemShare {
-  id                  String   @id @default(cuid())
-  studyId             String   @map("study_id")
-  userId              String   @map("user_id")
-  problemSubmissionId String   @map("problem_submission_id")
-  score               Float    @default(0)
-  sharedAt            DateTime @default(now()) @map("shared_at")
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
-
-  study             Study             @relation(fields: [studyId], references: [id], onDelete: Cascade)
-  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  problemSubmission ProblemSubmission @relation(fields: [problemSubmissionId], references: [id], onDelete: Cascade)
-
-  @@unique([studyId, problemSubmissionId])
-  @@index([userId])
-  @@index([problemSubmissionId])
-  @@map("study_problem_shares")
-}
