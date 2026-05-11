@@ -6,6 +6,7 @@ import {
   cancelStudyInvite,
   createStudyInvite,
   type CreateStudyInviteActionState,
+  updateStudyMemberRole,
 } from "@/app/(app)/study/[studyId]/owner/actions";
 
 type Invite = {
@@ -16,6 +17,7 @@ type Invite = {
 
 type Member = {
   contribution: number;
+  id: string;
   isCurrentUser: boolean;
   joinedAt: string;
   lastActive: string;
@@ -47,7 +49,7 @@ export default function OwnerConsole({
   return (
     <div className="space-y-10">
       <InviteMembersCard initialInvites={initialInvites} studyId={study.id} />
-      <ManageMembersCard members={members} />
+      <ManageMembersCard members={members} studyId={study.id} />
       <StudySettingsCard study={study} />
       <DangerZoneCard studyName={study.name} />
     </div>
@@ -159,7 +161,13 @@ function InviteMembersCard({
   );
 }
 
-function ManageMembersCard({ members }: { members: Member[] }) {
+function ManageMembersCard({
+  members,
+  studyId,
+}: {
+  members: Member[];
+  studyId: string;
+}) {
   return (
     <section className="app-card p-6">
       <div className="mb-6 flex flex-col justify-between gap-2 border-b border-slate-100 pb-4 sm:flex-row sm:items-end">
@@ -207,15 +215,27 @@ function ManageMembersCard({ members }: { members: Member[] }) {
                   {member.contribution.toLocaleString()} XP
                 </td>
                 <td className="px-6 py-4">
-                  <select
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-body-sm outline-none disabled:bg-slate-100 disabled:text-slate-400"
-                    defaultValue={member.role}
-                    disabled={member.role === "OWNER"}
-                  >
-                    <option>OWNER</option>
-                    <option>LEADER</option>
-                    <option>MEMBER</option>
-                  </select>
+                  {member.role === "OWNER" ? (
+                    <span className="rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-body-sm font-semibold text-slate-400">
+                      OWNER
+                    </span>
+                  ) : (
+                    <form action={updateStudyMemberRole} className="flex gap-2">
+                      <input name="studyId" type="hidden" value={studyId} />
+                      <input name="memberId" type="hidden" value={member.id} />
+                      <select
+                        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-body-sm outline-none"
+                        defaultValue={member.role}
+                        name="role"
+                      >
+                        <option>LEADER</option>
+                        <option>MEMBER</option>
+                      </select>
+                      <button className="btn-secondary min-h-10 px-3" type="submit">
+                        저장
+                      </button>
+                    </form>
+                  )}
                 </td>
                 <td className="px-6 py-4 text-body-sm text-slate-500">{member.joinedAt}</td>
                 <td className="px-6 py-4">

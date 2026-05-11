@@ -14,6 +14,7 @@ type OwnerStudy = {
 
 type OwnerMember = {
   contribution: number;
+  id: string;
   isCurrentUser: boolean;
   joinedAt: string;
   lastActive: string;
@@ -133,11 +134,12 @@ async function getStudyOwnerData(studyId: string): Promise<{
 
     return {
       contribution: shares.reduce((total, share) => total + share.score, 0),
+      id: member.id,
       isCurrentUser: member.userId === userId,
       joinedAt: formatDate(member.joinedAt),
       lastActive: formatDate(lastSharedAt ?? member.joinedAt),
       name: getUserDisplayName(member.user.name),
-      role: member.userId === study.ownerId ? "OWNER" : "MEMBER",
+      role: member.userId === study.ownerId ? "OWNER" : member.role,
     };
   });
 
@@ -146,6 +148,7 @@ async function getStudyOwnerData(studyId: string): Promise<{
       contribution: study.problemShares
         .filter((share) => share.userId === study.ownerId)
         .reduce((total, share) => total + share.score, 0),
+      id: study.ownerId,
       isCurrentUser: study.ownerId === userId,
       joinedAt: formatDate(study.createdAt),
       lastActive: formatDate(study.createdAt),

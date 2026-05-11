@@ -158,6 +158,49 @@ export async function cancelStudyInvite(formData: FormData) {
   revalidatePath(`/study/${studyId}/owner`);
 }
 
+export async function updateStudyMemberRole(formData: FormData) {
+  const session = await auth();
+  const userId = session?.user?.id;
+  const studyId = getFormValue(formData, "studyId");
+  const memberId = getFormValue(formData, "memberId");
+  const role = getFormValue(formData, "role");
+
+  if (!userId || !studyId || !memberId || !isEditableMemberRole(role)) {
+    return;
+  }
+
+  const study = await prisma.study.findFirst({
+    select: {
+      ownerId: true,
+    },
+    where: {
+      id: studyId,
+      ownerId: userId,
+    },
+  });
+
+  if (!study) {
+    return;
+  }
+
+  await prisma.studyMember.updateMany({
+    data: {
+      role,
+    },
+    where: {
+      id: memberId,
+      studyId,
+      userId: {
+        not: study.ownerId,
+      },
+    },
+  });
+
+  revalidatePath(`/study/${studyId}/owner`);
+  revalidatePath(`/study/${studyId}/members`);
+  revalidatePath(`/study/${studyId}/overview`);
+}
+
 function createInviteErrorState(target: string, error: string): CreateStudyInviteActionState {
   return {
     error,
@@ -170,4 +213,8 @@ function getFormValue(formData: FormData, key: string) {
   const value = formData.get(key);
 
   return typeof value === "string" ? value : "";
+}
+
+function isEditableMemberRole(role: string): role is "LEADER" | "MEMBER" {
+  return role === "LEADER" || role === "MEMBER";
 }

@@ -49,6 +49,7 @@ export async function createStudy(
         description: description || null,
         members: {
           create: {
+            role: "OWNER",
             user: {
               connect: {
                 id: userId,
