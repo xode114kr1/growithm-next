@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
@@ -325,6 +326,41 @@ export async function updateStudySettings(
     status: "success",
     title,
   };
+}
+
+export async function deleteStudy(formData: FormData) {
+  const session = await auth();
+  const userId = session?.user?.id;
+  const studyId = getFormValue(formData, "studyId");
+  const confirmText = getFormValue(formData, "confirmText");
+
+  if (!userId || !studyId || !confirmText) {
+    return;
+  }
+
+  const study = await prisma.study.findFirst({
+    select: {
+      id: true,
+      title: true,
+    },
+    where: {
+      id: studyId,
+      ownerId: userId,
+    },
+  });
+
+  if (!study || confirmText !== study.title) {
+    return;
+  }
+
+  await prisma.study.delete({
+    where: {
+      id: study.id,
+    },
+  });
+
+  revalidatePath("/study");
+  redirect("/study");
 }
 
 function createInviteErrorState(target: string, error: string): CreateStudyInviteActionState {

@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 import {
   cancelStudyInvite,
   createStudyInvite,
+  deleteStudy,
   removeStudyMember,
   type CreateStudyInviteActionState,
   type UpdateStudySettingsActionState,
@@ -61,7 +62,7 @@ export default function OwnerConsole({
       <InviteMembersCard initialInvites={initialInvites} studyId={study.id} />
       <ManageMembersCard members={members} studyId={study.id} />
       <StudySettingsCard study={study} />
-      <DangerZoneCard studyName={study.name} />
+      <DangerZoneCard studyId={study.id} studyName={study.name} />
     </div>
   );
 }
@@ -332,12 +333,22 @@ function StudySettingsCard({ study }: { study: Study }) {
   );
 }
 
-function DangerZoneCard({ studyName }: { studyName: string }) {
+function DangerZoneCard({
+  studyId,
+  studyName,
+}: {
+  studyId: string;
+  studyName: string;
+}) {
   const [confirmText, setConfirmText] = useState("");
   const canDelete = confirmText === studyName;
 
   return (
-    <section className="rounded-xl border border-error-container bg-error-container/20 p-6 shadow-sm">
+    <form
+      action={deleteStudy}
+      className="rounded-xl border border-error-container bg-error-container/20 p-6 shadow-sm"
+    >
+      <input name="studyId" type="hidden" value={studyId} />
       <div className="mb-6">
         <p className="text-label-caps text-error">Danger Zone</p>
         <h2 className="section-title text-error">스터디 삭제</h2>
@@ -353,6 +364,7 @@ function DangerZoneCard({ studyName }: { studyName: string }) {
           </span>
           <input
             className="w-full border-none bg-transparent p-0 font-mono text-body-sm text-error outline-none placeholder:text-slate-300 focus:ring-0"
+            name="confirmText"
             onChange={(event) => setConfirmText(event.target.value)}
             placeholder="Type here..."
             type="text"
@@ -362,12 +374,12 @@ function DangerZoneCard({ studyName }: { studyName: string }) {
         <button
           className="rounded-lg bg-error px-4 py-3 text-body-sm font-bold text-on-error transition-opacity enabled:hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           disabled={!canDelete}
-          type="button"
+          type="submit"
         >
           스터디 삭제
         </button>
       </div>
-    </section>
+    </form>
   );
 }
 
