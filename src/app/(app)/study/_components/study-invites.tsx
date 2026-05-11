@@ -1,91 +1,145 @@
-import Image from "next/image";
+import {
+  acceptStudyInvite,
+  declineStudyInvite,
+} from "@/app/(app)/study/actions";
+import { auth } from "@/lib/auth/auth";
+import { prisma } from "@/lib/prisma";
 
-const activities = [
-  {
-    avatar:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAPt1TWg6k8TvvhzTif9sfOEfjm9_ZP0xlljD1pu580BSFCSFGKIOmlxSL_GFBMr9a7czkgo4_GKqbBh-OtRpevEJGU1tlgH82dwUBl314g2QPZMVcw5Ro72uDHddpnp2ndAKsOhjQTlBJZCpwyQcY00ONHQnEnq1fzKrFCGM6kQD7fscfDhwS3ARWwQVCKARH_v4oH1ce4FBilShkFerGP6zYcYafR2FSjf-m8JECR9bD3zhT044EJWNiddyuQZlUor2I2m1t4wMU",
-    name: "David Kim",
-    primaryAction: "Accept",
-    secondaryAction: "Decline",
-    study: "System Design Lab",
-    time: "2 hours ago",
-    type: "invited you to",
-  },
-  {
-    initials: "SM",
-    name: "Sarah Miller",
-    primaryAction: "Review",
-    secondaryAction: "Dismiss",
-    study: "FAANG Interview Prep",
-    time: "Yesterday",
-    type: "requested to join",
-  },
-];
+type StudyInviteItem = {
+  id: string;
+  invitedByName: string;
+  studyTitle: string;
+  timeLabel: string;
+};
 
-export default function StudyInvites() {
+export default async function StudyInvites() {
+  const session = await auth();
+  const userId = session?.user?.id;
+  const invites = userId ? await getPendingInvites(userId) : [];
+
   return (
     <section className="app-card flex h-[min(520px,calc(100vh-9rem))] flex-col overflow-hidden">
       <div className="flex shrink-0 items-center justify-between border-b border-slate-50 p-6">
         <h2 className="section-title">Invites & Requests</h2>
-        <span className="rounded-full bg-error px-1.5 py-0.5 text-[10px] font-bold text-white">
-          2
-        </span>
+        {invites.length > 0 ? (
+          <span className="rounded-full bg-error px-1.5 py-0.5 text-[10px] font-bold text-white">
+            {invites.length}
+          </span>
+        ) : null}
       </div>
       <div className="flex-1 divide-y divide-slate-50 overflow-y-auto">
-        {activities.map((activity) => (
-          <article className="p-4 transition-all hover:bg-slate-50" key={activity.name}>
-            <div className="mb-3 flex gap-3">
-              {activity.avatar ? (
-                <Image
-                  alt={`${activity.name} avatar`}
-                  className="size-10 rounded-full object-cover"
-                  height={40}
-                  src={activity.avatar}
-                  width={40}
-                />
-              ) : (
-                <div className="flex size-10 items-center justify-center rounded-full bg-primary-fixed font-bold text-primary">
-                  {activity.initials}
-                </div>
-              )}
-              <div className="flex-1">
-                <p className="text-body-sm">
-                  <span className="font-bold text-on-surface">
-                    {activity.name}
-                  </span>{" "}
-                  {activity.type}{" "}
-                  <span className="font-semibold text-primary">
-                    {activity.study}
-                  </span>
-                </p>
-                <span className="text-[10px] uppercase tracking-wider text-outline">
-                  {activity.time}
-                </span>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <button
-                className="flex-1 rounded-md bg-primary py-1.5 text-xs font-bold text-on-primary transition-all hover:opacity-90"
-                type="button"
-              >
-                {activity.primaryAction}
-              </button>
-              <button
-                className="flex-1 rounded-md bg-surface-container py-1.5 text-xs font-bold text-on-surface-variant transition-all hover:bg-outline-variant/20"
-                type="button"
-              >
-                {activity.secondaryAction}
-              </button>
-            </div>
-          </article>
+        {invites.map((invite) => (
+          <InviteCard invite={invite} key={invite.id} />
         ))}
+        {invites.length === 0 ? (
+          <div className="p-6 text-center text-body-sm text-slate-500">
+            대기 중인 초대가 없습니다.
+          </div>
+        ) : null}
       </div>
-      <button
-        className="w-full shrink-0 bg-slate-50/50 py-3 text-xs font-bold text-outline transition-all hover:text-primary"
-        type="button"
-      >
-        View All Activity
-      </button>
     </section>
   );
+}
+
+async function getPendingInvites(userId: string): Promise<StudyInviteItem[]> {
+  const invites = await prisma.studyInvite.findMany({
+    include: {
+      invitedBy: {
+        select: {
+          name: true,
+        },
+      },
+      study: {
+        select: {
+          title: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    where: {
+      expiresAt: {
+        gt: new Date(),
+      },
+      status: "PENDING",
+      targetUserId: userId,
+    },
+  });
+
+  return invites.map((invite) => ({
+    id: invite.id,
+    invitedByName: getUserDisplayName(invite.invitedBy.name),
+    studyTitle: invite.study.title,
+    timeLabel: formatRelativeDate(invite.createdAt),
+  }));
+}
+
+function InviteCard({ invite }: { invite: StudyInviteItem }) {
+  return (
+    <article className="p-4 transition-all hover:bg-slate-50">
+      <div className="mb-3 flex gap-3">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-fixed font-bold text-primary">
+          {invite.invitedByName[0]?.toUpperCase()}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-body-sm">
+            <span className="font-bold text-on-surface">
+              {invite.invitedByName}
+            </span>{" "}
+            invited you to{" "}
+            <span className="font-semibold text-primary">
+              {invite.studyTitle}
+            </span>
+          </p>
+          <span className="text-[10px] uppercase tracking-wider text-outline">
+            {invite.timeLabel}
+          </span>
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <form action={acceptStudyInvite} className="flex-1">
+          <input name="inviteId" type="hidden" value={invite.id} />
+          <button
+            className="w-full rounded-md bg-primary py-1.5 text-xs font-bold text-on-primary transition-all hover:opacity-90"
+            type="submit"
+          >
+            Accept
+          </button>
+        </form>
+        <form action={declineStudyInvite} className="flex-1">
+          <input name="inviteId" type="hidden" value={invite.id} />
+          <button
+            className="w-full rounded-md bg-surface-container py-1.5 text-xs font-bold text-on-surface-variant transition-all hover:bg-outline-variant/20"
+            type="submit"
+          >
+            Decline
+          </button>
+        </form>
+      </div>
+    </article>
+  );
+}
+
+function formatRelativeDate(date: Date) {
+  const diffMs = Date.now() - date.getTime();
+  const diffMinutes = Math.max(1, Math.floor(diffMs / 60_000));
+
+  if (diffMinutes < 60) {
+    return `${diffMinutes} minutes ago`;
+  }
+
+  const diffHours = Math.floor(diffMinutes / 60);
+
+  if (diffHours < 24) {
+    return `${diffHours} hours ago`;
+  }
+
+  const diffDays = Math.floor(diffHours / 24);
+
+  return `${diffDays} days ago`;
+}
+
+function getUserDisplayName(name: string | null) {
+  return name || "Unknown";
 }
