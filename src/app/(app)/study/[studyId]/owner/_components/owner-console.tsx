@@ -19,7 +19,6 @@ type Member = {
 
 type Study = {
   description: string;
-  inviteLink: string;
   name: string;
 };
 
@@ -34,7 +33,7 @@ export default function OwnerConsole({
 }) {
   return (
     <div className="space-y-10">
-      <InviteMembersCard initialInvites={initialInvites} inviteLink={study.inviteLink} />
+      <InviteMembersCard initialInvites={initialInvites} />
       <ManageMembersCard members={members} />
       <StudySettingsCard study={study} />
       <DangerZoneCard studyName={study.name} />
@@ -44,12 +43,9 @@ export default function OwnerConsole({
 
 function InviteMembersCard({
   initialInvites,
-  inviteLink,
 }: {
   initialInvites: Invite[];
-  inviteLink: string;
 }) {
-  const [copied, setCopied] = useState(false);
   const [inviteTarget, setInviteTarget] = useState("");
   const [invites, setInvites] = useState(initialInvites);
 
@@ -71,12 +67,6 @@ function InviteMembersCard({
     setInviteTarget("");
   }
 
-  async function handleCopy() {
-    await navigator.clipboard.writeText(inviteLink);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1600);
-  }
-
   return (
     <section className="app-card p-6">
       <div className="mb-6 flex flex-col justify-between gap-2 border-b border-slate-100 pb-4 sm:flex-row sm:items-end">
@@ -92,7 +82,7 @@ function InviteMembersCard({
       </div>
 
       <div className="grid grid-cols-1 gap-gutter lg:grid-cols-2">
-        <div className="space-y-6">
+        <div>
           <label className="block">
             <span className="mb-2 block text-label-caps text-slate-500">
               Username / Email
@@ -107,20 +97,6 @@ function InviteMembersCard({
               />
               <button className="btn-primary shrink-0" onClick={handleInvite} type="button">
                 초대
-              </button>
-            </div>
-          </label>
-
-          <label className="block">
-            <span className="mb-2 block text-label-caps text-slate-500">
-              공유 초대 링크
-            </span>
-            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 p-1 pl-4">
-              <code className="min-w-0 flex-1 truncate font-mono text-sm text-slate-600">
-                {inviteLink}
-              </code>
-              <button className="btn-secondary min-h-10 px-3" onClick={handleCopy} type="button">
-                {copied ? "복사됨" : "복사"}
               </button>
             </div>
           </label>
