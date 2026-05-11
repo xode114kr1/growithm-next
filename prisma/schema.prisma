@@ -69,8 +69,64 @@ model User {
   sessions                 Session[]
   githubRepositoryWebhooks GitHubRepositoryWebhook[]
   problemSubmissions       ProblemSubmission[]
+  ownedStudies             Study[]                   @relation("StudyOwner")
+  studyMemberships         StudyMember[]
+  studyProblemShares       StudyProblemShare[]
 
   @@map("users")
+}
+
+model Study {
+  id          String   @id @default(cuid())
+  ownerId     String   @map("owner_id")
+  title       String
+  description String?  @db.Text
+  score       Float    @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  owner         User                @relation("StudyOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members       StudyMember[]
+  problemShares StudyProblemShare[]
+
+  @@index([ownerId])
+  @@map("studies")
+}
+
+model StudyMember {
+  id        String   @id @default(cuid())
+  studyId   String   @map("study_id")
+  userId    String   @map("user_id")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  study Study @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([studyId, userId])
+  @@index([userId])
+  @@map("study_members")
+}
+
+model StudyProblemShare {
+  id                  String   @id @default(cuid())
+  studyId             String   @map("study_id")
+  userId              String   @map("user_id")
+  problemSubmissionId String   @map("problem_submission_id")
+  score               Float    @default(0)
+  sharedAt            DateTime @default(now()) @map("shared_at")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  study             Study             @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problemSubmission ProblemSubmission @relation(fields: [problemSubmissionId], references: [id], onDelete: Cascade)
+
+  @@unique([studyId, problemSubmissionId])
+  @@index([userId])
+  @@index([problemSubmissionId])
+  @@map("study_problem_shares")
 }
 
 model GitHubRepositoryWebhook {
@@ -131,8 +187,9 @@ model ProblemSubmission {
   createdAt          DateTime        @default(now()) @map("created_at")
   updatedAt          DateTime        @updatedAt @map("updated_at")
 
-  user            User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
-  webhookDelivery WebhookDelivery? @relation(fields: [webhookDeliveryId], references: [id], onDelete: SetNull)
+  user            User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  webhookDelivery WebhookDelivery?    @relation(fields: [webhookDeliveryId], references: [id], onDelete: SetNull)
+  studyShares     StudyProblemShare[]
 
   @@unique([repositoryFullName, commitSha, readmePath])
   @@index([userId])
