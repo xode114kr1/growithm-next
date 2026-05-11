@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 import {
   cancelStudyInvite,
   createStudyInvite,
+  removeStudyMember,
   type CreateStudyInviteActionState,
   updateStudyMemberRole,
 } from "@/app/(app)/study/[studyId]/owner/actions";
@@ -242,12 +243,16 @@ function ManageMembersCard({
                   {member.role === "OWNER" ? (
                     <span className="text-xs italic text-slate-300">No Action</span>
                   ) : (
-                    <button
-                      className="rounded-lg bg-error-container px-4 py-2 text-body-sm font-semibold text-error transition-opacity hover:opacity-80"
-                      type="button"
-                    >
-                      내보내기
-                    </button>
+                    <form action={removeStudyMember}>
+                      <input name="studyId" type="hidden" value={studyId} />
+                      <input name="memberId" type="hidden" value={member.id} />
+                      <button
+                        className="rounded-lg bg-error-container px-4 py-2 text-body-sm font-semibold text-error transition-opacity hover:opacity-80"
+                        type="submit"
+                      >
+                        내보내기
+                      </button>
+                    </form>
                   )}
                 </td>
               </tr>

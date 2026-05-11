@@ -201,6 +201,45 @@ export async function updateStudyMemberRole(formData: FormData) {
   revalidatePath(`/study/${studyId}/overview`);
 }
 
+export async function removeStudyMember(formData: FormData) {
+  const session = await auth();
+  const userId = session?.user?.id;
+  const studyId = getFormValue(formData, "studyId");
+  const memberId = getFormValue(formData, "memberId");
+
+  if (!userId || !studyId || !memberId) {
+    return;
+  }
+
+  const study = await prisma.study.findFirst({
+    select: {
+      ownerId: true,
+    },
+    where: {
+      id: studyId,
+      ownerId: userId,
+    },
+  });
+
+  if (!study) {
+    return;
+  }
+
+  await prisma.studyMember.deleteMany({
+    where: {
+      id: memberId,
+      studyId,
+      userId: {
+        not: study.ownerId,
+      },
+    },
+  });
+
+  revalidatePath(`/study/${studyId}/owner`);
+  revalidatePath(`/study/${studyId}/members`);
+  revalidatePath(`/study/${studyId}/overview`);
+}
+
 function createInviteErrorState(target: string, error: string): CreateStudyInviteActionState {
   return {
     error,
