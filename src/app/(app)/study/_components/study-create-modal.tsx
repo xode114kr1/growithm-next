@@ -44,12 +44,12 @@ export default function StudyCreateModal() {
   }, [isOpen]);
 
   useEffect(() => {
-    if (state.status !== "success") {
+    if (state.status !== "success" || !state.studyId) {
       return;
     }
 
-    router.refresh();
-  }, [router, state.status]);
+    router.push(`/study/${state.studyId}/overview`);
+  }, [router, state.status, state.studyId]);
 
   return (
     <>

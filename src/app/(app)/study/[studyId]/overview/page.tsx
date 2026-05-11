@@ -1,6 +1,12 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
+
 import StudyLocalNav from "@/app/(app)/study/[studyId]/_components/study-local-nav";
 import ContributionChart from "@/app/(app)/study/[studyId]/overview/_components/contribution-chart";
+import { auth } from "@/lib/auth/auth";
+import { prisma } from "@/lib/prisma";
+
+type StudyTier = "Bronze" | "Silver" | "Gold" | "Platinum" | "Diamond" | "Ruby";
 
 type Study = {
   contribution: Array<{ name: string; score: number }>;
@@ -17,94 +23,21 @@ type Study = {
     title: string;
   }>;
   score: number;
-  tier: "Bronze" | "Silver" | "Gold" | "Platinum" | "Diamond" | "Ruby";
+  tier: StudyTier;
   totalSolved: number;
   weeklySolved: number;
 };
 
-const study: Study = {
-  contribution: [
-    { name: "xode114kr1", score: 74033 },
-    { name: "helppy", score: 0 },
-  ],
-  description: "스터디원들과 함께 풀이 기록을 쌓고 복습하는 알고리즘 스터디",
-  id: "study-1",
-  memberCount: 2,
-  members: [
-    { name: "helppy", role: "owner" },
-    { name: "xode114kr1", role: "member" },
-  ],
-  name: "Algorithm Sprint",
-  nextTierScore: 112499,
-  recentProblems: [
-    {
-      platform: "Programmers",
-      solvedBy: "xode114kr1",
-      tier: "Level 3",
-      title: "정수 삼각형",
-    },
-    {
-      platform: "Programmers",
-      solvedBy: "xode114kr1",
-      tier: "Level 2",
-      title: "쿼드압축 후 개수 세기",
-    },
-    {
-      platform: "Programmers",
-      solvedBy: "xode114kr1",
-      tier: "Level 2",
-      title: "호텔 대실",
-    },
-    {
-      platform: "Programmers",
-      solvedBy: "xode114kr1",
-      tier: "Level 2",
-      title: "미로 탈출",
-    },
-    {
-      platform: "Programmers",
-      solvedBy: "helppy",
-      tier: "Level 2",
-      title: "혼자서 하는 틱택토",
-    },
-    {
-      platform: "Programmers",
-      solvedBy: "xode114kr1",
-      tier: "Level 2",
-      title: "당구 연습",
-    },
-    {
-      platform: "Programmers",
-      solvedBy: "xode114kr1",
-      tier: "Level 2",
-      title: "리코쳇 로봇",
-    },
-    {
-      platform: "Programmers",
-      solvedBy: "helppy",
-      tier: "Level 2",
-      title: "광물 캐기",
-    },
-    {
-      platform: "Programmers",
-      solvedBy: "xode114kr1",
-      tier: "Level 2",
-      title: "거리두기 확인하기",
-    },
-    {
-      platform: "Programmers",
-      solvedBy: "xode114kr1",
-      tier: "Level 2",
-      title: "양궁대회",
-    },
-  ],
-  score: 74033,
-  tier: "Silver",
-  totalSolved: 69,
-  weeklySolved: 0,
-};
+const tierThresholds = [
+  { minScore: 3000, tier: "Ruby" },
+  { minScore: 1500, tier: "Diamond" },
+  { minScore: 700, tier: "Platinum" },
+  { minScore: 300, tier: "Gold" },
+  { minScore: 100, tier: "Silver" },
+  { minScore: 0, tier: "Bronze" },
+] satisfies Array<{ minScore: number; tier: StudyTier }>;
 
-const tierStyles: Record<Study["tier"], string> = {
+const tierStyles: Record<StudyTier, string> = {
   Bronze: "border-amber-700/20 bg-amber-700 text-white",
   Silver: "border-slate-300 bg-slate-200 text-slate-700",
   Gold: "border-yellow-400/40 bg-yellow-400 text-yellow-950",
@@ -119,6 +52,11 @@ export default async function StudyOverviewPage({
   params: Promise<{ studyId: string }>;
 }) {
   const { studyId } = await params;
+  const study = await getStudyOverview(studyId);
+
+  if (!study) {
+    notFound();
+  }
 
   return (
     <main className="page-shell">
@@ -145,6 +83,114 @@ export default async function StudyOverviewPage({
   );
 }
 
+async function getStudyOverview(studyId: string): Promise<Study | null> {
+  const session = await auth();
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    return null;
+  }
+
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+  const study = await prisma.study.findFirst({
+    include: {
+      members: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          joinedAt: "asc",
+        },
+      },
+      owner: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      problemShares: {
+        include: {
+          problemSubmission: {
+            select: {
+              platform: true,
+              tier: true,
+              title: true,
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          sharedAt: "desc",
+        },
+        take: 10,
+      },
+    },
+    where: {
+      id: studyId,
+      OR: [
+        {
+          ownerId: userId,
+        },
+        {
+          members: {
+            some: {
+              userId,
+            },
+          },
+        },
+      ],
+    },
+  });
+
+  if (!study) {
+    return null;
+  }
+
+  const tier = getStudyTier(study.score);
+  const contribution = study.members.map((member) => ({
+    name: getUserDisplayName(member.user.name),
+    score: study.problemShares
+      .filter((share) => share.userId === member.userId)
+      .reduce((total, share) => total + share.score, 0),
+  }));
+
+  return {
+    contribution,
+    description: study.description ?? "아직 스터디 설명이 없습니다.",
+    id: study.id,
+    memberCount: study.members.length,
+    members: study.members.map((member) => ({
+      name: getUserDisplayName(member.user.name),
+      role: member.userId === study.ownerId ? "owner" : "member",
+    })),
+    name: study.title,
+    nextTierScore: getNextTierScore(tier),
+    recentProblems: study.problemShares.map((share) => ({
+      platform: share.problemSubmission.platform,
+      solvedBy: getUserDisplayName(share.user.name),
+      tier: share.problemSubmission.tier ?? "-",
+      title: share.problemSubmission.title,
+    })),
+    score: study.score,
+    tier,
+    totalSolved: study.problemShares.length,
+    weeklySolved: study.problemShares.filter((share) => share.sharedAt >= oneWeekAgo)
+      .length,
+  };
+}
+
 function StudyOverviewHeader({ study }: { study: Study }) {
   return (
     <header className="border-b border-outline-variant/40 pb-8">
@@ -162,9 +208,7 @@ function StudyOverviewHeader({ study }: { study: Study }) {
       </div>
       <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
-          <h1 className="page-title text-primary">
-            {study.name} Overview
-          </h1>
+          <h1 className="page-title text-primary">{study.name} Overview</h1>
           <p className="mt-2 max-w-2xl text-body-md text-on-surface-variant">
             {study.description}
           </p>
@@ -285,7 +329,7 @@ function StudyMembersCard({ members }: { members: Study["members"] }) {
                 ? "flex items-center justify-between rounded-lg bg-surface-container-low p-3 ring-1 ring-secondary/10"
                 : "flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-slate-50"
             }
-            key={member.name}
+            key={`${member.role}-${member.name}`}
           >
             <div className="flex min-w-0 items-center gap-3">
               <div
@@ -314,12 +358,6 @@ function StudyMembersCard({ members }: { members: Study["members"] }) {
           </div>
         ))}
       </div>
-      <button
-        className="mt-6 w-full rounded-lg border border-slate-200 py-2 text-body-sm font-semibold text-slate-500 transition-colors hover:bg-slate-50 hover:text-primary"
-        type="button"
-      >
-        Invite Member
-      </button>
     </section>
   );
 }
@@ -346,41 +384,47 @@ function RecentSolvedProblems({
         </Link>
       </div>
       <div className="app-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/50">
-                <TableHead>Problem Title</TableHead>
-                <TableHead>Platform</TableHead>
-                <TableHead>Tier</TableHead>
-                <TableHead>Solved By</TableHead>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {problems.map((problem) => (
-                <tr
-                  className="transition-colors hover:bg-slate-50/80"
-                  key={`${problem.title}-${problem.solvedBy}`}
-                >
-                  <td className="min-w-[240px] px-6 py-4 text-body-sm font-semibold text-on-surface">
-                    {problem.title}
-                  </td>
-                  <td className="px-6 py-4 text-body-sm text-slate-500">
-                    {problem.platform}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="rounded border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold uppercase text-slate-600">
-                      {problem.tier}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-body-sm font-semibold text-secondary">
-                    {problem.solvedBy}
-                  </td>
+        {problems.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left">
+              <thead>
+                <tr className="border-b border-slate-100 bg-slate-50/50">
+                  <TableHead>Problem Title</TableHead>
+                  <TableHead>Platform</TableHead>
+                  <TableHead>Tier</TableHead>
+                  <TableHead>Solved By</TableHead>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {problems.map((problem) => (
+                  <tr
+                    className="transition-colors hover:bg-slate-50/80"
+                    key={`${problem.title}-${problem.solvedBy}`}
+                  >
+                    <td className="min-w-[240px] px-6 py-4 text-body-sm font-semibold text-on-surface">
+                      {problem.title}
+                    </td>
+                    <td className="px-6 py-4 text-body-sm text-slate-500">
+                      {problem.platform}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="rounded border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold uppercase text-slate-600">
+                        {problem.tier}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-body-sm font-semibold text-secondary">
+                      {problem.solvedBy}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="p-8 text-center text-body-sm text-slate-500">
+            아직 공유된 문제가 없습니다.
+          </div>
+        )}
       </div>
     </section>
   );
@@ -390,4 +434,24 @@ function TableHead({ children }: { children: React.ReactNode }) {
   return (
     <th className="px-6 py-4 text-label-caps text-slate-400">{children}</th>
   );
+}
+
+function getStudyTier(score: number): StudyTier {
+  return (
+    tierThresholds.find((threshold) => score >= threshold.minScore)?.tier ??
+    "Bronze"
+  );
+}
+
+function getNextTierScore(tier: StudyTier) {
+  const currentTierIndex = tierThresholds.findIndex(
+    (threshold) => threshold.tier === tier,
+  );
+  const nextThreshold = tierThresholds[currentTierIndex - 1];
+
+  return nextThreshold?.minScore ?? tierThresholds[0].minScore;
+}
+
+function getUserDisplayName(name: string | null) {
+  return name || "Unknown";
 }
