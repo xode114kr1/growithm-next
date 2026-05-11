@@ -37,6 +37,7 @@ export default async function StudyOwnerPage({
       <div className="workspace-container">
         <StudyLocalNav
           active="owner"
+          showOwner
           studyId={studyId}
           studyName={ownerData.study.name}
         />
@@ -96,18 +97,7 @@ async function getStudyOwnerData(studyId: string): Promise<{
     },
     where: {
       id: studyId,
-      OR: [
-        {
-          ownerId: userId,
-        },
-        {
-          members: {
-            some: {
-              userId,
-            },
-          },
-        },
-      ],
+      ownerId: userId,
     },
   });
 
