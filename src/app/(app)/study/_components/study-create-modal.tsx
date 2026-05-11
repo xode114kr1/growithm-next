@@ -1,11 +1,28 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect, useId, useState } from "react";
 
-const tierOptions = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Ruby"];
+import {
+  createStudy,
+  type CreateStudyActionState,
+} from "@/app/(app)/study/actions";
+
+const initialCreateStudyActionState: CreateStudyActionState = {
+  description: "",
+  error: null,
+  status: "idle",
+  studyId: null,
+  title: "",
+};
 
 export default function StudyCreateModal() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [state, formAction, isPending] = useActionState(
+    createStudy,
+    initialCreateStudyActionState,
+  );
   const titleId = useId();
 
   useEffect(() => {
@@ -25,6 +42,14 @@ export default function StudyCreateModal() {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (state.status !== "success") {
+      return;
+    }
+
+    router.refresh();
+  }, [router, state.status]);
 
   return (
     <>
@@ -71,39 +96,21 @@ export default function StudyCreateModal() {
               </div>
             </div>
 
-            <form className="space-y-6 px-6 py-6">
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <form action={formAction} className="space-y-6 px-6 py-6">
+              <div className="grid grid-cols-1 gap-5">
                 <label className="block md:col-span-2">
                   <span className="mb-2 block text-label-caps text-slate-500">
-                    Study Name
+                    Title
                   </span>
                   <input
+                    aria-invalid={state.status === "error" ? true : undefined}
                     className="input-field"
+                    defaultValue={state.status === "error" ? state.title : ""}
+                    maxLength={80}
+                    name="title"
                     placeholder="예: Algorithm Sprint"
+                    required
                     type="text"
-                  />
-                </label>
-
-                <label className="block">
-                  <span className="mb-2 block text-label-caps text-slate-500">
-                    Target Tier
-                  </span>
-                  <select className="input-field">
-                    {tierOptions.map((tier) => (
-                      <option key={tier}>{tier}</option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="block">
-                  <span className="mb-2 block text-label-caps text-slate-500">
-                    Max Members
-                  </span>
-                  <input
-                    className="input-field"
-                    min={2}
-                    type="number"
-                    defaultValue={8}
                   />
                 </label>
 
@@ -113,21 +120,39 @@ export default function StudyCreateModal() {
                   </span>
                   <textarea
                     className="min-h-28 w-full resize-y rounded-lg border border-slate-200 bg-white px-4 py-3 text-body-md text-on-surface outline-none transition-all placeholder:text-slate-300 focus:border-primary focus:ring-2 focus:ring-secondary-container/30"
+                    defaultValue={
+                      state.status === "error" ? state.description : ""
+                    }
+                    maxLength={500}
+                    name="description"
                     placeholder="스터디 목표, 진행 방식, 권장 풀이 주기를 적어주세요."
                   />
                 </label>
               </div>
 
+              {state.status === "error" ? (
+                <p className="rounded-lg bg-error/10 px-4 py-3 text-body-sm font-medium text-error">
+                  {state.error}
+                </p>
+              ) : null}
+
+              {state.status === "success" ? (
+                <p className="rounded-lg bg-secondary-container/60 px-4 py-3 text-body-sm font-medium text-primary">
+                  스터디를 생성했습니다.
+                </p>
+              ) : null}
+
               <div className="flex flex-col-reverse justify-end gap-2 border-t border-slate-100 pt-5 sm:flex-row">
                 <button
                   className="btn-secondary"
+                  disabled={isPending}
                   onClick={() => setIsOpen(false)}
                   type="button"
                 >
                   취소
                 </button>
-                <button className="btn-primary" type="button">
-                  스터디 생성
+                <button className="btn-primary" disabled={isPending} type="submit">
+                  {isPending ? "생성 중..." : "스터디 생성"}
                 </button>
               </div>
             </form>

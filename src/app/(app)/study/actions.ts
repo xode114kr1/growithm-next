@@ -16,14 +16,6 @@ export type CreateStudyActionState = {
   title: string;
 };
 
-export const initialCreateStudyActionState: CreateStudyActionState = {
-  description: "",
-  error: null,
-  status: "idle",
-  studyId: null,
-  title: "",
-};
-
 export async function createStudy(
   _prevState: CreateStudyActionState,
   formData: FormData,
