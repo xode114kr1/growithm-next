@@ -8,6 +8,7 @@ model Study {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   owner         User                @relation("StudyOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  invites       StudyInvite[]
   members       StudyMember[]
   problemShares StudyProblemShare[]
 

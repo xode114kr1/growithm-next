@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 
 type OwnerStudy = {
   description: string;
+  id: string;
   name: string;
 };
 
@@ -94,6 +95,19 @@ async function getStudyOwnerData(studyId: string): Promise<{
           userId: true,
         },
       },
+      invites: {
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          id: true,
+          status: true,
+          target: true,
+        },
+        where: {
+          status: "PENDING",
+        },
+      },
     },
     where: {
       id: studyId,
@@ -142,9 +156,14 @@ async function getStudyOwnerData(studyId: string): Promise<{
 
   return {
     members,
-    pendingInvites: [],
+    pendingInvites: study.invites.map((invite) => ({
+      id: invite.id,
+      status: "Pending",
+      target: invite.target,
+    })),
     study: {
       description: study.description ?? "아직 스터디 설명이 없습니다.",
+      id: study.id,
       name: study.title,
     },
   };
