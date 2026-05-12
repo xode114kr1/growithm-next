@@ -134,6 +134,7 @@ async function getStudyProblemsData(
     score: share.problemSubmission.score,
     scoreMax: share.problemSubmission.scoreMax,
     sharedAtLabel: formatDate(share.sharedAt),
+    sharedAtTime: share.sharedAt.getTime(),
     sharedBy: getUserDisplayName(share.user.name),
     status: share.problemSubmission.status,
     submittedAtText: share.problemSubmission.submittedAtText,

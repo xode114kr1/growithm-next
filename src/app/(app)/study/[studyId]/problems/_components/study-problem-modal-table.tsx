@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -10,6 +10,18 @@ import {
   getProblemStatusLabel,
 } from "@/app/(app)/problem/_lib/problem-status";
 import type { ProblemSubmissionStatus } from "@/generated/prisma/enums";
+
+const PAGE_SIZE = 10;
+const tierRank = {
+  Ruby: 6,
+  Diamond: 5,
+  Platinum: 4,
+  Gold: 3,
+  Silver: 2,
+  Bronze: 1,
+} as const;
+
+type StudyProblemSort = "latest" | "oldest" | "title" | "tier" | "member";
 
 export type StudyProblem = {
   categories: string[];
@@ -22,6 +34,7 @@ export type StudyProblem = {
   score: number | null;
   scoreMax: number | null;
   sharedAtLabel: string;
+  sharedAtTime: number;
   sharedBy: string;
   solutionCode: string | null;
   status: ProblemSubmissionStatus;
@@ -44,7 +57,9 @@ export default function StudyProblemModalTable({
     null,
   );
   const [sharedByFilter, setSharedByFilter] = useState("All");
+  const [sort, setSort] = useState<StudyProblemSort>("latest");
   const [tierFilter, setTierFilter] = useState("All");
+  const [currentPage, setCurrentPage] = useState(1);
   const filteredProblems = problems.filter((problem) => {
     const matchesPlatform =
       platformFilter === "All" || problem.platform === platformFilter;
@@ -54,6 +69,13 @@ export default function StudyProblemModalTable({
 
     return matchesPlatform && matchesTier && matchesSharedBy;
   });
+  const sortedProblems = sortProblems(filteredProblems, sort);
+  const totalPages = Math.max(1, Math.ceil(sortedProblems.length / PAGE_SIZE));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const paginatedProblems = sortedProblems.slice(
+    (safeCurrentPage - 1) * PAGE_SIZE,
+    safeCurrentPage * PAGE_SIZE,
+  );
   const hasActiveFilters =
     platformFilter !== "All" || tierFilter !== "All" || sharedByFilter !== "All";
 
@@ -61,6 +83,27 @@ export default function StudyProblemModalTable({
     setPlatformFilter("All");
     setSharedByFilter("All");
     setTierFilter("All");
+    setCurrentPage(1);
+  }
+
+  function handlePlatformChange(platform: string) {
+    setPlatformFilter(platform);
+    setCurrentPage(1);
+  }
+
+  function handleSharedByChange(sharedBy: string) {
+    setSharedByFilter(sharedBy);
+    setCurrentPage(1);
+  }
+
+  function handleSortChange(nextSort: StudyProblemSort) {
+    setSort(nextSort);
+    setCurrentPage(1);
+  }
+
+  function handleTierChange(tier: string) {
+    setTierFilter(tier);
+    setCurrentPage(1);
   }
 
   return (
@@ -69,11 +112,13 @@ export default function StudyProblemModalTable({
         filteredCount={filteredProblems.length}
         memberNames={memberNames}
         onClearFilters={clearFilters}
-        onPlatformChange={setPlatformFilter}
-        onSharedByChange={setSharedByFilter}
-        onTierChange={setTierFilter}
+        onPlatformChange={handlePlatformChange}
+        onSharedByChange={handleSharedByChange}
+        onSortChange={handleSortChange}
+        onTierChange={handleTierChange}
         platformFilter={platformFilter}
         sharedByFilter={sharedByFilter}
+        sort={sort}
         tiers={tiers}
         tierFilter={tierFilter}
         totalCount={problems.length}
@@ -91,7 +136,7 @@ export default function StudyProblemModalTable({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {filteredProblems.map((problem) => (
+              {paginatedProblems.map((problem) => (
                 <tr
                   className="group transition-colors hover:bg-slate-50/80"
                   key={problem.id}
@@ -141,7 +186,7 @@ export default function StudyProblemModalTable({
             </tbody>
           </table>
         </div>
-        {filteredProblems.length === 0 ? (
+        {sortedProblems.length === 0 ? (
           <EmptyState
             hasActiveFilters={hasActiveFilters}
             onClearFilters={clearFilters}
@@ -151,20 +196,29 @@ export default function StudyProblemModalTable({
           <p className="text-body-sm text-slate-500">
             Showing{" "}
             <span className="font-semibold text-on-surface">
-              {filteredProblems.length > 0 ? "1" : "0"} -{" "}
-              {filteredProblems.length}
+              {sortedProblems.length > 0
+                ? (safeCurrentPage - 1) * PAGE_SIZE + 1
+                : "0"}{" "}
+              - {Math.min(safeCurrentPage * PAGE_SIZE, sortedProblems.length)}
             </span>{" "}
-            of {problems.length.toLocaleString()} study problems
+            of {sortedProblems.length.toLocaleString()} study problems
           </p>
-          {hasActiveFilters ? (
-            <button
-              className="text-body-sm font-semibold text-secondary hover:underline"
-              onClick={clearFilters}
-              type="button"
-            >
-              Clear filters
-            </button>
-          ) : null}
+          <div className="flex items-center gap-2">
+            {hasActiveFilters ? (
+              <button
+                className="text-body-sm font-semibold text-secondary hover:underline"
+                onClick={clearFilters}
+                type="button"
+              >
+                Clear filters
+              </button>
+            ) : null}
+            <PaginationControls
+              currentPage={safeCurrentPage}
+              onPageChange={setCurrentPage}
+              totalPages={totalPages}
+            />
+          </div>
         </div>
         <StudyProblemModal
           onClose={() => setSelectedProblem(null)}
@@ -181,9 +235,11 @@ function StudyProblemFilters({
   onClearFilters,
   onPlatformChange,
   onSharedByChange,
+  onSortChange,
   onTierChange,
   platformFilter,
   sharedByFilter,
+  sort,
   tiers,
   tierFilter,
   totalCount,
@@ -193,9 +249,11 @@ function StudyProblemFilters({
   onClearFilters: () => void;
   onPlatformChange: (platform: string) => void;
   onSharedByChange: (sharedBy: string) => void;
+  onSortChange: (sort: StudyProblemSort) => void;
   onTierChange: (tier: string) => void;
   platformFilter: string;
   sharedByFilter: string;
+  sort: StudyProblemSort;
   tiers: string[];
   tierFilter: string;
   totalCount: number;
@@ -204,7 +262,7 @@ function StudyProblemFilters({
     platformFilter !== "All" || tierFilter !== "All" || sharedByFilter !== "All";
 
   return (
-    <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
       <FilterCard title="Platform">
         <div className="flex flex-wrap gap-2">
           {["All", "BAEKJOON", "PROGRAMMERS"].map((platform) => (
@@ -248,6 +306,21 @@ function StudyProblemFilters({
           ))}
         </select>
       </FilterCard>
+      <FilterCard title="Sort">
+        <select
+          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
+          onChange={(event) =>
+            onSortChange(event.target.value as StudyProblemSort)
+          }
+          value={sort}
+        >
+          <option value="latest">Latest shared</option>
+          <option value="oldest">Oldest shared</option>
+          <option value="title">Title</option>
+          <option value="tier">Tier</option>
+          <option value="member">Member</option>
+        </select>
+      </FilterCard>
       <FilterCard title="Result">
         <div className="flex items-end justify-between gap-3">
           <div>
@@ -273,6 +346,42 @@ function StudyProblemFilters({
   );
 }
 
+function PaginationControls({
+  currentPage,
+  onPageChange,
+  totalPages,
+}: {
+  currentPage: number;
+  onPageChange: (page: number) => void;
+  totalPages: number;
+}) {
+  return (
+    <div className="flex items-center gap-1">
+      <button
+        aria-label="Previous page"
+        className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
+        disabled={currentPage === 1}
+        onClick={() => onPageChange(currentPage - 1)}
+        type="button"
+      >
+        <ChevronLeft aria-hidden="true" size={16} />
+      </button>
+      <span className="px-2 text-body-sm font-semibold text-on-surface">
+        {currentPage} / {totalPages}
+      </span>
+      <button
+        aria-label="Next page"
+        className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
+        disabled={currentPage === totalPages}
+        onClick={() => onPageChange(currentPage + 1)}
+        type="button"
+      >
+        <ChevronRight aria-hidden="true" size={16} />
+      </button>
+    </div>
+  );
+}
+
 function FilterCard({
   children,
   title,
@@ -286,6 +395,40 @@ function FilterCard({
       {children}
     </div>
   );
+}
+
+function sortProblems(problems: StudyProblem[], sort: StudyProblemSort) {
+  return [...problems].sort((firstProblem, secondProblem) => {
+    if (sort === "oldest") {
+      return firstProblem.sharedAtTime - secondProblem.sharedAtTime;
+    }
+
+    if (sort === "title") {
+      return firstProblem.title.localeCompare(secondProblem.title);
+    }
+
+    if (sort === "tier") {
+      return getTierRank(secondProblem.tier) - getTierRank(firstProblem.tier);
+    }
+
+    if (sort === "member") {
+      return firstProblem.sharedBy.localeCompare(secondProblem.sharedBy);
+    }
+
+    return secondProblem.sharedAtTime - firstProblem.sharedAtTime;
+  });
+}
+
+function getTierRank(tier: string | null) {
+  const normalizedTier = tier?.toLowerCase() ?? "";
+
+  for (const [tierName, rank] of Object.entries(tierRank)) {
+    if (normalizedTier.includes(tierName.toLowerCase())) {
+      return rank;
+    }
+  }
+
+  return 0;
 }
 
 function StudyProblemModal({
