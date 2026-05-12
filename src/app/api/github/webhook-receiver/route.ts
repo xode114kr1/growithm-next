@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { Prisma } from "@/generated/prisma/client";
+import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import {
   fetchGitHubReadmeContent,
   type GitHubReadmeContent,
@@ -368,6 +369,7 @@ async function saveProblemSubmissions({
         repositoryFullName,
         score: parsedReadme.score,
         scoreMax: parsedReadme.scoreMax,
+        status: ProblemSubmissionStatus.PENDING,
         submittedAtText: parsedReadme.submittedAtText,
         tier: parsedReadme.tier,
         time: parsedReadme.time,
@@ -386,6 +388,7 @@ async function saveProblemSubmissions({
         problemId: parsedReadme.problemId,
         score: parsedReadme.score,
         scoreMax: parsedReadme.scoreMax,
+        status: ProblemSubmissionStatus.PENDING,
         submittedAtText: parsedReadme.submittedAtText,
         tier: parsedReadme.tier,
         time: parsedReadme.time,
