@@ -111,7 +111,7 @@ async function getStudyMembersData(
         contribution: shares.reduce((total, share) => total + share.score, 0),
         lastActive: formatDate(lastSharedAt ?? member.joinedAt),
         name: getUserDisplayName(member.user.name),
-        role: member.role === "OWNER" ? "LEADER" : member.role,
+        role: member.role,
       };
     }),
     name: study.title,

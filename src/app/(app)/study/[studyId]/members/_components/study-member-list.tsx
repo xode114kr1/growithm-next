@@ -6,7 +6,13 @@ export type StudyMember = {
   contribution: number;
   lastActive: string;
   name: string;
-  role: "LEADER" | "MEMBER";
+  role: "OWNER" | "LEADER" | "MEMBER";
+};
+
+const roleLabels: Record<StudyMember["role"], string> = {
+  LEADER: "Leader",
+  MEMBER: "Member",
+  OWNER: "Owner",
 };
 
 export default function StudyMemberList({
@@ -64,7 +70,9 @@ export default function StudyMemberList({
 }
 
 function MemberCard({ member }: { member: StudyMember }) {
+  const isOwner = member.role === "OWNER";
   const isLeader = member.role === "LEADER";
+  const isPrivileged = isOwner || isLeader;
 
   return (
     <article className="app-card p-6 transition-all hover:shadow-lg hover:shadow-teal-900/5">
@@ -72,8 +80,10 @@ function MemberCard({ member }: { member: StudyMember }) {
         <div className="flex min-w-0 items-center gap-4">
           <div
             className={
-              isLeader
+              isOwner
                 ? "flex size-12 shrink-0 items-center justify-center rounded-full bg-primary text-base font-black text-on-primary"
+                : isLeader
+                  ? "flex size-12 shrink-0 items-center justify-center rounded-full bg-secondary text-base font-black text-on-secondary"
                 : "flex size-12 shrink-0 items-center justify-center rounded-full bg-slate-200 text-base font-black text-slate-600"
             }
           >
@@ -85,16 +95,25 @@ function MemberCard({ member }: { member: StudyMember }) {
             </h2>
             <span
               className={
-                isLeader
+                isOwner
+                  ? "mt-1 inline-flex rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-on-primary"
+                  : isLeader
                   ? "mt-1 inline-flex rounded-full bg-secondary-fixed px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-on-secondary-fixed"
                   : "mt-1 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-500"
               }
             >
-              {member.role}
+              {roleLabels[member.role]}
             </span>
           </div>
         </div>
-        <button className="btn-secondary min-h-10 px-3" type="button">
+        <button
+          className={
+            isPrivileged
+              ? "btn-secondary min-h-10 px-3 ring-1 ring-secondary/20"
+              : "btn-secondary min-h-10 px-3"
+          }
+          type="button"
+        >
           프로필
         </button>
       </div>
