@@ -109,6 +109,7 @@ async function getStudyMembersData(
 
       return {
         contribution: shares.reduce((total, share) => total + share.score, 0),
+        id: member.id,
         joinedAt: formatDate(member.joinedAt),
         joinedAtTime: member.joinedAt.getTime(),
         lastActive: formatDate(lastSharedAt ?? member.joinedAt),
