@@ -1,5 +1,4 @@
 import Link from "next/link";
-import StudyLocalNav from "@/app/(app)/study/[studyId]/_components/study-local-nav";
 import StudyMemberList, {
   type StudyMember,
 } from "@/app/(app)/study/[studyId]/members/_components/study-member-list";
@@ -24,23 +23,12 @@ const members: StudyMember[] = [
   },
 ];
 
-export default async function StudyMembersPage({
-  params,
-}: {
-  params: Promise<{ studyId: string }>;
-}) {
-  const { studyId } = await params;
-
+export default function StudyMembersPage() {
   return (
-    <main className="page-shell">
-      <div className="workspace-container">
-        <StudyLocalNav active="members" studyId={studyId} studyName={study.name} />
-        <div className="min-w-0 flex-1">
-          <StudyMembersHeading memberCount={members.length} />
-          <StudyMemberList members={members} />
-        </div>
-      </div>
-    </main>
+    <>
+      <StudyMembersHeading memberCount={members.length} />
+      <StudyMemberList members={members} />
+    </>
   );
 }
 

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import StudyLocalNav from "@/app/(app)/study/[studyId]/_components/study-local-nav";
 import ContributionChart from "@/app/(app)/study/[studyId]/overview/_components/contribution-chart";
 import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
@@ -60,28 +59,18 @@ export default async function StudyOverviewPage({
   }
 
   return (
-    <main className="page-shell">
-      <div className="workspace-container">
-        <StudyLocalNav
-          active="overview"
-          showOwner={study.isOwner}
-          studyId={studyId}
-          studyName={study.name}
-        />
-        <div className="min-w-0 flex-1 space-y-8">
-          <StudyOverviewHeader study={study} />
-          <div className="grid grid-cols-1 gap-gutter xl:grid-cols-3">
-            <StudyTierCard study={study} />
-            <StudyStatsCard study={study} />
-          </div>
-          <div className="grid grid-cols-1 gap-gutter xl:grid-cols-3">
-            <ContributionSection contribution={study.contribution} />
-            <StudyMembersCard members={study.members} />
-          </div>
-          <RecentSolvedProblems problems={study.recentProblems} />
-        </div>
+    <div className="space-y-8">
+      <StudyOverviewHeader study={study} />
+      <div className="grid grid-cols-1 gap-gutter xl:grid-cols-3">
+        <StudyTierCard study={study} />
+        <StudyStatsCard study={study} />
       </div>
-    </main>
+      <div className="grid grid-cols-1 gap-gutter xl:grid-cols-3">
+        <ContributionSection contribution={study.contribution} />
+        <StudyMembersCard members={study.members} />
+      </div>
+      <RecentSolvedProblems problems={study.recentProblems} studyId={study.id} />
+    </div>
   );
 }
 
@@ -367,8 +356,10 @@ function StudyMembersCard({ members }: { members: Study["members"] }) {
 
 function RecentSolvedProblems({
   problems,
+  studyId,
 }: {
   problems: Study["recentProblems"];
+  studyId: string;
 }) {
   return (
     <section>
@@ -381,7 +372,7 @@ function RecentSolvedProblems({
         </div>
         <Link
           className="text-body-sm font-semibold text-secondary hover:underline"
-          href="#"
+          href={`/study/${studyId}/problems`}
         >
           View All
         </Link>
