@@ -1,6 +1,13 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, ExternalLink, X } from "lucide-react";
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  ExternalLink,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -222,7 +229,9 @@ export default function StudyProblemModalTable({
         </div>
         <StudyProblemModal
           onClose={() => setSelectedProblem(null)}
+          onSelectProblem={setSelectedProblem}
           problem={selectedProblem}
+          problems={sortedProblems}
         />
       </section>
     </>
@@ -433,11 +442,24 @@ function getTierRank(tier: string | null) {
 
 function StudyProblemModal({
   onClose,
+  onSelectProblem,
   problem,
+  problems,
 }: {
   onClose: () => void;
+  onSelectProblem: (problem: StudyProblem) => void;
   problem: StudyProblem | null;
+  problems: StudyProblem[];
 }) {
+  const selectedIndex = problem
+    ? problems.findIndex((studyProblem) => studyProblem.id === problem.id)
+    : -1;
+  const previousProblem = selectedIndex > 0 ? problems[selectedIndex - 1] : null;
+  const nextProblem =
+    selectedIndex >= 0 && selectedIndex < problems.length - 1
+      ? problems[selectedIndex + 1]
+      : null;
+
   useEffect(() => {
     if (!problem) {
       return;
@@ -446,13 +468,17 @@ function StudyProblemModal({
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         onClose();
+      } else if (event.key === "ArrowLeft" && previousProblem) {
+        onSelectProblem(previousProblem);
+      } else if (event.key === "ArrowRight" && nextProblem) {
+        onSelectProblem(nextProblem);
       }
     }
 
     window.addEventListener("keydown", handleKeyDown);
 
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose, problem]);
+  }, [nextProblem, onClose, onSelectProblem, previousProblem, problem]);
 
   if (!problem) {
     return null;
@@ -495,14 +521,34 @@ function StudyProblemModal({
               {problem.sharedBy} shared on {problem.sharedAtLabel}
             </p>
           </div>
-          <button
-            aria-label="Close problem modal"
-            className="flex size-10 shrink-0 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary"
-            onClick={onClose}
-            type="button"
-          >
-            <X aria-hidden="true" size={20} />
-          </button>
+          <div className="flex shrink-0 items-center gap-1">
+            <button
+              aria-label="Previous problem"
+              className="flex size-10 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary disabled:cursor-not-allowed disabled:text-slate-300"
+              disabled={!previousProblem}
+              onClick={() => previousProblem && onSelectProblem(previousProblem)}
+              type="button"
+            >
+              <ChevronLeft aria-hidden="true" size={20} />
+            </button>
+            <button
+              aria-label="Next problem"
+              className="flex size-10 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary disabled:cursor-not-allowed disabled:text-slate-300"
+              disabled={!nextProblem}
+              onClick={() => nextProblem && onSelectProblem(nextProblem)}
+              type="button"
+            >
+              <ChevronRight aria-hidden="true" size={20} />
+            </button>
+            <button
+              aria-label="Close problem modal"
+              className="flex size-10 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary"
+              onClick={onClose}
+              type="button"
+            >
+              <X aria-hidden="true" size={20} />
+            </button>
+          </div>
         </header>
         <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="min-w-0 space-y-6 p-5 md:p-6">
@@ -532,6 +578,9 @@ function StudyProblemModal({
                 Open Original
               </a>
             ) : null}
+            <Link className="btn-primary w-full" href={`/problem/${problem.id}`}>
+              Open Detail Page
+            </Link>
           </aside>
         </div>
       </div>
@@ -588,9 +637,37 @@ function ProblemDescription({ description }: { description: string | null }) {
 }
 
 function ProblemSolutionCode({ code }: { code: string | null }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopyCode() {
+    if (!code) {
+      return;
+    }
+
+    await navigator.clipboard.writeText(code);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1600);
+  }
+
   return (
     <section>
-      <h3 className="mb-3 section-title">풀이 코드</h3>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <h3 className="section-title">풀이 코드</h3>
+        {code ? (
+          <button
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-body-sm font-semibold text-slate-600 transition-colors hover:border-secondary hover:text-secondary"
+            onClick={handleCopyCode}
+            type="button"
+          >
+            {copied ? (
+              <Check aria-hidden="true" size={14} />
+            ) : (
+              <Copy aria-hidden="true" size={14} />
+            )}
+            {copied ? "Copied" : "Copy"}
+          </button>
+        ) : null}
+      </div>
       {code ? (
         <pre className="max-h-[420px] overflow-auto rounded-lg bg-surface-container-low p-4 text-mono-code text-body-sm text-primary">
           <code>{code}</code>
