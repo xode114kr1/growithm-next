@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import ProblemShareModal from "@/app/(app)/problem/[id]/_components/problem-share-modal";
 import {
   getProblemStatusBadgeClass,
   getProblemStatusLabel,
@@ -9,11 +10,14 @@ import {
   getTierBadgeClass,
 } from "@/app/(app)/problem/[id]/_lib/problem-detail-format";
 import type { ProblemDetail } from "@/app/(app)/problem/[id]/_lib/problem-detail-types";
+import type { ProblemShareTargetStudy } from "@/app/(app)/problem/[id]/_lib/problem-share-targets";
 
 export default function ProblemDetailHeader({
   problem,
+  shareTargetStudies,
 }: {
   problem: ProblemDetail;
+  shareTargetStudies: ProblemShareTargetStudy[];
 }) {
   return (
     <header className="border-b border-outline-variant/40 pb-8">
@@ -55,6 +59,10 @@ export default function ProblemDetailHeader({
         </div>
 
         <div className="flex flex-wrap gap-2">
+          <ProblemShareModal
+            problemStatus={problem.status}
+            studies={shareTargetStudies}
+          />
           <Link className="btn-secondary" href="/problem">
             뒤로가기
           </Link>
