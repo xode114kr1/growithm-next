@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
 
 export type ProblemShareTargetStudy = {
+  hasShared: boolean;
   id: string;
   memberCount: number;
   ownerName: string;
@@ -9,7 +10,7 @@ export type ProblemShareTargetStudy = {
   title: string;
 };
 
-export async function getProblemShareTargetStudies(): Promise<
+export async function getProblemShareTargetStudies(problemId: string): Promise<
   ProblemShareTargetStudy[]
 > {
   const session = await auth();
@@ -36,6 +37,14 @@ export async function getProblemShareTargetStudies(): Promise<
         },
       },
       score: true,
+      problemShares: {
+        select: {
+          id: true,
+        },
+        where: {
+          problemSubmissionId: problemId,
+        },
+      },
       title: true,
     },
     where: {
@@ -55,6 +64,7 @@ export async function getProblemShareTargetStudies(): Promise<
   });
 
   return studies.map((study) => ({
+    hasShared: study.problemShares.length > 0,
     id: study.id,
     memberCount: study._count.members,
     ownerName: study.owner.name ?? "Unknown",

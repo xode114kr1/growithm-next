@@ -22,7 +22,10 @@ export default function ProblemDetailHeader({
   return (
     <header className="border-b border-outline-variant/40 pb-8">
       <div className="mb-6 flex flex-wrap items-center gap-2 text-body-sm text-slate-500">
-        <Link className="font-semibold transition-colors hover:text-primary" href="/problem">
+        <Link
+          className="font-semibold transition-colors hover:text-primary"
+          href="/problem"
+        >
           Problems
         </Link>
         <span>/</span>
@@ -38,7 +41,9 @@ export default function ProblemDetailHeader({
               {problem.platform}
             </span>
             {problem.tier ? (
-              <span className={getTierBadgeClass(problem.tier)}>{problem.tier}</span>
+              <span className={getTierBadgeClass(problem.tier)}>
+                {problem.tier}
+              </span>
             ) : null}
             <span className="badge-solved">
               {getSubmittedLabel(problem.submittedAtText)}
@@ -60,6 +65,7 @@ export default function ProblemDetailHeader({
 
         <div className="flex flex-wrap gap-2">
           <ProblemShareModal
+            problemId={problem.id}
             problemStatus={problem.status}
             studies={shareTargetStudies}
           />

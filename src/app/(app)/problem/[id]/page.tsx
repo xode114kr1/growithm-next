@@ -16,7 +16,7 @@ export default async function ProblemDetailPage({
   const { id } = await params;
   const [problem, shareTargetStudies] = await Promise.all([
     getProblemDetail(id),
-    getProblemShareTargetStudies(),
+    getProblemShareTargetStudies(id),
   ]);
 
   if (!problem) {

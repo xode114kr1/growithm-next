@@ -1,22 +1,39 @@
 "use client";
 
 import { Share2, X } from "lucide-react";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useActionState, useEffect, useId, useMemo, useState } from "react";
 
 import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
+import {
+  shareProblemToStudies,
+  type ProblemShareActionState,
+} from "@/app/(app)/problem/[id]/actions";
 import type { ProblemShareTargetStudy } from "@/app/(app)/problem/[id]/_lib/problem-share-targets";
 
 type ProblemShareModalProps = {
+  problemId: string;
   problemStatus: ProblemSubmissionStatus;
   studies: ProblemShareTargetStudy[];
 };
 
+const initialShareState: ProblemShareActionState = {
+  error: null,
+  sharedCount: 0,
+  skippedCount: 0,
+  status: "idle",
+};
+
 export default function ProblemShareModal({
+  problemId,
   problemStatus,
   studies,
 }: ProblemShareModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedStudyIds, setSelectedStudyIds] = useState<string[]>([]);
+  const [state, formAction, isPending] = useActionState(
+    shareProblemToStudies,
+    initialShareState,
+  );
   const titleId = useId();
   const isShareDisabled = problemStatus !== ProblemSubmissionStatus.COMPLETED;
   const selectedCount = selectedStudyIds.length;
@@ -106,16 +123,20 @@ export default function ProblemShareModal({
               </div>
             </div>
 
-            <div className="space-y-4 px-6 py-6">
+            <form action={formAction} className="space-y-4 px-6 py-6">
+              <input name="problemId" type="hidden" value={problemId} />
               {studies.length > 0 ? (
                 <div className="space-y-2">
                   {studies.map((study) => {
                     const isSelected = selectedStudyIds.includes(study.id);
+                    const isStudyDisabled = study.hasShared || isPending;
 
                     return (
                       <label
-                        className={`flex cursor-pointer items-center gap-4 rounded-lg border px-4 py-3 transition-colors ${
-                          isSelected
+                        className={`flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors ${
+                          isStudyDisabled
+                            ? "cursor-not-allowed border-slate-100 bg-slate-50 opacity-70"
+                            : isSelected
                             ? "border-primary bg-secondary-container/40"
                             : "border-slate-200 bg-white hover:bg-slate-50"
                         }`}
@@ -124,12 +145,22 @@ export default function ProblemShareModal({
                         <input
                           checked={isSelected}
                           className="size-4 accent-primary"
+                          disabled={isStudyDisabled}
+                          name="studyIds"
                           onChange={() => toggleStudy(study.id)}
+                          value={study.id}
                           type="checkbox"
                         />
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate font-semibold text-on-surface">
-                            {study.title}
+                          <span className="flex min-w-0 items-center gap-2">
+                            <span className="block truncate font-semibold text-on-surface">
+                              {study.title}
+                            </span>
+                            {study.hasShared ? (
+                              <span className="shrink-0 rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-500">
+                                Shared
+                              </span>
+                            ) : null}
                           </span>
                           <span className="mt-1 block text-body-sm text-slate-500">
                             {study.ownerName} -{" "}
@@ -152,6 +183,21 @@ export default function ProblemShareModal({
                 </div>
               )}
 
+              {state.status === "error" ? (
+                <p className="rounded-lg bg-error/10 px-4 py-3 text-body-sm font-medium text-error">
+                  {state.error}
+                </p>
+              ) : null}
+
+              {state.status === "success" ? (
+                <p className="rounded-lg bg-secondary-container/60 px-4 py-3 text-body-sm font-medium text-primary">
+                  Shared to {state.sharedCount.toLocaleString()} studies.
+                  {state.skippedCount > 0
+                    ? ` ${state.skippedCount.toLocaleString()} were already shared.`
+                    : ""}
+                </p>
+              ) : null}
+
               <div className="flex flex-col-reverse justify-between gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center">
                 <p className="text-body-sm text-slate-500">{selectedLabel}</p>
                 <div className="flex justify-end gap-2">
@@ -164,14 +210,14 @@ export default function ProblemShareModal({
                   </button>
                   <button
                     className="btn-primary"
-                    disabled={selectedCount === 0}
-                    type="button"
+                    disabled={selectedCount === 0 || isPending}
+                    type="submit"
                   >
-                    Share
+                    {isPending ? "Sharing..." : "Share"}
                   </button>
                 </div>
               </div>
-            </div>
+            </form>
           </section>
         </div>
       ) : null}
