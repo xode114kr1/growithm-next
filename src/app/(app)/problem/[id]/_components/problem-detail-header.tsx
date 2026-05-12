@@ -1,20 +1,31 @@
 import Link from "next/link";
 
+import ProblemShareModal from "@/app/(app)/problem/[id]/_components/problem-share-modal";
+import {
+  getProblemStatusBadgeClass,
+  getProblemStatusLabel,
+} from "@/app/(app)/problem/_lib/problem-status";
 import {
   getSubmittedLabel,
   getTierBadgeClass,
 } from "@/app/(app)/problem/[id]/_lib/problem-detail-format";
 import type { ProblemDetail } from "@/app/(app)/problem/[id]/_lib/problem-detail-types";
+import type { ProblemShareTargetStudy } from "@/app/(app)/problem/[id]/_lib/problem-share-targets";
 
 export default function ProblemDetailHeader({
   problem,
+  shareTargetStudies,
 }: {
   problem: ProblemDetail;
+  shareTargetStudies: ProblemShareTargetStudy[];
 }) {
   return (
     <header className="border-b border-outline-variant/40 pb-8">
       <div className="mb-6 flex flex-wrap items-center gap-2 text-body-sm text-slate-500">
-        <Link className="font-semibold transition-colors hover:text-primary" href="/problem">
+        <Link
+          className="font-semibold transition-colors hover:text-primary"
+          href="/problem"
+        >
           Problems
         </Link>
         <span>/</span>
@@ -30,10 +41,15 @@ export default function ProblemDetailHeader({
               {problem.platform}
             </span>
             {problem.tier ? (
-              <span className={getTierBadgeClass(problem.tier)}>{problem.tier}</span>
+              <span className={getTierBadgeClass(problem.tier)}>
+                {problem.tier}
+              </span>
             ) : null}
             <span className="badge-solved">
               {getSubmittedLabel(problem.submittedAtText)}
+            </span>
+            <span className={getProblemStatusBadgeClass(problem.status)}>
+              {getProblemStatusLabel(problem.status)}
             </span>
           </div>
           <p className="mb-2 text-label-caps text-slate-400">
@@ -48,6 +64,11 @@ export default function ProblemDetailHeader({
         </div>
 
         <div className="flex flex-wrap gap-2">
+          <ProblemShareModal
+            problemId={problem.id}
+            problemStatus={problem.status}
+            studies={shareTargetStudies}
+          />
           <Link className="btn-secondary" href="/problem">
             뒤로가기
           </Link>

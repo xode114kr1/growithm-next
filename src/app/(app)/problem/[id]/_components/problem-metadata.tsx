@@ -1,8 +1,16 @@
+import {
+  getProblemStatusDescription,
+  getProblemStatusLabel,
+} from "@/app/(app)/problem/_lib/problem-status";
 import { formatDate } from "@/app/(app)/problem/[id]/_lib/problem-detail-format";
 import type { ProblemDetail } from "@/app/(app)/problem/[id]/_lib/problem-detail-types";
 
 export default function ProblemMetadata({ problem }: { problem: ProblemDetail }) {
   const metadata = [
+    {
+      label: "Status",
+      value: `${getProblemStatusLabel(problem.status)} - ${getProblemStatusDescription(problem.status)}`,
+    },
     { label: "Memory", value: problem.memory ?? "기록 없음" },
     { label: "Time", value: problem.time ?? "기록 없음" },
     { label: "Submitted", value: problem.submittedAtText ?? "제출 완료" },

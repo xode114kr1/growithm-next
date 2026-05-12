@@ -1,3 +1,5 @@
+import type { ProblemSubmissionStatus } from "@/generated/prisma/enums";
+
 export type ProblemDetail = {
   accuracy: number | null;
   categories: string[];
@@ -12,6 +14,7 @@ export type ProblemDetail = {
   problemId: string;
   score: number | null;
   scoreMax: number | null;
+  status: ProblemSubmissionStatus;
   submittedAtText: string | null;
   tier: string | null;
   time: string | null;
