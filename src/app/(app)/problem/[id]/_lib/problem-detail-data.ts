@@ -19,6 +19,7 @@ export async function getProblemDetail(id: string): Promise<ProblemDetail | null
       problemId: true,
       score: true,
       scoreMax: true,
+      status: true,
       submittedAtText: true,
       tier: true,
       time: true,

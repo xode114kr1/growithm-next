@@ -4,6 +4,11 @@ import type {
   ProblemEmptyStateReason,
   ProblemListItem,
 } from "@/app/(app)/problem/_lib/problem-list-types";
+import {
+  getProblemStatusBadgeClass,
+  getProblemStatusDescription,
+  getProblemStatusLabel,
+} from "@/app/(app)/problem/_lib/problem-status";
 
 export default function ProblemTable({
   currentPage,
@@ -83,7 +88,7 @@ export default function ProblemTable({
                   </div>
                 </td>
                 <td className="px-6 py-5">
-                  <ProblemState submittedAtText={problem.submittedAtText} />
+                  <ProblemSubmissionState problem={problem} />
                 </td>
               </tr>
             ))}
@@ -100,6 +105,20 @@ export default function ProblemTable({
         totalPages={totalPages}
       />
     </section>
+  );
+}
+
+function ProblemSubmissionState({ problem }: { problem: ProblemListItem }) {
+  return (
+    <div className="flex min-w-36 flex-col items-start gap-1.5">
+      <span className={getProblemStatusBadgeClass(problem.status)}>
+        {getProblemStatusLabel(problem.status)}
+      </span>
+      <span className="text-body-sm text-slate-500">
+        {getProblemStatusDescription(problem.status)}
+      </span>
+      <ProblemState submittedAtText={problem.submittedAtText} />
+    </div>
   );
 }
 

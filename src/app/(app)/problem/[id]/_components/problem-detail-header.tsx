@@ -1,6 +1,10 @@
 import Link from "next/link";
 
 import {
+  getProblemStatusBadgeClass,
+  getProblemStatusLabel,
+} from "@/app/(app)/problem/_lib/problem-status";
+import {
   getSubmittedLabel,
   getTierBadgeClass,
 } from "@/app/(app)/problem/[id]/_lib/problem-detail-format";
@@ -34,6 +38,9 @@ export default function ProblemDetailHeader({
             ) : null}
             <span className="badge-solved">
               {getSubmittedLabel(problem.submittedAtText)}
+            </span>
+            <span className={getProblemStatusBadgeClass(problem.status)}>
+              {getProblemStatusLabel(problem.status)}
             </span>
           </div>
           <p className="mb-2 text-label-caps text-slate-400">

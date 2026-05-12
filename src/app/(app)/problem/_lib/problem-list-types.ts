@@ -1,4 +1,7 @@
-import type { ProblemPlatform } from "@/generated/prisma/enums";
+import type {
+  ProblemPlatform,
+  ProblemSubmissionStatus,
+} from "@/generated/prisma/enums";
 
 export type ProblemSort = "newest" | "oldest" | "title" | "platform";
 
@@ -18,6 +21,7 @@ export type ProblemListItem = {
   id: string;
   platform: string;
   problemId: string;
+  status: ProblemSubmissionStatus;
   submittedAtText: string | null;
   tier: string | null;
   title: string;
