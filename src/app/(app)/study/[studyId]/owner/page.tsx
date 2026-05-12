@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import StudyLocalNav from "@/app/(app)/study/[studyId]/_components/study-local-nav";
 import OwnerConsole from "@/app/(app)/study/[studyId]/owner/_components/owner-console";
 import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
@@ -35,24 +34,14 @@ export default async function StudyOwnerPage({
   }
 
   return (
-    <main className="page-shell">
-      <div className="workspace-container">
-        <StudyLocalNav
-          active="owner"
-          showOwner
-          studyId={studyId}
-          studyName={ownerData.study.name}
-        />
-        <div className="min-w-0 flex-1">
-          <StudyOwnerHeading study={ownerData.study} />
-          <OwnerConsole
-            initialInvites={ownerData.pendingInvites}
-            members={ownerData.members}
-            study={ownerData.study}
-          />
-        </div>
-      </div>
-    </main>
+    <>
+      <StudyOwnerHeading study={ownerData.study} />
+      <OwnerConsole
+        initialInvites={ownerData.pendingInvites}
+        members={ownerData.members}
+        study={ownerData.study}
+      />
+    </>
   );
 }
 

@@ -1,21 +1,26 @@
+"use client";
+
 import Link from "next/link";
+import { useSelectedLayoutSegment } from "next/navigation";
 
 type StudyLocalNavProps = {
-  active: "overview" | "problems" | "members" | "owner";
   showOwner?: boolean;
   studyId: string;
   studyName: string;
 };
 
+type StudyLocalNavItemId = "overview" | "problems" | "members" | "owner";
+
 export default function StudyLocalNav({
-  active,
   showOwner = false,
   studyId,
   studyName,
 }: StudyLocalNavProps) {
+  const segment = useSelectedLayoutSegment();
+  const active = getActiveSegment(segment);
   const items: Array<{
     href: string;
-    id: StudyLocalNavProps["active"];
+    id: StudyLocalNavItemId;
     label: string;
   }> = [
     { href: `/study/${studyId}/overview`, id: "overview", label: "Overview" },
@@ -56,4 +61,16 @@ export default function StudyLocalNav({
       </nav>
     </aside>
   );
+}
+
+function getActiveSegment(segment: string | null): StudyLocalNavItemId {
+  if (
+    segment === "problems" ||
+    segment === "members" ||
+    segment === "owner"
+  ) {
+    return segment;
+  }
+
+  return "overview";
 }
