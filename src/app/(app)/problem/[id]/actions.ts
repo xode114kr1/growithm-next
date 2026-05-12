@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -49,6 +50,9 @@ export async function updateProblemMemo(
   const updateResult = await prisma.problemSubmission.updateMany({
     data: {
       memo: memo || null,
+      status: memo
+        ? ProblemSubmissionStatus.COMPLETED
+        : ProblemSubmissionStatus.PENDING,
     },
     where: {
       id: problemId,
@@ -65,6 +69,7 @@ export async function updateProblemMemo(
   }
 
   revalidatePath(`/problem/${problemId}`);
+  revalidatePath("/problem");
 
   return {
     error: null,
