@@ -33,12 +33,11 @@ export default async function StudyProblemsPage({
         name={data.name}
         totalCount={data.problems.length}
       />
-      <StudyProblemFilters
+      <StudyProblemModalTable
         memberNames={data.memberNames}
+        problems={data.problems}
         tiers={data.tiers}
-        totalCount={data.problems.length}
       />
-      <StudyProblemModalTable problems={data.problems} />
     </>
   );
 }
@@ -191,72 +190,6 @@ function StudyProblemsHeading({
         <p className="text-label-caps text-slate-400">Shared Problems</p>
         <p className="text-h3-ui text-primary">{totalCount.toLocaleString()}</p>
       </div>
-    </div>
-  );
-}
-
-function StudyProblemFilters({
-  memberNames,
-  tiers,
-  totalCount,
-}: {
-  memberNames: string[];
-  tiers: string[];
-  totalCount: number;
-}) {
-  return (
-    <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <FilterCard title="Platform">
-        <div className="flex flex-wrap gap-2">
-          {["All", "BAEKJOON", "PROGRAMMERS"].map((platform) => (
-            <span
-              className={
-                platform === "All"
-                  ? "rounded-lg border border-primary-container/20 bg-primary-container px-3 py-1.5 text-body-sm font-medium text-on-primary-container"
-                  : "rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-body-sm font-medium text-slate-600"
-              }
-              key={platform}
-            >
-              {platform}
-            </span>
-          ))}
-        </div>
-      </FilterCard>
-      <FilterCard title="Tier">
-        <select className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20">
-          <option>All Tiers</option>
-          {tiers.map((tier) => (
-            <option key={tier}>{tier}</option>
-          ))}
-        </select>
-      </FilterCard>
-      <FilterCard title="Shared By">
-        <select className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20">
-          <option>All Members</option>
-          {memberNames.map((memberName) => (
-            <option key={memberName}>{memberName}</option>
-          ))}
-        </select>
-      </FilterCard>
-      <FilterCard title="Result">
-        <p className="text-h3-ui text-primary">{totalCount.toLocaleString()}</p>
-        <p className="text-body-sm text-slate-500">현재 공유된 문제 수</p>
-      </FilterCard>
-    </section>
-  );
-}
-
-function FilterCard({
-  children,
-  title,
-}: {
-  children: React.ReactNode;
-  title: string;
-}) {
-  return (
-    <div className="app-card min-w-0 p-4">
-      <h2 className="mb-3 block text-label-caps text-slate-500">{title}</h2>
-      {children}
     </div>
   );
 }

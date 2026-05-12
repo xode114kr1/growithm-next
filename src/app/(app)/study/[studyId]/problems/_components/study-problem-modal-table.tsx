@@ -31,93 +31,260 @@ export type StudyProblem = {
 };
 
 export default function StudyProblemModalTable({
+  memberNames,
   problems,
+  tiers,
 }: {
+  memberNames: string[];
   problems: StudyProblem[];
+  tiers: string[];
 }) {
+  const [platformFilter, setPlatformFilter] = useState("All");
   const [selectedProblem, setSelectedProblem] = useState<StudyProblem | null>(
     null,
   );
+  const [sharedByFilter, setSharedByFilter] = useState("All");
+  const [tierFilter, setTierFilter] = useState("All");
+  const filteredProblems = problems.filter((problem) => {
+    const matchesPlatform =
+      platformFilter === "All" || problem.platform === platformFilter;
+    const matchesTier = tierFilter === "All" || problem.tier === tierFilter;
+    const matchesSharedBy =
+      sharedByFilter === "All" || problem.sharedBy === sharedByFilter;
+
+    return matchesPlatform && matchesTier && matchesSharedBy;
+  });
+  const hasActiveFilters =
+    platformFilter !== "All" || tierFilter !== "All" || sharedByFilter !== "All";
+
+  function clearFilters() {
+    setPlatformFilter("All");
+    setSharedByFilter("All");
+    setTierFilter("All");
+  }
 
   return (
-    <section className="app-card overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-left">
-          <thead>
-            <tr className="border-b border-slate-100 bg-slate-50/50">
-              <TableHead>Problem Details</TableHead>
-              <TableHead>Tags</TableHead>
-              <TableHead>Shared By</TableHead>
-              <TableHead>Shared At</TableHead>
-              <TableHead>State</TableHead>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-50">
-            {problems.map((problem) => (
-              <tr
-                className="group transition-colors hover:bg-slate-50/80"
-                key={problem.id}
-              >
-                <td className="min-w-[360px] max-w-[560px] px-6 py-5">
-                  <button
-                    className="flex w-full items-start gap-4 rounded-lg text-left outline-none focus-visible:ring-2 focus-visible:ring-secondary-container"
-                    onClick={() => setSelectedProblem(problem)}
-                    type="button"
-                  >
-                    <span
-                      className={`mt-1 flex size-10 shrink-0 items-center justify-center rounded-full border text-xs font-black shadow-sm ${getTierBadgeClass(problem.tier)}`}
-                    >
-                      {getPlatformInitial(problem.platform)}
-                    </span>
-                    <span className="min-w-0 space-y-1">
-                      <span className="flex flex-wrap items-center gap-2">
-                        <span className="rounded bg-slate-100 px-1.5 py-0.5 text-mono-code text-[11px] text-slate-500">
-                          {problem.code}
-                        </span>
-                        {problem.tier ? (
-                          <span className={getTierBadgeClass(problem.tier)}>
-                            {problem.tier}
-                          </span>
-                        ) : null}
-                      </span>
-                      <span className="block text-pretty break-words font-semibold leading-snug text-on-surface transition-colors group-hover:text-secondary">
-                        {problem.title}
-                      </span>
-                    </span>
-                  </button>
-                </td>
-                <td className="px-6 py-5">
-                  <ProblemTags categories={problem.categories} />
-                </td>
-                <td className="px-6 py-5 text-body-sm font-semibold text-secondary">
-                  {problem.sharedBy}
-                </td>
-                <td className="px-6 py-5 text-body-sm text-slate-500">
-                  {problem.sharedAtLabel}
-                </td>
-                <td className="px-6 py-5">
-                  <ProblemState status={problem.status} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {problems.length === 0 ? <EmptyState /> : null}
-      <div className="flex flex-col items-start justify-between gap-4 border-t border-slate-100 bg-slate-50/30 px-6 py-4 sm:flex-row sm:items-center">
-        <p className="text-body-sm text-slate-500">
-          Showing{" "}
-          <span className="font-semibold text-on-surface">
-            {problems.length > 0 ? "1" : "0"} - {problems.length}
-          </span>{" "}
-          of {problems.length.toLocaleString()} study problems
-        </p>
-      </div>
-      <StudyProblemModal
-        onClose={() => setSelectedProblem(null)}
-        problem={selectedProblem}
+    <>
+      <StudyProblemFilters
+        filteredCount={filteredProblems.length}
+        memberNames={memberNames}
+        onClearFilters={clearFilters}
+        onPlatformChange={setPlatformFilter}
+        onSharedByChange={setSharedByFilter}
+        onTierChange={setTierFilter}
+        platformFilter={platformFilter}
+        sharedByFilter={sharedByFilter}
+        tiers={tiers}
+        tierFilter={tierFilter}
+        totalCount={problems.length}
       />
+      <section className="app-card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-left">
+            <thead>
+              <tr className="border-b border-slate-100 bg-slate-50/50">
+                <TableHead>Problem Details</TableHead>
+                <TableHead>Tags</TableHead>
+                <TableHead>Shared By</TableHead>
+                <TableHead>Shared At</TableHead>
+                <TableHead>State</TableHead>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {filteredProblems.map((problem) => (
+                <tr
+                  className="group transition-colors hover:bg-slate-50/80"
+                  key={problem.id}
+                >
+                  <td className="min-w-[360px] max-w-[560px] px-6 py-5">
+                    <button
+                      className="flex w-full items-start gap-4 rounded-lg text-left outline-none focus-visible:ring-2 focus-visible:ring-secondary-container"
+                      onClick={() => setSelectedProblem(problem)}
+                      type="button"
+                    >
+                      <span
+                        className={`mt-1 flex size-10 shrink-0 items-center justify-center rounded-full border text-xs font-black shadow-sm ${getTierBadgeClass(problem.tier)}`}
+                      >
+                        {getPlatformInitial(problem.platform)}
+                      </span>
+                      <span className="min-w-0 space-y-1">
+                        <span className="flex flex-wrap items-center gap-2">
+                          <span className="rounded bg-slate-100 px-1.5 py-0.5 text-mono-code text-[11px] text-slate-500">
+                            {problem.code}
+                          </span>
+                          {problem.tier ? (
+                            <span className={getTierBadgeClass(problem.tier)}>
+                              {problem.tier}
+                            </span>
+                          ) : null}
+                        </span>
+                        <span className="block text-pretty break-words font-semibold leading-snug text-on-surface transition-colors group-hover:text-secondary">
+                          {problem.title}
+                        </span>
+                      </span>
+                    </button>
+                  </td>
+                  <td className="px-6 py-5">
+                    <ProblemTags categories={problem.categories} />
+                  </td>
+                  <td className="px-6 py-5 text-body-sm font-semibold text-secondary">
+                    {problem.sharedBy}
+                  </td>
+                  <td className="px-6 py-5 text-body-sm text-slate-500">
+                    {problem.sharedAtLabel}
+                  </td>
+                  <td className="px-6 py-5">
+                    <ProblemState status={problem.status} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {filteredProblems.length === 0 ? (
+          <EmptyState
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={clearFilters}
+          />
+        ) : null}
+        <div className="flex flex-col items-start justify-between gap-4 border-t border-slate-100 bg-slate-50/30 px-6 py-4 sm:flex-row sm:items-center">
+          <p className="text-body-sm text-slate-500">
+            Showing{" "}
+            <span className="font-semibold text-on-surface">
+              {filteredProblems.length > 0 ? "1" : "0"} -{" "}
+              {filteredProblems.length}
+            </span>{" "}
+            of {problems.length.toLocaleString()} study problems
+          </p>
+          {hasActiveFilters ? (
+            <button
+              className="text-body-sm font-semibold text-secondary hover:underline"
+              onClick={clearFilters}
+              type="button"
+            >
+              Clear filters
+            </button>
+          ) : null}
+        </div>
+        <StudyProblemModal
+          onClose={() => setSelectedProblem(null)}
+          problem={selectedProblem}
+        />
+      </section>
+    </>
+  );
+}
+
+function StudyProblemFilters({
+  filteredCount,
+  memberNames,
+  onClearFilters,
+  onPlatformChange,
+  onSharedByChange,
+  onTierChange,
+  platformFilter,
+  sharedByFilter,
+  tiers,
+  tierFilter,
+  totalCount,
+}: {
+  filteredCount: number;
+  memberNames: string[];
+  onClearFilters: () => void;
+  onPlatformChange: (platform: string) => void;
+  onSharedByChange: (sharedBy: string) => void;
+  onTierChange: (tier: string) => void;
+  platformFilter: string;
+  sharedByFilter: string;
+  tiers: string[];
+  tierFilter: string;
+  totalCount: number;
+}) {
+  const hasActiveFilters =
+    platformFilter !== "All" || tierFilter !== "All" || sharedByFilter !== "All";
+
+  return (
+    <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <FilterCard title="Platform">
+        <div className="flex flex-wrap gap-2">
+          {["All", "BAEKJOON", "PROGRAMMERS"].map((platform) => (
+            <button
+              aria-pressed={platformFilter === platform}
+              className={
+                platformFilter === platform
+                  ? "rounded-lg border border-primary-container/20 bg-primary-container px-3 py-1.5 text-body-sm font-medium text-on-primary-container"
+                  : "rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-body-sm font-medium text-slate-600 transition-colors hover:border-primary-container hover:text-primary"
+              }
+              key={platform}
+              onClick={() => onPlatformChange(platform)}
+              type="button"
+            >
+              {platform}
+            </button>
+          ))}
+        </div>
+      </FilterCard>
+      <FilterCard title="Tier">
+        <select
+          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
+          onChange={(event) => onTierChange(event.target.value)}
+          value={tierFilter}
+        >
+          <option>All</option>
+          {tiers.map((tier) => (
+            <option key={tier}>{tier}</option>
+          ))}
+        </select>
+      </FilterCard>
+      <FilterCard title="Shared By">
+        <select
+          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
+          onChange={(event) => onSharedByChange(event.target.value)}
+          value={sharedByFilter}
+        >
+          <option>All</option>
+          {memberNames.map((memberName) => (
+            <option key={memberName}>{memberName}</option>
+          ))}
+        </select>
+      </FilterCard>
+      <FilterCard title="Result">
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <p className="text-h3-ui text-primary">
+              {filteredCount.toLocaleString()}
+            </p>
+            <p className="text-body-sm text-slate-500">
+              of {totalCount.toLocaleString()} shared
+            </p>
+          </div>
+          {hasActiveFilters ? (
+            <button
+              className="rounded-lg border border-slate-200 px-3 py-1.5 text-body-sm font-semibold text-slate-600 transition-colors hover:border-secondary hover:text-secondary"
+              onClick={onClearFilters}
+              type="button"
+            >
+              Reset
+            </button>
+          ) : null}
+        </div>
+      </FilterCard>
     </section>
+  );
+}
+
+function FilterCard({
+  children,
+  title,
+}: {
+  children: React.ReactNode;
+  title: string;
+}) {
+  return (
+    <div className="app-card min-w-0 p-4">
+      <h2 className="mb-3 block text-label-caps text-slate-500">{title}</h2>
+      {children}
+    </div>
   );
 }
 
@@ -326,7 +493,27 @@ function ProblemState({ status }: { status: ProblemSubmissionStatus }) {
   );
 }
 
-function EmptyState() {
+function EmptyState({
+  hasActiveFilters,
+  onClearFilters,
+}: {
+  hasActiveFilters: boolean;
+  onClearFilters: () => void;
+}) {
+  if (hasActiveFilters) {
+    return (
+      <div className="border-t border-slate-100 px-6 py-14 text-center">
+        <p className="font-semibold text-on-surface">No matching problems</p>
+        <p className="mt-2 text-body-sm text-slate-500">
+          Change or reset the filters to see more shared problems.
+        </p>
+        <button className="btn-secondary mt-5" onClick={onClearFilters} type="button">
+          Clear filters
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="border-t border-slate-100 px-6 py-14 text-center">
       <p className="font-semibold text-on-surface">No shared problems yet</p>
