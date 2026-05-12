@@ -2,16 +2,22 @@ import Link from "next/link";
 
 type StudyLocalNavProps = {
   active: "overview" | "problems" | "members" | "owner";
+  showOwner?: boolean;
   studyId: string;
   studyName: string;
 };
 
 export default function StudyLocalNav({
   active,
+  showOwner = false,
   studyId,
   studyName,
 }: StudyLocalNavProps) {
-  const items = [
+  const items: Array<{
+    href: string;
+    id: StudyLocalNavProps["active"];
+    label: string;
+  }> = [
     { href: `/study/${studyId}/overview`, id: "overview", label: "Overview" },
     {
       href: `/study/${studyId}/problems`,
@@ -19,8 +25,11 @@ export default function StudyLocalNav({
       label: "Problem List",
     },
     { href: `/study/${studyId}/members`, id: "members", label: "Members" },
-    { href: `/study/${studyId}/owner`, id: "owner", label: "Owner" },
-  ] as const;
+  ];
+
+  if (showOwner) {
+    items.push({ href: `/study/${studyId}/owner`, id: "owner", label: "Owner" });
+  }
 
   return (
     <aside className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm lg:sticky lg:top-28 lg:w-64 lg:shrink-0">

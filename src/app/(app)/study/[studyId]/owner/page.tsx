@@ -1,45 +1,26 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
+
 import StudyLocalNav from "@/app/(app)/study/[studyId]/_components/study-local-nav";
 import OwnerConsole from "@/app/(app)/study/[studyId]/owner/_components/owner-console";
+import { auth } from "@/lib/auth/auth";
+import { prisma } from "@/lib/prisma";
 
-const study = {
-  description:
-    "매일 아침 9시, 알고리즘 문제를 풀고 코드 리뷰를 진행하는 스터디입니다.",
-  inviteLink: "https://growithm.app/invite/study-1",
-  name: "Algorithm Sprint",
+type OwnerStudy = {
+  description: string;
+  id: string;
+  name: string;
 };
 
-const pendingInvites = [
-  { id: "invite-1", status: "Pending" as const, target: "dev_minho" },
-  { id: "invite-2", status: "Pending" as const, target: "sara.coder@gmail.com" },
-];
-
-const members = [
-  {
-    contribution: 28,
-    isCurrentUser: true,
-    joinedAt: "2023.10.12",
-    lastActive: "2026-03-24",
-    name: "helppy",
-    role: "OWNER" as const,
-  },
-  {
-    contribution: 74005,
-    isCurrentUser: false,
-    joinedAt: "2023.11.05",
-    lastActive: "2026-04",
-    name: "xode114kr1",
-    role: "MEMBER" as const,
-  },
-  {
-    contribution: 12840,
-    isCurrentUser: false,
-    joinedAt: "2024.01.08",
-    lastActive: "2026-04-20",
-    name: "logic_wizard",
-    role: "LEADER" as const,
-  },
-];
+type OwnerMember = {
+  contribution: number;
+  id: string;
+  isCurrentUser: boolean;
+  joinedAt: string;
+  lastActive: string;
+  name: string;
+  role: "OWNER" | "LEADER" | "MEMBER";
+};
 
 export default async function StudyOwnerPage({
   params,
@@ -47,17 +28,27 @@ export default async function StudyOwnerPage({
   params: Promise<{ studyId: string }>;
 }) {
   const { studyId } = await params;
+  const ownerData = await getStudyOwnerData(studyId);
+
+  if (!ownerData) {
+    notFound();
+  }
 
   return (
     <main className="page-shell">
       <div className="workspace-container">
-        <StudyLocalNav active="owner" studyId={studyId} studyName={study.name} />
+        <StudyLocalNav
+          active="owner"
+          showOwner
+          studyId={studyId}
+          studyName={ownerData.study.name}
+        />
         <div className="min-w-0 flex-1">
-          <StudyOwnerHeading />
+          <StudyOwnerHeading study={ownerData.study} />
           <OwnerConsole
-            initialInvites={pendingInvites}
-            members={members}
-            study={study}
+            initialInvites={ownerData.pendingInvites}
+            members={ownerData.members}
+            study={ownerData.study}
           />
         </div>
       </div>
@@ -65,7 +56,123 @@ export default async function StudyOwnerPage({
   );
 }
 
-function StudyOwnerHeading() {
+async function getStudyOwnerData(studyId: string): Promise<{
+  members: OwnerMember[];
+  pendingInvites: Array<{ id: string; status: "Pending"; target: string }>;
+  study: OwnerStudy;
+} | null> {
+  const session = await auth();
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    return null;
+  }
+
+  const study = await prisma.study.findFirst({
+    include: {
+      members: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          joinedAt: "asc",
+        },
+      },
+      owner: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      problemShares: {
+        select: {
+          score: true,
+          sharedAt: true,
+          userId: true,
+        },
+      },
+      invites: {
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          id: true,
+          status: true,
+          target: true,
+        },
+        where: {
+          status: "PENDING",
+        },
+      },
+    },
+    where: {
+      id: studyId,
+      ownerId: userId,
+    },
+  });
+
+  if (!study) {
+    return null;
+  }
+
+  const members = study.members.map((member): OwnerMember => {
+    const shares = study.problemShares.filter(
+      (share) => share.userId === member.userId,
+    );
+    const lastSharedAt = shares.reduce<Date | null>(
+      (latestSharedAt, share) =>
+        !latestSharedAt || share.sharedAt > latestSharedAt
+          ? share.sharedAt
+          : latestSharedAt,
+      null,
+    );
+
+    return {
+      contribution: shares.reduce((total, share) => total + share.score, 0),
+      id: member.id,
+      isCurrentUser: member.userId === userId,
+      joinedAt: formatDate(member.joinedAt),
+      lastActive: formatDate(lastSharedAt ?? member.joinedAt),
+      name: getUserDisplayName(member.user.name),
+      role: member.userId === study.ownerId ? "OWNER" : member.role,
+    };
+  });
+
+  if (!members.some((member) => member.role === "OWNER")) {
+    members.unshift({
+      contribution: study.problemShares
+        .filter((share) => share.userId === study.ownerId)
+        .reduce((total, share) => total + share.score, 0),
+      id: study.ownerId,
+      isCurrentUser: study.ownerId === userId,
+      joinedAt: formatDate(study.createdAt),
+      lastActive: formatDate(study.createdAt),
+      name: getUserDisplayName(study.owner.name),
+      role: "OWNER",
+    });
+  }
+
+  return {
+    members,
+    pendingInvites: study.invites.map((invite) => ({
+      id: invite.id,
+      status: "Pending",
+      target: invite.target,
+    })),
+    study: {
+      description: study.description ?? "아직 스터디 설명이 없습니다.",
+      id: study.id,
+      name: study.title,
+    },
+  };
+}
+
+function StudyOwnerHeading({ study }: { study: OwnerStudy }) {
   return (
     <div className="mb-8">
       <div className="mb-4 flex flex-wrap items-center gap-2 text-body-sm text-slate-500">
@@ -90,4 +197,16 @@ function StudyOwnerHeading() {
       </p>
     </div>
   );
+}
+
+function formatDate(date: Date) {
+  return new Intl.DateTimeFormat("ko-KR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+}
+
+function getUserDisplayName(name: string | null) {
+  return name || "Unknown";
 }

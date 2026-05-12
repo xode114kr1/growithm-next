@@ -12,6 +12,7 @@ type Study = {
   contribution: Array<{ name: string; score: number }>;
   description: string;
   id: string;
+  isOwner: boolean;
   memberCount: number;
   members: Array<{ name: string; role: "owner" | "member" }>;
   name: string;
@@ -63,6 +64,7 @@ export default async function StudyOverviewPage({
       <div className="workspace-container">
         <StudyLocalNav
           active="overview"
+          showOwner={study.isOwner}
           studyId={studyId}
           studyName={study.name}
         />
@@ -170,6 +172,7 @@ async function getStudyOverview(studyId: string): Promise<Study | null> {
     contribution,
     description: study.description ?? "아직 스터디 설명이 없습니다.",
     id: study.id,
+    isOwner: study.ownerId === userId,
     memberCount: study.members.length,
     members: study.members.map((member) => ({
       name: getUserDisplayName(member.user.name),

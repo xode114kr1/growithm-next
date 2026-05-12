@@ -1,6 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
+
+import {
+  cancelStudyInvite,
+  createStudyInvite,
+  deleteStudy,
+  removeStudyMember,
+  type CreateStudyInviteActionState,
+  type UpdateStudySettingsActionState,
+  updateStudyMemberRole,
+  updateStudySettings,
+} from "@/app/(app)/study/[studyId]/owner/actions";
 
 type Invite = {
   id: string;
@@ -10,6 +21,7 @@ type Invite = {
 
 type Member = {
   contribution: number;
+  id: string;
   isCurrentUser: boolean;
   joinedAt: string;
   lastActive: string;
@@ -19,8 +31,21 @@ type Member = {
 
 type Study = {
   description: string;
-  inviteLink: string;
+  id: string;
   name: string;
+};
+
+const initialCreateStudyInviteActionState: CreateStudyInviteActionState = {
+  error: null,
+  status: "idle",
+  target: "",
+};
+
+const initialUpdateStudySettingsActionState: UpdateStudySettingsActionState = {
+  description: "",
+  error: null,
+  status: "idle",
+  title: "",
 };
 
 export default function OwnerConsole({
@@ -34,48 +59,25 @@ export default function OwnerConsole({
 }) {
   return (
     <div className="space-y-10">
-      <InviteMembersCard initialInvites={initialInvites} inviteLink={study.inviteLink} />
-      <ManageMembersCard members={members} />
+      <InviteMembersCard initialInvites={initialInvites} studyId={study.id} />
+      <ManageMembersCard members={members} studyId={study.id} />
       <StudySettingsCard study={study} />
-      <DangerZoneCard studyName={study.name} />
+      <DangerZoneCard studyId={study.id} studyName={study.name} />
     </div>
   );
 }
 
 function InviteMembersCard({
   initialInvites,
-  inviteLink,
+  studyId,
 }: {
   initialInvites: Invite[];
-  inviteLink: string;
+  studyId: string;
 }) {
-  const [copied, setCopied] = useState(false);
-  const [inviteTarget, setInviteTarget] = useState("");
-  const [invites, setInvites] = useState(initialInvites);
-
-  function handleInvite() {
-    const trimmedTarget = inviteTarget.trim();
-
-    if (!trimmedTarget) {
-      return;
-    }
-
-    setInvites((currentInvites) => [
-      ...currentInvites,
-      {
-        id: `invite-${Date.now()}`,
-        status: "Pending",
-        target: trimmedTarget,
-      },
-    ]);
-    setInviteTarget("");
-  }
-
-  async function handleCopy() {
-    await navigator.clipboard.writeText(inviteLink);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1600);
-  }
+  const [state, formAction, isPending] = useActionState(
+    createStudyInvite,
+    initialCreateStudyInviteActionState,
+  );
 
   return (
     <section className="app-card p-6">
@@ -92,46 +94,50 @@ function InviteMembersCard({
       </div>
 
       <div className="grid grid-cols-1 gap-gutter lg:grid-cols-2">
-        <div className="space-y-6">
-          <label className="block">
-            <span className="mb-2 block text-label-caps text-slate-500">
-              Username / Email
-            </span>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <input
-                className="input-field"
-                onChange={(event) => setInviteTarget(event.target.value)}
-                placeholder="github_id or email"
-                type="text"
-                value={inviteTarget}
-              />
-              <button className="btn-primary shrink-0" onClick={handleInvite} type="button">
-                초대
-              </button>
-            </div>
-          </label>
+        <div>
+          <form action={formAction}>
+            <input name="studyId" type="hidden" value={studyId} />
+            <label className="block">
+              <span className="mb-2 block text-label-caps text-slate-500">
+                Username / Email
+              </span>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <input
+                  aria-invalid={state.status === "error" ? true : undefined}
+                  className="input-field"
+                  defaultValue={state.status === "error" ? state.target : ""}
+                  maxLength={120}
+                  name="target"
+                  placeholder="github_id or email"
+                  required
+                  type="text"
+                />
+                <button className="btn-primary shrink-0" disabled={isPending} type="submit">
+                  {isPending ? "초대 중..." : "초대"}
+                </button>
+              </div>
+            </label>
+          </form>
 
-          <label className="block">
-            <span className="mb-2 block text-label-caps text-slate-500">
-              공유 초대 링크
-            </span>
-            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 p-1 pl-4">
-              <code className="min-w-0 flex-1 truncate font-mono text-sm text-slate-600">
-                {inviteLink}
-              </code>
-              <button className="btn-secondary min-h-10 px-3" onClick={handleCopy} type="button">
-                {copied ? "복사됨" : "복사"}
-              </button>
-            </div>
-          </label>
+          {state.status === "error" ? (
+            <p className="mt-3 rounded-lg bg-error/10 px-4 py-3 text-body-sm font-medium text-error">
+              {state.error}
+            </p>
+          ) : null}
+
+          {state.status === "success" ? (
+            <p className="mt-3 rounded-lg bg-secondary-container/60 px-4 py-3 text-body-sm font-medium text-primary">
+              초대를 보냈습니다.
+            </p>
+          ) : null}
         </div>
 
         <div>
           <h3 className="mb-4 text-label-caps text-slate-400">
-            대기 중인 초대 ({invites.length})
+            대기 중인 초대 ({initialInvites.length})
           </h3>
           <div className="divide-y divide-slate-50 rounded-lg border border-slate-100">
-            {invites.map((invite) => (
+            {initialInvites.map((invite) => (
               <div
                 className="flex items-center justify-between gap-4 px-4 py-3"
                 key={invite.id}
@@ -142,19 +148,23 @@ function InviteMembersCard({
                   </p>
                   <p className="text-xs text-slate-400">{invite.status}</p>
                 </div>
-                <button
-                  className="text-body-sm font-semibold text-error hover:underline"
-                  onClick={() =>
-                    setInvites((currentInvites) =>
-                      currentInvites.filter((item) => item.id !== invite.id),
-                    )
-                  }
-                  type="button"
-                >
-                  취소
-                </button>
+                <form action={cancelStudyInvite}>
+                  <input name="studyId" type="hidden" value={studyId} />
+                  <input name="inviteId" type="hidden" value={invite.id} />
+                  <button
+                    className="text-body-sm font-semibold text-error hover:underline"
+                    type="submit"
+                  >
+                    취소
+                  </button>
+                </form>
               </div>
             ))}
+            {initialInvites.length === 0 ? (
+              <div className="px-4 py-6 text-center text-body-sm text-slate-400">
+                대기 중인 초대가 없습니다.
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
@@ -162,7 +172,13 @@ function InviteMembersCard({
   );
 }
 
-function ManageMembersCard({ members }: { members: Member[] }) {
+function ManageMembersCard({
+  members,
+  studyId,
+}: {
+  members: Member[];
+  studyId: string;
+}) {
   return (
     <section className="app-card p-6">
       <div className="mb-6 flex flex-col justify-between gap-2 border-b border-slate-100 pb-4 sm:flex-row sm:items-end">
@@ -210,27 +226,43 @@ function ManageMembersCard({ members }: { members: Member[] }) {
                   {member.contribution.toLocaleString()} XP
                 </td>
                 <td className="px-6 py-4">
-                  <select
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-body-sm outline-none disabled:bg-slate-100 disabled:text-slate-400"
-                    defaultValue={member.role}
-                    disabled={member.role === "OWNER"}
-                  >
-                    <option>OWNER</option>
-                    <option>LEADER</option>
-                    <option>MEMBER</option>
-                  </select>
+                  {member.role === "OWNER" ? (
+                    <span className="rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-body-sm font-semibold text-slate-400">
+                      OWNER
+                    </span>
+                  ) : (
+                    <form action={updateStudyMemberRole} className="flex gap-2">
+                      <input name="studyId" type="hidden" value={studyId} />
+                      <input name="memberId" type="hidden" value={member.id} />
+                      <select
+                        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-body-sm outline-none"
+                        defaultValue={member.role}
+                        name="role"
+                      >
+                        <option>LEADER</option>
+                        <option>MEMBER</option>
+                      </select>
+                      <button className="btn-secondary min-h-10 px-3" type="submit">
+                        저장
+                      </button>
+                    </form>
+                  )}
                 </td>
                 <td className="px-6 py-4 text-body-sm text-slate-500">{member.joinedAt}</td>
                 <td className="px-6 py-4">
                   {member.role === "OWNER" ? (
                     <span className="text-xs italic text-slate-300">No Action</span>
                   ) : (
-                    <button
-                      className="rounded-lg bg-error-container px-4 py-2 text-body-sm font-semibold text-error transition-opacity hover:opacity-80"
-                      type="button"
-                    >
-                      내보내기
-                    </button>
+                    <form action={removeStudyMember}>
+                      <input name="studyId" type="hidden" value={studyId} />
+                      <input name="memberId" type="hidden" value={member.id} />
+                      <button
+                        className="rounded-lg bg-error-container px-4 py-2 text-body-sm font-semibold text-error transition-opacity hover:opacity-80"
+                        type="submit"
+                      >
+                        내보내기
+                      </button>
+                    </form>
                   )}
                 </td>
               </tr>
@@ -243,8 +275,14 @@ function ManageMembersCard({ members }: { members: Member[] }) {
 }
 
 function StudySettingsCard({ study }: { study: Study }) {
+  const [state, formAction, isPending] = useActionState(
+    updateStudySettings,
+    initialUpdateStudySettingsActionState,
+  );
+
   return (
-    <section className="app-card p-6">
+    <form action={formAction} className="app-card p-6">
+      <input name="studyId" type="hidden" value={study.id} />
       <div className="mb-6 flex flex-col justify-between gap-2 border-b border-slate-100 pb-4 sm:flex-row sm:items-end">
         <div>
           <h2 className="section-title">스터디 설정</h2>
@@ -252,34 +290,65 @@ function StudySettingsCard({ study }: { study: Study }) {
             스터디 이름과 설명을 관리합니다.
           </p>
         </div>
-        <button className="btn-secondary w-fit" type="button">
-          저장하기
+        <button className="btn-secondary w-fit" disabled={isPending} type="submit">
+          {isPending ? "저장 중..." : "저장하기"}
         </button>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <label className="block">
           <span className="mb-2 block text-label-caps text-slate-500">Study Name</span>
-          <input className="input-field font-semibold" defaultValue={study.name} type="text" />
+          <input
+            className="input-field font-semibold"
+            defaultValue={state.status === "error" ? state.title : study.name}
+            maxLength={80}
+            name="title"
+            required
+            type="text"
+          />
         </label>
         <label className="block lg:col-span-2">
           <span className="mb-2 block text-label-caps text-slate-500">Description</span>
           <textarea
             className="min-h-32 w-full resize-y rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-body-md outline-none transition-all focus:border-primary focus:bg-white focus:ring-2 focus:ring-secondary-container/30"
-            defaultValue={study.description}
+            defaultValue={state.status === "error" ? state.description : study.description}
+            maxLength={500}
+            name="description"
           />
         </label>
       </div>
-    </section>
+
+      {state.status === "error" ? (
+        <p className="mt-4 rounded-lg bg-error/10 px-4 py-3 text-body-sm font-medium text-error">
+          {state.error}
+        </p>
+      ) : null}
+
+      {state.status === "success" ? (
+        <p className="mt-4 rounded-lg bg-secondary-container/60 px-4 py-3 text-body-sm font-medium text-primary">
+          스터디 설정을 저장했습니다.
+        </p>
+      ) : null}
+    </form>
   );
 }
 
-function DangerZoneCard({ studyName }: { studyName: string }) {
+function DangerZoneCard({
+  studyId,
+  studyName,
+}: {
+  studyId: string;
+  studyName: string;
+}) {
   const [confirmText, setConfirmText] = useState("");
   const canDelete = confirmText === studyName;
 
   return (
-    <section className="rounded-xl border border-error-container bg-error-container/20 p-6 shadow-sm">
+    <form
+      action={deleteStudy}
+      className="rounded-xl border border-error-container bg-error-container/20 p-6 shadow-sm"
+    >
+      <input name="studyId" type="hidden" value={studyId} />
       <div className="mb-6">
         <p className="text-label-caps text-error">Danger Zone</p>
         <h2 className="section-title text-error">스터디 삭제</h2>
@@ -295,6 +364,7 @@ function DangerZoneCard({ studyName }: { studyName: string }) {
           </span>
           <input
             className="w-full border-none bg-transparent p-0 font-mono text-body-sm text-error outline-none placeholder:text-slate-300 focus:ring-0"
+            name="confirmText"
             onChange={(event) => setConfirmText(event.target.value)}
             placeholder="Type here..."
             type="text"
@@ -304,12 +374,12 @@ function DangerZoneCard({ studyName }: { studyName: string }) {
         <button
           className="rounded-lg bg-error px-4 py-3 text-body-sm font-bold text-on-error transition-opacity enabled:hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           disabled={!canDelete}
-          type="button"
+          type="submit"
         >
           스터디 삭제
         </button>
       </div>
-    </section>
+    </form>
   );
 }
 

@@ -71,6 +71,8 @@ model User {
   problemSubmissions       ProblemSubmission[]
   ownedStudies             Study[]                   @relation("StudyOwner")
   studyMemberships         StudyMember[]
+  studyInvitesReceived     StudyInvite[]             @relation("StudyInviteTarget")
+  studyInvitesSent         StudyInvite[]             @relation("StudyInviteInviter")
   studyProblemShares       StudyProblemShare[]
 
   @@map("users")
