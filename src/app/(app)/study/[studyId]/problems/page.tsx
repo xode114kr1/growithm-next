@@ -1,26 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import {
-  getProblemStatusBadgeClass,
-  getProblemStatusDescription,
-  getProblemStatusLabel,
-} from "@/app/(app)/problem/_lib/problem-status";
-import type { ProblemSubmissionStatus } from "@/generated/prisma/enums";
+import StudyProblemModalTable from "@/app/(app)/study/[studyId]/problems/_components/study-problem-modal-table";
+import type { StudyProblem } from "@/app/(app)/study/[studyId]/problems/_components/study-problem-modal-table";
 import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
-
-type StudyProblem = {
-  categories: string[];
-  code: string;
-  id: string;
-  platform: string;
-  sharedAt: Date;
-  sharedBy: string;
-  status: ProblemSubmissionStatus;
-  tier: string | null;
-  title: string;
-};
 
 type StudyProblemsData = {
   description: string;
@@ -54,7 +38,7 @@ export default async function StudyProblemsPage({
         tiers={data.tiers}
         totalCount={data.problems.length}
       />
-      <StudyProblemTable problems={data.problems} />
+      <StudyProblemModalTable problems={data.problems} />
     </>
   );
 }
@@ -93,10 +77,17 @@ async function getStudyProblemsData(
           problemSubmission: {
             select: {
               categories: true,
+              code: true,
+              description: true,
               id: true,
+              link: true,
+              memo: true,
               platform: true,
               problemId: true,
+              score: true,
+              scoreMax: true,
               status: true,
+              submittedAtText: true,
               tier: true,
               title: true,
             },
@@ -136,13 +127,20 @@ async function getStudyProblemsData(
   const problems = study.problemShares.map((share) => ({
     categories: normalizeCategories(share.problemSubmission.categories),
     code: `${share.problemSubmission.platform}-${share.problemSubmission.problemId}`,
+    description: share.problemSubmission.description,
     id: share.problemSubmission.id,
+    link: share.problemSubmission.link,
+    memo: share.problemSubmission.memo,
     platform: share.problemSubmission.platform,
-    sharedAt: share.sharedAt,
+    score: share.problemSubmission.score,
+    scoreMax: share.problemSubmission.scoreMax,
+    sharedAtLabel: formatDate(share.sharedAt),
     sharedBy: getUserDisplayName(share.user.name),
     status: share.problemSubmission.status,
+    submittedAtText: share.problemSubmission.submittedAtText,
     tier: share.problemSubmission.tier,
     title: share.problemSubmission.title,
+    solutionCode: share.problemSubmission.code,
   }));
 
   return {
@@ -248,129 +246,6 @@ function StudyProblemFilters({
   );
 }
 
-function StudyProblemTable({
-  problems,
-}: {
-  problems: StudyProblem[];
-}) {
-  return (
-    <section className="app-card overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-left">
-          <thead>
-            <tr className="border-b border-slate-100 bg-slate-50/50">
-              <TableHead>Problem Details</TableHead>
-              <TableHead>Tags</TableHead>
-              <TableHead>Shared By</TableHead>
-              <TableHead>Shared At</TableHead>
-              <TableHead>State</TableHead>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-50">
-            {problems.map((problem) => (
-              <tr
-                className="group transition-colors hover:bg-slate-50/80"
-                key={problem.id}
-              >
-                <td className="min-w-[360px] max-w-[560px] px-6 py-5">
-                  <Link
-                    className="flex items-start gap-4 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-secondary-container"
-                    href={`/problem/${problem.id}`}
-                  >
-                    <span
-                      className={`mt-1 flex size-10 shrink-0 items-center justify-center rounded-full border text-xs font-black shadow-sm ${getTierBadgeClass(problem.tier)}`}
-                    >
-                      {getPlatformInitial(problem.platform)}
-                    </span>
-                    <div className="min-w-0 space-y-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded bg-slate-100 px-1.5 py-0.5 text-mono-code text-[11px] text-slate-500">
-                          {problem.code}
-                        </span>
-                        {problem.tier ? (
-                          <span className={getTierBadgeClass(problem.tier)}>
-                            {problem.tier}
-                          </span>
-                        ) : null}
-                      </div>
-                      <h3 className="text-pretty break-words font-semibold leading-snug text-on-surface transition-colors group-hover:text-secondary">
-                        {problem.title}
-                      </h3>
-                    </div>
-                  </Link>
-                </td>
-                <td className="px-6 py-5">
-                  <div className="flex flex-wrap gap-1.5">
-                    {problem.categories.length > 0 ? (
-                      problem.categories.map((tag) => (
-                        <span
-                          className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-500"
-                          key={tag}
-                        >
-                          {tag}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-body-sm text-slate-400">No tags</span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-6 py-5 text-body-sm font-semibold text-secondary">
-                  {problem.sharedBy}
-                </td>
-                <td className="px-6 py-5 text-body-sm text-slate-500">
-                  {formatDate(problem.sharedAt)}
-                </td>
-                <td className="px-6 py-5">
-                  <ProblemState status={problem.status} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {problems.length === 0 ? <EmptyState /> : null}
-      <div className="flex flex-col items-start justify-between gap-4 border-t border-slate-100 bg-slate-50/30 px-6 py-4 sm:flex-row sm:items-center">
-        <p className="text-body-sm text-slate-500">
-          Showing{" "}
-          <span className="font-semibold text-on-surface">
-            {problems.length > 0 ? "1" : "0"} - {problems.length}
-          </span>{" "}
-          of {problems.length.toLocaleString()} study problems
-        </p>
-      </div>
-    </section>
-  );
-}
-
-function ProblemState({ status }: { status: ProblemSubmissionStatus }) {
-  return (
-    <div className="flex min-w-36 flex-col items-start gap-1.5">
-      <span className={getProblemStatusBadgeClass(status)}>
-        {getProblemStatusLabel(status)}
-      </span>
-      <span className="text-body-sm text-slate-500">
-        {getProblemStatusDescription(status)}
-      </span>
-    </div>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="border-t border-slate-100 px-6 py-14 text-center">
-      <p className="font-semibold text-on-surface">No shared problems yet</p>
-      <p className="mt-2 text-body-sm text-slate-500">
-        Share a completed submission from your problem detail page to populate
-        this study list.
-      </p>
-      <Link className="btn-secondary mt-5" href="/problem">
-        Browse Problems
-      </Link>
-    </div>
-  );
-}
-
 function FilterCard({
   children,
   title,
@@ -386,12 +261,6 @@ function FilterCard({
   );
 }
 
-function TableHead({ children }: { children: React.ReactNode }) {
-  return (
-    <th className="px-6 py-4 text-label-caps text-slate-400">{children}</th>
-  );
-}
-
 function normalizeCategories(categories: unknown): string[] {
   if (!Array.isArray(categories)) {
     return [];
@@ -400,34 +269,6 @@ function normalizeCategories(categories: unknown): string[] {
   return categories.filter(
     (category): category is string => typeof category === "string",
   );
-}
-
-function getPlatformInitial(platform: string) {
-  return platform.charAt(0);
-}
-
-function getTierBadgeClass(tier: string | null) {
-  if (tier?.toLowerCase().includes("ruby")) {
-    return "border-rose-300 bg-rose-600 text-white";
-  }
-
-  if (tier?.toLowerCase().includes("diamond")) {
-    return "border-sky-300 bg-sky-100 text-sky-800";
-  }
-
-  if (tier?.toLowerCase().includes("platinum")) {
-    return "badge-tier-platinum";
-  }
-
-  if (tier?.toLowerCase().includes("gold")) {
-    return "badge-tier-gold";
-  }
-
-  if (tier?.toLowerCase().includes("bronze")) {
-    return "border-amber-700/20 bg-amber-700 text-white";
-  }
-
-  return "badge-tier-silver";
 }
 
 function getUserDisplayName(name: string | null) {
