@@ -6,7 +6,6 @@ CREATE TABLE "study_invites" (
     "id" TEXT NOT NULL,
     "study_id" TEXT NOT NULL,
     "invited_by_id" TEXT NOT NULL,
-    "target_user_id" TEXT NOT NULL,
     "target" TEXT NOT NULL,
     "status" "StudyInviteStatus" NOT NULL DEFAULT 'PENDING',
     "expires_at" TIMESTAMP(3) NOT NULL,
@@ -20,13 +19,7 @@ CREATE TABLE "study_invites" (
 CREATE UNIQUE INDEX "study_invites_study_id_target_key" ON "study_invites"("study_id", "target");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "study_invites_study_id_target_user_id_key" ON "study_invites"("study_id", "target_user_id");
-
--- CreateIndex
 CREATE INDEX "study_invites_invited_by_id_idx" ON "study_invites"("invited_by_id");
-
--- CreateIndex
-CREATE INDEX "study_invites_target_user_id_idx" ON "study_invites"("target_user_id");
 
 -- CreateIndex
 CREATE INDEX "study_invites_status_idx" ON "study_invites"("status");
@@ -36,6 +29,3 @@ ALTER TABLE "study_invites" ADD CONSTRAINT "study_invites_study_id_fkey" FOREIGN
 
 -- AddForeignKey
 ALTER TABLE "study_invites" ADD CONSTRAINT "study_invites_invited_by_id_fkey" FOREIGN KEY ("invited_by_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "study_invites" ADD CONSTRAINT "study_invites_target_user_id_fkey" FOREIGN KEY ("target_user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
