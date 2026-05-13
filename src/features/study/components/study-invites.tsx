@@ -1,16 +1,10 @@
 import {
   acceptStudyInvite,
   declineStudyInvite,
-} from "@/app/(app)/study/actions";
+} from "@/features/study/actions/study-actions";
 import { auth } from "@/lib/auth/auth";
-import { prisma } from "@/lib/prisma";
-
-type StudyInviteItem = {
-  id: string;
-  invitedByName: string;
-  studyTitle: string;
-  timeLabel: string;
-};
+import { getPendingInvites } from "@/features/study/server/study-invites-data";
+import type { StudyInviteItem } from "@/features/study/types";
 
 export default async function StudyInvites() {
   const session = await auth();
@@ -39,40 +33,6 @@ export default async function StudyInvites() {
       </div>
     </section>
   );
-}
-
-async function getPendingInvites(userId: string): Promise<StudyInviteItem[]> {
-  const invites = await prisma.studyInvite.findMany({
-    include: {
-      invitedBy: {
-        select: {
-          name: true,
-        },
-      },
-      study: {
-        select: {
-          title: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    where: {
-      expiresAt: {
-        gt: new Date(),
-      },
-      status: "PENDING",
-      targetUserId: userId,
-    },
-  });
-
-  return invites.map((invite) => ({
-    id: invite.id,
-    invitedByName: getUserDisplayName(invite.invitedBy.name),
-    studyTitle: invite.study.title,
-    timeLabel: formatRelativeDate(invite.createdAt),
-  }));
 }
 
 function InviteCard({ invite }: { invite: StudyInviteItem }) {
@@ -121,25 +81,3 @@ function InviteCard({ invite }: { invite: StudyInviteItem }) {
   );
 }
 
-function formatRelativeDate(date: Date) {
-  const diffMs = Date.now() - date.getTime();
-  const diffMinutes = Math.max(1, Math.floor(diffMs / 60_000));
-
-  if (diffMinutes < 60) {
-    return `${diffMinutes} minutes ago`;
-  }
-
-  const diffHours = Math.floor(diffMinutes / 60);
-
-  if (diffHours < 24) {
-    return `${diffHours} hours ago`;
-  }
-
-  const diffDays = Math.floor(diffHours / 24);
-
-  return `${diffDays} days ago`;
-}
-
-function getUserDisplayName(name: string | null) {
-  return name || "Unknown";
-}

@@ -4,9 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
-
-const MAX_TITLE_LENGTH = 80;
-const MAX_DESCRIPTION_LENGTH = 500;
+import { validateStudyInput } from "@/features/study/validation/study-input";
 
 export type CreateStudyActionState = {
   description: string;
@@ -166,28 +164,6 @@ export async function declineStudyInvite(formData: FormData) {
   });
 
   revalidatePath("/study");
-}
-
-function validateStudyInput({
-  description,
-  title,
-}: {
-  description: string;
-  title: string;
-}) {
-  if (!title) {
-    return "스터디 제목을 입력해주세요.";
-  }
-
-  if (title.length > MAX_TITLE_LENGTH) {
-    return `스터디 제목은 ${MAX_TITLE_LENGTH.toLocaleString()}자 이하로 입력해주세요.`;
-  }
-
-  if (description.length > MAX_DESCRIPTION_LENGTH) {
-    return `스터디 설명은 ${MAX_DESCRIPTION_LENGTH.toLocaleString()}자 이하로 입력해주세요.`;
-  }
-
-  return null;
 }
 
 function createErrorState({

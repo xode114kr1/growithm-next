@@ -1,59 +1,10 @@
 import Link from "next/link";
 
-import StudyCreateModal from "@/app/(app)/study/_components/study-create-modal";
+import StudyCreateModal from "@/features/study/components/study-create-modal";
+import { getUserStudies } from "@/features/study/server/study-list-data";
+import type { StudyListItem, StudyTier } from "@/features/study/types";
+import { tierThumbnails } from "@/features/study/utils";
 import { auth } from "@/lib/auth/auth";
-import { prisma } from "@/lib/prisma";
-
-type StudyTier = "Bronze" | "Silver" | "Gold" | "Platinum" | "Diamond" | "Ruby";
-
-type StudyListItem = {
-  description: string;
-  id: string;
-  isOwner: boolean;
-  memberCount: number;
-  ownerName: string;
-  progress: number;
-  progressLabel: string;
-  score: number;
-  tier: StudyTier;
-  title: string;
-};
-
-const tierThresholds = [
-  { minScore: 3000, tier: "Ruby" },
-  { minScore: 1500, tier: "Diamond" },
-  { minScore: 700, tier: "Platinum" },
-  { minScore: 300, tier: "Gold" },
-  { minScore: 100, tier: "Silver" },
-  { minScore: 0, tier: "Bronze" },
-] satisfies Array<{ minScore: number; tier: StudyTier }>;
-
-const tierThumbnails: Record<StudyTier, { className: string; label: string }> = {
-  Bronze: {
-    className: "border-amber-700/20 bg-amber-700 text-white shadow-amber-900/10",
-    label: "B",
-  },
-  Silver: {
-    className: "border-slate-300 bg-slate-200 text-slate-700 shadow-slate-400/10",
-    label: "S",
-  },
-  Gold: {
-    className: "border-yellow-400/30 bg-yellow-400 text-yellow-950 shadow-yellow-500/10",
-    label: "G",
-  },
-  Platinum: {
-    className: "border-cyan-200 bg-primary-fixed text-primary shadow-cyan-500/10",
-    label: "P",
-  },
-  Diamond: {
-    className: "border-sky-300 bg-sky-100 text-sky-800 shadow-sky-500/10",
-    label: "D",
-  },
-  Ruby: {
-    className: "border-rose-300 bg-rose-600 text-white shadow-rose-700/10",
-    label: "R",
-  },
-};
 
 export default async function StudyList() {
   const session = await auth();
@@ -75,58 +26,6 @@ export default async function StudyList() {
       </div>
     </section>
   );
-}
-
-async function getUserStudies(userId: string): Promise<StudyListItem[]> {
-  const studies = await prisma.study.findMany({
-    include: {
-      _count: {
-        select: {
-          members: true,
-        },
-      },
-      owner: {
-        select: {
-          name: true,
-        },
-      },
-    },
-    orderBy: {
-      updatedAt: "desc",
-    },
-    where: {
-      OR: [
-        {
-          ownerId: userId,
-        },
-        {
-          members: {
-            some: {
-              userId,
-            },
-          },
-        },
-      ],
-    },
-  });
-
-  return studies.map((study) => {
-    const tier = getStudyTier(study.score);
-    const progress = getTierProgress(study.score, tier);
-
-    return {
-      description: study.description ?? "아직 스터디 설명이 없습니다.",
-      id: study.id,
-      isOwner: study.ownerId === userId,
-      memberCount: study._count.members,
-      ownerName: study.owner.name ?? "Unknown",
-      progress,
-      progressLabel: getProgressLabel(study.score, tier),
-      score: study.score,
-      tier,
-      title: study.title,
-    };
-  });
 }
 
 function StudyCard({ study }: { study: StudyListItem }) {
@@ -246,39 +145,3 @@ function FindStudyCard() {
   );
 }
 
-function getStudyTier(score: number): StudyTier {
-  return (
-    tierThresholds.find((threshold) => score >= threshold.minScore)?.tier ??
-    "Bronze"
-  );
-}
-
-function getTierProgress(score: number, tier: StudyTier) {
-  const currentTierIndex = tierThresholds.findIndex(
-    (threshold) => threshold.tier === tier,
-  );
-  const currentThreshold = tierThresholds[currentTierIndex];
-  const nextThreshold = tierThresholds[currentTierIndex - 1];
-
-  if (!currentThreshold || !nextThreshold) {
-    return 100;
-  }
-
-  const currentTierScore = score - currentThreshold.minScore;
-  const nextTierScore = nextThreshold.minScore - currentThreshold.minScore;
-
-  return Math.max(0, Math.min((currentTierScore / nextTierScore) * 100, 100));
-}
-
-function getProgressLabel(score: number, tier: StudyTier) {
-  const currentTierIndex = tierThresholds.findIndex(
-    (threshold) => threshold.tier === tier,
-  );
-  const nextThreshold = tierThresholds[currentTierIndex - 1];
-
-  if (!nextThreshold) {
-    return "Max tier";
-  }
-
-  return `${score.toLocaleString()} / ${nextThreshold.minScore.toLocaleString()} XP`;
-}

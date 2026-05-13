@@ -6,7 +6,7 @@ import { useActionState, useEffect, useId, useState } from "react";
 import {
   createStudy,
   type CreateStudyActionState,
-} from "@/app/(app)/study/actions";
+} from "@/features/study/actions/study-actions";
 
 const initialCreateStudyActionState: CreateStudyActionState = {
   description: "",
