@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-import type { ProblemDetail } from "./problem-detail-types";
+import type { ProblemDetail } from "@/features/problem/types";
 
 // 문제 제출 1건을 조회하고 상세 UI에 맞게 nullable JSON 필드를 정리한다.
 export async function getProblemDetail(id: string): Promise<ProblemDetail | null> {

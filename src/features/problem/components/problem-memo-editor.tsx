@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 import {
   type ProblemMemoActionState,
   updateProblemMemo,
-} from "@/app/(app)/problem/[id]/actions";
+} from "@/features/problem/actions/problem-detail-actions";
 
 type ProblemMemoEditorProps = {
   initialMemo: string | null;

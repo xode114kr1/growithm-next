@@ -34,3 +34,34 @@ export type ProblemPageSearchParams = {
   sort?: string | string[];
   tier?: string | string[];
 };
+
+export type ProblemDetail = {
+  accuracy: number | null;
+  categories: string[];
+  code: string | null;
+  createdAt: Date;
+  description: string | null;
+  id: string;
+  link: string | null;
+  memory: string | null;
+  memo: string | null;
+  platform: string;
+  problemId: string;
+  score: number | null;
+  scoreMax: number | null;
+  status: ProblemSubmissionStatus;
+  submittedAtText: string | null;
+  tier: string | null;
+  time: string | null;
+  title: string;
+  updatedAt: Date;
+};
+
+export type ProblemShareTargetStudy = {
+  hasShared: boolean;
+  id: string;
+  memberCount: number;
+  ownerName: string;
+  score: number;
+  title: string;
+};

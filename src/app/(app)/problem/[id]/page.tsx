@@ -1,12 +1,12 @@
 import { notFound } from "next/navigation";
 
-import ProblemDescription from "@/app/(app)/problem/[id]/_components/problem-description";
-import ProblemDetailHeader from "@/app/(app)/problem/[id]/_components/problem-detail-header";
-import ProblemMemoEditor from "@/app/(app)/problem/[id]/_components/problem-memo-editor";
-import ProblemMetadata from "@/app/(app)/problem/[id]/_components/problem-metadata";
-import ProblemSolutionCode from "@/app/(app)/problem/[id]/_components/problem-solution-code";
-import { getProblemDetail } from "@/app/(app)/problem/[id]/_lib/problem-detail-data";
-import { getProblemShareTargetStudies } from "@/app/(app)/problem/[id]/_lib/problem-share-targets";
+import ProblemDescription from "@/features/problem/components/problem-description";
+import ProblemDetailHeader from "@/features/problem/components/problem-detail-header";
+import ProblemMemoEditor from "@/features/problem/components/problem-memo-editor";
+import ProblemMetadata from "@/features/problem/components/problem-metadata";
+import ProblemSolutionCode from "@/features/problem/components/problem-solution-code";
+import { getProblemDetail } from "@/features/problem/server/problem-detail-data";
+import { getProblemShareTargetStudies } from "@/features/problem/server/problem-share-targets";
 
 export default async function ProblemDetailPage({
   params,

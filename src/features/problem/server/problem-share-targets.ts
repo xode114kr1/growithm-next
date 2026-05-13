@@ -1,14 +1,7 @@
 import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
 
-export type ProblemShareTargetStudy = {
-  hasShared: boolean;
-  id: string;
-  memberCount: number;
-  ownerName: string;
-  score: number;
-  title: string;
-};
+import type { ProblemShareTargetStudy } from "@/features/problem/types";
 
 export async function getProblemShareTargetStudies(problemId: string): Promise<
   ProblemShareTargetStudy[]

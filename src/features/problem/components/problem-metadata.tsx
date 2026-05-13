@@ -1,9 +1,9 @@
 import {
+  formatDate,
   getProblemStatusDescription,
   getProblemStatusLabel,
 } from "@/features/problem/utils";
-import { formatDate } from "@/app/(app)/problem/[id]/_lib/problem-detail-format";
-import type { ProblemDetail } from "@/app/(app)/problem/[id]/_lib/problem-detail-types";
+import type { ProblemDetail } from "@/features/problem/types";
 
 export default function ProblemMetadata({ problem }: { problem: ProblemDetail }) {
   const metadata = [

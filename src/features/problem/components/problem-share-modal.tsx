@@ -7,8 +7,8 @@ import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import {
   shareProblemToStudies,
   type ProblemShareActionState,
-} from "@/app/(app)/problem/[id]/actions";
-import type { ProblemShareTargetStudy } from "@/app/(app)/problem/[id]/_lib/problem-share-targets";
+} from "@/features/problem/actions/problem-detail-actions";
+import type { ProblemShareTargetStudy } from "@/features/problem/types";
 
 type ProblemShareModalProps = {
   problemId: string;
