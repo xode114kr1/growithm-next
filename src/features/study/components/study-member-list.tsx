@@ -2,16 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-export type StudyMember = {
-  contribution: number;
-  id: string;
-  joinedAt: string;
-  joinedAtTime: number;
-  lastActive: string;
-  lastActiveTime: number;
-  name: string;
-  role: "OWNER" | "LEADER" | "MEMBER";
-};
+import type { StudyMember } from "@/features/study/types";
 
 type RoleFilter = "ALL" | StudyMember["role"];
 type SortKey = "contribution" | "lastActive" | "joinedAt" | "name";

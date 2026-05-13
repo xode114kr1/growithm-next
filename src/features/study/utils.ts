@@ -73,6 +73,23 @@ export function getProgressLabel(score: number, tier: StudyTier) {
   return `${score.toLocaleString()} / ${nextThreshold.minScore.toLocaleString()} XP`;
 }
 
+export function getNextTierScore(tier: StudyTier) {
+  const currentTierIndex = tierThresholds.findIndex(
+    (threshold) => threshold.tier === tier,
+  );
+  const nextThreshold = tierThresholds[currentTierIndex - 1];
+
+  return nextThreshold?.minScore ?? tierThresholds[0].minScore;
+}
+
+export function formatShortDate(date: Date) {
+  return new Intl.DateTimeFormat("ko-KR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+}
+
 export function formatRelativeDate(date: Date) {
   const diffMs = Date.now() - date.getTime();
   const diffMinutes = Math.max(1, Math.floor(diffMs / 60_000));
