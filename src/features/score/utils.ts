@@ -1,4 +1,7 @@
-import type { PersonalScoreTier } from "@/features/score/types";
+import type {
+  PersonalScoreTier,
+  ScoreTierThreshold,
+} from "@/features/score/types";
 
 export const personalScoreTierThresholds = [
   { minScore: 1_000_000, tier: "Diamond" },
@@ -8,22 +11,27 @@ export const personalScoreTierThresholds = [
   { minScore: 0, tier: "Bronze" },
 ] satisfies Array<{ minScore: number; tier: PersonalScoreTier }>;
 
-export function getPersonalScoreTier(score: number): PersonalScoreTier {
+export function getScoreTier<TTier extends string>(
+  score: number,
+  thresholds: ReadonlyArray<ScoreTierThreshold<TTier>>,
+  fallbackTier: TTier,
+): TTier {
   return (
-    personalScoreTierThresholds.find((threshold) => score >= threshold.minScore)
-      ?.tier ?? "Bronze"
+    thresholds.find((threshold) => score >= threshold.minScore)?.tier ??
+    fallbackTier
   );
 }
 
-export function getPersonalTierProgress(
+export function getScoreTierProgress<TTier extends string>(
   score: number,
-  tier: PersonalScoreTier,
+  tier: TTier,
+  thresholds: ReadonlyArray<ScoreTierThreshold<TTier>>,
 ) {
-  const currentTierIndex = personalScoreTierThresholds.findIndex(
+  const currentTierIndex = thresholds.findIndex(
     (threshold) => threshold.tier === tier,
   );
-  const currentThreshold = personalScoreTierThresholds[currentTierIndex];
-  const nextThreshold = personalScoreTierThresholds[currentTierIndex - 1];
+  const currentThreshold = thresholds[currentTierIndex];
+  const nextThreshold = thresholds[currentTierIndex - 1];
 
   if (!currentThreshold || !nextThreshold) {
     return 100;
@@ -35,14 +43,15 @@ export function getPersonalTierProgress(
   return Math.max(0, Math.min((currentTierScore / nextTierScore) * 100, 100));
 }
 
-export function getPersonalProgressLabel(
+export function getScoreProgressLabel<TTier extends string>(
   score: number,
-  tier: PersonalScoreTier,
+  tier: TTier,
+  thresholds: ReadonlyArray<ScoreTierThreshold<TTier>>,
 ) {
-  const currentTierIndex = personalScoreTierThresholds.findIndex(
+  const currentTierIndex = thresholds.findIndex(
     (threshold) => threshold.tier === tier,
   );
-  const nextThreshold = personalScoreTierThresholds[currentTierIndex - 1];
+  const nextThreshold = thresholds[currentTierIndex - 1];
 
   if (!nextThreshold) {
     return "Max tier";
@@ -51,11 +60,36 @@ export function getPersonalProgressLabel(
   return `${score.toLocaleString()} / ${nextThreshold.minScore.toLocaleString()} XP`;
 }
 
-export function getNextPersonalTierScore(tier: PersonalScoreTier) {
-  const currentTierIndex = personalScoreTierThresholds.findIndex(
+export function getNextScoreTierScore<TTier extends string>(
+  tier: TTier,
+  thresholds: ReadonlyArray<ScoreTierThreshold<TTier>>,
+) {
+  const currentTierIndex = thresholds.findIndex(
     (threshold) => threshold.tier === tier,
   );
-  const nextThreshold = personalScoreTierThresholds[currentTierIndex - 1];
+  const nextThreshold = thresholds[currentTierIndex - 1];
 
-  return nextThreshold?.minScore ?? personalScoreTierThresholds[0].minScore;
+  return nextThreshold?.minScore ?? thresholds[0]?.minScore ?? 0;
+}
+
+export function getPersonalScoreTier(score: number): PersonalScoreTier {
+  return getScoreTier(score, personalScoreTierThresholds, "Bronze");
+}
+
+export function getPersonalTierProgress(
+  score: number,
+  tier: PersonalScoreTier,
+) {
+  return getScoreTierProgress(score, tier, personalScoreTierThresholds);
+}
+
+export function getPersonalProgressLabel(
+  score: number,
+  tier: PersonalScoreTier,
+) {
+  return getScoreProgressLabel(score, tier, personalScoreTierThresholds);
+}
+
+export function getNextPersonalTierScore(tier: PersonalScoreTier) {
+  return getNextScoreTierScore(tier, personalScoreTierThresholds);
 }

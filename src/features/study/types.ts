@@ -1,4 +1,6 @@
-export type StudyTier = "Bronze" | "Silver" | "Gold" | "Platinum" | "Diamond";
+import type { ScoreTier } from "@/features/score/types";
+
+export type StudyTier = ScoreTier;
 
 export type StudyListItem = {
   description: string;

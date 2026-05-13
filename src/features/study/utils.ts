@@ -1,6 +1,12 @@
+import {
+  getNextScoreTierScore,
+  getScoreProgressLabel,
+  getScoreTier,
+  getScoreTierProgress,
+} from "@/features/score/utils";
 import type { StudyTier } from "@/features/study/types";
 
-const tierThresholds = [
+const studyScoreTierThresholds = [
   { minScore: 5_000_000, tier: "Diamond" },
   { minScore: 500_000, tier: "Platinum" },
   { minScore: 50_000, tier: "Gold" },
@@ -32,49 +38,19 @@ export const tierThumbnails: Record<StudyTier, { className: string; label: strin
 };
 
 export function getStudyTier(score: number): StudyTier {
-  return (
-    tierThresholds.find((threshold) => score >= threshold.minScore)?.tier ??
-    "Bronze"
-  );
+  return getScoreTier(score, studyScoreTierThresholds, "Bronze");
 }
 
 export function getTierProgress(score: number, tier: StudyTier) {
-  const currentTierIndex = tierThresholds.findIndex(
-    (threshold) => threshold.tier === tier,
-  );
-  const currentThreshold = tierThresholds[currentTierIndex];
-  const nextThreshold = tierThresholds[currentTierIndex - 1];
-
-  if (!currentThreshold || !nextThreshold) {
-    return 100;
-  }
-
-  const currentTierScore = score - currentThreshold.minScore;
-  const nextTierScore = nextThreshold.minScore - currentThreshold.minScore;
-
-  return Math.max(0, Math.min((currentTierScore / nextTierScore) * 100, 100));
+  return getScoreTierProgress(score, tier, studyScoreTierThresholds);
 }
 
 export function getProgressLabel(score: number, tier: StudyTier) {
-  const currentTierIndex = tierThresholds.findIndex(
-    (threshold) => threshold.tier === tier,
-  );
-  const nextThreshold = tierThresholds[currentTierIndex - 1];
-
-  if (!nextThreshold) {
-    return "Max tier";
-  }
-
-  return `${score.toLocaleString()} / ${nextThreshold.minScore.toLocaleString()} XP`;
+  return getScoreProgressLabel(score, tier, studyScoreTierThresholds);
 }
 
 export function getNextTierScore(tier: StudyTier) {
-  const currentTierIndex = tierThresholds.findIndex(
-    (threshold) => threshold.tier === tier,
-  );
-  const nextThreshold = tierThresholds[currentTierIndex - 1];
-
-  return nextThreshold?.minScore ?? tierThresholds[0].minScore;
+  return getNextScoreTierScore(tier, studyScoreTierThresholds);
 }
 
 export function formatShortDate(date: Date) {
