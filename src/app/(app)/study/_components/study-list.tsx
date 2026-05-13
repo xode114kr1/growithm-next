@@ -134,7 +134,7 @@ function StudyCard({ study }: { study: StudyListItem }) {
     <article className="app-card relative overflow-hidden p-6 transition-all duration-300 hover:shadow-lg hover:shadow-teal-900/5">
       {study.isOwner ? (
         <div className="absolute right-0 top-0 p-4">
-          <span className="rounded-full bg-secondary-container px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-on-secondary-container">
+          <span className="rounded-full bg-secondary-container px-2 py-1 text-2.5 font-bold uppercase tracking-widest text-on-secondary-container">
             Owner
           </span>
         </div>
@@ -215,7 +215,7 @@ function TierThumbnail({ tier }: { tier: StudyTier }) {
 
 function EmptyStudyCard({ isSignedIn }: { isSignedIn: boolean }) {
   return (
-    <div className="app-card flex min-h-[282px] flex-col justify-center p-6">
+    <div className="app-card flex min-h-70.5 flex-col justify-center p-6">
       <p className="text-label-caps text-slate-400">No Studies</p>
       <h3 className="mt-2 text-base font-bold text-primary">
         {isSignedIn ? "참여 중인 스터디가 없습니다." : "로그인이 필요합니다."}
@@ -232,14 +232,14 @@ function EmptyStudyCard({ isSignedIn }: { isSignedIn: boolean }) {
 function FindStudyCard() {
   return (
     <button
-      className="flex min-h-[282px] flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-8 text-center transition-all hover:border-primary/20 hover:bg-white"
+      className="flex min-h-70.5 flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-8 text-center transition-all hover:border-primary/20 hover:bg-white"
       type="button"
     >
       <div className="mb-3 flex size-12 items-center justify-center rounded-full bg-slate-100 text-2xl text-slate-400">
         +
       </div>
       <h3 className="mb-1 font-bold text-primary">Find New Study</h3>
-      <p className="max-w-[180px] text-xs leading-relaxed text-outline">
+      <p className="max-w-45 text-xs leading-relaxed text-outline">
         Explore the directory to find study labs matching your level.
       </p>
     </button>

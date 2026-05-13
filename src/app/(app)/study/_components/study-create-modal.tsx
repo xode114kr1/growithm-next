@@ -65,7 +65,7 @@ export default function StudyCreateModal() {
         <div
           aria-labelledby={titleId}
           aria-modal="true"
-          className="fixed inset-0 z-[80] flex items-center justify-center bg-primary/25 px-4 py-8 backdrop-blur-sm"
+          className="fixed inset-0 z-80 flex items-center justify-center bg-primary/25 px-4 py-8 backdrop-blur-sm"
           role="dialog"
         >
           <button

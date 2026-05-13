@@ -337,13 +337,13 @@ function StudyMembersCard({ members }: { members: Study["members"] }) {
                 <p className="truncate text-body-sm font-bold text-on-surface">
                   {member.name}
                 </p>
-                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                <p className="text-2.5 font-bold uppercase tracking-wide text-slate-400">
                   {member.role}
                 </p>
               </div>
             </div>
             {member.role === "owner" ? (
-              <span className="rounded-full bg-secondary-fixed px-2 py-1 text-[10px] font-bold uppercase text-on-secondary-fixed">
+              <span className="rounded-full bg-secondary-fixed px-2 py-1 text-2.5 font-bold uppercase text-on-secondary-fixed">
                 Owner
               </span>
             ) : null}
@@ -395,7 +395,7 @@ function RecentSolvedProblems({
                     className="transition-colors hover:bg-slate-50/80"
                     key={`${problem.title}-${problem.solvedBy}`}
                   >
-                    <td className="min-w-[240px] px-6 py-4 text-body-sm font-semibold text-on-surface">
+                    <td className="min-w-60 px-6 py-4 text-body-sm font-semibold text-on-surface">
                       {problem.title}
                     </td>
                     <td className="px-6 py-4 text-body-sm text-slate-500">

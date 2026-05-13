@@ -55,7 +55,7 @@ export default function ProblemDetailHeader({
           <p className="mb-2 text-label-caps text-slate-400">
             Problem {problem.problemId}
           </p>
-          <h1 className="page-title text-pretty break-words text-primary">
+          <h1 className="page-title text-pretty wrap-break-word text-primary">
             {problem.title}
           </h1>
           <p className="mt-3 max-w-2xl text-body-md text-on-surface-variant">

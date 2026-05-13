@@ -177,7 +177,7 @@ function StudyOwnerHeading({ study }: { study: OwnerStudy }) {
         <h1 className="page-title">
           Study Owner Console
         </h1>
-        <span className="w-fit rounded bg-primary px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-on-primary">
+        <span className="w-fit rounded bg-primary px-2 py-1 text-2.5 font-bold uppercase tracking-widest text-on-primary">
           Owner Only
         </span>
       </div>

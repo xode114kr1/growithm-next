@@ -148,7 +148,7 @@ export default function StudyProblemModalTable({
                   className="group transition-colors hover:bg-slate-50/80"
                   key={problem.id}
                 >
-                  <td className="min-w-[360px] max-w-[560px] px-6 py-5">
+                  <td className="min-w-90 max-w-140 px-6 py-5">
                     <button
                       className="flex w-full items-start gap-4 rounded-lg text-left outline-none focus-visible:ring-2 focus-visible:ring-secondary-container"
                       onClick={() => setSelectedProblem(problem)}
@@ -161,7 +161,7 @@ export default function StudyProblemModalTable({
                       </span>
                       <span className="min-w-0 space-y-1">
                         <span className="flex flex-wrap items-center gap-2">
-                          <span className="rounded bg-slate-100 px-1.5 py-0.5 text-mono-code text-[11px] text-slate-500">
+                          <span className="rounded bg-slate-100 px-1.5 py-0.5 text-mono-code text-2.75 text-slate-500">
                             {problem.code}
                           </span>
                           {problem.tier ? (
@@ -170,7 +170,7 @@ export default function StudyProblemModalTable({
                             </span>
                           ) : null}
                         </span>
-                        <span className="block text-pretty break-words font-semibold leading-snug text-on-surface transition-colors group-hover:text-secondary">
+                        <span className="block text-pretty wrap-break-word font-semibold leading-snug text-on-surface transition-colors group-hover:text-secondary">
                           {problem.title}
                         </span>
                       </span>
@@ -499,7 +499,7 @@ function StudyProblemModal({
         <header className="flex items-start justify-between gap-4 border-b border-slate-100 p-5 md:p-6">
           <div className="min-w-0">
             <div className="mb-3 flex flex-wrap items-center gap-2">
-              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-mono-code text-[11px] text-slate-500">
+              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-mono-code text-2.75 text-slate-500">
                 {problem.code}
               </span>
               {problem.tier ? (
@@ -507,7 +507,7 @@ function StudyProblemModal({
                   {problem.tier}
                 </span>
               ) : null}
-              <span className="text-[11px] font-semibold text-slate-400">
+              <span className="text-2.75 font-semibold text-slate-400">
                 {problem.platform}
               </span>
             </div>
@@ -669,7 +669,7 @@ function ProblemSolutionCode({ code }: { code: string | null }) {
         ) : null}
       </div>
       {code ? (
-        <pre className="max-h-[420px] overflow-auto rounded-lg bg-surface-container-low p-4 text-mono-code text-body-sm text-primary">
+        <pre className="max-h-105 overflow-auto rounded-lg bg-surface-container-low p-4 text-mono-code text-body-sm text-primary">
           <code>{code}</code>
         </pre>
       ) : (
@@ -687,7 +687,7 @@ function ProblemTags({ categories }: { categories: string[] }) {
       {categories.length > 0 ? (
         categories.map((tag) => (
           <span
-            className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-500"
+            className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-2.75 font-medium text-slate-500"
             key={tag}
           >
             {tag}

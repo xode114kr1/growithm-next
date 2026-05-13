@@ -44,7 +44,7 @@ export default function ProblemTable({
                 className="group transition-colors hover:bg-slate-50/80"
                 key={problem.id}
               >
-                <td className="min-w-[360px] max-w-[560px] px-6 py-5">
+                <td className="min-w-90 max-w-140 px-6 py-5">
                   <Link
                     className="flex items-start gap-4 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-secondary-container"
                     href={`/problem/${problem.id}`}
@@ -56,7 +56,7 @@ export default function ProblemTable({
                     </span>
                     <div className="min-w-0 space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded bg-slate-100 px-1.5 py-0.5 text-mono-code text-[11px] text-slate-500">
+                        <span className="rounded bg-slate-100 px-1.5 py-0.5 text-mono-code text-2.75 text-slate-500">
                           {problem.code}
                         </span>
                         {problem.tier ? (
@@ -65,7 +65,7 @@ export default function ProblemTable({
                           </span>
                         ) : null}
                       </div>
-                      <h3 className="text-pretty break-words font-semibold leading-snug text-on-surface transition-colors group-hover:text-secondary">
+                      <h3 className="text-pretty wrap-break-word font-semibold leading-snug text-on-surface transition-colors group-hover:text-secondary">
                         {problem.title}
                       </h3>
                     </div>
@@ -76,7 +76,7 @@ export default function ProblemTable({
                     {problem.categories.length > 0 ? (
                       problem.categories.map((tag) => (
                         <span
-                          className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-500"
+                          className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-2.75 font-medium text-slate-500"
                           key={tag}
                         >
                           {tag}

@@ -50,7 +50,7 @@ export default function DashboardStats() {
             >
               {stat.label}
             </h2>
-            <p className="font-serif text-[2rem] font-semibold leading-tight">
+            <p className="font-serif text-8 font-semibold leading-tight">
               {stat.value}
             </p>
           </div>
