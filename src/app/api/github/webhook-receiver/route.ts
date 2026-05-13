@@ -5,13 +5,13 @@ import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import {
   fetchGitHubReadmeContent,
   type GitHubReadmeContent,
-} from "@/lib/github/readme-content";
+} from "@/features/github/server/readme-content";
 import {
   getReadmeChangesFromPushPayload,
   getRepositoryOwnerId,
   getRepositoryFullName,
   type GitHubWebhookPayload,
-} from "@/lib/github/webhook-payload";
+} from "@/features/github/server/webhooks/payload-parser";
 import { prisma } from "@/lib/prisma";
 import { parseProblemReadme } from "@/lib/problem-readme/parse";
 
