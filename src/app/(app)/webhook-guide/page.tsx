@@ -1,6 +1,6 @@
 import { ExternalLink } from "lucide-react";
 
-import { WebhookRegistrationForm } from "./_components/webhook-registration-form";
+import { WebhookRegistrationForm } from "@/features/github/components/webhook-registration-form";
 
 const githubNewRepoUrl = "https://github.com/new";
 const baekjoonHubUrl =
