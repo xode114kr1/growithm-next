@@ -39,6 +39,7 @@ src/
     dashboard/
     friend/
     github/
+    home/
     problem/
     study/
   lib/
@@ -83,7 +84,7 @@ Route files should not:
 
 ## `src/features`
 
-Use `src/features` for domain-owned code. A feature is a product area or business capability such as `problem`, `study`, `github`, `auth`, `dashboard`, or `friend`.
+Use `src/features` for domain-owned code. A feature is a product area or business capability such as `problem`, `study`, `github`, `auth`, `dashboard`, `home`, or `friend`.
 
 Recommended feature layout:
 

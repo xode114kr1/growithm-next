@@ -11,6 +11,10 @@ Before making code changes, review the relevant Markdown files in `docs/`.
 
 한국어 설명: 코드 변경 전에 `docs/` 안의 관련 Markdown 문서를 먼저 확인한다.
 
+When creating or refactoring code, follow `docs/project-structure.md`.
+
+한국어 설명: 코드를 생성하거나 리팩토링할 때 `docs/project-structure.md`를 따른다.
+
 When the user asks Codex to create a commit, follow `docs/commit-convention.md`.
 
 한국어 설명: 사용자가 Codex에게 커밋 생성을 요청하면 `docs/commit-convention.md`를 따른다.
