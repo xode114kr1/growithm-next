@@ -1,4 +1,4 @@
-import FeatureIcon from "@/app/(app)/(home)/_components/feature-icon";
+import FeatureIcon from "@/features/home/components/feature-icon";
 
 const heatmapColors = [
   "bg-slate-100",
