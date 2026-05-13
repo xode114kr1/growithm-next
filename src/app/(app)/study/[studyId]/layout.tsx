@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 
-import StudyLocalNav from "@/app/(app)/study/[studyId]/_components/study-local-nav";
 import { auth } from "@/lib/auth/auth";
-import { prisma } from "@/lib/prisma";
+import StudyLocalNav from "@/features/study/components/study-local-nav";
+import { getStudyLayoutData } from "@/features/study/server/study-layout-data";
 
 type StudyDetailLayoutProps = {
   children: React.ReactNode;
@@ -14,7 +14,9 @@ export default async function StudyDetailLayout({
   params,
 }: StudyDetailLayoutProps) {
   const { studyId } = await params;
-  const study = await getStudyLayoutData(studyId);
+  const session = await auth();
+  const userId = session?.user?.id;
+  const study = userId ? await getStudyLayoutData({ studyId, userId }) : null;
 
   if (!study) {
     notFound();
@@ -32,46 +34,4 @@ export default async function StudyDetailLayout({
       </div>
     </main>
   );
-}
-
-async function getStudyLayoutData(studyId: string) {
-  const session = await auth();
-  const userId = session?.user?.id;
-
-  if (!userId) {
-    return null;
-  }
-
-  const study = await prisma.study.findFirst({
-    select: {
-      id: true,
-      ownerId: true,
-      title: true,
-    },
-    where: {
-      id: studyId,
-      OR: [
-        {
-          ownerId: userId,
-        },
-        {
-          members: {
-            some: {
-              userId,
-            },
-          },
-        },
-      ],
-    },
-  });
-
-  if (!study) {
-    return null;
-  }
-
-  return {
-    id: study.id,
-    isOwner: study.ownerId === userId,
-    name: study.title,
-  };
 }

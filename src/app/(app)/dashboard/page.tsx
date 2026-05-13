@@ -1,8 +1,8 @@
-import DashboardHeader from "@/app/(app)/dashboard/_components/dashboard-header";
-import DashboardStats from "@/app/(app)/dashboard/_components/dashboard-stats";
-import GrowthMastery from "@/app/(app)/dashboard/_components/growth-mastery";
-import PendingAnalysis from "@/app/(app)/dashboard/_components/pending-analysis";
-import QuickLaunch from "@/app/(app)/dashboard/_components/quick-launch";
+import DashboardHeader from "@/features/dashboard/components/dashboard-header";
+import DashboardStats from "@/features/dashboard/components/dashboard-stats";
+import GrowthMastery from "@/features/dashboard/components/growth-mastery";
+import PendingAnalysis from "@/features/dashboard/components/pending-analysis";
+import QuickLaunch from "@/features/dashboard/components/quick-launch";
 
 export default function DashboardPage() {
   return (

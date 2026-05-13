@@ -1,4 +1,4 @@
-import FriendNetwork from "@/app/(app)/friend/_components/friend-network";
+import FriendNetwork from "@/features/friend/components/friend-network";
 
 export default function FriendPage() {
   return (

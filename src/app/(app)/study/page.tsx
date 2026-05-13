@@ -1,7 +1,7 @@
-import StudyFab from "@/app/(app)/study/_components/study-fab";
-import StudyHeader from "@/app/(app)/study/_components/study-header";
-import StudyInvites from "@/app/(app)/study/_components/study-invites";
-import StudyList from "@/app/(app)/study/_components/study-list";
+import StudyFab from "@/features/study/components/study-fab";
+import StudyHeader from "@/features/study/components/study-header";
+import StudyInvites from "@/features/study/components/study-invites";
+import StudyList from "@/features/study/components/study-list";
 
 export default function StudyPage() {
   return (
