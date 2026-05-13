@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import type { ProblemSort } from "@/app/(app)/problem/_lib/problem-list-types";
+import type { ProblemSort } from "@/features/problem/types";
 
 export default function ProblemSortSelect({ sort }: { sort: ProblemSort }) {
   const pathname = usePathname();

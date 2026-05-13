@@ -15,7 +15,7 @@ import {
   getProblemStatusBadgeClass,
   getProblemStatusDescription,
   getProblemStatusLabel,
-} from "@/app/(app)/problem/_lib/problem-status";
+} from "@/features/problem/utils";
 import type { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 
 const PAGE_SIZE = 10;

@@ -3,7 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import type { ProblemPlatform } from "@/generated/prisma/enums";
-import type { ProblemFiltersState } from "@/app/(app)/problem/_lib/problem-list-types";
+import type { ProblemFiltersState } from "@/features/problem/types";
 
 const platforms: Array<ProblemPlatform | "All"> = [
   "All",

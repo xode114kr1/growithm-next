@@ -1,7 +1,7 @@
 import {
   getProblemStatusDescription,
   getProblemStatusLabel,
-} from "@/app/(app)/problem/_lib/problem-status";
+} from "@/features/problem/utils";
 import { formatDate } from "@/app/(app)/problem/[id]/_lib/problem-detail-format";
 import type { ProblemDetail } from "@/app/(app)/problem/[id]/_lib/problem-detail-types";
 

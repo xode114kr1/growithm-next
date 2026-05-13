@@ -8,7 +8,7 @@ import type {
   ProblemListItem,
   ProblemPageSearchParams,
   ProblemSort,
-} from "./problem-list-types";
+} from "@/features/problem/types";
 
 const PAGE_SIZE = 25;
 const SEARCH_PARAMS_TO_KEEP = ["platform", "tier", "q", "sort"] as const;

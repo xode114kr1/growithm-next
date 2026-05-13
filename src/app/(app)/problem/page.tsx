@@ -1,11 +1,11 @@
-import ProblemFilters from "@/app/(app)/problem/_components/problem-filters";
-import ProblemSortSelect from "@/app/(app)/problem/_components/problem-sort-select";
-import ProblemTable from "@/app/(app)/problem/_components/problem-table";
-import { getProblemListPageData } from "@/app/(app)/problem/_lib/problem-list-data";
+import ProblemFilters from "@/features/problem/components/problem-filters";
+import ProblemSortSelect from "@/features/problem/components/problem-sort-select";
+import ProblemTable from "@/features/problem/components/problem-table";
+import { getProblemListPageData } from "@/features/problem/server/problem-list-data";
 import type {
   ProblemFiltersState,
   ProblemPageSearchParams,
-} from "@/app/(app)/problem/_lib/problem-list-types";
+} from "@/features/problem/types";
 
 type ProblemPageProps = {
   searchParams: Promise<ProblemPageSearchParams>;

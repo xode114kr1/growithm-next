@@ -3,12 +3,12 @@ import Link from "next/link";
 import type {
   ProblemEmptyStateReason,
   ProblemListItem,
-} from "@/app/(app)/problem/_lib/problem-list-types";
+} from "@/features/problem/types";
 import {
   getProblemStatusBadgeClass,
   getProblemStatusDescription,
   getProblemStatusLabel,
-} from "@/app/(app)/problem/_lib/problem-status";
+} from "@/features/problem/utils";
 
 export default function ProblemTable({
   currentPage,

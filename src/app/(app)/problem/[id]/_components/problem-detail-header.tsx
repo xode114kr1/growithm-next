@@ -4,7 +4,7 @@ import ProblemShareModal from "@/app/(app)/problem/[id]/_components/problem-shar
 import {
   getProblemStatusBadgeClass,
   getProblemStatusLabel,
-} from "@/app/(app)/problem/_lib/problem-status";
+} from "@/features/problem/utils";
 import {
   getSubmittedLabel,
   getTierBadgeClass,
