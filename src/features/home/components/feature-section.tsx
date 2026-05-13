@@ -25,13 +25,13 @@ const heatmapColors = [
 ];
 
 const growthBars = [
-  "h-[40%]",
-  "h-[60%]",
-  "h-[55%]",
-  "h-[80%]",
+  "h-2/5",
+  "h-3/5",
+  "h-11/20",
+  "h-4/5",
   "h-full",
-  "h-[70%]",
-  "h-[90%]",
+  "h-7/10",
+  "h-9/10",
 ];
 
 export default function FeatureSection() {

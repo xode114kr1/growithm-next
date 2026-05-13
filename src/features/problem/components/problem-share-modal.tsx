@@ -92,7 +92,7 @@ export default function ProblemShareModal({
         <div
           aria-labelledby={titleId}
           aria-modal="true"
-          className="fixed inset-0 z-[80] flex items-center justify-center bg-primary/25 px-4 py-8 backdrop-blur-sm"
+          className="fixed inset-0 z-80 flex items-center justify-center bg-primary/25 px-4 py-8 backdrop-blur-sm"
           role="dialog"
         >
           <button
@@ -157,7 +157,7 @@ export default function ProblemShareModal({
                               {study.title}
                             </span>
                             {study.hasShared ? (
-                              <span className="shrink-0 rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-500">
+                              <span className="shrink-0 rounded-full bg-slate-200 px-2 py-0.5 text-2.5 font-bold uppercase text-slate-500">
                                 Shared
                               </span>
                             ) : null}

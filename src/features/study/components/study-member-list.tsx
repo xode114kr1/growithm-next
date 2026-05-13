@@ -164,10 +164,10 @@ function MemberCard({
             <span
               className={
                 isOwner
-                  ? "mt-1 inline-flex rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-on-primary"
+                  ? "mt-1 inline-flex rounded-full bg-primary px-2.5 py-1 text-2.5 font-bold uppercase tracking-wide text-on-primary"
                   : isLeader
-                  ? "mt-1 inline-flex rounded-full bg-secondary-fixed px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-on-secondary-fixed"
-                  : "mt-1 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-500"
+                  ? "mt-1 inline-flex rounded-full bg-secondary-fixed px-2.5 py-1 text-2.5 font-bold uppercase tracking-wide text-on-secondary-fixed"
+                  : "mt-1 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-2.5 font-bold uppercase tracking-wide text-slate-500"
               }
             >
               {roleLabels[member.role]}

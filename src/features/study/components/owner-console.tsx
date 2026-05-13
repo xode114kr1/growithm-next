@@ -184,7 +184,7 @@ function ManageMembersCard({
           <tbody className="divide-y divide-slate-50">
             {members.map((member) => (
               <tr className="transition-colors hover:bg-slate-50/80" key={member.name}>
-                <td className="min-w-[220px] px-6 py-4">
+                <td className="min-w-55 px-6 py-4">
                   <div className="flex items-center gap-3">
                     <div
                       className={

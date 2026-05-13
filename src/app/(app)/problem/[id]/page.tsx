@@ -25,7 +25,7 @@ export default async function ProblemDetailPage({
 
   return (
     <main className="page-shell">
-      <div className="page-container max-w-[1120px] space-y-8">
+      <div className="page-container max-w-280 space-y-8">
         <ProblemDetailHeader
           problem={problem}
           shareTargetStudies={shareTargetStudies}
