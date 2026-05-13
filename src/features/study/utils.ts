@@ -1,11 +1,10 @@
 import type { StudyTier } from "@/features/study/types";
 
 const tierThresholds = [
-  { minScore: 3000, tier: "Ruby" },
-  { minScore: 1500, tier: "Diamond" },
-  { minScore: 700, tier: "Platinum" },
-  { minScore: 300, tier: "Gold" },
-  { minScore: 100, tier: "Silver" },
+  { minScore: 5_000_000, tier: "Diamond" },
+  { minScore: 500_000, tier: "Platinum" },
+  { minScore: 50_000, tier: "Gold" },
+  { minScore: 5_000, tier: "Silver" },
   { minScore: 0, tier: "Bronze" },
 ] satisfies Array<{ minScore: number; tier: StudyTier }>;
 
@@ -29,10 +28,6 @@ export const tierThumbnails: Record<StudyTier, { className: string; label: strin
   Diamond: {
     className: "border-sky-300 bg-sky-100 text-sky-800 shadow-sky-500/10",
     label: "D",
-  },
-  Ruby: {
-    className: "border-rose-300 bg-rose-600 text-white shadow-rose-700/10",
-    label: "R",
   },
 };
 

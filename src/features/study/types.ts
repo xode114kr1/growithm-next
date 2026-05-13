@@ -1,4 +1,4 @@
-export type StudyTier = "Bronze" | "Silver" | "Gold" | "Platinum" | "Diamond" | "Ruby";
+export type StudyTier = "Bronze" | "Silver" | "Gold" | "Platinum" | "Diamond";
 
 export type StudyListItem = {
   description: string;
