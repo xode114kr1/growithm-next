@@ -11,29 +11,8 @@ import {
   type UpdateStudySettingsActionState,
   updateStudyMemberRole,
   updateStudySettings,
-} from "@/app/(app)/study/[studyId]/owner/actions";
-
-type Invite = {
-  id: string;
-  status: "Pending";
-  target: string;
-};
-
-type Member = {
-  contribution: number;
-  id: string;
-  isCurrentUser: boolean;
-  joinedAt: string;
-  lastActive: string;
-  name: string;
-  role: "OWNER" | "LEADER" | "MEMBER";
-};
-
-type Study = {
-  description: string;
-  id: string;
-  name: string;
-};
+} from "@/features/study/actions/study-owner-actions";
+import type { OwnerInvite, OwnerMember, OwnerStudy } from "@/features/study/types";
 
 const initialCreateStudyInviteActionState: CreateStudyInviteActionState = {
   error: null,
@@ -53,9 +32,9 @@ export default function OwnerConsole({
   members,
   study,
 }: {
-  initialInvites: Invite[];
-  members: Member[];
-  study: Study;
+  initialInvites: OwnerInvite[];
+  members: OwnerMember[];
+  study: OwnerStudy;
 }) {
   return (
     <div className="space-y-10">
@@ -71,7 +50,7 @@ function InviteMembersCard({
   initialInvites,
   studyId,
 }: {
-  initialInvites: Invite[];
+  initialInvites: OwnerInvite[];
   studyId: string;
 }) {
   const [state, formAction, isPending] = useActionState(
@@ -176,7 +155,7 @@ function ManageMembersCard({
   members,
   studyId,
 }: {
-  members: Member[];
+  members: OwnerMember[];
   studyId: string;
 }) {
   return (
@@ -274,7 +253,7 @@ function ManageMembersCard({
   );
 }
 
-function StudySettingsCard({ study }: { study: Study }) {
+function StudySettingsCard({ study }: { study: OwnerStudy }) {
   const [state, formAction, isPending] = useActionState(
     updateStudySettings,
     initialUpdateStudySettingsActionState,

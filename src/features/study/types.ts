@@ -58,3 +58,31 @@ export type StudyOverview = {
   totalSolved: number;
   weeklySolved: number;
 };
+
+export type OwnerStudy = {
+  description: string;
+  id: string;
+  name: string;
+};
+
+export type OwnerMember = {
+  contribution: number;
+  id: string;
+  isCurrentUser: boolean;
+  joinedAt: string;
+  lastActive: string;
+  name: string;
+  role: "OWNER" | "LEADER" | "MEMBER";
+};
+
+export type OwnerInvite = {
+  id: string;
+  status: "Pending";
+  target: string;
+};
+
+export type StudyOwnerData = {
+  members: OwnerMember[];
+  pendingInvites: OwnerInvite[];
+  study: OwnerStudy;
+};

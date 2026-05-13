@@ -5,11 +5,12 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  validateStudyInviteTarget,
+  validateStudySettingsInput,
+} from "@/features/study/validation/study-owner-validation";
 
-const INVITE_TARGET_MAX_LENGTH = 120;
 const INVITE_EXPIRATION_DAYS = 7;
-const MAX_STUDY_TITLE_LENGTH = 80;
-const MAX_STUDY_DESCRIPTION_LENGTH = 500;
 
 export type CreateStudyInviteActionState = {
   error: string | null;
@@ -41,15 +42,10 @@ export async function createStudyInvite(
     return createInviteErrorState(target, "스터디 정보를 찾을 수 없습니다.");
   }
 
-  if (!target) {
-    return createInviteErrorState(target, "초대할 사용자 이름 또는 이메일을 입력해주세요.");
-  }
+  const validationError = validateStudyInviteTarget(target);
 
-  if (target.length > INVITE_TARGET_MAX_LENGTH) {
-    return createInviteErrorState(
-      target,
-      `초대 대상은 ${INVITE_TARGET_MAX_LENGTH.toLocaleString()}자 이하로 입력해주세요.`,
-    );
+  if (validationError) {
+    return createInviteErrorState(target, validationError);
   }
 
   const study = await prisma.study.findFirst({
@@ -272,26 +268,12 @@ export async function updateStudySettings(
     });
   }
 
-  if (!title) {
-    return createStudySettingsErrorState({
-      description,
-      error: "스터디 이름을 입력해주세요.",
-      title,
-    });
-  }
+  const validationError = validateStudySettingsInput({ description, title });
 
-  if (title.length > MAX_STUDY_TITLE_LENGTH) {
+  if (validationError) {
     return createStudySettingsErrorState({
       description,
-      error: `스터디 이름은 ${MAX_STUDY_TITLE_LENGTH.toLocaleString()}자 이하로 입력해주세요.`,
-      title,
-    });
-  }
-
-  if (description.length > MAX_STUDY_DESCRIPTION_LENGTH) {
-    return createStudySettingsErrorState({
-      description,
-      error: `스터디 설명은 ${MAX_STUDY_DESCRIPTION_LENGTH.toLocaleString()}자 이하로 입력해주세요.`,
+      error: validationError,
       title,
     });
   }
