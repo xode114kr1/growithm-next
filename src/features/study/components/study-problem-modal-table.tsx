@@ -17,6 +17,7 @@ import {
   getProblemStatusLabel,
 } from "@/features/problem/utils";
 import type { ProblemSubmissionStatus } from "@/generated/prisma/enums";
+import type { StudyProblem } from "@/features/study/types";
 
 const PAGE_SIZE = 10;
 const tierRank = {
@@ -29,26 +30,6 @@ const tierRank = {
 } as const;
 
 type StudyProblemSort = "latest" | "oldest" | "title" | "tier" | "member";
-
-export type StudyProblem = {
-  categories: string[];
-  code: string;
-  description: string | null;
-  id: string;
-  link: string | null;
-  memo: string | null;
-  platform: string;
-  score: number | null;
-  scoreMax: number | null;
-  sharedAtLabel: string;
-  sharedAtTime: number;
-  sharedBy: string;
-  solutionCode: string | null;
-  status: ProblemSubmissionStatus;
-  submittedAtText: string | null;
-  tier: string | null;
-  title: string;
-};
 
 export default function StudyProblemModalTable({
   memberNames,

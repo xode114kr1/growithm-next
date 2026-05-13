@@ -112,3 +112,13 @@ export function formatRelativeDate(date: Date) {
 export function getUserDisplayName(name: string | null) {
   return name || "Unknown";
 }
+
+export function normalizeCategories(categories: unknown): string[] {
+  if (!Array.isArray(categories)) {
+    return [];
+  }
+
+  return categories.filter(
+    (category): category is string => typeof category === "string",
+  );
+}

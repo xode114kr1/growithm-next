@@ -86,3 +86,37 @@ export type StudyOwnerData = {
   pendingInvites: OwnerInvite[];
   study: OwnerStudy;
 };
+
+export type StudyProblem = {
+  categories: string[];
+  code: string;
+  description: string | null;
+  id: string;
+  link: string | null;
+  memo: string | null;
+  platform: string;
+  score: number | null;
+  scoreMax: number | null;
+  sharedAtLabel: string;
+  sharedAtTime: number;
+  sharedBy: string;
+  solutionCode: string | null;
+  status: import("@/generated/prisma/enums").ProblemSubmissionStatus;
+  submittedAtText: string | null;
+  tier: string | null;
+  title: string;
+};
+
+export type StudyProblemsData = {
+  description: string;
+  memberNames: string[];
+  name: string;
+  problems: StudyProblem[];
+  tiers: string[];
+};
+
+export type StudyLayoutData = {
+  id: string;
+  isOwner: boolean;
+  name: string;
+};
