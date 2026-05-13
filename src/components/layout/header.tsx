@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth/auth";
-import AccountMenu from "@/components/account-menu";
-import Navigation from "@/components/navigation";
+import AccountMenu from "@/components/layout/account-menu";
+import Navigation from "@/components/layout/navigation";
 
 export default async function Header() {
   const session = await auth();

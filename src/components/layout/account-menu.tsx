@@ -1,5 +1,5 @@
 import { signIn, signOut } from "@/lib/auth/auth";
-import Dropdown from "@/components/dropdown";
+import Dropdown from "@/components/ui/dropdown";
 import Image from "next/image";
 
 type AccountMenuProps = {
