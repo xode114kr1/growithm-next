@@ -86,7 +86,7 @@ export default function PersonalTierCard({
           </span>
         </div>
         <p className="text-xs font-medium text-on-surface-variant">
-          {personalTier.solvedCount.toLocaleString()} completed problems counted
+          {personalTier.solvedCount.toLocaleString()} submitted problems counted
         </p>
       </div>
     </section>

@@ -1,4 +1,3 @@
-import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import {
   getNextPersonalTierScore,
   getPersonalProgressLabel,
@@ -16,20 +15,23 @@ export async function getDashboardPersonalTier(
     return createDashboardPersonalTier(0, 0);
   }
 
-  const stats = await prisma.problemSubmission.aggregate({
-    _count: {
-      id: true,
-    },
-    _sum: {
-      score: true,
-    },
-    where: {
-      status: ProblemSubmissionStatus.COMPLETED,
-      userId,
-    },
-  });
+  const [user, solvedCount] = await Promise.all([
+    prisma.user.findUnique({
+      select: {
+        score: true,
+      },
+      where: {
+        id: userId,
+      },
+    }),
+    prisma.problemSubmission.count({
+      where: {
+        userId,
+      },
+    }),
+  ]);
 
-  return createDashboardPersonalTier(stats._sum.score ?? 0, stats._count.id);
+  return createDashboardPersonalTier(user?.score ?? 0, solvedCount);
 }
 
 function createDashboardPersonalTier(
