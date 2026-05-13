@@ -6,7 +6,7 @@ export default function ProblemSolutionCode({ code }: { code: string | null }) {
         <h2 className="section-title">풀이 코드</h2>
       </div>
       {code ? (
-        <pre className="max-h-[520px] overflow-auto rounded-lg bg-surface-container-low p-4 text-mono-code text-body-sm text-primary">
+        <pre className="max-h-130 overflow-auto rounded-lg bg-surface-container-low p-4 text-mono-code text-body-sm text-primary">
           <code>{code}</code>
         </pre>
       ) : (

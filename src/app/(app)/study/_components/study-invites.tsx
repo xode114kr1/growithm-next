@@ -22,7 +22,7 @@ export default async function StudyInvites() {
       <div className="flex shrink-0 items-center justify-between border-b border-slate-50 p-6">
         <h2 className="section-title">Invites & Requests</h2>
         {invites.length > 0 ? (
-          <span className="rounded-full bg-error px-1.5 py-0.5 text-[10px] font-bold text-white">
+          <span className="rounded-full bg-error px-1.5 py-0.5 text-2.5 font-bold text-white">
             {invites.length}
           </span>
         ) : null}
@@ -92,7 +92,7 @@ function InviteCard({ invite }: { invite: StudyInviteItem }) {
               {invite.studyTitle}
             </span>
           </p>
-          <span className="text-[10px] uppercase tracking-wider text-outline">
+          <span className="text-2.5 uppercase tracking-wider text-outline">
             {invite.timeLabel}
           </span>
         </div>

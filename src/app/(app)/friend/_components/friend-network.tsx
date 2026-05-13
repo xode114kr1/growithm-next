@@ -233,7 +233,7 @@ function ProfileCard({
         <div className="mb-1 flex flex-col gap-2 md:flex-row md:items-center">
           <h2 className="section-title text-on-background">{profile.name}</h2>
           <span
-            className={`mx-auto w-fit rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-widest md:mx-0 ${profile.tierClass}`}
+            className={`mx-auto w-fit rounded-full border px-3 py-0.5 text-2.5 font-bold uppercase tracking-widest md:mx-0 ${profile.tierClass}`}
           >
             {profile.tier}
           </span>
