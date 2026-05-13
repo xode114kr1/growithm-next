@@ -65,7 +65,7 @@ export default function ProblemTable({
                           </span>
                         ) : null}
                       </div>
-                      <h3 className="text-pretty break-words font-semibold leading-snug text-on-surface transition-colors group-hover:text-secondary">
+                      <h3 className="text-pretty wrap-break-word font-semibold leading-snug text-on-surface transition-colors group-hover:text-secondary">
                         {problem.title}
                       </h3>
                     </div>

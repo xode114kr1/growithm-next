@@ -170,7 +170,7 @@ export default function StudyProblemModalTable({
                             </span>
                           ) : null}
                         </span>
-                        <span className="block text-pretty break-words font-semibold leading-snug text-on-surface transition-colors group-hover:text-secondary">
+                        <span className="block text-pretty wrap-break-word font-semibold leading-snug text-on-surface transition-colors group-hover:text-secondary">
                           {problem.title}
                         </span>
                       </span>

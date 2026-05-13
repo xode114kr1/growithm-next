@@ -23,7 +23,7 @@ export default function ProblemMetadata({ problem }: { problem: ProblemDetail })
         {metadata.map((item) => (
           <div className="app-card p-4" key={item.label}>
             <p className="text-label-caps text-slate-400">{item.label}</p>
-            <p className="mt-2 break-words text-body-md font-semibold text-on-surface">
+            <p className="mt-2 wrap-break-word text-body-md font-semibold text-on-surface">
               {item.value}
             </p>
           </div>

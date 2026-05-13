@@ -91,7 +91,7 @@ export default function ProblemMemoEditor({
           </div>
         </form>
       ) : memo ? (
-        <p className="whitespace-pre-wrap break-words text-body-md text-on-surface-variant">
+        <p className="whitespace-pre-wrap wrap-break-word text-body-md text-on-surface-variant">
           {memo}
         </p>
       ) : (
