@@ -8,6 +8,7 @@ export type FriendRelationStatus =
 
 export type FriendProfile = {
   avatar: string;
+  id: string;
   name: string;
   offline?: boolean;
   relationStatus: FriendRelationStatus;
@@ -16,6 +17,7 @@ export type FriendProfile = {
 };
 
 export type FriendRequest = FriendProfile & {
+  requestId: string;
   relationStatus: "received_request" | "sent_request";
 };
 

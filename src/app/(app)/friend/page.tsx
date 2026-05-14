@@ -1,8 +1,10 @@
 import FriendNetwork from "@/features/friend/components/friend-network";
 import { getFriendPageData } from "@/features/friend/server/friend-data";
+import { auth } from "@/lib/auth/auth";
 
 export default async function FriendPage() {
-  const friendPageData = await getFriendPageData();
+  const session = await auth();
+  const friendPageData = await getFriendPageData(session?.user?.id);
 
   return (
     <main className="page-shell">
