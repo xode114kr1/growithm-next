@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 
 import { FriendFilterTabs } from "@/features/friend/components/friend-filter-tabs";
 import {
@@ -14,6 +14,7 @@ import {
   FriendSearchInput,
   SearchResultList,
 } from "@/features/friend/components/friend-search";
+import { useClickOutside } from "@/features/friend/hooks/use-click-outside";
 import type {
   FriendListFilter,
   FriendListMap,
@@ -28,7 +29,9 @@ export default function FriendNetwork({
   searchQuery: string;
 }) {
   const router = useRouter();
+  const searchContainerRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<FriendListFilter>("friends");
+  const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const [pendingRequestNames, setPendingRequestNames] = useState<Set<string>>(
     () => new Set(),
   );
@@ -39,7 +42,18 @@ export default function FriendNetwork({
   );
   const normalizedSearchQuery = searchQuery.trim();
   const searchResults = friendLists.searchResults;
-  const shouldShowSearchDropdown = normalizedSearchQuery.length > 0;
+  const shouldShowSearchDropdown =
+    isSearchDropdownOpen && normalizedSearchQuery.length > 0;
+
+  const closeSearchDropdown = useCallback(() => {
+    setIsSearchDropdownOpen(false);
+  }, []);
+
+  useClickOutside({
+    enabled: shouldShowSearchDropdown,
+    onClickOutside: closeSearchDropdown,
+    ref: searchContainerRef,
+  });
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -68,20 +82,29 @@ export default function FriendNetwork({
     });
   }
 
+  function handleSearchQueryChange(query: string) {
+    setSearchQuery(query);
+    setIsSearchDropdownOpen(query.trim().length > 0);
+  }
+
   return (
     <>
       <section className="mb-8 flex flex-col items-stretch justify-between gap-6 md:flex-row md:items-center">
         <FriendFilterTabs activeTab={activeTab} onTabChange={setActiveTab} />
-        <div className="relative w-full md:w-96">
+        <div className="relative w-full md:w-96" ref={searchContainerRef}>
           <FriendSearchInput
-            onQueryChange={setSearchQuery}
+            onFocus={() => setIsSearchDropdownOpen(searchQuery.trim().length > 0)}
+            onQueryChange={handleSearchQueryChange}
             query={searchQuery}
           />
           {shouldShowSearchDropdown ? (
             <SearchResultList
               isPending={isSearchPending}
               onAddFriend={handleAddFriend}
-              onOpenProfile={setSelectedProfile}
+              onOpenProfile={(profile) => {
+                closeSearchDropdown();
+                setSelectedProfile(profile);
+              }}
               pendingRequestNames={pendingRequestNames}
               query={searchQuery}
               results={searchResults}

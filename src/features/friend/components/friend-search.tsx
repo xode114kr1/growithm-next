@@ -4,9 +4,11 @@ import { SearchResultActions } from "@/features/friend/components/friend-action-
 import type { FriendSearchResult } from "@/features/friend/types";
 
 export function FriendSearchInput({
+  onFocus,
   onQueryChange,
   query,
 }: {
+  onFocus: () => void;
   onQueryChange: (query: string) => void;
   query: string;
 }) {
@@ -20,6 +22,7 @@ export function FriendSearchInput({
       </span>
       <input
         className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-20 pr-4 text-body-md shadow-sm outline-none transition-all focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
+        onFocus={onFocus}
         onChange={(event) => onQueryChange(event.target.value)}
         placeholder="Find developers..."
         type="search"
