@@ -26,6 +26,14 @@ const QUICK_LAUNCH_PLATFORMS = [
   ProblemPlatform.PROGRAMMERS,
 ] as const;
 
+const PROGRAMMERS_LEVEL_BUCKETS: Record<number, string> = {
+  1: "BRONZE",
+  2: "SILVER",
+  3: "GOLD",
+  4: "PLATINUM",
+  5: "DIAMOND",
+};
+
 const PENDING_PROBLEM_LIMIT = 3;
 
 export async function getDashboardPageData(
@@ -185,7 +193,19 @@ function createQuickLaunches(
 }
 
 function parseTierBucket(tier: string | null) {
-  return tier?.split(/\s+/)[0]?.toUpperCase() ?? null;
+  const normalizedTier = tier?.trim().toLowerCase() ?? "";
+
+  if (!normalizedTier) {
+    return null;
+  }
+
+  const levelMatch = normalizedTier.match(/(?:lv\.?|level)\s*(\d+)/);
+
+  if (levelMatch) {
+    return PROGRAMMERS_LEVEL_BUCKETS[Number(levelMatch[1])] ?? null;
+  }
+
+  return normalizedTier.split(/\s+/)[0]?.toUpperCase() ?? null;
 }
 
 function getDaysAgo(baseDate: Date, days: number) {

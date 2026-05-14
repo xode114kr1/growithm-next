@@ -20,7 +20,7 @@ export default async function DashboardPage() {
           <DashboardStats stats={dashboardData.stats} />
           <QuickLaunch />
           <GrowthMastery mastery={dashboardData.mastery} />
-          <PendingAnalysis />
+          <PendingAnalysis pendingProblems={dashboardData.pendingProblems} />
         </div>
       </div>
     </main>

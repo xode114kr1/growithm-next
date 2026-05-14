@@ -14,6 +14,15 @@ import {
 
 import type { DashboardMasteryBucket } from "@/features/dashboard/types";
 
+const masteryTooltipLabels: Record<string, string> = {
+  BRONZE: "Bronze / Level 1",
+  DIAMOND: "Diamond / Level 5",
+  GOLD: "Gold / Level 3",
+  PLATINUM: "Platinum / Level 4",
+  RUBY: "Ruby",
+  SILVER: "Silver / Level 2",
+};
+
 export default function GrowthMastery({
   mastery,
 }: {
@@ -61,11 +70,7 @@ export default function GrowthMastery({
                 tickLine={false}
               />
               <Tooltip
-                contentStyle={{
-                  border: "1px solid #c0c8c8",
-                  borderRadius: "12px",
-                  boxShadow: "0 18px 45px rgb(59 101 102 / 14%)",
-                }}
+                content={<MasteryTooltip />}
                 cursor={{ fill: "#eff4ff" }}
               />
               <Bar dataKey="solved" radius={[10, 10, 0, 0]}>
@@ -80,5 +85,30 @@ export default function GrowthMastery({
         )}
       </div>
     </section>
+  );
+}
+
+function MasteryTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: Array<{ payload?: DashboardMasteryBucket }>;
+}) {
+  const bucket = payload?.[0]?.payload;
+
+  if (!active || !bucket) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-xl border border-outline-variant bg-white px-4 py-3 shadow-lg">
+      <p className="text-body-sm font-bold text-on-surface">
+        {masteryTooltipLabels[bucket.tier] ?? bucket.tier}
+      </p>
+      <p className="mt-1 text-mono-code text-xs text-on-surface-variant">
+        {bucket.solved.toLocaleString()} solved
+      </p>
+    </div>
   );
 }
