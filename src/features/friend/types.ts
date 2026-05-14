@@ -37,16 +37,6 @@ export type FriendPageData = {
   searchQuery: string;
 };
 
-export type FriendSearchFilter = {
-  query: string;
-  relationStatus?: FriendRelationStatus;
-};
-
 export type FriendPageSearchParams = {
   query?: string | string[];
-};
-
-export type FriendListFilterState = {
-  list: FriendListFilter;
-  search: FriendSearchFilter;
 };

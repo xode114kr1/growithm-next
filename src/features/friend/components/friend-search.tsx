@@ -31,7 +31,7 @@ export function FriendSearchInput({
         className="rounded-xl bg-primary px-5 py-3 font-semibold text-on-primary shadow-md transition-all hover:opacity-90 active:scale-95"
         type="submit"
       >
-        Add
+        Search
       </button>
     </form>
   );

@@ -8,7 +8,6 @@ import {
 import { prisma } from "@/lib/prisma";
 
 import type {
-  FriendListFilter,
   FriendListMap,
   FriendPageData,
   FriendPageSearchParams,
@@ -30,15 +29,6 @@ const emptyFriendLists: FriendListMap = {
   searchResults: [],
   sent: [],
 };
-
-export async function getFriendListByFilter<T extends FriendListFilter>(
-  userId: string | undefined,
-  filter: T,
-): Promise<FriendListMap[T]> {
-  const pageData = await getFriendPageData(userId);
-
-  return pageData.lists[filter];
-}
 
 export async function getFriendPageData(
   userId: string | undefined,
