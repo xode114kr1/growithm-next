@@ -156,12 +156,7 @@ function SearchResultActions({
   if (profile.relationStatus === "friend") {
     return (
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-        <button
-          className="rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-teal-900"
-          type="button"
-        >
-          View Profile
-        </button>
+        <ViewProfileButton />
         <button
           className="rounded-xl bg-slate-100 px-5 py-3 font-semibold text-slate-500"
           disabled
@@ -176,12 +171,7 @@ function SearchResultActions({
   if (profile.relationStatus === "received_request") {
     return (
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-        <button
-          className="rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-teal-900"
-          type="button"
-        >
-          View Profile
-        </button>
+        <ViewProfileButton />
         <button
           className="rounded-xl bg-primary px-6 py-3 font-semibold text-on-primary shadow-md transition-all hover:opacity-90 active:scale-95"
           type="button"
@@ -195,12 +185,7 @@ function SearchResultActions({
   if (profile.relationStatus === "sent_request" || isPending) {
     return (
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-        <button
-          className="rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-teal-900"
-          type="button"
-        >
-          View Profile
-        </button>
+        <ViewProfileButton />
         <button
           className="rounded-xl bg-slate-100 px-5 py-3 font-semibold text-slate-500"
           disabled
@@ -214,12 +199,7 @@ function SearchResultActions({
 
   return (
     <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-      <button
-        className="rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-teal-900"
-        type="button"
-      >
-        View Profile
-      </button>
+      <ViewProfileButton />
       <button
         className="rounded-xl bg-primary px-6 py-3 font-semibold text-on-primary shadow-md transition-all hover:opacity-90 active:scale-95"
         onClick={onAddFriend}
@@ -231,12 +211,30 @@ function SearchResultActions({
   );
 }
 
+function ViewProfileButton() {
+  return (
+    <button
+      className="rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-teal-900"
+      type="button"
+    >
+      View Profile
+    </button>
+  );
+}
+
 function FriendList({ friends }: { friends: FriendProfile[] }) {
   return (
     <section className="grid grid-cols-1 gap-4">
       {friends.map((friend) => (
         <ProfileCard key={friend.name} profile={friend}>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+            <ViewProfileButton />
+            <button
+              className="rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-error"
+              type="button"
+            >
+              Delete Friend
+            </button>
             <button
               className="rounded-xl bg-primary px-6 py-3 font-semibold text-on-primary shadow-md transition-all hover:opacity-90 active:scale-95"
               type="button"
@@ -257,11 +255,12 @@ function ReceivedRequestList({ requests }: { requests: FriendRequest[] }) {
       {requests.map((request) => (
         <ProfileCard key={request.name} profile={request}>
           <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+            <ViewProfileButton />
             <button
               className="rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-600 transition-all hover:bg-slate-50"
               type="button"
             >
-              Decline
+              Delete Request
             </button>
             <button
               className="rounded-xl bg-primary px-6 py-3 font-semibold text-on-primary shadow-md transition-all hover:opacity-90 active:scale-95"
@@ -282,6 +281,7 @@ function SentRequestList({ requests }: { requests: FriendRequest[] }) {
       {requests.map((request) => (
         <ProfileCard key={request.name} profile={request}>
           <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+            <ViewProfileButton />
             <button
               className="rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-error"
               type="button"
