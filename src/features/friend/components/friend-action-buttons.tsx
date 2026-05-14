@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import {
   acceptFriendRequestAction,
   cancelFriendRequestAction,
@@ -7,14 +9,14 @@ import {
 } from "@/features/friend/actions/friend-actions";
 import type { FriendSearchResult } from "@/features/friend/types";
 
-export function ViewProfileButton() {
+export function ViewProfileButton({ profileId }: { profileId: string }) {
   return (
-    <button
+    <Link
       className="rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-teal-900"
-      type="button"
+      href={`/profile/${profileId}`}
     >
       View Profile
-    </button>
+    </Link>
   );
 }
 
@@ -30,7 +32,7 @@ export function SearchResultActions({
   if (profile.relationStatus === "friend") {
     return (
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-        <ViewProfileButton />
+        <ViewProfileButton profileId={profile.id} />
         <button
           className="rounded-xl bg-slate-100 px-5 py-3 font-semibold text-slate-500"
           disabled
@@ -45,7 +47,7 @@ export function SearchResultActions({
   if (profile.relationStatus === "received_request") {
     return (
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-        <ViewProfileButton />
+        <ViewProfileButton profileId={profile.id} />
         {profile.requestId ? (
           <>
             <DeleteReceivedRequestButton requestId={profile.requestId} />
@@ -59,7 +61,7 @@ export function SearchResultActions({
   if (profile.relationStatus === "sent_request" || isPending) {
     return (
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-        <ViewProfileButton />
+        <ViewProfileButton profileId={profile.id} />
         {profile.requestId ? (
           <CancelFriendRequestButton requestId={profile.requestId} />
         ) : (
@@ -77,7 +79,7 @@ export function SearchResultActions({
 
   return (
     <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-      <ViewProfileButton />
+      <ViewProfileButton profileId={profile.id} />
       <SendFriendRequestButton
         onAddFriend={onAddFriend}
         targetUserId={profile.id}

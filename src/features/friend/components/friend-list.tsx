@@ -14,7 +14,7 @@ export function FriendList({ friends }: { friends: FriendProfile[] }) {
       {friends.map((friend) => (
         <ProfileCard key={friend.name} profile={friend}>
           <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ViewProfileButton />
+            <ViewProfileButton profileId={friend.id} />
             <DeleteFriendButton friendUserId={friend.id} />
             <button
               className="rounded-xl bg-primary px-6 py-3 font-semibold text-on-primary shadow-md transition-all hover:opacity-90 active:scale-95"
@@ -40,7 +40,7 @@ export function ReceivedRequestList({
       {requests.map((request) => (
         <ProfileCard key={request.name} profile={request}>
           <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ViewProfileButton />
+            <ViewProfileButton profileId={request.id} />
             <DeleteReceivedRequestButton requestId={request.requestId} />
             <AcceptFriendRequestButton requestId={request.requestId} />
           </div>
@@ -56,7 +56,7 @@ export function SentRequestList({ requests }: { requests: FriendRequest[] }) {
       {requests.map((request) => (
         <ProfileCard key={request.name} profile={request}>
           <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ViewProfileButton />
+            <ViewProfileButton profileId={request.id} />
             <CancelFriendRequestButton requestId={request.requestId} />
           </div>
         </ProfileCard>
