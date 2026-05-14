@@ -1,6 +1,9 @@
 import FriendNetwork from "@/features/friend/components/friend-network";
+import { getFriendPageData } from "@/features/friend/server/friend-data";
 
-export default function FriendPage() {
+export default async function FriendPage() {
+  const friendPageData = await getFriendPageData();
+
   return (
     <main className="page-shell">
       <div className="page-container">
@@ -16,7 +19,7 @@ export default function FriendPage() {
             complex algorithmic challenges together.
           </p>
         </header>
-        <FriendNetwork />
+        <FriendNetwork friendLists={friendPageData.lists} />
       </div>
     </main>
   );
