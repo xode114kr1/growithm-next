@@ -65,9 +65,6 @@ export default function PersonalTierCard({
           <p className="font-serif text-8 font-semibold leading-tight text-primary">
             {personalTier.tier}
           </p>
-          <p className="pb-1 text-body-sm font-semibold text-secondary">
-            {personalTier.score.toLocaleString()} XP
-          </p>
         </div>
       </div>
       <div className="mt-6 space-y-3">

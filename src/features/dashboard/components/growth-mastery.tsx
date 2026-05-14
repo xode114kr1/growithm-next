@@ -12,16 +12,22 @@ import {
   YAxis,
 } from "recharts";
 
-const masteryData = [
-  { tier: "BRONZE", solved: 86, fill: "#c1c7cf" },
-  { tier: "SILVER", solved: 132, fill: "#dde3eb" },
-  { tier: "GOLD", solved: 156, fill: "#f4bf3a" },
-  { tier: "PLATINUM", solved: 42, fill: "#a3cfcf" },
-  { tier: "DIAMOND", solved: 19, fill: "#00daf3" },
-  { tier: "RUBY", solved: 7, fill: "#ba1a1a" },
-];
+import type { DashboardMasteryBucket } from "@/features/dashboard/types";
 
-export default function GrowthMastery() {
+const masteryTooltipLabels: Record<string, string> = {
+  BRONZE: "Bronze / Level 1",
+  DIAMOND: "Diamond / Level 5",
+  GOLD: "Gold / Level 3",
+  PLATINUM: "Platinum / Level 4",
+  RUBY: "Ruby",
+  SILVER: "Silver / Level 2",
+};
+
+export default function GrowthMastery({
+  mastery,
+}: {
+  mastery: DashboardMasteryBucket[];
+}) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -48,7 +54,7 @@ export default function GrowthMastery() {
         {isMounted ? (
           <ResponsiveContainer height="100%" width="100%">
             <BarChart
-              data={masteryData}
+              data={mastery}
               margin={{ bottom: 0, left: -20, right: 8, top: 8 }}
             >
               <CartesianGrid stroke="#eff4ff" vertical={false} />
@@ -64,15 +70,11 @@ export default function GrowthMastery() {
                 tickLine={false}
               />
               <Tooltip
-                contentStyle={{
-                  border: "1px solid #c0c8c8",
-                  borderRadius: "12px",
-                  boxShadow: "0 18px 45px rgb(59 101 102 / 14%)",
-                }}
+                content={<MasteryTooltip />}
                 cursor={{ fill: "#eff4ff" }}
               />
               <Bar dataKey="solved" radius={[10, 10, 0, 0]}>
-                {masteryData.map((entry) => (
+                {mastery.map((entry) => (
                   <Cell fill={entry.fill} key={entry.tier} />
                 ))}
               </Bar>
@@ -83,5 +85,30 @@ export default function GrowthMastery() {
         )}
       </div>
     </section>
+  );
+}
+
+function MasteryTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: Array<{ payload?: DashboardMasteryBucket }>;
+}) {
+  const bucket = payload?.[0]?.payload;
+
+  if (!active || !bucket) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-xl border border-outline-variant bg-white px-4 py-3 shadow-lg">
+      <p className="text-body-sm font-bold text-on-surface">
+        {masteryTooltipLabels[bucket.tier] ?? bucket.tier}
+      </p>
+      <p className="mt-1 text-mono-code text-xs text-on-surface-variant">
+        {bucket.solved.toLocaleString()} solved
+      </p>
+    </div>
   );
 }

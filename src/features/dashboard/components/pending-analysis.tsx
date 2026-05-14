@@ -1,35 +1,23 @@
-const pendingProblems = [
-  {
-    name: "Longest Increasing Subsequence",
-    platform: "Baekjoon 11053",
-    tier: "Silver I",
-    tierClass: "badge-tier-silver",
-    time: "2 hours ago",
-  },
-  {
-    name: "Network Flow: Ford-Fulkerson",
-    platform: "Programmers Lvl 4",
-    tier: "Platinum V",
-    tierClass: "badge-tier-platinum",
-    time: "5 hours ago",
-  },
-  {
-    name: "2D Segment Tree Optimization",
-    platform: "Baekjoon 2042",
-    tier: "Gold II",
-    tierClass: "badge-tier-gold",
-    time: "Yesterday",
-  },
-];
+import Link from "next/link";
 
-export default function PendingAnalysis() {
+import type { DashboardPendingProblem } from "@/features/dashboard/types";
+import { getTierBadgeClass } from "@/features/problem/utils";
+
+export default function PendingAnalysis({
+  pendingProblems,
+}: {
+  pendingProblems: DashboardPendingProblem[];
+}) {
   return (
     <section className="app-card mb-12 overflow-hidden md:col-span-12">
       <div className="flex items-center justify-between border-b border-slate-50 p-6 lg:p-8">
         <h2 className="section-title">Pending Analysis</h2>
-        <button className="text-body-sm font-semibold text-secondary hover:underline">
+        <Link
+          className="text-body-sm font-semibold text-secondary hover:underline"
+          href="/problem"
+        >
           View All Backlog
-        </button>
+        </Link>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-left">
@@ -38,7 +26,7 @@ export default function PendingAnalysis() {
               <TableHead>Problem Name</TableHead>
               <TableHead>Platform</TableHead>
               <TableHead>Tier</TableHead>
-              <TableHead>Time Since Solved</TableHead>
+              <TableHead>Submitted</TableHead>
               <TableHead className="text-right">Action</TableHead>
             </tr>
           </thead>
@@ -46,36 +34,51 @@ export default function PendingAnalysis() {
             {pendingProblems.map((problem) => (
               <tr
                 className="transition-colors hover:bg-slate-50/50"
-                key={problem.name}
+                key={problem.id}
               >
                 <td className="px-8 py-5 font-semibold text-on-background">
-                  {problem.name}
+                  {problem.title}
                 </td>
                 <td className="px-8 py-5">
                   <span className="rounded bg-slate-100 px-2 py-1 text-mono-code text-xs text-slate-600">
-                    {problem.platform}
+                    {getProblemCode(problem)}
                   </span>
                 </td>
                 <td className="px-8 py-5">
-                  <span className={`${problem.tierClass} shadow-sm`}>
+                  <span className={`${getTierBadgeClass(problem.tier)} shadow-sm`}>
                     {problem.tier}
                   </span>
                 </td>
                 <td className="px-8 py-5 text-body-sm text-slate-500">
-                  {problem.time}
+                  {problem.submittedAtText}
                 </td>
                 <td className="px-8 py-5 text-right">
-                  <button className="rounded-lg bg-secondary-container px-4 py-2 text-body-sm font-bold text-secondary">
+                  <Link
+                    className="rounded-lg bg-secondary-container px-4 py-2 text-body-sm font-bold text-secondary transition-colors hover:bg-secondary-fixed"
+                    href={`/problem/${problem.id}`}
+                  >
                     Write Analysis
-                  </button>
+                  </Link>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      {pendingProblems.length === 0 ? (
+        <div className="border-t border-slate-50 px-6 py-12 text-center">
+          <p className="font-semibold text-on-surface">No pending analysis</p>
+          <p className="mt-2 text-body-sm text-slate-500">
+            Problems that need a memo will appear here after submission.
+          </p>
+        </div>
+      ) : null}
     </section>
   );
+}
+
+function getProblemCode(problem: DashboardPendingProblem) {
+  return `${problem.platform}-${problem.problemId}`;
 }
 
 function TableHead({
