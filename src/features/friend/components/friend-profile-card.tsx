@@ -5,9 +5,11 @@ import type { FriendProfile } from "@/features/friend/types";
 
 export function ProfileCard({
   children,
+  onOpenProfile,
   profile,
 }: {
   children: ReactNode;
+  onOpenProfile: (profile: FriendProfile) => void;
   profile: FriendProfile;
 }) {
   return (
@@ -16,7 +18,12 @@ export function ProfileCard({
         profile.offline ? "opacity-80 hover:opacity-100" : ""
       }`}
     >
-      <div className="relative shrink-0">
+      <button
+        aria-label={`${profile.name} profile`}
+        className="relative shrink-0 rounded-full outline-none transition-opacity hover:opacity-80 focus:ring-2 focus:ring-primary-container"
+        onClick={() => onOpenProfile(profile)}
+        type="button"
+      >
         <Image
           alt={`${profile.name} avatar`}
           className={`size-16 rounded-full object-cover ring-4 ring-slate-50 ${
@@ -31,7 +38,7 @@ export function ProfileCard({
             profile.offline ? "bg-slate-300" : "bg-green-500"
           }`}
         />
-      </div>
+      </button>
       <div className="min-w-0 flex-1 text-center md:text-left">
         <div className="mb-1 flex flex-col gap-2 md:flex-row md:items-center">
           <h2 className="section-title text-on-background">{profile.name}</h2>

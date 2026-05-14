@@ -3,18 +3,26 @@ import {
   CancelFriendRequestButton,
   DeleteFriendButton,
   DeleteReceivedRequestButton,
-  ViewProfileButton,
 } from "@/features/friend/components/friend-action-buttons";
 import { ProfileCard } from "@/features/friend/components/friend-profile-card";
 import type { FriendProfile, FriendRequest } from "@/features/friend/types";
 
-export function FriendList({ friends }: { friends: FriendProfile[] }) {
+export function FriendList({
+  friends,
+  onOpenProfile,
+}: {
+  friends: FriendProfile[];
+  onOpenProfile: (profile: FriendProfile) => void;
+}) {
   return (
     <section className="grid grid-cols-1 gap-4">
       {friends.map((friend) => (
-        <ProfileCard key={friend.name} profile={friend}>
+        <ProfileCard
+          key={friend.name}
+          onOpenProfile={onOpenProfile}
+          profile={friend}
+        >
           <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ViewProfileButton profileId={friend.id} />
             <DeleteFriendButton friendUserId={friend.id} />
             <button
               className="rounded-xl bg-primary px-6 py-3 font-semibold text-on-primary shadow-md transition-all hover:opacity-90 active:scale-95"
@@ -31,16 +39,21 @@ export function FriendList({ friends }: { friends: FriendProfile[] }) {
 }
 
 export function ReceivedRequestList({
+  onOpenProfile,
   requests,
 }: {
+  onOpenProfile: (profile: FriendProfile) => void;
   requests: FriendRequest[];
 }) {
   return (
     <section className="grid grid-cols-1 gap-4">
       {requests.map((request) => (
-        <ProfileCard key={request.name} profile={request}>
+        <ProfileCard
+          key={request.name}
+          onOpenProfile={onOpenProfile}
+          profile={request}
+        >
           <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ViewProfileButton profileId={request.id} />
             <DeleteReceivedRequestButton requestId={request.requestId} />
             <AcceptFriendRequestButton requestId={request.requestId} />
           </div>
@@ -50,13 +63,22 @@ export function ReceivedRequestList({
   );
 }
 
-export function SentRequestList({ requests }: { requests: FriendRequest[] }) {
+export function SentRequestList({
+  onOpenProfile,
+  requests,
+}: {
+  onOpenProfile: (profile: FriendProfile) => void;
+  requests: FriendRequest[];
+}) {
   return (
     <section className="grid grid-cols-1 gap-4">
       {requests.map((request) => (
-        <ProfileCard key={request.name} profile={request}>
+        <ProfileCard
+          key={request.name}
+          onOpenProfile={onOpenProfile}
+          profile={request}
+        >
           <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <ViewProfileButton profileId={request.id} />
             <CancelFriendRequestButton requestId={request.requestId} />
           </div>
         </ProfileCard>
