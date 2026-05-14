@@ -36,14 +36,14 @@ export function SearchResultList({
   isPending,
   onAddFriend,
   onOpenProfile,
-  pendingRequestNames,
+  pendingRequestIds,
   query,
   results,
 }: {
   isPending: boolean;
-  onAddFriend: (profileName: string) => void;
+  onAddFriend: (profileId: string) => void;
   onOpenProfile: (profile: FriendSearchResult) => void;
-  pendingRequestNames: Set<string>;
+  pendingRequestIds: Set<string>;
   query: string;
   results: FriendSearchResult[];
 }) {
@@ -89,8 +89,8 @@ export function SearchResultList({
                 </div>
               </div>
               <SearchResultActions
-                isPending={pendingRequestNames.has(profile.name)}
-                onAddFriend={() => onAddFriend(profile.name)}
+                isPending={pendingRequestIds.has(profile.id)}
+                onAddFriend={() => onAddFriend(profile.id)}
                 profile={profile}
               />
             </div>

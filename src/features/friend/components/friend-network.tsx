@@ -32,7 +32,7 @@ export default function FriendNetwork({
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<FriendListFilter>("friends");
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
-  const [pendingRequestNames, setPendingRequestNames] = useState<Set<string>>(
+  const [pendingRequestIds, setPendingRequestIds] = useState<Set<string>>(
     () => new Set(),
   );
   const [isSearchPending, startSearchTransition] = useTransition();
@@ -74,10 +74,10 @@ export default function FriendNetwork({
     return () => window.clearTimeout(timeoutId);
   }, [initialSearchQuery, router, searchQuery]);
 
-  function handleAddFriend(profileName: string) {
-    setPendingRequestNames((current) => {
+  function handleAddFriend(profileId: string) {
+    setPendingRequestIds((current) => {
       const next = new Set(current);
-      next.add(profileName);
+      next.add(profileId);
       return next;
     });
   }
@@ -105,7 +105,7 @@ export default function FriendNetwork({
                 closeSearchDropdown();
                 setSelectedProfile(profile);
               }}
-              pendingRequestNames={pendingRequestNames}
+              pendingRequestIds={pendingRequestIds}
               query={searchQuery}
               results={searchResults}
             />

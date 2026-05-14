@@ -11,16 +11,33 @@ import {
 } from "@/features/friend/server/friend-mutations";
 import { auth } from "@/lib/auth/auth";
 
+type FriendActionResult =
+  | { ok: true }
+  | { message: string; ok: false };
+
 export async function sendFriendRequestAction(formData: FormData) {
-  const userId = await getCurrentUserId();
   const targetUserId = getFormValue(formData, "targetUserId");
 
-  if (!userId || !targetUserId) {
-    return;
+  return sendFriendRequestByIdAction(targetUserId);
+}
+
+export async function sendFriendRequestByIdAction(
+  targetUserId: string,
+): Promise<FriendActionResult> {
+  const userId = await getCurrentUserId();
+
+  if (!userId) {
+    return { message: "Login is required.", ok: false };
+  }
+
+  if (!targetUserId) {
+    return { message: "Friend target is required.", ok: false };
   }
 
   await sendFriendRequest({ requesterId: userId, targetUserId });
   revalidatePath("/friend");
+
+  return { ok: true };
 }
 
 export async function cancelFriendRequestAction(formData: FormData) {
