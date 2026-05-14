@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import type { DashboardQuickLaunch } from "@/features/dashboard/types";
 import type { ProblemPlatform } from "@/generated/prisma/enums";
 
@@ -10,6 +8,7 @@ const quickLinkStyles: Record<
     codeClass: string;
     hoverClass: string;
     label: string;
+    url: string;
   }
 > = {
   BAEKJOON: {
@@ -17,12 +16,14 @@ const quickLinkStyles: Record<
     codeClass: "bg-teal-50 text-teal-800",
     hoverClass: "group-hover:text-teal-600",
     label: "Baekjoon",
+    url: "https://www.acmicpc.net/",
   },
   PROGRAMMERS: {
     code: "PG",
     codeClass: "bg-blue-50 text-blue-800",
     hoverClass: "group-hover:text-blue-600",
     label: "Programmers",
+    url: "https://school.programmers.co.kr/learn/challenges",
   },
 };
 
@@ -41,34 +42,36 @@ export default function QuickLaunch({
           const link = quickLinkStyles[quickLaunch.platform];
 
           return (
-          <Link
-            className="group flex items-center justify-between rounded-xl border border-slate-100 bg-white p-4 transition-all hover:shadow-md"
-            href={`/problem?platform=${quickLaunch.platform}`}
-            key={quickLaunch.platform}
-          >
-            <span className="flex items-center gap-3">
-              <span
-                className={`flex size-8 items-center justify-center rounded-lg text-xs font-bold ${link.codeClass}`}
-              >
-                {link.code}
-              </span>
-              <span>
-                <span className="block text-body-sm font-semibold">
-                  {link.label}
-                </span>
-                <span className="mt-0.5 block text-mono-code text-xs text-slate-400">
-                  {quickLaunch.problemCount.toLocaleString()} problems
-                </span>
-              </span>
-            </span>
-            <span
-              className={`text-lg text-slate-300 transition-colors ${link.hoverClass}`}
-              aria-hidden="true"
+            <a
+              className="group flex items-center justify-between rounded-xl border border-slate-100 bg-white p-4 transition-all hover:shadow-md"
+              href={link.url}
+              key={quickLaunch.platform}
+              rel="noreferrer"
+              target="_blank"
             >
-              ↗
-            </span>
-          </Link>
-        );
+              <span className="flex items-center gap-3">
+                <span
+                  className={`flex size-8 items-center justify-center rounded-lg text-xs font-bold ${link.codeClass}`}
+                >
+                  {link.code}
+                </span>
+                <span>
+                  <span className="block text-body-sm font-semibold">
+                    {link.label}
+                  </span>
+                  <span className="mt-0.5 block text-mono-code text-xs text-slate-400">
+                    {quickLaunch.problemCount.toLocaleString()} problems
+                  </span>
+                </span>
+              </span>
+              <span
+                className={`text-lg text-slate-300 transition-colors ${link.hoverClass}`}
+                aria-hidden="true"
+              >
+                ↗
+              </span>
+            </a>
+          );
         })}
       </div>
     </section>
