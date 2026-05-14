@@ -9,6 +9,7 @@ import type {
   FriendListMap,
   FriendProfile,
   FriendRequest,
+  FriendSearchResult,
 } from "@/features/friend/types";
 
 const tabs: { label: string; value: FriendListFilter }[] = [
@@ -23,6 +24,26 @@ export default function FriendNetwork({
   friendLists: FriendListMap;
 }) {
   const [activeTab, setActiveTab] = useState<FriendListFilter>("friends");
+  const [pendingRequestNames, setPendingRequestNames] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const [searchQuery, setSearchQuery] = useState("");
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+  const searchResults =
+    normalizedSearchQuery.length === 0
+      ? []
+      : friendLists.searchResults.filter((profile) =>
+          profile.name.toLowerCase().includes(normalizedSearchQuery),
+        );
+  const isSearching = normalizedSearchQuery.length > 0;
+
+  function handleAddFriend(profileName: string) {
+    setPendingRequestNames((current) => {
+      const next = new Set(current);
+      next.add(profileName);
+      return next;
+    });
+  }
 
   return (
     <>
@@ -52,18 +73,161 @@ export default function FriendNetwork({
           </span>
           <input
             className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-20 pr-4 text-body-md shadow-sm outline-none transition-all focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
+            onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Find developers..."
             type="text"
+            value={searchQuery}
           />
         </label>
       </section>
 
-      {activeTab === "friends" && <FriendList friends={friendLists.friends} />}
-      {activeTab === "received" && (
-        <ReceivedRequestList requests={friendLists.received} />
+      {isSearching ? (
+        <SearchResultList
+          onAddFriend={handleAddFriend}
+          pendingRequestNames={pendingRequestNames}
+          query={searchQuery}
+          results={searchResults}
+        />
+      ) : (
+        <>
+          {activeTab === "friends" && (
+            <FriendList friends={friendLists.friends} />
+          )}
+          {activeTab === "received" && (
+            <ReceivedRequestList requests={friendLists.received} />
+          )}
+          {activeTab === "sent" && (
+            <SentRequestList requests={friendLists.sent} />
+          )}
+        </>
       )}
-      {activeTab === "sent" && <SentRequestList requests={friendLists.sent} />}
     </>
+  );
+}
+
+function SearchResultList({
+  onAddFriend,
+  pendingRequestNames,
+  query,
+  results,
+}: {
+  onAddFriend: (profileName: string) => void;
+  pendingRequestNames: Set<string>;
+  query: string;
+  results: FriendSearchResult[];
+}) {
+  if (results.length === 0) {
+    return (
+      <section className="app-card p-8 text-center">
+        <h2 className="section-title mb-2 text-on-background">
+          No developers found
+        </h2>
+        <p className="text-body-md text-on-surface-variant">
+          Try another name or check the spelling for &quot;{query.trim()}&quot;.
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="grid grid-cols-1 gap-4">
+      {results.map((profile) => (
+        <ProfileCard key={profile.name} profile={profile}>
+          <SearchResultActions
+            isPending={pendingRequestNames.has(profile.name)}
+            onAddFriend={() => onAddFriend(profile.name)}
+            profile={profile}
+          />
+        </ProfileCard>
+      ))}
+    </section>
+  );
+}
+
+function SearchResultActions({
+  isPending,
+  onAddFriend,
+  profile,
+}: {
+  isPending: boolean;
+  onAddFriend: () => void;
+  profile: FriendSearchResult;
+}) {
+  if (profile.relationStatus === "friend") {
+    return (
+      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+        <button
+          className="rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-teal-900"
+          type="button"
+        >
+          View Profile
+        </button>
+        <button
+          className="rounded-xl bg-slate-100 px-5 py-3 font-semibold text-slate-500"
+          disabled
+          type="button"
+        >
+          Friends
+        </button>
+      </div>
+    );
+  }
+
+  if (profile.relationStatus === "received_request") {
+    return (
+      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+        <button
+          className="rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-teal-900"
+          type="button"
+        >
+          View Profile
+        </button>
+        <button
+          className="rounded-xl bg-primary px-6 py-3 font-semibold text-on-primary shadow-md transition-all hover:opacity-90 active:scale-95"
+          type="button"
+        >
+          Respond
+        </button>
+      </div>
+    );
+  }
+
+  if (profile.relationStatus === "sent_request" || isPending) {
+    return (
+      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+        <button
+          className="rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-teal-900"
+          type="button"
+        >
+          View Profile
+        </button>
+        <button
+          className="rounded-xl bg-slate-100 px-5 py-3 font-semibold text-slate-500"
+          disabled
+          type="button"
+        >
+          Request Sent
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+      <button
+        className="rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-teal-900"
+        type="button"
+      >
+        View Profile
+      </button>
+      <button
+        className="rounded-xl bg-primary px-6 py-3 font-semibold text-on-primary shadow-md transition-all hover:opacity-90 active:scale-95"
+        onClick={onAddFriend}
+        type="button"
+      >
+        Add Friend
+      </button>
+    </div>
   );
 }
 

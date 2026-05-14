@@ -19,9 +19,12 @@ export type FriendRequest = FriendProfile & {
   relationStatus: "received_request" | "sent_request";
 };
 
+export type FriendSearchResult = FriendProfile;
+
 export type FriendListMap = {
   friends: FriendProfile[];
   received: FriendRequest[];
+  searchResults: FriendSearchResult[];
   sent: FriendRequest[];
 };
 

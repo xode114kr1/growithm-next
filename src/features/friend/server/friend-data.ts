@@ -6,6 +6,7 @@ import type {
   FriendPageData,
   FriendProfile,
   FriendRequest,
+  FriendSearchResult,
 } from "@/features/friend/types";
 
 const friends: FriendProfile[] = [
@@ -78,9 +79,56 @@ const sentRequests: FriendRequest[] = [
   },
 ];
 
+const searchResults: FriendSearchResult[] = [
+  {
+    avatar:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCgb3oGiEiz4g96_3kqwsY-QNFoIedmXX0BPnmN0AXv8Yh38rQ9A8_dTxM32DD1vN5QWmRZflrDQyvRL7xg4n3yLcwXxdGqjp4zhaDLrLu9aA3_T-t-AomlgybPdVCObfwtLvTuE-4OHax-dUNRg7lWPRQV4bg44LrqOfg9Be5UpjRX33QNvzCfSE2g34GSYl3C3rqX-6-QpxdmQtR7RmkwxYtcwgUk2OJDMxQa6bFunXMTOga8q0FOYo577bqrTuAnyl80bW0gFYI",
+    name: "Alex Rivera",
+    relationStatus: "friend",
+    tier: "Platinum Tier",
+    tierClass:
+      "bg-gradient-to-r from-slate-100 to-white border-slate-200 text-slate-600",
+  },
+  {
+    avatar:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDvRAmcbi1H1VojcYoL4I64HV6vA0X5p2YobQhpT9eR7WyIGWKvW_xRHeNndH2v3DjjiOoRjkg2L2ul12odKjkxIsnwdjxIJh4I6DOkJyJ2kz5w6TvLJFLU7uStpiwassIUXveGvbEdGiUfKGRQThJGZQGVIpGTVK54aDihc7MDib6ETjvr7vYqdqxirkr6USFRfPG-jGmbg8HK_FMJyYLT3pjISl2gvCOCLZVPTbPLIwVO78r6CcNtuXrRG46y6PLzK8HQg8QqNyM",
+    name: "Lara Croft",
+    relationStatus: "received_request",
+    tier: "Gold Tier",
+    tierClass:
+      "bg-gradient-to-r from-amber-100 to-amber-50 border-amber-200 text-amber-700",
+  },
+  {
+    avatar:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDj6HEJJjO0GxSUdzmrRTGFcTsya_nRSf8DgY3CVBY6qhxwFF2IHltGhc1LmHICaQxyB0iTJbYR4-tMJ7KlquFP4zNUu0Xm1dRNyJeCnmJXoPY7mWOaAH_E26p9Gb7oZPw8pUrbTdrm73bol9NgQM1iG7cuMbvbaWUZ0PzBu5Q0any15G2xZiT0J0MiLh3L9iXhFTWHXr-AIjW0_zXNw9zsee84vbRC0trDleWc72NF2WnrnU7WwRRuMdOn5bzwznya4Zsdn3BQVjw",
+    name: "Elena Rossi",
+    relationStatus: "sent_request",
+    tier: "Diamond Tier",
+    tierClass: "bg-cyan-50 border-cyan-200 text-cyan-800",
+  },
+  {
+    avatar:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuAXizqU3SmAgyxTLa0P5MqRkndGv8WUSaNQK_tMDt1iCKz7QSkmJYi6nm_MQ3n3f_5qAZ2M4S7CM4eNWKd12yl0fvr2ZwotFjR9QJHG1V8SBZ0g6W7DiVeKwcED01CVmUdmCk1Kp5aTNo4AVKJbgg9Eyh4Wk4HMRuqZxYVbUpJA15AEhw60LwqzWfFqSfNlWQZo9N4ZTFAVl3i2PQzUYco9fAySnp1S1gOLpj4zqpmAm3G4cG0p_PVWfu1EzxlBkzWO3J4wEQhdSrWfOM",
+    name: "Priya Shah",
+    relationStatus: "none",
+    tier: "Gold Tier",
+    tierClass:
+      "bg-gradient-to-r from-amber-100 to-amber-50 border-amber-200 text-amber-700",
+  },
+  {
+    avatar:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuC7h9GpH1yeZW1yDkDnQLnvw5kqvJrzI-OVsGukV8QlUxyRI8t4pL_YMrJ1AiOZLxTJoKQ8NEbMhAJ92CjE2Z2JSge-p9IRq6rZJnjZkwG6kaRSo5d1cURdmS8maTz0R1eWWJDMwAvYuP5z6oMrXQmwdj8P_jpM6-PJuEUUOus_8Px9RmXG2D9RcHo9fKmsTLR3ZfQaMeSHu47nkXf8qOm5F9bTyqLx03YKcoz9fMmVJQTVmx9kW1czQ2EvRhQ",
+    name: "Sam Wilson",
+    relationStatus: "none",
+    tier: "Silver Tier",
+    tierClass: "bg-slate-200 border-slate-300 text-slate-600",
+  },
+];
+
 const friendLists: FriendListMap = {
   friends,
   received: receivedRequests,
+  searchResults,
   sent: sentRequests,
 };
 
