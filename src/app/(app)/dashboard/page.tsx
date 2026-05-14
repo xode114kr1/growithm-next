@@ -18,7 +18,7 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
           <PersonalTierCard personalTier={dashboardData.personalTier} />
           <DashboardStats stats={dashboardData.stats} />
-          <QuickLaunch />
+          <QuickLaunch quickLaunches={dashboardData.quickLaunches} />
           <GrowthMastery mastery={dashboardData.mastery} />
           <PendingAnalysis pendingProblems={dashboardData.pendingProblems} />
         </div>
