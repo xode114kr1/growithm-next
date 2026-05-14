@@ -14,6 +14,7 @@ import {
 } from "@/features/github/server/webhooks/payload-parser";
 import { prisma } from "@/lib/prisma";
 import { parseProblemReadme } from "@/features/problem/server/problem-readme-parser";
+import { getProblemExperienceScore } from "@/features/score/problem-score";
 
 const signaturePrefix = "sha256=";
 
@@ -354,55 +355,90 @@ async function saveProblemSubmissions({
       continue;
     }
 
-    await prisma.problemSubmission.upsert({
-      create: {
-        accuracy: parsedReadme.accuracy,
-        code,
-        categories: parsedReadme.categories,
-        commitSha: readme.commitSha,
-        description: parsedReadme.description,
-        link: parsedReadme.link,
-        memory: parsedReadme.memory,
-        platform: parsedReadme.platform,
-        problemId: parsedReadme.problemId,
-        readmePath: readme.path,
-        repositoryFullName,
-        score: parsedReadme.score,
-        scoreMax: parsedReadme.scoreMax,
-        status: ProblemSubmissionStatus.PENDING,
-        submittedAtText: parsedReadme.submittedAtText,
-        tier: parsedReadme.tier,
-        time: parsedReadme.time,
-        title: parsedReadme.title,
-        userId,
-        webhookDeliveryId,
-      },
-      update: {
-        accuracy: parsedReadme.accuracy,
-        code,
-        categories: parsedReadme.categories,
-        description: parsedReadme.description,
-        link: parsedReadme.link,
-        memory: parsedReadme.memory,
-        platform: parsedReadme.platform,
-        problemId: parsedReadme.problemId,
-        score: parsedReadme.score,
-        scoreMax: parsedReadme.scoreMax,
-        status: ProblemSubmissionStatus.PENDING,
-        submittedAtText: parsedReadme.submittedAtText,
-        tier: parsedReadme.tier,
-        time: parsedReadme.time,
-        title: parsedReadme.title,
-        userId,
-        webhookDeliveryId,
-      },
-      where: {
-        repositoryFullName_commitSha_readmePath: {
+    const experienceScore = getProblemExperienceScore({
+      platform: parsedReadme.platform,
+      tier: parsedReadme.tier,
+    });
+
+    await prisma.$transaction(async (tx) => {
+      const existingSubmission = await tx.problemSubmission.findUnique({
+        select: {
+          score: true,
+        },
+        where: {
+          repositoryFullName_commitSha_readmePath: {
+            commitSha: readme.commitSha,
+            readmePath: readme.path,
+            repositoryFullName,
+          },
+        },
+      });
+
+      await tx.problemSubmission.upsert({
+        create: {
+          accuracy: parsedReadme.accuracy,
+          code,
+          categories: parsedReadme.categories,
           commitSha: readme.commitSha,
+          description: parsedReadme.description,
+          link: parsedReadme.link,
+          memory: parsedReadme.memory,
+          platform: parsedReadme.platform,
+          problemId: parsedReadme.problemId,
           readmePath: readme.path,
           repositoryFullName,
+          score: experienceScore,
+          scoreMax: parsedReadme.scoreMax,
+          status: ProblemSubmissionStatus.PENDING,
+          submittedAtText: parsedReadme.submittedAtText,
+          tier: parsedReadme.tier,
+          time: parsedReadme.time,
+          title: parsedReadme.title,
+          userId,
+          webhookDeliveryId,
         },
-      },
+        update: {
+          accuracy: parsedReadme.accuracy,
+          code,
+          categories: parsedReadme.categories,
+          description: parsedReadme.description,
+          link: parsedReadme.link,
+          memory: parsedReadme.memory,
+          platform: parsedReadme.platform,
+          problemId: parsedReadme.problemId,
+          score: experienceScore,
+          scoreMax: parsedReadme.scoreMax,
+          status: ProblemSubmissionStatus.PENDING,
+          submittedAtText: parsedReadme.submittedAtText,
+          tier: parsedReadme.tier,
+          time: parsedReadme.time,
+          title: parsedReadme.title,
+          userId,
+          webhookDeliveryId,
+        },
+        where: {
+          repositoryFullName_commitSha_readmePath: {
+            commitSha: readme.commitSha,
+            readmePath: readme.path,
+            repositoryFullName,
+          },
+        },
+      });
+
+      const scoreDelta = experienceScore - (existingSubmission?.score ?? 0);
+
+      if (scoreDelta !== 0) {
+        await tx.user.update({
+          data: {
+            score: {
+              increment: scoreDelta,
+            },
+          },
+          where: {
+            id: userId,
+          },
+        });
+      }
     });
 
     savedCount += 1;

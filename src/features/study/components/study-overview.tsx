@@ -2,13 +2,13 @@ import Link from "next/link";
 
 import ContributionChart from "@/features/study/components/contribution-chart";
 import type { StudyOverview, StudyTier } from "@/features/study/types";
+import { getTierProgress } from "@/features/study/utils";
 
 const tierStyles: Record<StudyTier, string> = {
   Bronze: "border-amber-700/20 bg-amber-700 text-white",
   Diamond: "border-sky-300 bg-sky-100 text-sky-800",
   Gold: "border-yellow-400/40 bg-yellow-400 text-yellow-950",
   Platinum: "border-cyan-200 bg-primary-fixed text-primary",
-  Ruby: "border-rose-300 bg-rose-600 text-white",
   Silver: "border-slate-300 bg-slate-200 text-slate-700",
 };
 
@@ -57,7 +57,7 @@ function StudyOverviewHeader({ study }: { study: StudyOverview }) {
 }
 
 function StudyTierCard({ study }: { study: StudyOverview }) {
-  const progress = Math.min((study.score / study.nextTierScore) * 100, 100);
+  const progress = getTierProgress(study.score, study.tier);
   const remainingScore = Math.max(study.nextTierScore - study.score, 0);
 
   return (

@@ -7,15 +7,6 @@ const stats = [
     metaClass: "text-teal-600",
     value: "412",
   },
-  {
-    accent: "bg-on-primary-fixed-variant text-primary-fixed",
-    dark: true,
-    icon: "⚑",
-    label: "Today's Goal",
-    meta: "Target: 3",
-    metaClass: "text-on-primary/80",
-    value: "2 / 3",
-  },
 ];
 
 export default function DashboardStats() {
@@ -23,11 +14,7 @@ export default function DashboardStats() {
     <>
       {stats.map((stat) => (
         <article
-          className={
-            stat.dark
-              ? "flex flex-col justify-between rounded-xl bg-primary p-6 text-on-primary shadow-lg shadow-primary/15 md:col-span-4"
-              : "app-card flex flex-col justify-between p-6 md:col-span-4"
-          }
+          className="app-card flex flex-col justify-between p-6 md:col-span-4"
           key={stat.label}
         >
           <div>
@@ -41,15 +28,7 @@ export default function DashboardStats() {
                 {stat.meta}
               </span>
             </div>
-            <h2
-              className={
-                stat.dark
-                  ? "mb-1 text-label-caps text-on-primary/70"
-                  : "mb-1 text-label-caps text-slate-500"
-              }
-            >
-              {stat.label}
-            </h2>
+            <h2 className="mb-1 text-label-caps text-slate-500">{stat.label}</h2>
             <p className="font-serif text-8 font-semibold leading-tight">
               {stat.value}
             </p>
