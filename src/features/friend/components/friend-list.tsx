@@ -1,4 +1,10 @@
-import { ViewProfileButton } from "@/features/friend/components/friend-action-buttons";
+import {
+  AcceptFriendRequestButton,
+  CancelFriendRequestButton,
+  DeleteFriendButton,
+  DeleteReceivedRequestButton,
+  ViewProfileButton,
+} from "@/features/friend/components/friend-action-buttons";
 import { ProfileCard } from "@/features/friend/components/friend-profile-card";
 import type { FriendProfile, FriendRequest } from "@/features/friend/types";
 
@@ -9,12 +15,7 @@ export function FriendList({ friends }: { friends: FriendProfile[] }) {
         <ProfileCard key={friend.name} profile={friend}>
           <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ViewProfileButton />
-            <button
-              className="rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-error"
-              type="button"
-            >
-              Delete Friend
-            </button>
+            <DeleteFriendButton friendUserId={friend.id} />
             <button
               className="rounded-xl bg-primary px-6 py-3 font-semibold text-on-primary shadow-md transition-all hover:opacity-90 active:scale-95"
               type="button"
@@ -40,18 +41,8 @@ export function ReceivedRequestList({
         <ProfileCard key={request.name} profile={request}>
           <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ViewProfileButton />
-            <button
-              className="rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-600 transition-all hover:bg-slate-50"
-              type="button"
-            >
-              Delete Request
-            </button>
-            <button
-              className="rounded-xl bg-primary px-6 py-3 font-semibold text-on-primary shadow-md transition-all hover:opacity-90 active:scale-95"
-              type="button"
-            >
-              Accept
-            </button>
+            <DeleteReceivedRequestButton requestId={request.requestId} />
+            <AcceptFriendRequestButton requestId={request.requestId} />
           </div>
         </ProfileCard>
       ))}
@@ -66,12 +57,7 @@ export function SentRequestList({ requests }: { requests: FriendRequest[] }) {
         <ProfileCard key={request.name} profile={request}>
           <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <ViewProfileButton />
-            <button
-              className="rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-error"
-              type="button"
-            >
-              Cancel Request
-            </button>
+            <CancelFriendRequestButton requestId={request.requestId} />
           </div>
         </ProfileCard>
       ))}

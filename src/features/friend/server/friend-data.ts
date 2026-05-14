@@ -167,8 +167,16 @@ async function getFriendSearchResults({
     userBId: string;
   }>;
   query: string;
-  receivedRequests: Array<{ requester: FriendUserRow; requesterId: string }>;
-  sentRequests: Array<{ addressee: FriendUserRow; addresseeId: string }>;
+  receivedRequests: Array<{
+    id: string;
+    requester: FriendUserRow;
+    requesterId: string;
+  }>;
+  sentRequests: Array<{
+    addressee: FriendUserRow;
+    addresseeId: string;
+    id: string;
+  }>;
   userId: string;
 }) {
   if (!query) {
@@ -209,6 +217,7 @@ async function getFriendSearchResults({
   });
 
   const relationStatusByUserId = new Map<string, FriendRelationStatus>();
+  const requestIdByUserId = new Map<string, string>();
 
   for (const friendship of friendships) {
     relationStatusByUserId.set(
@@ -219,15 +228,18 @@ async function getFriendSearchResults({
 
   for (const request of receivedRequests) {
     relationStatusByUserId.set(request.requesterId, "received_request");
+    requestIdByUserId.set(request.requesterId, request.id);
   }
 
   for (const request of sentRequests) {
     relationStatusByUserId.set(request.addresseeId, "sent_request");
+    requestIdByUserId.set(request.addresseeId, request.id);
   }
 
-  return users.map((user) =>
-    createFriendProfile(user, relationStatusByUserId.get(user.id) ?? "none"),
-  );
+  return users.map((user) => ({
+    ...createFriendProfile(user, relationStatusByUserId.get(user.id) ?? "none"),
+    requestId: requestIdByUserId.get(user.id),
+  }));
 }
 
 function parseSearchQuery(query: string | string[] | undefined) {
