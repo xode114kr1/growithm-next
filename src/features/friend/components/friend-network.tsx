@@ -238,13 +238,6 @@ function FriendList({ friends }: { friends: FriendProfile[] }) {
         <ProfileCard key={friend.name} profile={friend}>
           <div className="flex items-center gap-3">
             <button
-              aria-label={`Message ${friend.name}`}
-              className="rounded-xl border border-slate-200 px-4 py-3 text-body-sm font-semibold text-slate-500 transition-all hover:bg-slate-50 hover:text-teal-900"
-              type="button"
-            >
-              Message
-            </button>
-            <button
               className="rounded-xl bg-primary px-6 py-3 font-semibold text-on-primary shadow-md transition-all hover:opacity-90 active:scale-95"
               type="button"
             >
