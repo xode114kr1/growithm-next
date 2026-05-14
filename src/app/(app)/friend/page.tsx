@@ -1,10 +1,18 @@
 import FriendNetwork from "@/features/friend/components/friend-network";
 import { getFriendPageData } from "@/features/friend/server/friend-data";
+import type { FriendPageSearchParams } from "@/features/friend/types";
 import { auth } from "@/lib/auth/auth";
 
-export default async function FriendPage() {
+type FriendPageProps = {
+  searchParams: Promise<FriendPageSearchParams>;
+};
+
+export default async function FriendPage({ searchParams }: FriendPageProps) {
   const session = await auth();
-  const friendPageData = await getFriendPageData(session?.user?.id);
+  const friendPageData = await getFriendPageData(
+    session?.user?.id,
+    await searchParams,
+  );
 
   return (
     <main className="page-shell">
@@ -21,7 +29,10 @@ export default async function FriendPage() {
             complex algorithmic challenges together.
           </p>
         </header>
-        <FriendNetwork friendLists={friendPageData.lists} />
+        <FriendNetwork
+          friendLists={friendPageData.lists}
+          searchQuery={friendPageData.searchQuery}
+        />
       </div>
     </main>
   );

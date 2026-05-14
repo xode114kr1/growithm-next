@@ -11,7 +11,9 @@ import type {
   FriendListFilter,
   FriendListMap,
   FriendPageData,
+  FriendPageSearchParams,
   FriendProfile,
+  FriendRelationStatus,
 } from "@/features/friend/types";
 
 type FriendUserRow = {
@@ -40,10 +42,14 @@ export async function getFriendListByFilter<T extends FriendListFilter>(
 
 export async function getFriendPageData(
   userId: string | undefined,
+  params: FriendPageSearchParams = {},
 ): Promise<FriendPageData> {
+  const searchQuery = parseSearchQuery(params.query);
+
   if (!userId) {
     return {
       lists: emptyFriendLists,
+      searchQuery,
     };
   }
 
@@ -91,6 +97,13 @@ export async function getFriendPageData(
       },
     }),
   ]);
+  const searchResults = await getFriendSearchResults({
+    friendships,
+    query: searchQuery,
+    receivedRequests,
+    sentRequests,
+    userId,
+  });
 
   return {
     lists: {
@@ -105,13 +118,14 @@ export async function getFriendPageData(
         requestId: request.id,
         relationStatus: "received_request",
       })),
-      searchResults: [],
+      searchResults,
       sent: sentRequests.map((request) => ({
         ...createFriendProfile(request.addressee, "sent_request"),
         requestId: request.id,
         relationStatus: "sent_request",
       })),
     },
+    searchQuery,
   };
 }
 
@@ -137,4 +151,87 @@ function createFriendProfile(
     tier: tier.tier,
     tierClass: tier.tierClass,
   };
+}
+
+async function getFriendSearchResults({
+  friendships,
+  query,
+  receivedRequests,
+  sentRequests,
+  userId,
+}: {
+  friendships: Array<{
+    userA: FriendUserRow;
+    userAId: string;
+    userB: FriendUserRow;
+    userBId: string;
+  }>;
+  query: string;
+  receivedRequests: Array<{ requester: FriendUserRow; requesterId: string }>;
+  sentRequests: Array<{ addressee: FriendUserRow; addresseeId: string }>;
+  userId: string;
+}) {
+  if (!query) {
+    return [];
+  }
+
+  const users = await prisma.user.findMany({
+    orderBy: {
+      name: "asc",
+    },
+    select: friendUserSelect,
+    take: 12,
+    where: {
+      AND: [
+        {
+          id: {
+            not: userId,
+          },
+        },
+        {
+          OR: [
+            {
+              name: {
+                contains: query,
+                mode: "insensitive",
+              },
+            },
+            {
+              email: {
+                contains: query,
+                mode: "insensitive",
+              },
+            },
+          ],
+        },
+      ],
+    },
+  });
+
+  const relationStatusByUserId = new Map<string, FriendRelationStatus>();
+
+  for (const friendship of friendships) {
+    relationStatusByUserId.set(
+      friendship.userAId === userId ? friendship.userBId : friendship.userAId,
+      "friend",
+    );
+  }
+
+  for (const request of receivedRequests) {
+    relationStatusByUserId.set(request.requesterId, "received_request");
+  }
+
+  for (const request of sentRequests) {
+    relationStatusByUserId.set(request.addresseeId, "sent_request");
+  }
+
+  return users.map((user) =>
+    createFriendProfile(user, relationStatusByUserId.get(user.id) ?? "none"),
+  );
+}
+
+function parseSearchQuery(query: string | string[] | undefined) {
+  const value = Array.isArray(query) ? query[0] : query;
+
+  return value?.trim() ?? "";
 }

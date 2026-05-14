@@ -19,21 +19,18 @@ import type {
 
 export default function FriendNetwork({
   friendLists,
+  searchQuery: initialSearchQuery,
 }: {
   friendLists: FriendListMap;
+  searchQuery: string;
 }) {
   const [activeTab, setActiveTab] = useState<FriendListFilter>("friends");
   const [pendingRequestNames, setPendingRequestNames] = useState<Set<string>>(
     () => new Set(),
   );
-  const [searchQuery, setSearchQuery] = useState("");
-  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
-  const searchResults =
-    normalizedSearchQuery.length === 0
-      ? []
-      : friendLists.searchResults.filter((profile) =>
-          profile.name.toLowerCase().includes(normalizedSearchQuery),
-        );
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
+  const normalizedSearchQuery = initialSearchQuery.trim();
+  const searchResults = friendLists.searchResults;
   const isSearching = normalizedSearchQuery.length > 0;
 
   function handleAddFriend(profileName: string) {
@@ -58,7 +55,7 @@ export default function FriendNetwork({
         <SearchResultList
           onAddFriend={handleAddFriend}
           pendingRequestNames={pendingRequestNames}
-          query={searchQuery}
+          query={initialSearchQuery}
           results={searchResults}
         />
       ) : (
