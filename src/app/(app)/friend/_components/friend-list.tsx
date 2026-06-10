@@ -8,7 +8,7 @@ import {
   DeleteFriendButton,
   DeleteReceivedRequestButton,
 } from "./friend-action-buttons";
-import { ProfileCard } from "./friend-profile-card";
+import { FriendItem } from "./friend-item";
 import type { FriendProfile, FriendRequest } from "@/types/friend";
 
 const FRIEND_LIST_PAGE_SIZE = 6;
@@ -33,7 +33,7 @@ export function FriendList({
   return (
     <section className="grid grid-cols-1 gap-4">
       {visibleFriends.map((friend) => (
-        <ProfileCard
+        <FriendItem
           key={friend.id}
           onOpenProfile={onOpenProfile}
           profile={friend}
@@ -47,7 +47,7 @@ export function FriendList({
               Invite to Session
             </button>
           </div>
-        </ProfileCard>
+        </FriendItem>
       ))}
       {shouldShowPagination ? (
         <Pagination
@@ -73,7 +73,7 @@ export function ReceivedRequestList({
   return (
     <section className="grid grid-cols-1 gap-4">
       {requests.map((request) => (
-        <ProfileCard
+        <FriendItem
           key={request.name}
           onOpenProfile={onOpenProfile}
           profile={request}
@@ -82,7 +82,7 @@ export function ReceivedRequestList({
             <DeleteReceivedRequestButton requestId={request.requestId} />
             <AcceptFriendRequestButton requestId={request.requestId} />
           </div>
-        </ProfileCard>
+        </FriendItem>
       ))}
     </section>
   );
@@ -98,7 +98,7 @@ export function SentRequestList({
   return (
     <section className="grid grid-cols-1 gap-4">
       {requests.map((request) => (
-        <ProfileCard
+        <FriendItem
           key={request.name}
           onOpenProfile={onOpenProfile}
           profile={request}
@@ -106,7 +106,7 @@ export function SentRequestList({
           <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
             <CancelFriendRequestButton requestId={request.requestId} />
           </div>
-        </ProfileCard>
+        </FriendItem>
       ))}
     </section>
   );

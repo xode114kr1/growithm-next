@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import type { FriendProfile } from "@/types/friend";
 
-export function ProfileCard({
+export function FriendItem({
   children,
   onOpenProfile,
   profile,
