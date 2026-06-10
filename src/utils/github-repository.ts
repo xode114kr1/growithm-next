@@ -1,13 +1,7 @@
-export type GitHubWebhookRequestBody = {
-  owner?: unknown;
-  repo?: unknown;
-  repositoryUrl?: unknown;
-};
-
-export type GitHubRepositoryInput = {
-  owner: string;
-  repo: string;
-};
+import type {
+  GitHubRepositoryInput,
+  GitHubWebhookRequestBody,
+} from "@/types/github";
 
 const repositoryNamePattern = /^[A-Za-z0-9_.-]+$/;
 

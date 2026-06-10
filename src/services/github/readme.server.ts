@@ -1,8 +1,6 @@
-export type GitHubReadmeContent = {
-  commitSha: string;
-  path: string;
-  text: string;
-};
+import "server-only";
+
+import type { GitHubReadmeContent } from "@/types/github";
 
 type GitHubContentResponse = {
   content?: unknown;

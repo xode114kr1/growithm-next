@@ -1,19 +1,4 @@
-export type GitHubWebhookPayload = {
-  after?: unknown;
-  commits?: unknown;
-  repository?: {
-    full_name?: unknown;
-    owner?: {
-      id?: unknown;
-    };
-  };
-};
-
-export type GitHubReadmeChange = {
-  codePath: string | null;
-  commitSha: string;
-  path: string;
-};
+import type { GitHubReadmeChange, GitHubWebhookPayload } from "@/types/github";
 
 type GitHubPushCommit = {
   added?: unknown;

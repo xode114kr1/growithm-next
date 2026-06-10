@@ -1,8 +1,8 @@
+import "server-only";
+
 import { prisma } from "@/lib/prisma";
-import {
-  parseRepository,
-  type GitHubWebhookRequestBody,
-} from "@/features/github/validation/github-repository";
+import type { GitHubWebhookRequestBody } from "@/types/github";
+import { parseRepository } from "@/utils/github-repository";
 
 type GitHubWebhook = {
   config?: {

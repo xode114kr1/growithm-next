@@ -1,17 +1,21 @@
+import "server-only";
+
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { Prisma } from "@/generated/prisma/client";
 import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import {
   fetchGitHubReadmeContent,
-  type GitHubReadmeContent,
-} from "@/features/github/server/readme-content";
+} from "@/services/github/readme.server";
+import type {
+  GitHubReadmeContent,
+  GitHubWebhookPayload,
+} from "@/types/github";
 import {
   getReadmeChangesFromPushPayload,
   getRepositoryOwnerId,
   getRepositoryFullName,
-  type GitHubWebhookPayload,
-} from "@/features/github/server/webhooks/payload-parser";
+} from "@/utils/github-webhook";
 import { prisma } from "@/lib/prisma";
 import { parseProblemReadme } from "@/utils/problem-readme";
 import { getProblemExperienceScore } from "@/utils/problem";
