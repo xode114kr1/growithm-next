@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { FriendProfileModal } from "@/components/friend-profile-modal";
 import type {
   FriendListFilter,
   FriendProfile,
@@ -13,7 +14,6 @@ import {
   ReceivedRequestList,
   SentRequestList,
 } from "./friend-list";
-import { FriendProfileModal } from "./friend-profile-modal";
 
 export function FriendListSection({
   activeTab,

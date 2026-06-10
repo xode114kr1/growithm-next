@@ -3,10 +3,10 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 
+import { FriendProfileModal } from "@/components/friend-profile-modal";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import type { FriendProfile, FriendSearchResult } from "@/types/friend";
 
-import { FriendProfileModal } from "./friend-profile-modal";
 import { FriendSearchInput, SearchResultList } from "./friend-search";
 
 export function FriendSearchSection({
