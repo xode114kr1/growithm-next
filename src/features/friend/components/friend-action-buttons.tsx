@@ -123,7 +123,7 @@ export function DeleteFriendButton({ friendUserId }: { friendUserId: string }) {
     <form action={deleteFriendAction}>
       <input name="friendUserId" type="hidden" value={friendUserId} />
       <button
-        className="w-full rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-error"
+        className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-body-sm font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-error"
         type="submit"
       >
         Delete Friend
