@@ -213,7 +213,7 @@ export default function ProblemShareModal({
                     disabled={selectedCount === 0 || isPending}
                     type="submit"
                   >
-                    {isPending ? "Sharing..." : "Share"}
+                    Share
                   </button>
                 </div>
               </div>

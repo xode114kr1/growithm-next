@@ -33,14 +33,12 @@ export function FriendSearchInput({
 }
 
 export function SearchResultList({
-  isPending,
   onAddFriend,
   onOpenProfile,
   pendingRequestIds,
   query,
   results,
 }: {
-  isPending: boolean;
   onAddFriend: (profileId: string) => void;
   onOpenProfile: (profile: FriendSearchResult) => void;
   pendingRequestIds: Set<string>;
@@ -49,11 +47,7 @@ export function SearchResultList({
 }) {
   return (
     <section className="absolute left-0 right-0 top-full z-20 mt-3 rounded-xl border border-slate-200 bg-white p-3 shadow-xl">
-      {isPending ? (
-        <div className="px-3 py-4 text-body-sm text-slate-500">
-          Searching...
-        </div>
-      ) : results.length === 0 ? (
+      {results.length === 0 ? (
         <div className="px-3 py-4">
           <div className="text-body-md font-semibold text-on-background">
             No developers found

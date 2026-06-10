@@ -121,7 +121,7 @@ export function WebhookRegistrationForm() {
       ) : null}
 
       <button className="btn-primary w-full" disabled={isSubmitting} type="submit">
-        {isSubmitting ? "웹훅 연결 요청 중..." : "웹훅 연결하기"}
+        웹훅 연결하기
       </button>
     </form>
   );

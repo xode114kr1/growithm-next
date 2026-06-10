@@ -113,7 +113,7 @@ export function SendFriendRequestButton({
       onClick={handleSendFriendRequest}
       type="button"
     >
-      {isPending ? "Sending..." : isSent ? "Request Sent" : "Add Friend"}
+      {isSent ? "Request Sent" : "Add Friend"}
     </button>
   );
 }

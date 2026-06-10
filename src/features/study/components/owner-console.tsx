@@ -92,7 +92,7 @@ function InviteMembersCard({
                   type="text"
                 />
                 <button className="btn-primary shrink-0" disabled={isPending} type="submit">
-                  {isPending ? "초대 중..." : "초대"}
+                  초대
                 </button>
               </div>
             </label>
@@ -270,7 +270,7 @@ function StudySettingsCard({ study }: { study: OwnerStudy }) {
           </p>
         </div>
         <button className="btn-secondary w-fit" disabled={isPending} type="submit">
-          {isPending ? "저장 중..." : "저장하기"}
+          저장하기
         </button>
       </div>
 

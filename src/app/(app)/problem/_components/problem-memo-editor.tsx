@@ -78,7 +78,7 @@ export default function ProblemMemoEditor({
           ) : null}
           <div className="flex flex-wrap gap-2">
             <button className="btn-primary" disabled={isPending} type="submit">
-              {isPending ? "저장 중" : "저장"}
+              저장
             </button>
             <button
               className="btn-secondary"

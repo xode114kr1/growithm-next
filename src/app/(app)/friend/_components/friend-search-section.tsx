@@ -23,7 +23,7 @@ export function FriendSearchSection({
   const [pendingRequestIds, setPendingRequestIds] = useState<Set<string>>(
     () => new Set(),
   );
-  const [isSearchPending, startSearchTransition] = useTransition();
+  const [, startSearchTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [selectedProfile, setSelectedProfile] = useState<FriendProfile | null>(
     null,
@@ -90,7 +90,6 @@ export function FriendSearchSection({
         />
         {shouldShowDropdown ? (
           <SearchResultList
-            isPending={isSearchPending}
             onAddFriend={handleAddFriend}
             onOpenProfile={(profile) => {
               closeDropdown();

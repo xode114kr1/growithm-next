@@ -152,7 +152,7 @@ export default function StudyCreateModal() {
                   취소
                 </button>
                 <button className="btn-primary" disabled={isPending} type="submit">
-                  {isPending ? "생성 중..." : "스터디 생성"}
+                  스터디 생성
                 </button>
               </div>
             </form>
