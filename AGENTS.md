@@ -1,33 +1,23 @@
 <!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
+# 기존 지식과 다른 Next.js 버전
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+이 프로젝트의 Next.js 버전에는 기존 버전과 호환되지 않는 변경 사항이 있다. API, 규칙, 파일 구조가 학습 데이터와 다를 수 있으므로 코드를 작성하기 전에 `node_modules/next/dist/docs/`의 관련 가이드를 읽고 지원 중단 안내를 따른다.
 <!-- END:nextjs-agent-rules -->
 
 <!-- BEGIN:project-docs-agent-rules -->
-# Project Docs
+# 프로젝트 문서
 
-Before making code changes, always list the Markdown files in `docs/`, then read the files relevant to the current request before editing.
+코드를 변경하기 전에 항상 `docs/` 안의 Markdown 파일 목록을 확인하고, 현재 요청과 관련된 문서를 실제로 읽은 후 작업한다.
 
-한국어 설명: 코드 변경 전에 항상 `docs/` 안의 Markdown 파일 목록을 확인한 다음, 현재 요청과 관련된 문서를 실제로 읽고 작업한다.
+작업 유형에 따라 최소한 아래 문서를 확인한다.
 
-At minimum, use these docs by task type:
+- 코드 생성 또는 리팩터링: `docs/project-structure.md`
+- 커밋 생성: `docs/commit-convention.md`
+- 풀 리퀘스트 생성 또는 설명 작성: `docs/pr-convention.md`
 
-- Code creation or refactoring: `docs/project-structure.md`
-- Commit creation: `docs/commit-convention.md`
-- Pull request creation or PR description: `docs/pr-convention.md`
+코드를 생성하거나 리팩터링할 때는 `docs/project-structure.md`를 따른다.
 
-한국어 설명: 작업 유형에 따라 최소한 위 문서들을 확인한다.
+사용자가 Codex에게 커밋 생성을 요청하면 `docs/commit-convention.md`를 따른다.
 
-When creating or refactoring code, follow `docs/project-structure.md`.
-
-한국어 설명: 코드를 생성하거나 리팩토링할 때 `docs/project-structure.md`를 따른다.
-
-When the user asks Codex to create a commit, follow `docs/commit-convention.md`.
-
-한국어 설명: 사용자가 Codex에게 커밋 생성을 요청하면 `docs/commit-convention.md`를 따른다.
-
-When the user asks Codex to create or describe a pull request, follow `docs/pr-convention.md`.
-
-한국어 설명: 사용자가 Codex에게 PR 생성 또는 PR 설명 작성을 요청하면 `docs/pr-convention.md`를 따른다.
+사용자가 Codex에게 풀 리퀘스트 생성 또는 설명 작성을 요청하면 `docs/pr-convention.md`를 따른다.
 <!-- END:project-docs-agent-rules -->
