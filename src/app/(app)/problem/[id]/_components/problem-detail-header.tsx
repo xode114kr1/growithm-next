@@ -1,16 +1,9 @@
 import Link from "next/link";
 
 import ProblemShareModal from "./problem-share-modal";
-import {
-  getProblemStatusBadgeClass,
-  getProblemStatusLabel,
-  getSubmittedLabel,
-  getTierBadgeClass,
-} from "@/utils/problem";
-import type {
-  ProblemDetail,
-} from "@/types/problem";
+import type { ProblemDetail } from "@/types/problem";
 import type { ProblemShareTargetStudy } from "@/types/study";
+import { getTierBadgeClass } from "@/utils/problem";
 
 export default function ProblemDetailHeader({
   problem,
@@ -45,12 +38,6 @@ export default function ProblemDetailHeader({
                 {problem.tier}
               </span>
             ) : null}
-            <span className="badge-solved">
-              {getSubmittedLabel(problem.submittedAtText)}
-            </span>
-            <span className={getProblemStatusBadgeClass(problem.status)}>
-              {getProblemStatusLabel(problem.status)}
-            </span>
           </div>
           <p className="mb-2 text-label-caps text-slate-400">
             Problem {problem.problemId}

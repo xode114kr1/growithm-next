@@ -6,7 +6,6 @@ import type {
 } from "@/types/problem";
 import {
   getProblemStatusBadgeClass,
-  getProblemStatusDescription,
   getProblemStatusLabel,
 } from "@/utils/problem";
 
@@ -110,25 +109,11 @@ export default function ProblemTable({
 
 function ProblemSubmissionState({ problem }: { problem: ProblemListItem }) {
   return (
-    <div className="flex min-w-36 flex-col items-start gap-1.5">
+    <div className="min-w-36">
       <span className={getProblemStatusBadgeClass(problem.status)}>
         {getProblemStatusLabel(problem.status)}
       </span>
-      <span className="text-body-sm text-slate-500">
-        {getProblemStatusDescription(problem.status)}
-      </span>
-      <ProblemState submittedAtText={problem.submittedAtText} />
     </div>
-  );
-}
-
-// 제출일이 있으면 제출일을 사용해 제출 상태를 표시한다.
-function ProblemState({ submittedAtText }: { submittedAtText: string | null }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-3 py-1 text-body-sm font-semibold text-on-secondary-fixed">
-      <span aria-hidden="true">✓</span>
-      {submittedAtText ?? "Submitted"}
-    </span>
   );
 }
 
