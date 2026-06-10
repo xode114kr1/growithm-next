@@ -13,30 +13,19 @@ export function ProfileCard({
   profile: FriendProfile;
 }) {
   return (
-    <article
-      className={`app-card flex flex-col items-center gap-4 p-4 transition-all hover:border-slate-200 md:flex-row md:gap-5 ${
-        profile.offline ? "opacity-80 hover:opacity-100" : ""
-      }`}
-    >
+    <article className="app-card flex flex-col items-center gap-4 p-4 transition-all hover:border-slate-200 md:flex-row md:gap-5">
       <button
         aria-label={`${profile.name} profile`}
-        className="relative shrink-0 rounded-full outline-none transition-opacity hover:opacity-80 focus:ring-2 focus:ring-primary-container"
+        className="shrink-0 rounded-full outline-none transition-opacity hover:opacity-80 focus:ring-2 focus:ring-primary-container"
         onClick={() => onOpenProfile(profile)}
         type="button"
       >
         <Image
           alt={`${profile.name} avatar`}
-          className={`size-12 rounded-full object-cover ring-2 ring-slate-50 md:size-14 ${
-            profile.offline ? "grayscale" : ""
-          }`}
+          className="size-12 rounded-full object-cover ring-2 ring-slate-50 md:size-14"
           height={56}
           src={profile.avatar}
           width={56}
-        />
-        <span
-          className={`absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-white ${
-            profile.offline ? "bg-slate-300" : "bg-green-500"
-          }`}
         />
       </button>
       <div className="min-w-0 flex-1 text-center md:text-left">

@@ -10,7 +10,6 @@ export type FriendProfile = {
   avatar: string;
   id: string;
   name: string;
-  offline?: boolean;
   relationStatus: FriendRelationStatus;
   tier: string;
   tierClass: string;
