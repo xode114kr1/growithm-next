@@ -80,6 +80,10 @@ model User {
   studyInvitesReceived     StudyInvite[]             @relation("StudyInviteTarget")
   studyInvitesSent         StudyInvite[]             @relation("StudyInviteInviter")
   studyProblemShares       StudyProblemShare[]
+  friendRequestsSent       FriendRequest[]           @relation("FriendRequestRequester")
+  friendRequestsReceived   FriendRequest[]           @relation("FriendRequestAddressee")
+  friendshipsAsUserA       Friendship[]              @relation("FriendshipUserA")
+  friendshipsAsUserB       Friendship[]              @relation("FriendshipUserB")
 
   @@map("users")
 }

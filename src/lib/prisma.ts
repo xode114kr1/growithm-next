@@ -25,6 +25,8 @@ export { prisma };
 
 function isCurrentPrismaClient(prismaClient: PrismaClient) {
   return (
+    "friendRequest" in prismaClient &&
+    "friendship" in prismaClient &&
     "gitHubRepositoryWebhook" in prismaClient &&
     "problemSubmission" in prismaClient &&
     "study" in prismaClient &&
