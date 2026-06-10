@@ -1,5 +1,5 @@
 import type { ProblemPlatform } from "@/generated/prisma/enums";
-import type { DashboardQuickLaunch } from "@/types/dashboard";
+import { getProblemCountsByPlatform } from "@/services/problem.server";
 
 const quickLinkStyles: Record<
   ProblemPlatform,
@@ -27,11 +27,13 @@ const quickLinkStyles: Record<
   },
 };
 
-export default function QuickLaunch({
-  quickLaunches,
+export default async function QuickLaunch({
+  userId,
 }: {
-  quickLaunches: DashboardQuickLaunch[];
+  userId: string | undefined;
 }) {
+  const quickLaunches = await getProblemCountsByPlatform(userId);
+
   return (
     <section className="app-card-muted p-6 md:col-span-4">
       <h2 className="mb-6 text-label-caps text-on-primary-fixed-variant">

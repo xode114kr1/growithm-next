@@ -12,7 +12,7 @@ import {
   YAxis,
 } from "recharts";
 
-import type { DashboardMasteryBucket } from "@/types/dashboard";
+import type { ProblemTierBucket } from "@/types/problem";
 
 const masteryTooltipLabels: Record<string, string> = {
   BRONZE: "Bronze / Level 1",
@@ -26,7 +26,7 @@ const masteryTooltipLabels: Record<string, string> = {
 export default function GrowthMastery({
   mastery,
 }: {
-  mastery: DashboardMasteryBucket[];
+  mastery: ProblemTierBucket[];
 }) {
   const [isMounted, setIsMounted] = useState(false);
 
@@ -93,7 +93,7 @@ function MasteryTooltip({
   payload,
 }: {
   active?: boolean;
-  payload?: Array<{ payload?: DashboardMasteryBucket }>;
+  payload?: Array<{ payload?: ProblemTierBucket }>;
 }) {
   const bucket = payload?.[0]?.payload;
 

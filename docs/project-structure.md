@@ -309,7 +309,8 @@ project-root/
 │  │  ├─ auth/                        # 전역 인증 설정
 │  │  └─ prisma.ts                    # PostgreSQL용 PrismaClient 인스턴스
 │  ├─ services/                       # 데이터 요청과 비즈니스 로직
-│  │  └─ dashboard/
+│  │  ├─ problem.server.ts
+│  │  └─ user.server.ts
 │  ├─ types/                          # 공유 타입 및 라이브러리 타입 확장
 │  └─ utils/                          # 순수 유틸 함수
 ├─ .env.example                       # 필수 환경 변수 예시
@@ -323,10 +324,11 @@ project-root/
 
 `src/app`은 URL 구조와 Next.js 특수 파일을 담당한다.
 
-- `page.tsx`는 파라미터를 읽고 서비스 함수와 라우트 전용 컴포넌트를 조합한다.
+- `page.tsx`는 파라미터를 읽고 라우트 전용 컴포넌트를 조합한다.
 - `route.ts`는 요청을 읽고 서비스 함수에 처리를 위임한 뒤 `Response`를 반환한다.
 - `layout.tsx`, `loading.tsx`, `error.tsx`, `not-found.tsx`는 라우트 단위 UI 경계를 담당한다.
 - 큰 Prisma 쿼리, 재사용 가능한 비즈니스 규칙, 외부 API 연동 로직은 `src/app`에 두지 않는다.
+- 서로 독립적인 화면 영역은 각각 필요한 서비스 함수를 호출한다.
 
 예를 들어 GitHub 웹훅 라우트 핸들러는 요청 처리의 진입점만 담당한다.
 
@@ -345,18 +347,23 @@ src/
 ├─ app/(app)/dashboard/
 │  ├─ _components/                    # dashboard 페이지 전용 UI
 │  └─ page.tsx
-├─ services/dashboard/
-│  ├─ dashboard-page.server.ts        # dashboard 데이터 요청과 조합
-│  └─ dashboard-tier.server.ts        # dashboard 티어 데이터 요청
-├─ types/dashboard.ts                 # dashboard 공유 타입
-└─ utils/dashboard.ts                 # dashboard 순수 변환 함수
+├─ services/
+│  ├─ problem.server.ts               # 문제 데이터 요청과 문제 비즈니스 로직
+│  └─ user.server.ts                  # 사용자 데이터 요청과 사용자 비즈니스 로직
+├─ types/
+│  ├─ problem.ts                     # 문제 리소스 타입
+│  └─ user.ts                        # 사용자 리소스 타입
+└─ utils/problem.ts                  # 문제 리소스 순수 변환 함수
 ```
 
 배치 기준은 다음과 같다.
 
 - 페이지 전용 컴포넌트는 해당 라우트의 `_components`에 둔다.
 - Prisma 쿼리와 비즈니스 로직은 `src/services`에 둔다.
+- 서비스 파일은 `dashboard`와 같은 화면 이름이 아니라 `problem`, `user`와 같은 리소스 이름으로 구분한다.
+- 타입과 유틸 파일도 화면 이름이 아니라 리소스 이름으로 구분한다.
 - 서버에서만 실행되는 서비스 파일은 `.server.ts` 접미사를 사용한다.
+- 서로 독립적인 페이지 영역은 하나의 페이지 데이터 객체로 묶지 않고 각 영역에서 필요한 서비스를 호출한다.
 - 여러 페이지에서 재사용하는 UI만 `src/components`로 이동한다.
 - 순수 함수는 `src/utils`, 공유 타입은 `src/types`에 둔다.
 

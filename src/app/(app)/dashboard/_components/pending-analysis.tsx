@@ -1,13 +1,16 @@
 import Link from "next/link";
 
 import { getTierBadgeClass } from "@/features/problem/utils";
-import type { DashboardPendingProblem } from "@/types/dashboard";
+import { getPendingProblems } from "@/services/problem.server";
+import type { PendingProblem } from "@/types/problem";
 
-export default function PendingAnalysis({
-  pendingProblems,
+export default async function PendingAnalysis({
+  userId,
 }: {
-  pendingProblems: DashboardPendingProblem[];
+  userId: string | undefined;
 }) {
+  const pendingProblems = await getPendingProblems(userId);
+
   return (
     <section className="app-card mb-12 overflow-hidden md:col-span-12">
       <div className="flex items-center justify-between border-b border-slate-50 p-6 lg:p-8">
@@ -77,7 +80,7 @@ export default function PendingAnalysis({
   );
 }
 
-function getProblemCode(problem: DashboardPendingProblem) {
+function getProblemCode(problem: PendingProblem) {
   return `${problem.platform}-${problem.problemId}`;
 }
 

@@ -1,10 +1,10 @@
 import { ProblemPlatform } from "@/generated/prisma/enums";
 
 import type {
-  DashboardMasteryBucket,
-  DashboardPendingProblem,
-  DashboardQuickLaunch,
-} from "@/types/dashboard";
+  PendingProblem,
+  PlatformProblemCount,
+  ProblemTierBucket,
+} from "@/types/problem";
 
 const MASTERY_BUCKETS = [
   { fill: "#c1c7cf", key: "BRONZE" },
@@ -28,13 +28,13 @@ const PROGRAMMERS_LEVEL_BUCKETS: Record<number, string> = {
   5: "DIAMOND",
 };
 
-export function createDashboardMasteryBuckets(
+export function createProblemTierBuckets(
   rows: Array<{ tier: string | null }>,
-): DashboardMasteryBucket[] {
+): ProblemTierBucket[] {
   const counts = new Map<string, number>();
 
   for (const row of rows) {
-    const bucket = parseDashboardTierBucket(row.tier);
+    const bucket = parseProblemTierBucket(row.tier);
 
     if (bucket) {
       counts.set(bucket, (counts.get(bucket) ?? 0) + 1);
@@ -48,14 +48,14 @@ export function createDashboardMasteryBuckets(
   }));
 }
 
-export function createDashboardPendingProblem(row: {
+export function createPendingProblem(row: {
   id: string;
   platform: ProblemPlatform;
   problemId: string;
   submittedAtText: string | null;
   tier: string | null;
   title: string;
-}): DashboardPendingProblem {
+}): PendingProblem {
   return {
     id: row.id,
     platform: row.platform,
@@ -66,14 +66,14 @@ export function createDashboardPendingProblem(row: {
   };
 }
 
-export function createDashboardQuickLaunches(
+export function createPlatformProblemCounts(
   rows: Array<{
     _count: {
       _all: number;
     };
     platform: ProblemPlatform;
   }>,
-): DashboardQuickLaunch[] {
+): PlatformProblemCount[] {
   const counts = new Map(rows.map((row) => [row.platform, row._count._all]));
 
   return QUICK_LAUNCH_PLATFORMS.map((platform) => ({
@@ -82,21 +82,7 @@ export function createDashboardQuickLaunches(
   }));
 }
 
-export function getDashboardWeeklyChangePercent({
-  currentCount,
-  previousCount,
-}: {
-  currentCount: number;
-  previousCount: number;
-}) {
-  if (previousCount === 0) {
-    return currentCount > 0 ? 100 : 0;
-  }
-
-  return Math.round(((currentCount - previousCount) / previousCount) * 100);
-}
-
-function parseDashboardTierBucket(tier: string | null) {
+function parseProblemTierBucket(tier: string | null) {
   const normalizedTier = tier?.trim().toLowerCase() ?? "";
 
   if (!normalizedTier) {

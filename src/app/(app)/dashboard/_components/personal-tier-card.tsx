@@ -1,7 +1,8 @@
 import { Award } from "lucide-react";
 
 import type { PersonalScoreTier } from "@/features/score/types";
-import type { DashboardPersonalTier } from "@/types/dashboard";
+import { getSolvedProblemCount } from "@/services/problem.server";
+import { getUserPersonalTier } from "@/services/user.server";
 
 const tierStyles: Record<
   PersonalScoreTier,
@@ -34,11 +35,17 @@ const tierStyles: Record<
   },
 };
 
-export default function PersonalTierCard({
-  personalTier,
+export default async function PersonalTierCard({
+  userId,
 }: {
-  personalTier: DashboardPersonalTier;
+  userId: string | undefined;
 }) {
+  const [tier, solvedCount] = await Promise.all([
+    getUserPersonalTier(userId),
+    getSolvedProblemCount(userId),
+  ]);
+  const personalTier = { ...tier, solvedCount };
+
   const styles = tierStyles[personalTier.tier];
   const remainingScore = Math.max(
     personalTier.nextTierScore - personalTier.score,

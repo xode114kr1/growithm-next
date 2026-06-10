@@ -1,17 +1,19 @@
 import { Check } from "lucide-react";
 
-import type { DashboardStatsSummary } from "@/types/dashboard";
+import { getSolvedProblemCount } from "@/services/problem.server";
 
 const statStyle = {
   accent: "bg-secondary-fixed text-on-secondary-container",
   label: "Total Solved",
 } as const;
 
-export default function DashboardStats({
-  stats,
+export default async function DashboardStats({
+  userId,
 }: {
-  stats: DashboardStatsSummary;
+  userId: string | undefined;
 }) {
+  const totalSolved = await getSolvedProblemCount(userId);
+
   return (
     <article className="app-card flex flex-col justify-between p-6 md:col-span-4">
       <div>
@@ -26,7 +28,7 @@ export default function DashboardStats({
           {statStyle.label}
         </h2>
         <p className="font-serif text-8 font-semibold leading-tight">
-          {stats.totalSolved.toLocaleString()}
+          {totalSolved.toLocaleString()}
         </p>
       </div>
     </article>
