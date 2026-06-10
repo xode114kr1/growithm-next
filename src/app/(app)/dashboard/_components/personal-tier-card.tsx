@@ -77,7 +77,7 @@ export default async function PersonalTierCard({
       <div className="mt-6 space-y-3">
         <div className="h-2 overflow-hidden rounded-full bg-surface-container">
           <div
-            className={`h-full rounded-full bg-gradient-to-r ${styles.ring}`}
+            className={`h-full rounded-full bg-linear-to-r ${styles.ring}`}
             style={{ width: `${personalTier.progress}%` }}
           />
         </div>
