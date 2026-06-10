@@ -85,47 +85,20 @@ export async function getUserProfilePageData(
   };
 }
 
-export async function searchUsers({
+export async function getUsers({
   excludedUserId,
-  query,
 }: {
   excludedUserId: string;
-  query: string;
 }): Promise<UserSummary[]> {
-  if (!query) {
-    return [];
-  }
-
   const users = await prisma.user.findMany({
     orderBy: {
       name: "asc",
     },
     select: userSummarySelect,
-    take: 12,
     where: {
-      AND: [
-        {
-          id: {
-            not: excludedUserId,
-          },
-        },
-        {
-          OR: [
-            {
-              name: {
-                contains: query,
-                mode: "insensitive",
-              },
-            },
-            {
-              email: {
-                contains: query,
-                mode: "insensitive",
-              },
-            },
-          ],
-        },
-      ],
+      id: {
+        not: excludedUserId,
+      },
     },
   });
 

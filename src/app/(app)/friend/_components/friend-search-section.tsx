@@ -1,7 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { FriendProfileModal } from "@/components/friend-profile-modal";
 import { useClickOutside } from "@/hooks/use-click-outside";
@@ -10,21 +9,19 @@ import type { FriendProfile, FriendSearchResult } from "@/types/friend";
 import { FriendSearchInput, SearchResultList } from "./friend-search";
 
 export function FriendSearchSection({
-  initialSearchQuery,
+  onSearchQueryChange,
+  searchQuery,
   searchResults,
 }: {
-  initialSearchQuery: string;
+  onSearchQueryChange: (query: string) => void;
+  searchQuery: string;
   searchResults: FriendSearchResult[];
 }) {
-  const router = useRouter();
-  const currentSearchParams = useSearchParams();
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [pendingRequestIds, setPendingRequestIds] = useState<Set<string>>(
     () => new Set(),
   );
-  const [, startSearchTransition] = useTransition();
-  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [selectedProfile, setSelectedProfile] = useState<FriendProfile | null>(
     null,
   );
@@ -41,32 +38,6 @@ export function FriendSearchSection({
     ref: searchContainerRef,
   });
 
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      const nextQuery = searchQuery.trim();
-
-      if (nextQuery === initialSearchQuery.trim()) {
-        return;
-      }
-
-      startSearchTransition(() => {
-        const nextSearchParams = new URLSearchParams(currentSearchParams);
-
-        if (nextQuery) {
-          nextSearchParams.set("query", nextQuery);
-        } else {
-          nextSearchParams.delete("query");
-        }
-
-        router.replace(`/friend?${nextSearchParams.toString()}`, {
-          scroll: false,
-        });
-      });
-    }, 250);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [currentSearchParams, initialSearchQuery, router, searchQuery]);
-
   function handleAddFriend(profileId: string) {
     setPendingRequestIds((current) => {
       const next = new Set(current);
@@ -76,7 +47,7 @@ export function FriendSearchSection({
   }
 
   function handleSearchQueryChange(query: string) {
-    setSearchQuery(query);
+    onSearchQueryChange(query);
     setIsDropdownOpen(query.trim().length > 0);
   }
 
