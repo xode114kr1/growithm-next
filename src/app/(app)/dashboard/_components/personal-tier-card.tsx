@@ -1,8 +1,8 @@
 import { Award } from "lucide-react";
 
-import type { PersonalScoreTier } from "@/features/score/types";
 import { getSolvedProblemCount } from "@/services/problem.server";
 import { getUserPersonalTier } from "@/services/user.server";
+import type { PersonalScoreTier } from "@/types/user";
 
 const tierStyles: Record<
   PersonalScoreTier,

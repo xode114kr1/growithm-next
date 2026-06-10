@@ -14,7 +14,7 @@ import {
 } from "@/features/github/server/webhooks/payload-parser";
 import { prisma } from "@/lib/prisma";
 import { parseProblemReadme } from "@/utils/problem-readme";
-import { getProblemExperienceScore } from "@/features/score/problem-score";
+import { getProblemExperienceScore } from "@/utils/problem";
 
 const signaturePrefix = "sha256=";
 

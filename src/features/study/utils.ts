@@ -3,7 +3,7 @@ import {
   getScoreProgressLabel,
   getScoreTier,
   getScoreTierProgress,
-} from "@/features/score/utils";
+} from "@/utils/score";
 import type { StudyTier } from "@/features/study/types";
 
 const studyScoreTierThresholds = [

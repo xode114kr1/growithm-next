@@ -1,4 +1,9 @@
-import type { PersonalScoreTier } from "@/features/score/types";
+export type PersonalScoreTier =
+  | "Bronze"
+  | "Silver"
+  | "Gold"
+  | "Platinum"
+  | "Diamond";
 
 export type UserPersonalTier = {
   nextTierScore: number;

@@ -1,11 +1,5 @@
 import "server-only";
 
-import {
-  getNextPersonalTierScore,
-  getPersonalProgressLabel,
-  getPersonalScoreTier,
-  getPersonalTierProgress,
-} from "@/features/score/utils";
 import { prisma } from "@/lib/prisma";
 import type {
   UserPersonalTier,
@@ -13,6 +7,10 @@ import type {
   UserSummary,
 } from "@/types/user";
 import {
+  getNextPersonalTierScore,
+  getPersonalProgressLabel,
+  getPersonalScoreTier,
+  getPersonalTierProgress,
   getUserAvatar,
   getUserDisplayName,
   getUserTier,

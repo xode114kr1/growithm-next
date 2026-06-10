@@ -1,4 +1,4 @@
-import type { ScoreTier } from "@/features/score/types";
+import type { ScoreTier } from "@/types/score";
 
 export type StudyTier = ScoreTier;
 

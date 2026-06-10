@@ -1,4 +1,19 @@
-import { getPersonalScoreTier } from "@/features/score/utils";
+import type { PersonalScoreTier } from "@/types/user";
+
+import {
+  getNextScoreTierScore,
+  getScoreProgressLabel,
+  getScoreTier,
+  getScoreTierProgress,
+} from "@/utils/score";
+
+const personalScoreTierThresholds = [
+  { minScore: 1_000_000, tier: "Diamond" },
+  { minScore: 100_000, tier: "Platinum" },
+  { minScore: 10_000, tier: "Gold" },
+  { minScore: 1_000, tier: "Silver" },
+  { minScore: 0, tier: "Bronze" },
+] satisfies Array<{ minScore: number; tier: PersonalScoreTier }>;
 
 const tierClasses = {
   Bronze: "bg-orange-50 border-orange-200 text-orange-800",
@@ -16,6 +31,28 @@ export function getUserTier(score: number) {
     tier: `${tier} Tier`,
     tierClass: tierClasses[tier],
   };
+}
+
+export function getPersonalScoreTier(score: number): PersonalScoreTier {
+  return getScoreTier(score, personalScoreTierThresholds, "Bronze");
+}
+
+export function getPersonalTierProgress(
+  score: number,
+  tier: PersonalScoreTier,
+) {
+  return getScoreTierProgress(score, tier, personalScoreTierThresholds);
+}
+
+export function getPersonalProgressLabel(
+  score: number,
+  tier: PersonalScoreTier,
+) {
+  return getScoreProgressLabel(score, tier, personalScoreTierThresholds);
+}
+
+export function getNextPersonalTierScore(tier: PersonalScoreTier) {
+  return getNextScoreTierScore(tier, personalScoreTierThresholds);
 }
 
 export function getUserDisplayName(name: string | null, email: string | null) {
