@@ -1,3 +1,5 @@
+import { RefreshCw, Users, type LucideIcon } from "lucide-react";
+
 const heatmapColors = [
   "bg-slate-100",
   "bg-emerald-100",
@@ -33,7 +35,7 @@ const growthBars = [
 ];
 
 type FeatureIconProps = {
-  label: string;
+  icon: LucideIcon;
   tone: "primary" | "inverse";
 };
 
@@ -66,7 +68,7 @@ function GitHubSyncCard() {
   return (
     <article className="surface-card flex flex-col items-center gap-8 rounded-xl p-8 md:col-span-8 md:flex-row lg:p-10">
       <div className="flex-1 space-y-4">
-        <FeatureIcon label="↻" tone="primary" />
+        <FeatureIcon icon={RefreshCw} tone="primary" />
         <h3 className="section-title">GitHub 자동 연동</h3>
         <p className="text-body-md text-on-surface-variant">
           문제를 해결하는 즉시 당신의 깃허브 레포지토리에 코드가 자동으로
@@ -91,7 +93,7 @@ function StudyGroupCard() {
   return (
     <article className="relative overflow-hidden rounded-xl bg-primary p-8 text-on-primary md:col-span-4 lg:p-10">
       <div className="relative z-10 space-y-4">
-        <FeatureIcon label="👥" tone="inverse" />
+        <FeatureIcon icon={Users} tone="inverse" />
         <h3 className="section-title text-on-primary">함께하는 스터디</h3>
         <p className="text-body-md text-white/80">
           혼자하면 힘들지만 함께하면 즐겁습니다. 실시간 코드 리뷰와 주간
@@ -128,7 +130,7 @@ function GrowthMetricsCard() {
   );
 }
 
-function FeatureIcon({ label, tone }: FeatureIconProps) {
+function FeatureIcon({ icon: Icon, tone }: FeatureIconProps) {
   const toneClass = {
     inverse: "bg-white/10 text-white",
     primary: "bg-primary-fixed text-primary",
@@ -136,9 +138,9 @@ function FeatureIcon({ label, tone }: FeatureIconProps) {
 
   return (
     <span
-      className={`flex size-12 items-center justify-center rounded-xl text-lg font-bold ${toneClass}`}
+      className={`flex size-12 items-center justify-center rounded-xl ${toneClass}`}
     >
-      {label}
+      <Icon aria-hidden="true" size={24} strokeWidth={2.2} />
     </span>
   );
 }
