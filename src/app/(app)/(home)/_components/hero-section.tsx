@@ -1,4 +1,4 @@
-import { signIn } from "@/lib/auth/auth";
+import { signInWithGitHub } from "../actions";
 
 export default function HeroSection() {
   return (
@@ -17,12 +17,7 @@ export default function HeroSection() {
             환경을 제공합니다.
           </p>
           <div className="flex flex-wrap gap-4">
-            <form
-              action={async () => {
-                "use server";
-                await signIn("github");
-              }}
-            >
+            <form action={signInWithGitHub}>
               <button
                 className="btn-primary min-h-14 rounded-xl px-8 text-base"
                 type="submit"
@@ -48,7 +43,7 @@ export default function HeroSection() {
 function CodePreview() {
   return (
     <div className="relative flex-1">
-      <div className="absolute inset-0 aspect-square scale-95 rounded-xl bg-gradient-to-br from-primary-fixed to-surface-container-highest opacity-50 -rotate-6" />
+      <div className="absolute inset-0 aspect-square scale-95 rounded-xl bg-linear-to-br from-primary-fixed to-surface-container-highest opacity-50 -rotate-6" />
       <div className="surface-card relative rounded-xl border-slate-100 p-8">
         <div className="mb-8 flex items-center justify-between">
           <div className="flex gap-2">

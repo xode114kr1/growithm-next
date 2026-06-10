@@ -1,4 +1,4 @@
-import { signIn } from "@/lib/auth/auth";
+import { signInWithGitHub } from "../actions";
 
 const trustBadges = ["GITHUB VERIFIED", "SECURE SYNC", "REAL-TIME REVIEW"];
 
@@ -7,7 +7,7 @@ export default function GrowthCtaSection() {
     <section className="relative bg-surface px-4 py-24 sm:px-10">
       <div className="relative mx-auto max-w-container overflow-hidden rounded-xl bg-primary-container p-8 text-center sm:p-16">
         <div className="absolute inset-0 opacity-10">
-          <div className="size-full bg-[linear-gradient(135deg,transparent_0_24px,var(--primary-fixed)_24px_25px,transparent_25px_48px)] bg-[length:48px_48px]" />
+          <div className="size-full bg-[linear-gradient(135deg,transparent_0_24px,var(--primary-fixed)_24px_25px,transparent_25px_48px)] bg-size-[48px_48px]" />
         </div>
         <div className="relative z-10 space-y-8">
           <h2 className="text-h1-editorial text-on-primary">
@@ -19,12 +19,7 @@ export default function GrowthCtaSection() {
             Growithm과 함께라면 알고리즘 정복은 더 이상 막막한 과제가 아닙니다.
           </p>
           <div className="flex justify-center">
-            <form
-              action={async () => {
-                "use server";
-                await signIn("github");
-              }}
-            >
+            <form action={signInWithGitHub}>
               <button
                 className="inline-flex min-h-14 items-center justify-center rounded-xl bg-secondary-fixed px-8 text-base font-bold text-on-secondary-container shadow-lg transition-transform hover:scale-[1.03]"
                 type="submit"

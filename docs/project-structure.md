@@ -282,6 +282,8 @@ project-root/
 │  ├─ app/                            # Next.js 라우팅 경계
 │  │  ├─ (app)/                       # 공통 앱 레이아웃을 사용하는 라우트 그룹
 │  │  │  ├─ (home)/
+│  │  │  │  ├─ _components/
+│  │  │  │  └─ actions.ts
 │  │  │  ├─ dashboard/
 │  │  │  │  └─ _components/
 │  │  │  ├─ friend/

@@ -1,5 +1,3 @@
-import FeatureIcon from "@/features/home/components/feature-icon";
-
 const heatmapColors = [
   "bg-slate-100",
   "bg-emerald-100",
@@ -33,6 +31,11 @@ const growthBars = [
   "h-7/10",
   "h-9/10",
 ];
+
+type FeatureIconProps = {
+  label: string;
+  tone: "primary" | "inverse";
+};
 
 export default function FeatureSection() {
   return (
@@ -122,5 +125,20 @@ function GrowthMetricsCard() {
         ))}
       </div>
     </article>
+  );
+}
+
+function FeatureIcon({ label, tone }: FeatureIconProps) {
+  const toneClass = {
+    inverse: "bg-white/10 text-white",
+    primary: "bg-primary-fixed text-primary",
+  }[tone];
+
+  return (
+    <span
+      className={`flex size-12 items-center justify-center rounded-xl text-lg font-bold ${toneClass}`}
+    >
+      {label}
+    </span>
   );
 }
