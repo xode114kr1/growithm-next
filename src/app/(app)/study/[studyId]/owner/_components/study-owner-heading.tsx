@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import type { OwnerStudy } from "@/features/study/types";
+import type { OwnerStudy } from "@/types/study";
 
 export default function StudyOwnerHeading({ study }: { study: OwnerStudy }) {
   return (

@@ -1,10 +1,12 @@
+import "server-only";
+
 import { prisma } from "@/lib/prisma";
-import type { StudyProblemsData } from "@/features/study/types";
+import type { StudyProblemsData } from "@/types/study";
 import {
   formatShortDate,
   getUserDisplayName,
   normalizeCategories,
-} from "@/features/study/utils";
+} from "@/utils/study";
 
 export async function getStudyProblemsData({
   studyId,

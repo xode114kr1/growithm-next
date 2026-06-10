@@ -1,10 +1,12 @@
+import "server-only";
+
 import { prisma } from "@/lib/prisma";
-import type { StudyListItem } from "@/features/study/types";
+import type { StudyListItem } from "@/types/study";
 import {
   getProgressLabel,
   getStudyTier,
   getTierProgress,
-} from "@/features/study/utils";
+} from "@/utils/study";
 
 export async function getUserStudies(userId: string): Promise<StudyListItem[]> {
   const studies = await prisma.study.findMany({

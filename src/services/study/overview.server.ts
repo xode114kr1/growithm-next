@@ -1,10 +1,12 @@
+import "server-only";
+
 import { prisma } from "@/lib/prisma";
-import type { StudyOverview } from "@/features/study/types";
+import type { StudyOverview } from "@/types/study";
 import {
   getNextTierScore,
   getStudyTier,
   getUserDisplayName,
-} from "@/features/study/utils";
+} from "@/utils/study";
 
 export async function getStudyOverview({
   studyId,

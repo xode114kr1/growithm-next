@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 
 import { auth } from "@/lib/auth/auth";
-import StudyProblemModalTable from "@/features/study/components/study-problem-modal-table";
-import StudyProblemsHeading from "@/features/study/components/study-problems-heading";
-import { getStudyProblemsData } from "@/features/study/server/study-problems-data";
+import { getStudyProblemsData } from "@/services/study/problem.server";
+
+import StudyProblemModalTable from "./_components/study-problem-modal-table";
+import StudyProblemsHeading from "./_components/study-problems-heading";
 
 export default async function StudyProblemsPage({
   params,

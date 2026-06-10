@@ -1,10 +1,10 @@
 import {
   acceptStudyInvite,
   declineStudyInvite,
-} from "@/features/study/actions/study-actions";
+} from "../actions";
 import { auth } from "@/lib/auth/auth";
-import { getPendingInvites } from "@/features/study/server/study-invites-data";
-import type { StudyInviteItem } from "@/features/study/types";
+import { getPendingInvites } from "@/services/study/invite.server";
+import type { StudyInviteItem } from "@/types/study";
 
 export default async function StudyInvites() {
   const session = await auth();

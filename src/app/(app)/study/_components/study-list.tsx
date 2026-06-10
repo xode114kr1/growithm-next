@@ -1,10 +1,11 @@
 import Link from "next/link";
 
-import StudyCreateModal from "@/features/study/components/study-create-modal";
-import { getUserStudies } from "@/features/study/server/study-list-data";
-import type { StudyListItem, StudyTier } from "@/features/study/types";
-import { tierThumbnails } from "@/features/study/utils";
 import { auth } from "@/lib/auth/auth";
+import { getUserStudies } from "@/services/study/list.server";
+import type { StudyListItem, StudyTier } from "@/types/study";
+import { tierThumbnails } from "@/utils/study";
+
+import StudyCreateModal from "./study-create-modal";
 
 export default async function StudyList() {
   const session = await auth();

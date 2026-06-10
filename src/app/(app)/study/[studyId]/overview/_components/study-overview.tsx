@@ -1,8 +1,9 @@
 import Link from "next/link";
 
-import ContributionChart from "@/features/study/components/contribution-chart";
-import type { StudyOverview, StudyTier } from "@/features/study/types";
-import { getTierProgress } from "@/features/study/utils";
+import type { StudyOverview, StudyTier } from "@/types/study";
+import { getTierProgress } from "@/utils/study";
+
+import ContributionChart from "./contribution-chart";
 
 const tierStyles: Record<StudyTier, string> = {
   Bronze: "border-amber-700/20 bg-amber-700 text-white",

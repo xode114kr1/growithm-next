@@ -4,7 +4,7 @@ import {
   getScoreTier,
   getScoreTierProgress,
 } from "@/utils/score";
-import type { StudyTier } from "@/features/study/types";
+import type { StudyTier } from "@/types/study";
 
 const studyScoreTierThresholds = [
   { minScore: 5_000_000, tier: "Diamond" },

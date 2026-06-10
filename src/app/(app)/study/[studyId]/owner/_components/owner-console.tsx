@@ -11,8 +11,8 @@ import {
   type UpdateStudySettingsActionState,
   updateStudyMemberRole,
   updateStudySettings,
-} from "@/features/study/actions/study-owner-actions";
-import type { OwnerInvite, OwnerMember, OwnerStudy } from "@/features/study/types";
+} from "../actions";
+import type { OwnerInvite, OwnerMember, OwnerStudy } from "@/types/study";
 
 const initialCreateStudyInviteActionState: CreateStudyInviteActionState = {
   error: null,

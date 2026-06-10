@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import type { StudyMember } from "@/features/study/types";
+import type { StudyMember } from "@/types/study";
 
 type RoleFilter = "ALL" | StudyMember["role"];
 type SortKey = "contribution" | "lastActive" | "joinedAt" | "name";

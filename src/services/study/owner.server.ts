@@ -1,6 +1,8 @@
+import "server-only";
+
 import { prisma } from "@/lib/prisma";
-import type { OwnerMember, StudyOwnerData } from "@/features/study/types";
-import { formatShortDate, getUserDisplayName } from "@/features/study/utils";
+import type { OwnerMember, StudyOwnerData } from "@/types/study";
+import { formatShortDate, getUserDisplayName } from "@/utils/study";
 
 export async function getStudyOwnerData({
   studyId,

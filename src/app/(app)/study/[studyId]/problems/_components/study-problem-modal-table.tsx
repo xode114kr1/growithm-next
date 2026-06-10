@@ -17,7 +17,7 @@ import {
   getProblemStatusLabel,
 } from "@/utils/problem";
 import type { ProblemSubmissionStatus } from "@/generated/prisma/enums";
-import type { StudyProblem } from "@/features/study/types";
+import type { StudyProblem } from "@/types/study";
 
 const PAGE_SIZE = 10;
 const tierRank = {

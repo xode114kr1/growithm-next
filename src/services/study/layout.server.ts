@@ -1,5 +1,7 @@
+import "server-only";
+
 import { prisma } from "@/lib/prisma";
-import type { StudyLayoutData } from "@/features/study/types";
+import type { StudyLayoutData } from "@/types/study";
 
 export async function getStudyLayoutData({
   studyId,

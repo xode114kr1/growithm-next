@@ -1,6 +1,8 @@
+import "server-only";
+
 import { prisma } from "@/lib/prisma";
-import type { StudyInviteItem } from "@/features/study/types";
-import { formatRelativeDate, getUserDisplayName } from "@/features/study/utils";
+import type { StudyInviteItem } from "@/types/study";
+import { formatRelativeDate, getUserDisplayName } from "@/utils/study";
 
 export async function getPendingInvites(
   userId: string,

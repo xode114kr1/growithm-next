@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 
 import { auth } from "@/lib/auth/auth";
-import StudyOverviewView from "@/features/study/components/study-overview";
-import { getStudyOverview } from "@/features/study/server/study-overview-data";
+import { getStudyOverview } from "@/services/study/overview.server";
+
+import StudyOverviewView from "./_components/study-overview";
 
 export default async function StudyOverviewPage({
   params,

@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 
 import { auth } from "@/lib/auth/auth";
-import StudyLocalNav from "@/features/study/components/study-local-nav";
-import { getStudyLayoutData } from "@/features/study/server/study-layout-data";
+import { getStudyLayoutData } from "@/services/study/layout.server";
+
+import StudyLocalNav from "./_components/study-local-nav";
 
 type StudyDetailLayoutProps = {
   children: React.ReactNode;
