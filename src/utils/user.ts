@@ -9,7 +9,7 @@ const tierClasses = {
   Silver: "bg-slate-200 border-slate-300 text-slate-600",
 };
 
-export function getFriendTier(score: number) {
+export function getUserTier(score: number) {
   const tier = getPersonalScoreTier(score);
 
   return {
@@ -18,10 +18,10 @@ export function getFriendTier(score: number) {
   };
 }
 
-export function getFriendDisplayName(name: string | null, email: string | null) {
+export function getUserDisplayName(name: string | null, email: string | null) {
   return name?.trim() || email?.trim() || "Unknown Developer";
 }
 
-export function getFriendAvatar(image: string | null) {
+export function getUserAvatar(image: string | null) {
   return image || "https://avatars.githubusercontent.com/u/0?v=4";
 }

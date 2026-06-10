@@ -9,8 +9,8 @@ import {
   deleteFriendAction,
   deleteReceivedFriendRequestAction,
   sendFriendRequestByIdAction,
-} from "@/features/friend/actions/friend-actions";
-import type { FriendSearchResult } from "@/features/friend/types";
+} from "../actions";
+import type { FriendSearchResult } from "@/types/friend";
 
 export function SearchResultActions({
   isPending,

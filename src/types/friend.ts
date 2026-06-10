@@ -24,19 +24,3 @@ export type FriendRequest = FriendProfile & {
 export type FriendSearchResult = FriendProfile & {
   requestId?: string;
 };
-
-export type FriendListMap = {
-  friends: FriendProfile[];
-  received: FriendRequest[];
-  searchResults: FriendSearchResult[];
-  sent: FriendRequest[];
-};
-
-export type FriendPageData = {
-  lists: FriendListMap;
-  searchQuery: string;
-};
-
-export type FriendPageSearchParams = {
-  query?: string | string[];
-};

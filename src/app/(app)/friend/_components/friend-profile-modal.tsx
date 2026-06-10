@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import type { FriendProfile } from "@/features/friend/types";
+import type { FriendProfile } from "@/types/friend";
 
 const relationLabels: Record<FriendProfile["relationStatus"], string> = {
   friend: "Friend",

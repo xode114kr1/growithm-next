@@ -285,6 +285,8 @@ project-root/
 │  │  │  ├─ dashboard/
 │  │  │  │  └─ _components/
 │  │  │  ├─ friend/
+│  │  │  │  ├─ _components/
+│  │  │  │  └─ actions.ts
 │  │  │  ├─ problem/
 │  │  │  │  └─ [id]/
 │  │  │  ├─ profile/
@@ -305,14 +307,16 @@ project-root/
 │  │  └─ ui/                          # 도메인에 종속되지 않는 기초 UI
 │  ├─ generated/
 │  │  └─ prisma/                      # Prisma가 생성한 클라이언트와 타입
+│  ├─ hooks/                          # 여러 화면에서 재사용하는 React 커스텀 훅
 │  ├─ lib/
 │  │  ├─ auth/                        # 전역 인증 설정
 │  │  └─ prisma.ts                    # PostgreSQL용 PrismaClient 인스턴스
 │  ├─ services/                       # 데이터 요청과 비즈니스 로직
+│  │  ├─ friend.server.ts             # 친구 관계 조회와 친구 요청 처리
 │  │  ├─ problem.server.ts
-│  │  └─ user.server.ts
+│  │  └─ user.server.ts               # 사용자 정보와 프로필 조회
 │  ├─ types/                          # 공유 타입 및 라이브러리 타입 확장
-│  └─ utils/                          # 순수 유틸 함수
+│  └─ utils/                          # 리소스별 순수 유틸 함수
 ├─ .env.example                       # 필수 환경 변수 예시
 ├─ docker-compose.yml                 # 앱과 PostgreSQL 로컬 실행 환경
 ├─ Dockerfile                         # 앱 컨테이너 이미지 정의

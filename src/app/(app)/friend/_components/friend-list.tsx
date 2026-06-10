@@ -7,9 +7,9 @@ import {
   CancelFriendRequestButton,
   DeleteFriendButton,
   DeleteReceivedRequestButton,
-} from "@/features/friend/components/friend-action-buttons";
-import { ProfileCard } from "@/features/friend/components/friend-profile-card";
-import type { FriendProfile, FriendRequest } from "@/features/friend/types";
+} from "./friend-action-buttons";
+import { ProfileCard } from "./friend-profile-card";
+import type { FriendProfile, FriendRequest } from "@/types/friend";
 
 const FRIEND_LIST_PAGE_SIZE = 6;
 

@@ -1,18 +1,40 @@
-import FriendNetwork from "@/features/friend/components/friend-network";
-import { getFriendPageData } from "@/features/friend/server/friend-data";
-import type { FriendPageSearchParams } from "@/features/friend/types";
 import { auth } from "@/lib/auth/auth";
+import {
+  getFriendRelationsForUsers,
+  getReceivedFriendRequests,
+  getSentFriendRequests,
+} from "@/services/friend.server";
+import { getFriendUsers, searchUsers } from "@/services/user.server";
+import type { FriendListFilter, FriendProfile } from "@/types/friend";
+
+import { FriendFilterTabs } from "./_components/friend-filter-tabs";
+import { FriendListSection } from "./_components/friend-list-section";
+import { FriendSearchSection } from "./_components/friend-search-section";
 
 type FriendPageProps = {
-  searchParams: Promise<FriendPageSearchParams>;
+  searchParams: Promise<{
+    query?: string | string[];
+    tab?: string | string[];
+  }>;
 };
 
 export default async function FriendPage({ searchParams }: FriendPageProps) {
   const session = await auth();
-  const friendPageData = await getFriendPageData(
-    session?.user?.id,
-    await searchParams,
-  );
+  const userId = session?.user?.id;
+  const params = await searchParams;
+  const activeTab = parseActiveTab(params.tab);
+  const searchQuery = parseSearchQuery(params.query);
+  const [friendUsers, receivedRequests, sentRequests, users] = await Promise.all([
+    getFriendUsers(userId),
+    getReceivedFriendRequests(userId),
+    getSentFriendRequests(userId),
+    userId ? searchUsers({ excludedUserId: userId, query: searchQuery }) : [],
+  ]);
+  const friends: FriendProfile[] = friendUsers.map((user) => ({
+    ...user,
+    relationStatus: "friend",
+  }));
+  const searchResults = await getFriendRelationsForUsers({ userId, users });
 
   return (
     <main className="page-shell">
@@ -28,11 +50,32 @@ export default async function FriendPage({ searchParams }: FriendPageProps) {
             </p>
           </div>
         </header>
-        <FriendNetwork
-          friendLists={friendPageData.lists}
-          searchQuery={friendPageData.searchQuery}
+        <section className="mb-8 flex flex-col items-stretch justify-between gap-6 md:flex-row md:items-center">
+          <FriendFilterTabs activeTab={activeTab} searchQuery={searchQuery} />
+          <FriendSearchSection
+            initialSearchQuery={searchQuery}
+            searchResults={searchResults}
+          />
+        </section>
+        <FriendListSection
+          activeTab={activeTab}
+          friends={friends}
+          receivedRequests={receivedRequests}
+          sentRequests={sentRequests}
         />
       </div>
     </main>
   );
+}
+
+function parseActiveTab(tab: string | string[] | undefined): FriendListFilter {
+  const value = Array.isArray(tab) ? tab[0] : tab;
+
+  return value === "received" || value === "sent" ? value : "friends";
+}
+
+function parseSearchQuery(query: string | string[] | undefined) {
+  const value = Array.isArray(query) ? query[0] : query;
+
+  return value?.trim() ?? "";
 }

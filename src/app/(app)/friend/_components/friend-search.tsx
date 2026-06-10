@@ -1,7 +1,7 @@
 import Image from "next/image";
 
-import { SearchResultActions } from "@/features/friend/components/friend-action-buttons";
-import type { FriendSearchResult } from "@/features/friend/types";
+import { SearchResultActions } from "./friend-action-buttons";
+import type { FriendSearchResult } from "@/types/friend";
 
 export function FriendSearchInput({
   onFocus,
