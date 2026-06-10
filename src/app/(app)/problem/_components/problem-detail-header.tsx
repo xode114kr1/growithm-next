@@ -1,16 +1,16 @@
 import Link from "next/link";
 
-import ProblemShareModal from "@/features/problem/components/problem-share-modal";
+import ProblemShareModal from "./problem-share-modal";
 import {
   getProblemStatusBadgeClass,
   getProblemStatusLabel,
   getSubmittedLabel,
   getTierBadgeClass,
-} from "@/features/problem/utils";
+} from "@/utils/problem";
 import type {
   ProblemDetail,
-  ProblemShareTargetStudy,
-} from "@/features/problem/types";
+} from "@/types/problem";
+import type { ProblemShareTargetStudy } from "@/types/study";
 
 export default function ProblemDetailHeader({
   problem,

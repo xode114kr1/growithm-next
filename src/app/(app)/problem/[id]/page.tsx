@@ -1,12 +1,14 @@
 import { notFound } from "next/navigation";
 
-import ProblemDescription from "@/features/problem/components/problem-description";
-import ProblemDetailHeader from "@/features/problem/components/problem-detail-header";
-import ProblemMemoEditor from "@/features/problem/components/problem-memo-editor";
-import ProblemMetadata from "@/features/problem/components/problem-metadata";
-import ProblemSolutionCode from "@/features/problem/components/problem-solution-code";
-import { getProblemDetail } from "@/features/problem/server/problem-detail-data";
-import { getProblemShareTargetStudies } from "@/features/problem/server/problem-share-targets";
+import { auth } from "@/lib/auth/auth";
+import { getProblemDetail } from "@/services/problem.server";
+import { getProblemShareTargetStudies } from "@/services/study.server";
+
+import ProblemDescription from "../_components/problem-description";
+import ProblemDetailHeader from "../_components/problem-detail-header";
+import ProblemMemoEditor from "../_components/problem-memo-editor";
+import ProblemMetadata from "../_components/problem-metadata";
+import ProblemSolutionCode from "../_components/problem-solution-code";
 
 export default async function ProblemDetailPage({
   params,
@@ -14,9 +16,13 @@ export default async function ProblemDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const session = await auth();
   const [problem, shareTargetStudies] = await Promise.all([
     getProblemDetail(id),
-    getProblemShareTargetStudies(id),
+    getProblemShareTargetStudies({
+      problemId: id,
+      userId: session?.user?.id,
+    }),
   ]);
 
   if (!problem) {

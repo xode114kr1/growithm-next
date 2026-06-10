@@ -13,7 +13,7 @@ import {
   type GitHubWebhookPayload,
 } from "@/features/github/server/webhooks/payload-parser";
 import { prisma } from "@/lib/prisma";
-import { parseProblemReadme } from "@/features/problem/server/problem-readme-parser";
+import { parseProblemReadme } from "@/utils/problem-readme";
 import { getProblemExperienceScore } from "@/features/score/problem-score";
 
 const signaturePrefix = "sha256=";

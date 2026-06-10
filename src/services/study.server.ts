@@ -1,14 +1,15 @@
-import { auth } from "@/lib/auth/auth";
+import "server-only";
+
 import { prisma } from "@/lib/prisma";
+import type { ProblemShareTargetStudy } from "@/types/study";
 
-import type { ProblemShareTargetStudy } from "@/features/problem/types";
-
-export async function getProblemShareTargetStudies(problemId: string): Promise<
-  ProblemShareTargetStudy[]
-> {
-  const session = await auth();
-  const userId = session?.user?.id;
-
+export async function getProblemShareTargetStudies({
+  problemId,
+  userId,
+}: {
+  problemId: string;
+  userId: string | undefined;
+}): Promise<ProblemShareTargetStudy[]> {
   if (!userId) {
     return [];
   }

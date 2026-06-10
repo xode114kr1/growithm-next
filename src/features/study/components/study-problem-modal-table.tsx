@@ -15,7 +15,7 @@ import {
   getProblemStatusBadgeClass,
   getProblemStatusDescription,
   getProblemStatusLabel,
-} from "@/features/problem/utils";
+} from "@/utils/problem";
 import type { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import type { StudyProblem } from "@/features/study/types";
 

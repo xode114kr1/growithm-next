@@ -288,7 +288,9 @@ project-root/
 │  │  │  │  ├─ _components/
 │  │  │  │  └─ actions.ts
 │  │  │  ├─ problem/
+│  │  │  │  ├─ _components/
 │  │  │  │  └─ [id]/
+│  │  │  │     └─ actions.ts
 │  │  │  ├─ profile/
 │  │  │  │  └─ [userId]/
 │  │  │  └─ study/
@@ -314,6 +316,7 @@ project-root/
 │  ├─ services/                       # 데이터 요청과 비즈니스 로직
 │  │  ├─ friend.server.ts             # 친구 관계 조회와 친구 요청 처리
 │  │  ├─ problem.server.ts
+│  │  ├─ study.server.ts
 │  │  └─ user.server.ts               # 사용자 정보와 프로필 조회
 │  ├─ types/                          # 공유 타입 및 라이브러리 타입 확장
 │  └─ utils/                          # 리소스별 순수 유틸 함수

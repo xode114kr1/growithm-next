@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { getTierBadgeClass } from "@/features/problem/utils";
+import { getTierBadgeClass } from "@/utils/problem";
 import { getPendingProblems } from "@/services/problem.server";
 import type { PendingProblem } from "@/types/problem";
 
