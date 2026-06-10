@@ -16,8 +16,6 @@ At minimum, use these docs by task type:
 - Code creation or refactoring: `docs/project-structure.md`
 - Commit creation: `docs/commit-convention.md`
 - Pull request creation or PR description: `docs/pr-convention.md`
-- Study members page changes: `docs/study-members-verification.md`
-- Study owner workflow changes: `docs/study-owner-verification.md`
 
 한국어 설명: 작업 유형에 따라 최소한 위 문서들을 확인한다.
 
