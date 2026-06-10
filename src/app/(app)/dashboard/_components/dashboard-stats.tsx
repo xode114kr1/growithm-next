@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 
-import type { DashboardStatsSummary } from "@/features/dashboard/types";
+import type { DashboardStatsSummary } from "@/types/dashboard";
 
 const statStyle = {
   accent: "bg-secondary-fixed text-on-secondary-container",

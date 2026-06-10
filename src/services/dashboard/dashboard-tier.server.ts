@@ -6,7 +6,7 @@ import {
 } from "@/features/score/utils";
 import { prisma } from "@/lib/prisma";
 
-import type { DashboardPersonalTier } from "@/features/dashboard/types";
+import type { DashboardPersonalTier } from "@/types/dashboard";
 
 export async function getDashboardPersonalTier(
   userId: string | undefined,

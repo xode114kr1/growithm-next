@@ -1,5 +1,5 @@
-import type { DashboardQuickLaunch } from "@/features/dashboard/types";
 import type { ProblemPlatform } from "@/generated/prisma/enums";
+import type { DashboardQuickLaunch } from "@/types/dashboard";
 
 const quickLinkStyles: Record<
   ProblemPlatform,

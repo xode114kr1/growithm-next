@@ -12,7 +12,7 @@ import {
   YAxis,
 } from "recharts";
 
-import type { DashboardMasteryBucket } from "@/features/dashboard/types";
+import type { DashboardMasteryBucket } from "@/types/dashboard";
 
 const masteryTooltipLabels: Record<string, string> = {
   BRONZE: "Bronze / Level 1",

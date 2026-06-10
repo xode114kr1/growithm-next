@@ -1,7 +1,7 @@
 import { Award } from "lucide-react";
 
-import type { DashboardPersonalTier } from "@/features/dashboard/types";
 import type { PersonalScoreTier } from "@/features/score/types";
+import type { DashboardPersonalTier } from "@/types/dashboard";
 
 const tierStyles: Record<
   PersonalScoreTier,

@@ -3,14 +3,14 @@ import {
 } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 
-import { getDashboardPersonalTier } from "@/features/dashboard/server/dashboard-tier-data";
-import type { DashboardPageData } from "@/features/dashboard/types";
+import { getDashboardPersonalTier } from "@/services/dashboard/dashboard-tier.server";
+import type { DashboardPageData } from "@/types/dashboard";
 import {
   createDashboardMasteryBuckets,
   createDashboardPendingProblem,
   createDashboardQuickLaunches,
   getDashboardWeeklyChangePercent,
-} from "@/features/dashboard/utils";
+} from "@/utils/dashboard";
 
 const PENDING_PROBLEM_LIMIT = 3;
 

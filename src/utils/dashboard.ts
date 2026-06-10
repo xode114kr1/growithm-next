@@ -4,7 +4,7 @@ import type {
   DashboardMasteryBucket,
   DashboardPendingProblem,
   DashboardQuickLaunch,
-} from "@/features/dashboard/types";
+} from "@/types/dashboard";
 
 const MASTERY_BUCKETS = [
   { fill: "#c1c7cf", key: "BRONZE" },

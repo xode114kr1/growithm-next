@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-import type { DashboardPendingProblem } from "@/features/dashboard/types";
 import { getTierBadgeClass } from "@/features/problem/utils";
+import type { DashboardPendingProblem } from "@/types/dashboard";
 
 export default function PendingAnalysis({
   pendingProblems,

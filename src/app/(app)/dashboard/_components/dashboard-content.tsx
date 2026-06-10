@@ -1,9 +1,10 @@
-import DashboardStats from "@/features/dashboard/components/dashboard-stats";
-import GrowthMastery from "@/features/dashboard/components/growth-mastery";
-import PendingAnalysis from "@/features/dashboard/components/pending-analysis";
-import PersonalTierCard from "@/features/dashboard/components/personal-tier-card";
-import QuickLaunch from "@/features/dashboard/components/quick-launch";
-import type { DashboardPageData } from "@/features/dashboard/types";
+import type { DashboardPageData } from "@/types/dashboard";
+
+import DashboardStats from "./dashboard-stats";
+import GrowthMastery from "./growth-mastery";
+import PendingAnalysis from "./pending-analysis";
+import PersonalTierCard from "./personal-tier-card";
+import QuickLaunch from "./quick-launch";
 
 export default function DashboardContent({
   dashboardData,
