@@ -1,4 +1,4 @@
-import { getProblemTierDistribution } from "@/services/problem.server";
+import { getProblemTierDistribution } from "@/services/problems/problem.server";
 
 import GrowthMastery from "./growth-mastery";
 

@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 
-import { getSolvedProblemCount } from "@/services/problem.server";
+import { getSolvedProblemCount } from "@/services/problems/problem.server";
 
 const statStyle = {
   accent: "bg-secondary-fixed text-on-secondary-container",

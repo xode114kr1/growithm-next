@@ -7,15 +7,13 @@ import type {
   UserSummary,
 } from "@/types/user";
 import {
+  createPersonalTier,
+  createUserSummary,
   getUserAvatar,
   getUserDisplayName,
   getUserTier,
-} from "@/utils/user";
-import {
-  createPersonalTier,
-  createUserSummary,
   type UserSummaryRow,
-} from "@/utils/user.helper";
+} from "@/services/users/user.helper";
 
 // 사용자의 점수를 조회해 개인 티어 정보를 만든다.
 export async function getUserPersonalTier(

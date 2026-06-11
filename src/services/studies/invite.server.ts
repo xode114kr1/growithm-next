@@ -2,7 +2,8 @@ import "server-only";
 
 import { prisma } from "@/lib/prisma";
 import type { StudyInviteItem } from "@/types/study";
-import { formatRelativeDate, getUserDisplayName } from "@/utils/study";
+import { getUserDisplayName } from "@/services/studies/study.helper";
+import { formatRelativeDate } from "@/utils/date";
 
 // 사용자에게 도착한 유효한 대기 중 스터디 초대를 조회한다.
 export async function getPendingInvites(

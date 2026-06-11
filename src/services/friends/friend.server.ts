@@ -7,7 +7,7 @@ import {
   createFriendProfile,
   normalizeFriendshipUserIds,
   type FriendUserRow,
-} from "@/utils/friend.helper";
+} from "@/services/friends/friend.helper";
 
 // 현재 사용자가 받은 대기 중인 친구 요청을 조회한다.
 export async function getReceivedFriendRequests(

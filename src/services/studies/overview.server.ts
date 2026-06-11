@@ -6,7 +6,7 @@ import {
   getNextTierScore,
   getStudyTier,
   getUserDisplayName,
-} from "@/utils/study";
+} from "@/services/studies/study.helper";
 
 // 스터디 개요 화면에 필요한 통계와 최근 활동을 조회한다.
 export async function getStudyOverview({

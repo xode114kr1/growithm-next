@@ -1,4 +1,8 @@
-import type { PersonalScoreTier } from "@/types/user";
+import type {
+  PersonalScoreTier,
+  UserPersonalTier,
+  UserSummary,
+} from "@/types/user";
 
 import {
   getNextScoreTierScore,
@@ -68,4 +72,38 @@ export function getUserDisplayName(name: string | null, email: string | null) {
 // 사용자 이미지가 없을 때 기본 아바타 URL을 반환한다.
 export function getUserAvatar(image: string | null) {
   return image || "https://avatars.githubusercontent.com/u/0?v=4";
+}
+
+export type UserSummaryRow = {
+  email: string | null;
+  id: string;
+  image: string | null;
+  name: string | null;
+  score: number;
+};
+
+// 점수를 기반으로 개인 티어 표시 데이터를 구성한다.
+export function createPersonalTier(score: number): UserPersonalTier {
+  const tier = getPersonalScoreTier(score);
+
+  return {
+    nextTierScore: getNextPersonalTierScore(tier),
+    progress: getPersonalTierProgress(score, tier),
+    progressLabel: getPersonalProgressLabel(score, tier),
+    score,
+    tier,
+  };
+}
+
+// 사용자 조회 결과를 공용 사용자 요약 데이터로 변환한다.
+export function createUserSummary(user: UserSummaryRow): UserSummary {
+  const tier = getUserTier(user.score);
+
+  return {
+    avatar: getUserAvatar(user.image),
+    id: user.id,
+    name: getUserDisplayName(user.name, user.email),
+    tier: tier.tier,
+    tierClass: tier.tierClass,
+  };
 }

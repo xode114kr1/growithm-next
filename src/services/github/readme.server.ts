@@ -5,7 +5,7 @@ import {
   encodeGitHubPath,
   getGitHubContentErrorMessage,
   type GitHubContentResponse,
-} from "@/utils/github-readme.helper";
+} from "@/services/github/readme.helper";
 
 // 특정 커밋의 README 내용을 GitHub API에서 조회한다.
 export async function fetchGitHubReadmeContent({

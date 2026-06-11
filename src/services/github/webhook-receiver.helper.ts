@@ -6,9 +6,9 @@ import type { Prisma } from "@/generated/prisma/client";
 import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import type { GitHubReadmeContent, GitHubWebhookPayload } from "@/types/github";
-import { getRepositoryOwnerId } from "@/utils/github-webhook";
-import { getProblemExperienceScore } from "@/utils/problem";
-import { parseProblemReadme } from "@/utils/problem-readme";
+import { getRepositoryOwnerId } from "@/services/github/webhook.helper";
+import { getProblemExperienceScore } from "@/services/problems/problem.helper";
+import { parseProblemReadme } from "@/services/github/problem-readme.helper";
 
 const signaturePrefix = "sha256=";
 

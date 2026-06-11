@@ -3,8 +3,8 @@ import {
   getFriendRelationsForUsers,
   getReceivedFriendRequests,
   getSentFriendRequests,
-} from "@/services/friend.server";
-import { getFriendUsers, getUsers } from "@/services/user.server";
+} from "@/services/friends/friend.server";
+import { getFriendUsers, getUsers } from "@/services/users/user.server";
 import type { FriendProfile } from "@/types/friend";
 
 import FriendContent from "./_components/friend-content";

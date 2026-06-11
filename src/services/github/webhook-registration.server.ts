@@ -1,9 +1,9 @@
 import "server-only";
 
 import { prisma } from "@/lib/prisma";
-import { createGitHubWebhook } from "@/services/github/webhook-registration.helper.server";
+import { createGitHubWebhook } from "@/services/github/webhook-registration.helper";
 import type { GitHubWebhookRequestBody } from "@/types/github";
-import { parseRepository } from "@/utils/github-repository";
+import { parseRepository } from "@/services/github/repository.helper";
 
 type RegisterGitHubWebhookResult =
   | {

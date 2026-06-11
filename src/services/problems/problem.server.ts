@@ -12,18 +12,16 @@ import type {
   ProblemTierBucket,
 } from "@/types/problem";
 import {
-  createPendingProblem,
-  createPlatformProblemCounts,
-  createProblemTierBuckets,
-  normalizeProblemCategories,
-} from "@/utils/problem";
-import {
   buildProblemOrderBy,
   buildProblemWhere,
+  createPendingProblem,
+  createPlatformProblemCounts,
   createProblemShareError,
+  createProblemTierBuckets,
   getProblemShareScore,
   isWithinShareScoreWindow,
-} from "@/utils/problem.helper";
+  normalizeProblemCategories,
+} from "@/services/problems/problem.helper";
 
 export const PROBLEM_PAGE_SIZE = 25;
 const PENDING_PROBLEM_LIMIT = 3;

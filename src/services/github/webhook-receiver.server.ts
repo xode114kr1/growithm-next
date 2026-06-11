@@ -9,7 +9,7 @@ import {
   saveProblemSubmissions,
   saveWebhookDelivery,
   updateWebhookDeliveryStatus,
-} from "@/services/github/webhook-receiver.helper.server";
+} from "@/services/github/webhook-receiver.helper";
 import type {
   GitHubReadmeContent,
   GitHubWebhookPayload,
@@ -17,7 +17,7 @@ import type {
 import {
   getReadmeChangesFromPushPayload,
   getRepositoryFullName,
-} from "@/utils/github-webhook";
+} from "@/services/github/webhook.helper";
 
 // GitHub 웹훅 요청을 검증하고 문제 제출 데이터로 처리한다.
 export async function receiveGitHubWebhook(request: Request) {

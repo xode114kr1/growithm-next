@@ -4,7 +4,7 @@ import {
   getProblemCount,
   getProblems,
   PROBLEM_PAGE_SIZE,
-} from "@/services/problem.server";
+} from "@/services/problems/problem.server";
 import type {
   ProblemFiltersState,
   ProblemPageSearchParams,

@@ -3,10 +3,10 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import type { StudyProblemsData } from "@/types/study";
 import {
-  formatShortDate,
   getUserDisplayName,
   normalizeCategories,
-} from "@/utils/study";
+} from "@/services/studies/study.helper";
+import { formatShortDate } from "@/utils/date";
 
 // 스터디에 공유된 문제 목록과 필터 정보를 조회한다.
 export async function getStudyProblemsData({

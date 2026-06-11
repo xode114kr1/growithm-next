@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth/auth";
 import {
   shareProblemWithStudies,
   updateProblemMemo as updateProblemMemoResource,
-} from "@/services/problem.server";
+} from "@/services/problems/problem.server";
 
 const MAX_MEMO_LENGTH = 2000;
 

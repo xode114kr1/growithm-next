@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma";
 import {
   validateStudyInviteTarget,
   validateStudySettingsInput,
-} from "@/utils/study-owner-validation";
+} from "@/services/studies/study.validator";
 
 const INVITE_EXPIRATION_DAYS = 7;
 

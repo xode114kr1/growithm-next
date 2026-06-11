@@ -2,7 +2,8 @@ import "server-only";
 
 import { prisma } from "@/lib/prisma";
 import type { OwnerMember, StudyOwnerData } from "@/types/study";
-import { formatShortDate, getUserDisplayName } from "@/utils/study";
+import { getUserDisplayName } from "@/services/studies/study.helper";
+import { formatShortDate } from "@/utils/date";
 
 // 스터디 소유자 관리 화면에 필요한 멤버와 초대 정보를 조회한다.
 export async function getStudyOwnerData({
