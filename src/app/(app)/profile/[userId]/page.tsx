@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
-import { getFriendProfilePageData } from "@/features/friend/server/friend-profile-data";
+import { getUserProfilePageData } from "@/services/users/user.server";
 
 type ProfilePageProps = {
   params: Promise<{
@@ -11,7 +11,7 @@ type ProfilePageProps = {
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { userId } = await params;
-  const profile = await getFriendProfilePageData(userId);
+  const profile = await getUserProfilePageData(userId);
 
   if (!profile) {
     notFound();

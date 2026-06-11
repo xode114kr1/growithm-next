@@ -1,35 +1,49 @@
 <!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
+# 기존 지식과 다른 Next.js 버전
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+이 프로젝트의 Next.js 버전에는 기존 버전과 호환되지 않는 변경 사항이 있다. API, 규칙, 파일 구조가 학습 데이터와 다를 수 있으므로 코드를 작성하기 전에 `node_modules/next/dist/docs/`의 관련 가이드를 읽고 지원 중단 안내를 따른다.
 <!-- END:nextjs-agent-rules -->
 
 <!-- BEGIN:project-docs-agent-rules -->
-# Project Docs
+# 프로젝트 문서
 
-Before making code changes, always list the Markdown files in `docs/`, then read the files relevant to the current request before editing.
+코드를 변경하기 전에 항상 `docs/` 안의 Markdown 파일 목록을 확인하고, 현재 요청과 관련된 문서를 실제로 읽은 후 작업한다.
 
-한국어 설명: 코드 변경 전에 항상 `docs/` 안의 Markdown 파일 목록을 확인한 다음, 현재 요청과 관련된 문서를 실제로 읽고 작업한다.
+작업 유형에 따라 최소한 아래 문서를 확인한다.
 
-At minimum, use these docs by task type:
+- 코드 생성 또는 리팩터링: `docs/project-structure.md`
+- 커밋 생성: `docs/commit-convention.md`
+- 풀 리퀘스트 생성 또는 설명 작성: `docs/pr-convention.md`
 
-- Code creation or refactoring: `docs/project-structure.md`
-- Commit creation: `docs/commit-convention.md`
-- Pull request creation or PR description: `docs/pr-convention.md`
-- Study members page changes: `docs/study-members-verification.md`
-- Study owner workflow changes: `docs/study-owner-verification.md`
+코드를 생성하거나 리팩터링할 때는 `docs/project-structure.md`를 따른다.
 
-한국어 설명: 작업 유형에 따라 최소한 위 문서들을 확인한다.
+사용자가 Codex에게 커밋 생성을 요청하면 `docs/commit-convention.md`를 따른다.
 
-When creating or refactoring code, follow `docs/project-structure.md`.
-
-한국어 설명: 코드를 생성하거나 리팩토링할 때 `docs/project-structure.md`를 따른다.
-
-When the user asks Codex to create a commit, follow `docs/commit-convention.md`.
-
-한국어 설명: 사용자가 Codex에게 커밋 생성을 요청하면 `docs/commit-convention.md`를 따른다.
-
-When the user asks Codex to create or describe a pull request, follow `docs/pr-convention.md`.
-
-한국어 설명: 사용자가 Codex에게 PR 생성 또는 PR 설명 작성을 요청하면 `docs/pr-convention.md`를 따른다.
+사용자가 Codex에게 풀 리퀘스트 생성 또는 설명 작성을 요청하면 `docs/pr-convention.md`를 따른다.
 <!-- END:project-docs-agent-rules -->
+
+<!-- BEGIN:code-writing-rules -->
+# 코드 작성 규칙
+
+## 불필요한 코드 작성 금지
+
+- 현재 요구사항을 해결하는 데 필요한 코드만 작성한다.
+- 사용되지 않는 변수, 함수, import, 주석, 파일은 남기지 않는다.
+- 실제 필요가 확인되지 않은 옵션, 예외 처리, 확장 지점, 추상화를 미리 추가하지 않는다.
+- 기존 코드로 충분히 해결할 수 있으면 동일한 역할의 코드나 의존성을 새로 만들지 않는다.
+
+## 재사용성을 고려한 기능 정의
+
+- 기능의 책임과 사용 범위를 먼저 정한 뒤 적절한 위치에 구현한다.
+- 같은 로직이 반복되거나 여러 곳에서 사용할 가능성이 명확하면 재사용 가능한 함수나 컴포넌트로 분리한다.
+- 특정 기능에만 필요한 코드는 해당 기능 가까이에 두고, 실제 공유되는 코드만 공용 영역으로 이동한다.
+- 재사용성을 이유로 서로 다른 책임을 하나의 범용 함수나 컴포넌트에 억지로 결합하지 않는다.
+
+## 신입 개발자도 이해할 수 있는 코드 작성
+
+- 이름만으로 역할을 알 수 있도록 변수, 함수, 타입, 파일 이름을 구체적으로 작성한다.
+- 함수와 컴포넌트는 한 가지 책임에 집중하고, 실행 흐름을 쉽게 따라갈 수 있도록 작게 유지한다.
+- 복잡한 축약 표현, 과도한 중첩, 암묵적인 동작보다 명시적이고 일관된 코드를 우선한다.
+- 주석은 코드만으로 설명하기 어려운 의도나 제약 조건을 전달할 때만 작성한다.
+- 프로젝트의 기존 패턴과 용어를 일관되게 사용한다.
+<!-- END:code-writing-rules -->

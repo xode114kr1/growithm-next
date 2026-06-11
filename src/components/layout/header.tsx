@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { auth } from "@/lib/auth/auth";
 import AccountMenu from "@/components/layout/account-menu";
 import Navigation from "@/components/layout/navigation";
@@ -22,8 +24,11 @@ export default async function Header() {
 
 function Brand() {
   return (
-    <span className="font-serif text-2xl font-semibold italic text-primary">
+    <Link
+      className="rounded font-serif text-2xl font-semibold italic text-primary outline-none focus-visible:ring-2 focus-visible:ring-secondary-container"
+      href="/"
+    >
       Growithm
-    </span>
+    </Link>
   );
 }

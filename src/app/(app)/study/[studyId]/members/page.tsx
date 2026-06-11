@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 
 import { auth } from "@/lib/auth/auth";
-import StudyMemberList from "@/features/study/components/study-member-list";
-import StudyMembersHeading from "@/features/study/components/study-members-heading";
-import { getStudyMembersData } from "@/features/study/server/study-members-data";
+import { getStudyMembersData } from "@/services/studies/study.server";
+
+import StudyMemberList from "./_components/study-member-list";
+import StudyMembersHeading from "./_components/study-members-heading";
 
 export default async function StudyMembersPage({
   params,

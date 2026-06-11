@@ -1,28 +1,42 @@
-import ProblemFilters from "@/features/problem/components/problem-filters";
-import ProblemSortSelect from "@/features/problem/components/problem-sort-select";
-import ProblemTable from "@/features/problem/components/problem-table";
-import { getProblemListPageData } from "@/features/problem/server/problem-list-data";
+import { ProblemPlatform } from "@/generated/prisma/enums";
+import {
+  getAvailableProblemTiers,
+  getProblemCount,
+  getProblems,
+  PROBLEM_PAGE_SIZE,
+} from "@/services/problems/problem.server";
 import type {
   ProblemFiltersState,
   ProblemPageSearchParams,
-} from "@/features/problem/types";
+  ProblemSort,
+} from "@/types/problem";
+
+import ProblemFilters from "./_components/problem-filters";
+import ProblemSortSelect from "./_components/problem-sort-select";
+import ProblemTable from "./_components/problem-table";
 
 type ProblemPageProps = {
   searchParams: Promise<ProblemPageSearchParams>;
 };
 
 export default async function ProblemPage({ searchParams }: ProblemPageProps) {
-  const {
-    currentPage,
-    emptyStateReason,
-    filters,
-    pageSize,
-    problems,
-    queryString,
-    tiers,
-    totalCount,
-    totalPages,
-  } = await getProblemListPageData(await searchParams);
+  const params = await searchParams;
+  const filters = parseFilters(params);
+  const requestedPage = parsePageParam(params.page);
+  const [tiers, unfilteredTotalCount, totalCount] = await Promise.all([
+    getAvailableProblemTiers(),
+    getProblemCount(),
+    getProblemCount(filters),
+  ]);
+  const totalPages = Math.max(1, Math.ceil(totalCount / PROBLEM_PAGE_SIZE));
+  const currentPage = Math.min(requestedPage, totalPages);
+  const problems = await getProblems({ filters, page: currentPage });
+  const emptyStateReason =
+    totalCount > 0
+      ? null
+      : unfilteredTotalCount > 0
+        ? "no-filter-results"
+        : "no-submissions";
 
   return (
     <main className="page-shell">
@@ -32,15 +46,67 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
         <ProblemTable
           currentPage={currentPage}
           emptyStateReason={emptyStateReason}
-          pageSize={pageSize}
+          pageSize={PROBLEM_PAGE_SIZE}
           problems={problems}
-          queryString={queryString}
+          queryString={buildQueryString(params)}
           totalCount={totalCount}
           totalPages={totalPages}
         />
       </div>
     </main>
   );
+}
+
+function parseFilters(params: ProblemPageSearchParams): ProblemFiltersState {
+  return {
+    platform: parsePlatformParam(params.platform),
+    q: parseStringParam(params.q),
+    sort: parseSortParam(params.sort),
+    tier: parseStringParam(params.tier),
+  };
+}
+
+function parsePageParam(page: string | string[] | undefined) {
+  const parsedPage = Number(parseStringParam(page));
+
+  return Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+}
+
+function parsePlatformParam(platform: string | string[] | undefined) {
+  const value = parseStringParam(platform);
+
+  return value === ProblemPlatform.BAEKJOON ||
+    value === ProblemPlatform.PROGRAMMERS
+    ? value
+    : null;
+}
+
+function parseSortParam(sort: string | string[] | undefined): ProblemSort {
+  const value = parseStringParam(sort);
+
+  return value === "oldest" || value === "title" || value === "platform"
+    ? value
+    : "newest";
+}
+
+function parseStringParam(value: string | string[] | undefined) {
+  const firstValue = Array.isArray(value) ? value[0] : value;
+
+  return firstValue?.trim() ?? "";
+}
+
+function buildQueryString(params: ProblemPageSearchParams) {
+  const query = new URLSearchParams();
+
+  for (const key of ["platform", "tier", "q", "sort"] as const) {
+    const value = parseStringParam(params[key]);
+
+    if (value) {
+      query.set(key, value);
+    }
+  }
+
+  return query.toString();
 }
 
 // 현재 필터를 유지하면서 페이지 제목과 정렬 컨트롤을 렌더링한다.

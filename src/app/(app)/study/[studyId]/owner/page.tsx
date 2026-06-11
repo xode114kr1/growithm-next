@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 
 import { auth } from "@/lib/auth/auth";
-import OwnerConsole from "@/features/study/components/owner-console";
-import StudyOwnerHeading from "@/features/study/components/study-owner-heading";
-import { getStudyOwnerData } from "@/features/study/server/study-owner-data";
+import { getStudyOwnerData } from "@/services/studies/study.server";
+
+import OwnerConsole from "./_components/owner-console";
+import StudyOwnerHeading from "./_components/study-owner-heading";
 
 export default async function StudyOwnerPage({
   params,

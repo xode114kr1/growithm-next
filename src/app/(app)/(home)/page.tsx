@@ -1,6 +1,6 @@
-import FeatureSection from "@/features/home/components/feature-section";
-import GrowthCtaSection from "@/features/home/components/growth-cta-section";
-import HeroSection from "@/features/home/components/hero-section";
+import FeatureSection from "./_components/feature-section";
+import GrowthCtaSection from "./_components/growth-cta-section";
+import HeroSection from "./_components/hero-section";
 
 export default function Home() {
   return (

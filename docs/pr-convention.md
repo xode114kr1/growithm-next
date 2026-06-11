@@ -1,54 +1,43 @@
-# Pull Request Convention
+# 풀 리퀘스트 규칙
 
-When the user asks Codex to create or describe a pull request, use this template.
-
-한국어 설명: 사용자가 Codex에게 PR 생성 또는 PR 설명 작성을 요청하면 아래 템플릿을 사용한다.
+사용자가 Codex에게 풀 리퀘스트 생성 또는 설명 작성을 요청하면 아래 템플릿을 사용한다.
 
 ```markdown
-# Pull Request
+# 풀 리퀘스트
 
-## What
+## 작업 내용
 
 * 작업 내용 요약
 
-## Why
+## 작업 이유
 
 * 작업 이유
 
-## Changes
+## 변경 사항
 
 * 변경 사항 정리
 
-## How to Test
+## 테스트 방법
 
 * 테스트 방법
 
-## Issue
+## 관련 이슈
 
 * Closes #
 
-## Checklist
+## 확인 목록
 
 * [ ] 명세서 기준으로 작업했는가
-* [ ] 불필요한 코드 제거했는가
-* [ ] 기존 기능 영향 없는가
-* [ ] 기본 테스트 완료했는가
+* [ ] 불필요한 코드를 제거했는가
+* [ ] 기존 기능에 영향이 없는가
+* [ ] 기본 테스트를 완료했는가
 ```
 
-## Sections
+## 항목 작성 기준
 
-- `What`: summarize the work in one or more short bullets.
-- `Why`: explain the reason or problem this pull request addresses.
-- `Changes`: list meaningful code, configuration, documentation, or test changes.
-- `How to Test`: include commands or manual verification steps.
-- `Issue`: include `Closes #issue-number` when there is a related issue. Remove the placeholder when there is no issue.
-- `Checklist`: mark completed items with `[x]` only when they are actually verified.
-
-한국어 설명:
-
-- `What`: 작업 내용을 짧은 bullet로 요약한다.
-- `Why`: PR이 해결하는 문제나 작업 이유를 설명한다.
-- `Changes`: 코드, 설정, 문서, 테스트 변경 사항을 정리한다.
-- `How to Test`: 실행한 명령어나 수동 검증 절차를 작성한다.
-- `Issue`: 관련 이슈가 있으면 `Closes #issue-number` 형식으로 작성한다. 없으면 placeholder를 제거한다.
-- `Checklist`: 실제로 확인한 항목만 `[x]`로 표시한다.
+- `작업 내용`: 작업 내용을 하나 이상의 짧은 목록으로 요약한다.
+- `작업 이유`: 풀 리퀘스트가 해결하는 문제나 작업 이유를 설명한다.
+- `변경 사항`: 코드, 설정, 문서, 테스트의 주요 변경 사항을 정리한다.
+- `테스트 방법`: 실행한 명령어나 수동 검증 절차를 작성한다.
+- `관련 이슈`: 관련 이슈가 있으면 `Closes #issue-number` 형식으로 작성하고, 없으면 자리표시자를 제거한다.
+- `확인 목록`: 실제로 확인한 항목만 `[x]`로 표시한다.
