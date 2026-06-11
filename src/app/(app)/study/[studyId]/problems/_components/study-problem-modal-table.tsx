@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { usePagination } from "@/hooks/use-pagination";
 import {
   getProblemStatusBadgeClass,
   getProblemStatusDescription,
@@ -47,7 +48,6 @@ export default function StudyProblemModalTable({
   const [sharedByFilter, setSharedByFilter] = useState("All");
   const [sort, setSort] = useState<StudyProblemSort>("latest");
   const [tierFilter, setTierFilter] = useState("All");
-  const [currentPage, setCurrentPage] = useState(1);
   const filteredProblems = problems.filter((problem) => {
     const matchesPlatform =
       platformFilter === "All" || problem.platform === platformFilter;
@@ -58,12 +58,12 @@ export default function StudyProblemModalTable({
     return matchesPlatform && matchesTier && matchesSharedBy;
   });
   const sortedProblems = sortProblems(filteredProblems, sort);
-  const totalPages = Math.max(1, Math.ceil(sortedProblems.length / PAGE_SIZE));
-  const safeCurrentPage = Math.min(currentPage, totalPages);
-  const paginatedProblems = sortedProblems.slice(
-    (safeCurrentPage - 1) * PAGE_SIZE,
-    safeCurrentPage * PAGE_SIZE,
-  );
+  const { currentPage, endIndex, setCurrentPage, startIndex, totalPages } =
+    usePagination({
+      itemCount: sortedProblems.length,
+      pageSize: PAGE_SIZE,
+    });
+  const paginatedProblems = sortedProblems.slice(startIndex, endIndex);
   const hasActiveFilters =
     platformFilter !== "All" || tierFilter !== "All" || sharedByFilter !== "All";
 
@@ -185,9 +185,9 @@ export default function StudyProblemModalTable({
             Showing{" "}
             <span className="font-semibold text-on-surface">
               {sortedProblems.length > 0
-                ? (safeCurrentPage - 1) * PAGE_SIZE + 1
+                ? startIndex + 1
                 : "0"}{" "}
-              - {Math.min(safeCurrentPage * PAGE_SIZE, sortedProblems.length)}
+              - {Math.min(endIndex, sortedProblems.length)}
             </span>{" "}
             of {sortedProblems.length.toLocaleString()} study problems
           </p>
@@ -202,7 +202,7 @@ export default function StudyProblemModalTable({
               </button>
             ) : null}
             <PaginationControls
-              currentPage={safeCurrentPage}
+              currentPage={currentPage}
               onPageChange={setCurrentPage}
               totalPages={totalPages}
             />

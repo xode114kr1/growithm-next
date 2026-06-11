@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -12,6 +11,7 @@ import {
   YAxis,
 } from "recharts";
 
+import { useMounted } from "@/hooks/use-mounted";
 import type { ProblemTierBucket } from "@/types/problem";
 
 const masteryTooltipLabels: Record<string, string> = {
@@ -28,17 +28,7 @@ export default function GrowthMastery({
 }: {
   mastery: ProblemTierBucket[];
 }) {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => {
-      setIsMounted(true);
-    });
-
-    return () => {
-      cancelAnimationFrame(frame);
-    };
-  }, []);
+  const isMounted = useMounted();
 
   return (
     <section className="app-card p-6 md:col-span-12 lg:p-8">

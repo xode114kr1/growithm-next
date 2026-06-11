@@ -1,8 +1,7 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-
 import type { ProblemPlatform } from "@/generated/prisma/enums";
+import { useReplacePaginatedQueryParams } from "@/hooks/use-replace-paginated-query-params";
 import type { ProblemFiltersState } from "@/types/problem";
 
 const platforms: Array<ProblemPlatform | "All"> = [
@@ -18,28 +17,7 @@ export default function ProblemFilters({
   filters: ProblemFiltersState;
   tiers: string[];
 }) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  function replaceQuery(updates: Record<string, string | null>) {
-    const params = new URLSearchParams(searchParams.toString());
-
-    for (const [key, value] of Object.entries(updates)) {
-      if (value) {
-        params.set(key, value);
-      } else {
-        params.delete(key);
-      }
-    }
-
-    params.delete("page");
-
-    const queryString = params.toString();
-    router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
-      scroll: false,
-    });
-  }
+  const replaceQuery = useReplacePaginatedQueryParams();
 
   return (
     <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">

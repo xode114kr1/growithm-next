@@ -1,28 +1,14 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-
+import { useReplacePaginatedQueryParams } from "@/hooks/use-replace-paginated-query-params";
 import type { ProblemSort } from "@/types/problem";
 
 export default function ProblemSortSelect({ sort }: { sort: ProblemSort }) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const replaceQuery = useReplacePaginatedQueryParams();
 
   function handleSortChange(nextSort: ProblemSort) {
-    const params = new URLSearchParams(searchParams.toString());
-
-    if (nextSort === "newest") {
-      params.delete("sort");
-    } else {
-      params.set("sort", nextSort);
-    }
-
-    params.delete("page");
-
-    const queryString = params.toString();
-    router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
-      scroll: false,
+    replaceQuery({
+      sort: nextSort === "newest" ? null : nextSort,
     });
   }
 

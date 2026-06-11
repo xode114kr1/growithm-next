@@ -1,7 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
+import { usePagination } from "@/hooks/use-pagination";
+import type { FriendProfile, FriendRequest } from "@/types/friend";
 import {
   AcceptFriendRequestButton,
   CancelFriendRequestButton,
@@ -9,7 +11,6 @@ import {
   DeleteReceivedRequestButton,
 } from "./friend-action-buttons";
 import { FriendItem } from "./friend-item";
-import type { FriendProfile, FriendRequest } from "@/types/friend";
 
 const FRIEND_LIST_PAGE_SIZE = 6;
 
@@ -20,13 +21,14 @@ export function FriendList({
   friends: FriendProfile[];
   onOpenProfile: (profile: FriendProfile) => void;
 }) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(friends.length / FRIEND_LIST_PAGE_SIZE));
-  const safeCurrentPage = Math.min(currentPage, totalPages);
-  const startIndex = (safeCurrentPage - 1) * FRIEND_LIST_PAGE_SIZE;
+  const { currentPage, endIndex, setCurrentPage, startIndex, totalPages } =
+    usePagination({
+      itemCount: friends.length,
+      pageSize: FRIEND_LIST_PAGE_SIZE,
+    });
   const visibleFriends = useMemo(
-    () => friends.slice(startIndex, startIndex + FRIEND_LIST_PAGE_SIZE),
-    [friends, startIndex],
+    () => friends.slice(startIndex, endIndex),
+    [endIndex, friends, startIndex],
   );
   const shouldShowPagination = friends.length > FRIEND_LIST_PAGE_SIZE;
 
@@ -51,7 +53,7 @@ export function FriendList({
       ))}
       {shouldShowPagination ? (
         <Pagination
-          currentPage={safeCurrentPage}
+          currentPage={currentPage}
           onPageChange={setCurrentPage}
           pageSize={FRIEND_LIST_PAGE_SIZE}
           showingCount={visibleFriends.length}

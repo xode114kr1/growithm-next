@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useRef, useState, type ReactNode } from "react";
+
+import { useClickOutside } from "@/hooks/use-click-outside";
+import { useEscapeKey } from "@/hooks/use-escape-key";
 
 type DropdownProps = {
   ariaLabel: string;
@@ -21,32 +24,14 @@ export default function Dropdown({
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const closeDropdown = useCallback(() => setIsOpen(false), []);
 
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    function handlePointerDown(event: PointerEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setIsOpen(false);
-      }
-    }
-
-    document.addEventListener("pointerdown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen]);
+  useClickOutside({
+    enabled: isOpen,
+    onClickOutside: closeDropdown,
+    ref: rootRef,
+  });
+  useEscapeKey({ enabled: isOpen, onEscape: closeDropdown });
 
   return (
     <div className={className} ref={rootRef}>

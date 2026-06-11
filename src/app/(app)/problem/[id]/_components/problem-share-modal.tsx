@@ -1,9 +1,10 @@
 "use client";
 
 import { Share2, X } from "lucide-react";
-import { useActionState, useEffect, useId, useMemo, useState } from "react";
+import { useActionState, useCallback, useId, useMemo, useState } from "react";
 
 import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
+import { useEscapeKey } from "@/hooks/use-escape-key";
 import {
   shareProblemToStudies,
   type ProblemShareActionState,
@@ -44,24 +45,9 @@ export default function ProblemShareModal({
         : `${selectedCount.toLocaleString()} selected`,
     [selectedCount],
   );
+  const closeModal = useCallback(() => setIsOpen(false), []);
 
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setIsOpen(false);
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen]);
+  useEscapeKey({ enabled: isOpen, onEscape: closeModal });
 
   function toggleStudy(studyId: string) {
     setSelectedStudyIds((current) =>

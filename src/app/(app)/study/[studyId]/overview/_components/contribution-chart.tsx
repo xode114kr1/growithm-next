@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   Bar,
   BarChart,
@@ -10,6 +10,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+
+import { useMounted } from "@/hooks/use-mounted";
 
 type Contribution = {
   name: string;
@@ -21,14 +23,8 @@ export default function ContributionChart({
 }: {
   data: Contribution[];
 }) {
-  const [isMounted, setIsMounted] = useState(false);
+  const isMounted = useMounted();
   const chartData = useMemo(() => data.slice(0, 4), [data]);
-
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => setIsMounted(true));
-
-    return () => cancelAnimationFrame(frame);
-  }, []);
 
   return (
     <div className="h-72 min-w-0">

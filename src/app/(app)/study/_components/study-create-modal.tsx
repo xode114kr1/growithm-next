@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useId, useState } from "react";
+import { useActionState, useCallback, useEffect, useId, useState } from "react";
 
+import { useEscapeKey } from "@/hooks/use-escape-key";
 import {
   createStudy,
   type CreateStudyActionState,
@@ -24,24 +25,9 @@ export default function StudyCreateModal() {
     initialCreateStudyActionState,
   );
   const titleId = useId();
+  const closeModal = useCallback(() => setIsOpen(false), []);
 
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setIsOpen(false);
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen]);
+  useEscapeKey({ enabled: isOpen, onEscape: closeModal });
 
   useEffect(() => {
     if (state.status !== "success" || !state.studyId) {
