@@ -1,0 +1,29 @@
+enum StudyInviteStatus {
+  PENDING
+  CANCELED
+  ACCEPTED
+  EXPIRED
+}
+
+model StudyInvite {
+  id          String            @id @default(cuid())
+  studyId     String            @map("study_id")
+  invitedById String            @map("invited_by_id")
+  targetUserId String           @map("target_user_id")
+  target      String
+  status      StudyInviteStatus @default(PENDING)
+  expiresAt   DateTime          @map("expires_at")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  study     Study @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  invitedBy User  @relation("StudyInviteInviter", fields: [invitedById], references: [id], onDelete: Cascade)
+  targetUser User @relation("StudyInviteTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
+
+  @@unique([studyId, target])
+  @@unique([studyId, targetUserId])
+  @@index([invitedById])
+  @@index([targetUserId])
+  @@index([status])
+  @@map("study_invites")
+}

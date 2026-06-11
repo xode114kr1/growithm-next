@@ -1,0 +1,38 @@
+import { PrismaPg } from "@prisma/adapter-pg";
+
+import { PrismaClient } from "@/generated/prisma/client";
+
+const globalForPrisma = globalThis as unknown as {
+  prisma?: PrismaClient;
+};
+
+const cachedPrisma = globalForPrisma.prisma;
+
+const prisma =
+  cachedPrisma && isCurrentPrismaClient(cachedPrisma)
+    ? cachedPrisma
+    : new PrismaClient({
+        adapter: new PrismaPg({
+          connectionString: process.env.DATABASE_URL,
+        }),
+      });
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}
+
+export { prisma };
+
+function isCurrentPrismaClient(prismaClient: PrismaClient) {
+  return (
+    "friendRequest" in prismaClient &&
+    "friendship" in prismaClient &&
+    "gitHubRepositoryWebhook" in prismaClient &&
+    "problemSubmission" in prismaClient &&
+    "study" in prismaClient &&
+    "studyInvite" in prismaClient &&
+    "studyMember" in prismaClient &&
+    "studyProblemShare" in prismaClient &&
+    "webhookDelivery" in prismaClient
+  );
+}
