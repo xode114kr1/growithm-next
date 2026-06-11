@@ -23,6 +23,7 @@ import {
 export const PROBLEM_PAGE_SIZE = 25;
 const PENDING_PROBLEM_LIMIT = 3;
 
+// 필터와 페이지 조건에 맞는 문제 목록을 조회한다.
 export async function getProblems({
   filters,
   page,
@@ -62,12 +63,14 @@ export async function getProblems({
   }));
 }
 
+// 필터 조건에 해당하는 문제 수를 조회한다.
 export async function getProblemCount(filters?: ProblemFiltersState) {
   return prisma.problemSubmission.count({
     where: filters ? buildProblemWhere(filters) : undefined,
   });
 }
 
+// 문제 필터에 사용할 고유 티어 목록을 조회한다.
 export async function getAvailableProblemTiers() {
   const tiers = await prisma.problemSubmission.findMany({
     distinct: ["tier"],
@@ -87,6 +90,7 @@ export async function getAvailableProblemTiers() {
   return tiers.flatMap((item) => item.tier ?? []);
 }
 
+// 문제 상세 화면에 필요한 단일 문제 정보를 조회한다.
 export async function getProblemDetail(id: string): Promise<ProblemDetail | null> {
   const problem = await prisma.problemSubmission.findUnique({
     select: {
@@ -125,6 +129,7 @@ export async function getProblemDetail(id: string): Promise<ProblemDetail | null
   };
 }
 
+// 완료한 문제를 티어별로 집계해 분포 데이터를 만든다.
 export async function getProblemTierDistribution(
   userId: string | undefined,
 ): Promise<ProblemTierBucket[]> {
@@ -144,6 +149,7 @@ export async function getProblemTierDistribution(
   return createProblemTierBuckets(rows);
 }
 
+// 메모 작성이 필요한 사용자의 대기 문제를 조회한다.
 export async function getPendingProblems(
   userId: string | undefined,
 ): Promise<PendingProblem[]> {
@@ -171,6 +177,7 @@ export async function getPendingProblems(
   return rows.map(createPendingProblem);
 }
 
+// 사용자의 완료 문제 수를 플랫폼별로 집계한다.
 export async function getProblemCountsByPlatform(
   userId: string | undefined,
 ): Promise<PlatformProblemCount[]> {
@@ -191,6 +198,7 @@ export async function getProblemCountsByPlatform(
   return createPlatformProblemCounts(rows);
 }
 
+// 사용자의 완료 문제 수를 조회한다.
 export async function getSolvedProblemCount(userId: string | undefined) {
   if (!userId) {
     return 0;
@@ -203,6 +211,7 @@ export async function getSolvedProblemCount(userId: string | undefined) {
   });
 }
 
+// 사용자가 소유한 문제 제출의 메모와 상태를 수정한다.
 export async function updateProblemMemo({
   memo,
   problemId,
@@ -228,6 +237,7 @@ export async function updateProblemMemo({
   return result.count > 0;
 }
 
+// 문제를 선택한 스터디에 공유하고 스터디 점수를 갱신한다.
 export async function shareProblemWithStudies({
   problemId,
   studyIds,
@@ -351,6 +361,7 @@ export async function shareProblemWithStudies({
   };
 }
 
+// 문제 목록 필터를 Prisma 조회 조건으로 변환한다.
 function buildProblemWhere(filters: ProblemFiltersState) {
   const where: Prisma.ProblemSubmissionWhereInput = {};
 
@@ -382,6 +393,7 @@ function buildProblemWhere(filters: ProblemFiltersState) {
   return where;
 }
 
+// 선택한 문제 정렬 기준을 Prisma 정렬 조건으로 변환한다.
 function buildProblemOrderBy(sort: ProblemSort) {
   const orderBy: Prisma.ProblemSubmissionOrderByWithRelationInput[] = [];
 
@@ -400,6 +412,7 @@ function buildProblemOrderBy(sort: ProblemSort) {
   return orderBy;
 }
 
+// 문제 공유 실패 결과를 일관된 형태로 생성한다.
 function createProblemShareError(error: string): ProblemShareResult {
   return {
     error,
@@ -408,6 +421,7 @@ function createProblemShareError(error: string): ProblemShareResult {
   };
 }
 
+// 문제 티어에 해당하는 스터디 공유 점수를 계산한다.
 function getProblemShareScore(tier: string | null) {
   const normalizedTier = tier?.toLowerCase() ?? "";
 
@@ -423,6 +437,7 @@ function getProblemShareScore(tier: string | null) {
   return levelMatch ? Math.max(0, Number(levelMatch[1]) * 10) : 0;
 }
 
+// 문제 제출 시각이 공유 점수 인정 기간 안인지 확인한다.
 function isWithinShareScoreWindow(submittedAtText: string | null) {
   const submittedAt = parseSubmittedAt(submittedAtText);
 
@@ -435,6 +450,7 @@ function isWithinShareScoreWindow(submittedAtText: string | null) {
   return elapsedMs >= 0 && elapsedMs <= 2 * 24 * 60 * 60 * 1000;
 }
 
+// 제출 시각 문자열을 Date 객체로 변환한다.
 function parseSubmittedAt(submittedAtText: string | null) {
   if (!submittedAtText) {
     return null;

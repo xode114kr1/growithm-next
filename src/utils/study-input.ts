@@ -1,6 +1,7 @@
 const MAX_TITLE_LENGTH = 80;
 const MAX_DESCRIPTION_LENGTH = 500;
 
+// 새 스터디 제목과 설명 입력값을 검증한다.
 export function validateStudyInput({
   description,
   title,

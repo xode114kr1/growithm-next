@@ -24,6 +24,7 @@ const tierClasses = {
   Silver: "bg-slate-200 border-slate-300 text-slate-600",
 };
 
+// 사용자 점수에 맞는 티어 이름과 스타일을 반환한다.
 export function getUserTier(score: number) {
   const tier = getPersonalScoreTier(score);
 
@@ -33,10 +34,12 @@ export function getUserTier(score: number) {
   };
 }
 
+// 개인 점수에 해당하는 티어를 계산한다.
 export function getPersonalScoreTier(score: number): PersonalScoreTier {
   return getScoreTier(score, personalScoreTierThresholds, "Bronze");
 }
 
+// 개인 점수의 현재 티어 내 진행률을 계산한다.
 export function getPersonalTierProgress(
   score: number,
   tier: PersonalScoreTier,
@@ -44,6 +47,7 @@ export function getPersonalTierProgress(
   return getScoreTierProgress(score, tier, personalScoreTierThresholds);
 }
 
+// 개인 티어 진행도를 점수 범위 문자열로 만든다.
 export function getPersonalProgressLabel(
   score: number,
   tier: PersonalScoreTier,
@@ -51,14 +55,17 @@ export function getPersonalProgressLabel(
   return getScoreProgressLabel(score, tier, personalScoreTierThresholds);
 }
 
+// 개인 티어의 다음 티어 진입 점수를 반환한다.
 export function getNextPersonalTierScore(tier: PersonalScoreTier) {
   return getNextScoreTierScore(tier, personalScoreTierThresholds);
 }
 
+// 사용자 이름이 없을 때 사용할 표시 이름을 결정한다.
 export function getUserDisplayName(name: string | null, email: string | null) {
   return name?.trim() || email?.trim() || "Unknown Developer";
 }
 
+// 사용자 이미지가 없을 때 기본 아바타 URL을 반환한다.
 export function getUserAvatar(image: string | null) {
   return image || "https://avatars.githubusercontent.com/u/0?v=4";
 }

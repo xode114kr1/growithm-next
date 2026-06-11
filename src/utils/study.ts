@@ -37,22 +37,27 @@ export const tierThumbnails: Record<StudyTier, { className: string; label: strin
   },
 };
 
+// 스터디 점수에 해당하는 티어를 계산한다.
 export function getStudyTier(score: number): StudyTier {
   return getScoreTier(score, studyScoreTierThresholds, "Bronze");
 }
 
+// 스터디 점수의 현재 티어 내 진행률을 계산한다.
 export function getTierProgress(score: number, tier: StudyTier) {
   return getScoreTierProgress(score, tier, studyScoreTierThresholds);
 }
 
+// 스터디 티어 진행도를 점수 범위 문자열로 만든다.
 export function getProgressLabel(score: number, tier: StudyTier) {
   return getScoreProgressLabel(score, tier, studyScoreTierThresholds);
 }
 
+// 스터디 티어의 다음 티어 진입 점수를 반환한다.
 export function getNextTierScore(tier: StudyTier) {
   return getNextScoreTierScore(tier, studyScoreTierThresholds);
 }
 
+// 날짜를 한국어 짧은 날짜 형식으로 변환한다.
 export function formatShortDate(date: Date) {
   return new Intl.DateTimeFormat("ko-KR", {
     day: "2-digit",
@@ -61,6 +66,7 @@ export function formatShortDate(date: Date) {
   }).format(date);
 }
 
+// 날짜를 현재 시점 기준의 상대 시간 문자열로 변환한다.
 export function formatRelativeDate(date: Date) {
   const diffMs = Date.now() - date.getTime();
   const diffMinutes = Math.max(1, Math.floor(diffMs / 60_000));
@@ -80,10 +86,12 @@ export function formatRelativeDate(date: Date) {
   return `${diffDays} days ago`;
 }
 
+// 사용자 이름이 없을 때 사용할 표시 이름을 결정한다.
 export function getUserDisplayName(name: string | null) {
   return name || "Unknown";
 }
 
+// 알 수 없는 카테고리 값을 문자열 배열로 정리한다.
 export function normalizeCategories(categories: unknown): string[] {
   if (!Array.isArray(categories)) {
     return [];

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import type { StudyInviteItem } from "@/types/study";
 import { formatRelativeDate, getUserDisplayName } from "@/utils/study";
 
+// 사용자에게 도착한 유효한 대기 중 스터디 초대를 조회한다.
 export async function getPendingInvites(
   userId: string,
 ): Promise<StudyInviteItem[]> {

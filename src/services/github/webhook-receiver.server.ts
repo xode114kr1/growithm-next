@@ -27,6 +27,7 @@ type GitHubCodeContent = {
   readmePath: string;
 };
 
+// GitHub 웹훅 요청을 검증하고 문제 제출 데이터로 처리한다.
 export async function receiveGitHubWebhook(request: Request) {
   const webhookSecret = process.env.GITHUB_WEBHOOK_SECRET;
 
@@ -251,6 +252,7 @@ export async function receiveGitHubWebhook(request: Request) {
   });
 }
 
+// 저장된 웹훅 정보와 payload를 사용해 저장소 소유 사용자를 찾는다.
 async function getRepositoryOwner(
   repositoryFullName: string,
   payload: GitHubWebhookPayload,
@@ -288,6 +290,7 @@ async function getRepositoryOwner(
   };
 }
 
+// 웹훅 payload의 GitHub 소유자 ID로 연결된 사용자를 찾는다.
 async function getRepositoryOwnerFromPayload(
   repositoryFullName: string,
   payload: GitHubWebhookPayload,
@@ -332,6 +335,7 @@ async function getRepositoryOwnerFromPayload(
   };
 }
 
+// README와 코드 내용을 문제 제출 데이터로 저장하고 점수를 반영한다.
 async function saveProblemSubmissions({
   codeContents,
   readmes,
@@ -454,6 +458,7 @@ async function saveProblemSubmissions({
   };
 }
 
+// 저장된 웹훅 delivery의 처리 상태와 오류를 갱신한다.
 async function updateWebhookDeliveryStatus({
   deliveryId,
   errorMessage,
@@ -482,6 +487,7 @@ async function updateWebhookDeliveryStatus({
   });
 }
 
+// 웹훅 delivery를 중복 없이 저장하고 처리 가능 상태를 반환한다.
 async function saveWebhookDelivery({
   deliveryId,
   event,
@@ -563,6 +569,7 @@ async function saveWebhookDelivery({
   };
 }
 
+// 웹훅 처리 상태가 재시도 가능한 상태인지 확인한다.
 function isRetryableDeliveryStatus(status: string) {
   return (
     status === "FAILED" ||
@@ -571,6 +578,7 @@ function isRetryableDeliveryStatus(status: string) {
   );
 }
 
+// 커밋과 파일 경로를 사용해 GitHub 원본 파일 URL을 만든다.
 function buildRawGitHubContentUrl({
   commitSha,
   path,
@@ -583,10 +591,12 @@ function buildRawGitHubContentUrl({
   return `https://raw.githubusercontent.com/${repositoryFullName}/${commitSha}/${encodeGitHubPath(path)}`;
 }
 
+// GitHub API 요청에 사용할 파일 경로의 각 구간을 인코딩한다.
 function encodeGitHubPath(path: string) {
   return path.split("/").map(encodeURIComponent).join("/");
 }
 
+// 요청 본문과 시크릿으로 GitHub 웹훅 서명을 검증한다.
 function isValidSignature(
   rawBody: string,
   signature: string | null,

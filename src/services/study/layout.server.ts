@@ -3,6 +3,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import type { StudyLayoutData } from "@/types/study";
 
+// 스터디 상세 레이아웃에 필요한 접근 권한과 기본 정보를 조회한다.
 export async function getStudyLayoutData({
   studyId,
   userId,

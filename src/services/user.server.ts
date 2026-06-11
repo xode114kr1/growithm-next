@@ -16,6 +16,7 @@ import {
   getUserTier,
 } from "@/utils/user";
 
+// 사용자의 점수를 조회해 개인 티어 정보를 만든다.
 export async function getUserPersonalTier(
   userId: string | undefined,
 ): Promise<UserPersonalTier> {
@@ -35,6 +36,7 @@ export async function getUserPersonalTier(
   return createPersonalTier(user?.score ?? 0);
 }
 
+// 점수를 기반으로 개인 티어 표시 데이터를 구성한다.
 function createPersonalTier(score: number): UserPersonalTier {
   const tier = getPersonalScoreTier(score);
 
@@ -47,6 +49,7 @@ function createPersonalTier(score: number): UserPersonalTier {
   };
 }
 
+// 프로필 화면에 필요한 사용자 정보와 문제 수를 조회한다.
 export async function getUserProfilePageData(
   userId: string,
 ): Promise<UserProfilePageData | null> {
@@ -83,6 +86,7 @@ export async function getUserProfilePageData(
   };
 }
 
+// 검색어와 제외 조건에 맞는 사용자 목록을 조회한다.
 export async function getUsers({
   excludedUserId,
 }: {
@@ -103,6 +107,7 @@ export async function getUsers({
   return users.map(createUserSummary);
 }
 
+// 현재 사용자의 친구 목록을 사용자 요약 데이터로 조회한다.
 export async function getFriendUsers(
   userId: string | undefined,
 ): Promise<UserSummary[]> {
@@ -150,6 +155,7 @@ const userSummarySelect = {
   score: true,
 } satisfies Record<keyof UserSummaryRow, true>;
 
+// 사용자 조회 결과를 공용 사용자 요약 데이터로 변환한다.
 function createUserSummary(user: UserSummaryRow): UserSummary {
   const tier = getUserTier(user.score);
 

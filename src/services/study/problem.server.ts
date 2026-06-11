@@ -8,6 +8,7 @@ import {
   normalizeCategories,
 } from "@/utils/study";
 
+// 스터디에 공유된 문제 목록과 필터 정보를 조회한다.
 export async function getStudyProblemsData({
   studyId,
   userId,

@@ -5,6 +5,7 @@ import type {
 
 const repositoryNamePattern = /^[A-Za-z0-9_.-]+$/;
 
+// 요청 본문에서 유효한 GitHub 저장소 정보를 추출한다.
 export function parseRepository(
   body: GitHubWebhookRequestBody,
 ): GitHubRepositoryInput | null {
@@ -22,6 +23,7 @@ export function parseRepository(
   return parseRepositoryUrl(body.repositoryUrl);
 }
 
+// GitHub 소유자 또는 저장소 이름을 검증하고 정리한다.
 function normalizeRepositoryPart(value: unknown) {
   if (typeof value !== "string") {
     return null;
@@ -36,6 +38,7 @@ function normalizeRepositoryPart(value: unknown) {
   return trimmed;
 }
 
+// GitHub 저장소 URL에서 소유자와 저장소 이름을 추출한다.
 function parseRepositoryUrl(value: string) {
   const trimmed = value.trim();
 

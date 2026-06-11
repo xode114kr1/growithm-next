@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import type { StudyMembersData } from "@/types/study";
 import { formatShortDate, getUserDisplayName } from "@/utils/study";
 
+// 스터디 멤버 화면에 필요한 멤버와 기여도 정보를 조회한다.
 export async function getStudyMembersData({
   studyId,
   userId,

@@ -6,16 +6,19 @@ type GitHubPushCommit = {
   modified?: unknown;
 };
 
+// GitHub 웹훅 payload에서 저장소 전체 이름을 추출한다.
 export function getRepositoryFullName(payload: GitHubWebhookPayload) {
   return typeof payload.repository?.full_name === "string"
     ? payload.repository.full_name
     : null;
 }
 
+// GitHub push payload에서 최종 커밋 SHA를 추출한다.
 export function getAfterCommitSha(payload: GitHubWebhookPayload) {
   return typeof payload.after === "string" && payload.after ? payload.after : null;
 }
 
+// GitHub 웹훅 payload에서 저장소 소유자 ID를 추출한다.
 export function getRepositoryOwnerId(payload: GitHubWebhookPayload) {
   const ownerId = payload.repository?.owner?.id;
 
@@ -26,6 +29,7 @@ export function getRepositoryOwnerId(payload: GitHubWebhookPayload) {
   return typeof ownerId === "string" && ownerId ? ownerId : null;
 }
 
+// GitHub push payload에서 처리할 README 변경 목록을 만든다.
 export function getReadmeChangesFromPushPayload(
   payload: GitHubWebhookPayload,
 ): GitHubReadmeChange[] {
@@ -56,6 +60,7 @@ export function getReadmeChangesFromPushPayload(
   return [...changes.values()];
 }
 
+// GitHub 커밋에서 추가되거나 수정된 README 경로를 추출한다.
 function getReadmePathsFromCommit(commit: unknown) {
   if (!isPushCommit(commit)) {
     return [];
@@ -66,6 +71,7 @@ function getReadmePathsFromCommit(commit: unknown) {
     .filter(isReadmePath);
 }
 
+// GitHub 커밋에서 추가되거나 수정된 풀이 코드 경로를 추출한다.
 function getCodePathsFromCommit(commit: unknown) {
   if (!isPushCommit(commit)) {
     return [];
@@ -76,6 +82,7 @@ function getCodePathsFromCommit(commit: unknown) {
     .filter(isCodePath);
 }
 
+// GitHub push 커밋 객체에서 커밋 SHA를 추출한다.
 function getCommitSha(commit: unknown) {
   if (!isPushCommit(commit)) {
     return null;
@@ -84,24 +91,29 @@ function getCommitSha(commit: unknown) {
   return typeof commit.id === "string" && commit.id ? commit.id : null;
 }
 
+// 값이 GitHub push 커밋 객체인지 확인한다.
 function isPushCommit(value: unknown): value is GitHubPushCommit {
   return typeof value === "object" && value !== null;
 }
 
+// 알 수 없는 값을 문자열 배열로 안전하게 변환한다.
 function getStringArray(value: unknown) {
   return Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string")
     : [];
 }
 
+// 경로가 README 파일을 가리키는지 확인한다.
 function isReadmePath(path: string) {
   return /(^|\/)README\.md$/i.test(path);
 }
 
+// 경로가 처리 가능한 풀이 코드 파일인지 확인한다.
 function isCodePath(path: string) {
   return path !== "" && !isReadmePath(path) && !path.toLowerCase().endsWith(".md");
 }
 
+// README와 같은 디렉터리에 변경된 풀이 코드 경로를 찾는다.
 function findCodePathForReadme(readmePath: string, codePaths: string[]) {
   const readmeDirectory = getDirectoryPath(readmePath);
 
@@ -111,6 +123,7 @@ function findCodePathForReadme(readmePath: string, codePaths: string[]) {
   );
 }
 
+// 파일 경로에서 상위 디렉터리 경로를 추출한다.
 function getDirectoryPath(path: string) {
   const lastSlashIndex = path.lastIndexOf("/");
 

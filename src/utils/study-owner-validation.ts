@@ -2,6 +2,7 @@ const INVITE_TARGET_MAX_LENGTH = 120;
 const MAX_STUDY_TITLE_LENGTH = 80;
 const MAX_STUDY_DESCRIPTION_LENGTH = 500;
 
+// 스터디 초대 대상 입력값을 검증한다.
 export function validateStudyInviteTarget(target: string) {
   if (!target) {
     return "초대할 사용자 이름 또는 이메일을 입력해주세요.";
@@ -14,6 +15,7 @@ export function validateStudyInviteTarget(target: string) {
   return null;
 }
 
+// 스터디 설정의 제목과 설명 입력값을 검증한다.
 export function validateStudySettingsInput({
   description,
   title,

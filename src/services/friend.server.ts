@@ -22,6 +22,7 @@ type FriendUserRow = {
   score: number;
 };
 
+// 현재 사용자가 받은 대기 중인 친구 요청을 조회한다.
 export async function getReceivedFriendRequests(
   userId: string | undefined,
 ): Promise<FriendRequest[]> {
@@ -50,6 +51,7 @@ export async function getReceivedFriendRequests(
   }));
 }
 
+// 현재 사용자가 보낸 대기 중인 친구 요청을 조회한다.
 export async function getSentFriendRequests(
   userId: string | undefined,
 ): Promise<FriendRequest[]> {
@@ -86,6 +88,7 @@ const friendUserSelect = {
   score: true,
 } satisfies Record<keyof FriendUserRow, true>;
 
+// 사용자 조회 결과를 친구 화면용 프로필 데이터로 변환한다.
 function createFriendProfile(
   user: FriendUserRow,
   relationStatus: FriendProfile["relationStatus"],
@@ -102,6 +105,7 @@ function createFriendProfile(
   };
 }
 
+// 현재 사용자와 여러 사용자 사이의 친구 관계 상태를 조회한다.
 export async function getFriendRelationsForUsers({
   users,
   userId,
@@ -190,6 +194,7 @@ export async function getFriendRelationsForUsers({
   }));
 }
 
+// 대상 사용자에게 새 친구 요청을 생성한다.
 export async function sendFriendRequest({
   requesterId,
   targetUserId,
@@ -256,6 +261,7 @@ export async function sendFriendRequest({
   });
 }
 
+// 사용자가 보낸 대기 중인 친구 요청을 취소한다.
 export async function cancelFriendRequest({
   requesterId,
   requestId,
@@ -271,6 +277,7 @@ export async function cancelFriendRequest({
   });
 }
 
+// 받은 대기 중인 친구 요청을 삭제한다.
 export async function deleteReceivedFriendRequest({
   addresseeId,
   requestId,
@@ -286,6 +293,7 @@ export async function deleteReceivedFriendRequest({
   });
 }
 
+// 받은 친구 요청을 수락하고 양방향 친구 관계를 생성한다.
 export async function acceptFriendRequest({
   addresseeId,
   requestId,
@@ -337,6 +345,7 @@ export async function acceptFriendRequest({
   ]);
 }
 
+// 두 사용자 사이의 친구 관계를 삭제한다.
 export async function deleteFriend({
   currentUserId,
   friendUserId,
@@ -351,6 +360,7 @@ export async function deleteFriend({
   });
 }
 
+// 친구 관계의 두 사용자 ID를 일관된 순서로 정렬한다.
 function normalizeFriendshipUserIds(firstUserId: string, secondUserId: string) {
   const [userAId, userBId] = [firstUserId, secondUserId].sort();
 

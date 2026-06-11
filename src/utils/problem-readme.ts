@@ -20,6 +20,7 @@ type ProblemReadmeDraft = Partial<ParsedProblemReadme> & {
   platform: ProblemPlatform;
 };
 
+// 플랫폼 형식을 판별해 README의 문제 정보를 파싱한다.
 export function parseProblemReadme(text: string) {
   if (text.includes("https://www.acmicpc.net/problem/")) {
     return validateParsedReadme(parseBaekjoonReadme(text));
@@ -32,6 +33,7 @@ export function parseProblemReadme(text: string) {
   return null;
 }
 
+// 백준 README에서 문제 제출 정보를 추출한다.
 function parseBaekjoonReadme(text: string): ProblemReadmeDraft {
   const result: ProblemReadmeDraft = {
     platform: ProblemPlatform.BAEKJOON,
@@ -72,6 +74,7 @@ function parseBaekjoonReadme(text: string): ProblemReadmeDraft {
   return result;
 }
 
+// 프로그래머스 README에서 문제 제출 정보를 추출한다.
 function parseProgrammersReadme(text: string): ProblemReadmeDraft {
   const result: ProblemReadmeDraft = {
     platform: ProblemPlatform.PROGRAMMERS,
@@ -134,6 +137,7 @@ function parseProgrammersReadme(text: string): ProblemReadmeDraft {
   return result;
 }
 
+// 파싱된 README에 필수 문제 정보가 있는지 검증한다.
 function validateParsedReadme(
   parsedReadme: ProblemReadmeDraft,
 ): ParsedProblemReadme | null {

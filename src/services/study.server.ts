@@ -3,6 +3,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import type { ProblemShareTargetStudy } from "@/types/study";
 
+// 문제를 공유할 수 있는 사용자의 스터디 목록을 조회한다.
 export async function getProblemShareTargetStudies({
   problemId,
   userId,

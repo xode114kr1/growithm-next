@@ -25,6 +25,7 @@ type RegisterGitHubWebhookResult =
       status: number;
     };
 
+// 사용자 저장소에 GitHub 웹훅을 등록하고 연결 정보를 저장한다.
 export async function registerGitHubWebhook({
   body,
   userId,
@@ -112,6 +113,7 @@ export async function registerGitHubWebhook({
   };
 }
 
+// 저장소에 기존 웹훅이 없으면 새 GitHub 웹훅을 생성한다.
 async function createGitHubWebhook({
   accessToken,
   owner,
@@ -181,6 +183,7 @@ async function createGitHubWebhook({
   };
 }
 
+// 저장소에 동일한 수신 URL의 GitHub 웹훅이 있는지 확인한다.
 async function findExistingGitHubWebhook({
   accessToken,
   owner,
@@ -234,6 +237,7 @@ async function findExistingGitHubWebhook({
   };
 }
 
+// GitHub 저장소 웹훅 API 요청을 공통 헤더와 함께 전송한다.
 function githubFetch({
   accessToken,
   body,
@@ -261,6 +265,7 @@ function githubFetch({
   });
 }
 
+// GitHub 웹훅 API 오류를 사용자용 메시지로 변환한다.
 function getGitHubErrorMessage(status: number, message: unknown) {
   if (status === 401 || status === 403) {
     return "GitHub 웹훅을 생성할 권한이 없습니다. GitHub로 다시 로그인해주세요.";

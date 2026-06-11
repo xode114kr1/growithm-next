@@ -8,6 +8,7 @@ import {
   getTierProgress,
 } from "@/utils/study";
 
+// 사용자가 참여하거나 소유한 스터디 목록을 조회한다.
 export async function getUserStudies(userId: string): Promise<StudyListItem[]> {
   const studies = await prisma.study.findMany({
     include: {
