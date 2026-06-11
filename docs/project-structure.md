@@ -140,6 +140,7 @@ services/
 - `*.helper.ts`: 서비스에서 사용하는 데이터를 변형한다.
 
 각 역할의 함수가 실제로 있을 때만 해당 파일을 생성한다.
+같은 리소스의 조회 목적이 다르더라도 `invite.server.ts`, `layout.server.ts`처럼 화면이나 조회 목적별 파일로 나누지 않고 리소스의 `*.server.ts`에 통합한다.
 
 ### `src/types`
 
@@ -334,6 +335,9 @@ project-root/
 │  │  ├─ problems/
 │  │  ├─ readme/
 │  │  ├─ studies/
+│  │  │  ├─ study.server.ts
+│  │  │  ├─ study.helper.ts
+│  │  │  └─ study.validator.ts
 │  │  ├─ users/
 │  │  ├─ webhook-receiver/
 │  │  └─ webhook-registration/
@@ -397,6 +401,7 @@ src/
 - 외부 API 호출은 `[resource].client.ts`에 두고 `fetch`를 다른 역할 파일에 작성하지 않는다.
 - 입력값과 외부 API 응답값 검증은 `[resource].validator.ts`에 둔다.
 - 서비스 데이터 변형은 `[resource].helper.ts`에 둔다.
+- 같은 리소스의 서버 함수는 화면이나 조회 목적별 파일로 나누지 않고 하나의 `[resource].server.ts`에 통합한다.
 - `src/utils`에는 프론트엔드 여러 화면에서 공통으로 사용하는 포맷 및 표시 함수만 둔다.
 - 서로 독립적인 페이지 영역은 하나의 페이지 데이터 객체로 묶지 않고 각 영역에서 필요한 서비스를 호출한다.
 - 여러 페이지에서 재사용하는 UI만 `src/components`로 이동한다.

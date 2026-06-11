@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { auth } from "@/lib/auth/auth";
-import { getStudyProblemsData } from "@/services/studies/problem.server";
+import { getStudyProblemsData } from "@/services/studies/study.server";
 
 import StudyProblemModalTable from "./_components/study-problem-modal-table";
 import StudyProblemsHeading from "./_components/study-problems-heading";
