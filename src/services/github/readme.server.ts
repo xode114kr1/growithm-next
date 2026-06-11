@@ -1,13 +1,11 @@
 import "server-only";
 
 import type { GitHubReadmeContent } from "@/types/github";
-
-type GitHubContentResponse = {
-  content?: unknown;
-  encoding?: unknown;
-  message?: unknown;
-  type?: unknown;
-};
+import {
+  encodeGitHubPath,
+  getGitHubContentErrorMessage,
+  type GitHubContentResponse,
+} from "@/utils/github-readme.helper";
 
 // 특정 커밋의 README 내용을 GitHub API에서 조회한다.
 export async function fetchGitHubReadmeContent({
@@ -55,21 +53,4 @@ export async function fetchGitHubReadmeContent({
       "utf8",
     ),
   };
-}
-
-// GitHub API 요청에 사용할 파일 경로의 각 구간을 인코딩한다.
-function encodeGitHubPath(path: string) {
-  return path.split("/").map(encodeURIComponent).join("/");
-}
-
-// GitHub 파일 조회 실패 응답을 사용자용 오류 메시지로 변환한다.
-function getGitHubContentErrorMessage(
-  status: number,
-  data: GitHubContentResponse | null,
-) {
-  if (typeof data?.message === "string" && data.message) {
-    return `GitHub README 조회 실패: ${data.message}`;
-  }
-
-  return `GitHub README 조회 실패: HTTP ${status}`;
 }

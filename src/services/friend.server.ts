@@ -1,26 +1,13 @@
 import "server-only";
 
 import { prisma } from "@/lib/prisma";
-import type {
-  FriendProfile,
-  FriendRequest,
-  FriendRelationStatus,
-  FriendSearchResult,
-} from "@/types/friend";
+import type { FriendRequest, FriendRelationStatus, FriendSearchResult } from "@/types/friend";
 import type { UserSummary } from "@/types/user";
 import {
-  getUserAvatar,
-  getUserDisplayName,
-  getUserTier,
-} from "@/utils/user";
-
-type FriendUserRow = {
-  email: string | null;
-  id: string;
-  image: string | null;
-  name: string | null;
-  score: number;
-};
+  createFriendProfile,
+  normalizeFriendshipUserIds,
+  type FriendUserRow,
+} from "@/utils/friend.helper";
 
 // 현재 사용자가 받은 대기 중인 친구 요청을 조회한다.
 export async function getReceivedFriendRequests(
@@ -87,23 +74,6 @@ const friendUserSelect = {
   name: true,
   score: true,
 } satisfies Record<keyof FriendUserRow, true>;
-
-// 사용자 조회 결과를 친구 화면용 프로필 데이터로 변환한다.
-function createFriendProfile(
-  user: FriendUserRow,
-  relationStatus: FriendProfile["relationStatus"],
-): FriendProfile {
-  const tier = getUserTier(user.score);
-
-  return {
-    avatar: getUserAvatar(user.image),
-    id: user.id,
-    name: getUserDisplayName(user.name, user.email),
-    relationStatus,
-    tier: tier.tier,
-    tierClass: tier.tierClass,
-  };
-}
 
 // 현재 사용자와 여러 사용자 사이의 친구 관계 상태를 조회한다.
 export async function getFriendRelationsForUsers({
@@ -358,14 +328,4 @@ export async function deleteFriend({
   await prisma.friendship.deleteMany({
     where: friendPair,
   });
-}
-
-// 친구 관계의 두 사용자 ID를 일관된 순서로 정렬한다.
-function normalizeFriendshipUserIds(firstUserId: string, secondUserId: string) {
-  const [userAId, userBId] = [firstUserId, secondUserId].sort();
-
-  return {
-    userAId,
-    userBId,
-  };
 }
