@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth/auth";
-import { registerGitHubWebhook } from "@/services/github/webhook-registration.server";
+import { registerGitHubWebhook } from "@/services/webhook-registration/webhook-registration.server";
 import type { GitHubWebhookRequestBody } from "@/types/github";
 
 export async function POST(request: Request) {

@@ -6,6 +6,19 @@ type GitHubPushCommit = {
   modified?: unknown;
 };
 
+// 커밋과 파일 경로를 사용해 GitHub 원본 파일 URL을 만든다.
+export function buildRawGitHubContentUrl({
+  commitSha,
+  path,
+  repositoryFullName,
+}: {
+  commitSha: string;
+  path: string;
+  repositoryFullName: string;
+}) {
+  return `https://raw.githubusercontent.com/${repositoryFullName}/${commitSha}/${encodeGitHubPath(path)}`;
+}
+
 // GitHub 웹훅 payload에서 저장소 전체 이름을 추출한다.
 export function getRepositoryFullName(payload: GitHubWebhookPayload) {
   return typeof payload.repository?.full_name === "string"
@@ -128,4 +141,9 @@ function getDirectoryPath(path: string) {
   const lastSlashIndex = path.lastIndexOf("/");
 
   return lastSlashIndex === -1 ? "" : path.slice(0, lastSlashIndex);
+}
+
+// GitHub API 요청에 사용할 파일 경로의 각 구간을 인코딩한다.
+function encodeGitHubPath(path: string) {
+  return path.split("/").map(encodeURIComponent).join("/");
 }

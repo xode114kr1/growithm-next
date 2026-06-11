@@ -1,11 +1,14 @@
 import "server-only";
 
+import { fetchGitHubContent } from "@/services/readme/readme.client";
 import type { GitHubReadmeContent } from "@/types/github";
 import {
-  encodeGitHubPath,
   getGitHubContentErrorMessage,
+} from "@/services/readme/readme.helper";
+import {
+  isGitHubFileContentResponse,
   type GitHubContentResponse,
-} from "@/services/github/readme.helper";
+} from "@/services/readme/readme.validator";
 
 // 특정 커밋의 README 내용을 GitHub API에서 조회한다.
 export async function fetchGitHubReadmeContent({
@@ -19,16 +22,12 @@ export async function fetchGitHubReadmeContent({
   path: string;
   repositoryFullName: string;
 }): Promise<GitHubReadmeContent> {
-  const response = await fetch(
-    `https://api.github.com/repos/${repositoryFullName}/contents/${encodeGitHubPath(path)}?ref=${encodeURIComponent(commitSha)}`,
-    {
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${accessToken}`,
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-    },
-  );
+  const response = await fetchGitHubContent({
+    accessToken,
+    commitSha,
+    path,
+    repositoryFullName,
+  });
 
   const data = (await response.json().catch(() => null)) as
     | GitHubContentResponse
@@ -38,11 +37,7 @@ export async function fetchGitHubReadmeContent({
     throw new Error(getGitHubContentErrorMessage(response.status, data));
   }
 
-  if (
-    data?.type !== "file" ||
-    data.encoding !== "base64" ||
-    typeof data.content !== "string"
-  ) {
+  if (!isGitHubFileContentResponse(data)) {
     throw new Error("GitHub README 응답 형식이 올바르지 않습니다.");
   }
 

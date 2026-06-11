@@ -1,9 +1,4 @@
-export type GitHubContentResponse = {
-  content?: unknown;
-  encoding?: unknown;
-  message?: unknown;
-  type?: unknown;
-};
+import type { GitHubContentResponse } from "@/services/readme/readme.validator";
 
 // GitHub API 요청에 사용할 파일 경로의 각 구간을 인코딩한다.
 export function encodeGitHubPath(path: string) {

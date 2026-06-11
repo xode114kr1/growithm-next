@@ -1,4 +1,5 @@
 import { ProblemPlatform } from "@/generated/prisma/client";
+import { validateParsedProblemReadme } from "@/services/readme/problem-readme.validator";
 
 export type ParsedProblemReadme = {
   accuracy?: number;
@@ -23,11 +24,11 @@ type ProblemReadmeDraft = Partial<ParsedProblemReadme> & {
 // 플랫폼 형식을 판별해 README의 문제 정보를 파싱한다.
 export function parseProblemReadme(text: string) {
   if (text.includes("https://www.acmicpc.net/problem/")) {
-    return validateParsedReadme(parseBaekjoonReadme(text));
+    return validateParsedProblemReadme(parseBaekjoonReadme(text));
   }
 
   if (text.includes("https://school.programmers.co.kr/")) {
-    return validateParsedReadme(parseProgrammersReadme(text));
+    return validateParsedProblemReadme(parseProgrammersReadme(text));
   }
 
   return null;
@@ -137,13 +138,3 @@ function parseProgrammersReadme(text: string): ProblemReadmeDraft {
   return result;
 }
 
-// 파싱된 README에 필수 문제 정보가 있는지 검증한다.
-function validateParsedReadme(
-  parsedReadme: ProblemReadmeDraft,
-): ParsedProblemReadme | null {
-  if (!parsedReadme.problemId || !parsedReadme.title) {
-    return null;
-  }
-
-  return parsedReadme as ParsedProblemReadme;
-}

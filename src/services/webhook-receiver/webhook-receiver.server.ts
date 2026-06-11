@@ -1,15 +1,13 @@
 import "server-only";
 
-import type { Prisma } from "@/generated/prisma/client";
-import { fetchGitHubReadmeContent } from "@/services/github/readme.server";
+import { fetchGitHubReadmeContent } from "@/services/readme/readme.server";
+import { fetchGitHubRawCode } from "@/services/webhook-receiver/webhook-receiver.client";
 import {
-  buildRawGitHubContentUrl,
   getRepositoryOwner,
-  isValidSignature,
   saveProblemSubmissions,
   saveWebhookDelivery,
   updateWebhookDeliveryStatus,
-} from "@/services/github/webhook-receiver.helper";
+} from "@/services/webhook-receiver/webhook-receiver.persistence.server";
 import type {
   GitHubReadmeContent,
   GitHubWebhookPayload,
@@ -17,7 +15,12 @@ import type {
 import {
   getReadmeChangesFromPushPayload,
   getRepositoryFullName,
-} from "@/services/github/webhook.helper";
+  buildRawGitHubContentUrl,
+} from "@/services/webhook-receiver/webhook-receiver.helper";
+import {
+  isValidGitHubWebhookSignature,
+  parseGitHubWebhookPayload,
+} from "@/services/webhook-receiver/webhook-receiver.validator";
 
 // GitHub 웹훅 요청을 검증하고 문제 제출 데이터로 처리한다.
 export async function receiveGitHubWebhook(request: Request) {
@@ -42,18 +45,16 @@ export async function receiveGitHubWebhook(request: Request) {
     );
   }
 
-  if (!isValidSignature(rawBody, signature, webhookSecret)) {
+  if (!isValidGitHubWebhookSignature(rawBody, signature, webhookSecret)) {
     return Response.json(
       { message: "GitHub 웹훅 서명이 올바르지 않습니다." },
       { status: 401 },
     );
   }
 
-  let payload: Prisma.InputJsonValue;
+  const payload = parseGitHubWebhookPayload(rawBody);
 
-  try {
-    payload = JSON.parse(rawBody) as Prisma.InputJsonValue;
-  } catch {
+  if (!payload) {
     return Response.json(
       { message: "GitHub 웹훅 payload 형식이 올바르지 않습니다." },
       { status: 400 },
@@ -127,7 +128,7 @@ export async function receiveGitHubWebhook(request: Request) {
         path: change.codePath,
         repositoryFullName,
       });
-      const response = await fetch(codeUrl);
+      const response = await fetchGitHubRawCode(codeUrl);
 
       return {
         code: response.ok ? await response.text() : null,

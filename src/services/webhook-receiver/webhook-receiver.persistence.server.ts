@@ -1,16 +1,12 @@
 import "server-only";
 
-import { createHmac, timingSafeEqual } from "node:crypto";
-
 import type { Prisma } from "@/generated/prisma/client";
 import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import type { GitHubReadmeContent, GitHubWebhookPayload } from "@/types/github";
-import { getRepositoryOwnerId } from "@/services/github/webhook.helper";
+import { getRepositoryOwnerId } from "@/services/webhook-receiver/webhook-receiver.helper";
 import { getProblemExperienceScore } from "@/services/problems/problem.helper";
-import { parseProblemReadme } from "@/services/github/problem-readme.helper";
-
-const signaturePrefix = "sha256=";
+import { parseProblemReadme } from "@/services/readme/problem-readme.helper";
 
 export type GitHubCodeContent = {
   code: string | null;
@@ -248,41 +244,6 @@ export async function saveWebhookDelivery({
   return { created: true, id: delivery.id, status: delivery.status };
 }
 
-// 커밋과 파일 경로를 사용해 GitHub 원본 파일 URL을 만든다.
-export function buildRawGitHubContentUrl({
-  commitSha,
-  path,
-  repositoryFullName,
-}: {
-  commitSha: string;
-  path: string;
-  repositoryFullName: string;
-}) {
-  return `https://raw.githubusercontent.com/${repositoryFullName}/${commitSha}/${encodeGitHubPath(path)}`;
-}
-
-// 요청 본문과 시크릿으로 GitHub 웹훅 서명을 검증한다.
-export function isValidSignature(
-  rawBody: string,
-  signature: string | null,
-  webhookSecret: string,
-) {
-  if (!signature?.startsWith(signaturePrefix)) return false;
-
-  const expectedSignature = `${signaturePrefix}${createHmac(
-    "sha256",
-    webhookSecret,
-  )
-    .update(rawBody)
-    .digest("hex")}`;
-  const signatureBuffer = Buffer.from(signature);
-  const expectedSignatureBuffer = Buffer.from(expectedSignature);
-
-  if (signatureBuffer.length !== expectedSignatureBuffer.length) return false;
-
-  return timingSafeEqual(signatureBuffer, expectedSignatureBuffer);
-}
-
 type WebhookDeliveryStatus =
   | "FETCH_FAILED"
   | "FAILED"
@@ -299,9 +260,4 @@ function isRetryableDeliveryStatus(status: string) {
     status === "FETCH_FAILED" ||
     status === "PARSE_FAILED"
   );
-}
-
-// GitHub API 요청에 사용할 파일 경로의 각 구간을 인코딩한다.
-function encodeGitHubPath(path: string) {
-  return path.split("/").map(encodeURIComponent).join("/");
 }

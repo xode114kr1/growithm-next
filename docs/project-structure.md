@@ -118,13 +118,28 @@ lib/
 
 ```text
 services/
-└─ friends/
-   ├─ friend.server.ts
-   ├─ friend.helper.ts
-   └─ friend.validator.ts
+├─ friends/
+│  ├─ friend.server.ts
+│  ├─ friend.helper.ts
+│  └─ friend.validator.ts
+├─ webhook-receiver/
+│  ├─ webhook-receiver.server.ts
+│  ├─ webhook-receiver.client.ts
+│  └─ webhook-receiver.validator.ts
+└─ readme/
+   ├─ readme.server.ts
+   ├─ readme.client.ts
+   └─ readme.helper.ts
 ```
 
-`helper`, `validator` 파일은 해당 역할의 함수가 실제로 있을 때만 생성한다.
+서비스 파일의 역할은 다음과 같이 구분한다.
+
+- `*.server.ts`: 내부 DB 호출과 서비스 전체 흐름을 담당한다.
+- `*.client.ts`: GitHub 등 외부 API 호출만 담당한다.
+- `*.validator.ts`: 입력값과 외부 API 응답값을 검증한다.
+- `*.helper.ts`: 서비스에서 사용하는 데이터를 변형한다.
+
+각 역할의 함수가 실제로 있을 때만 해당 파일을 생성한다.
 
 ### `src/types`
 
@@ -317,8 +332,11 @@ project-root/
 │  │  │  ├─ friend.helper.ts
 │  │  │  └─ friend.validator.ts
 │  │  ├─ problems/
+│  │  ├─ readme/
 │  │  ├─ studies/
-│  │  └─ users/
+│  │  ├─ users/
+│  │  ├─ webhook-receiver/
+│  │  └─ webhook-registration/
 │  ├─ types/                          # 공유 타입 및 라이브러리 타입 확장
 │  └─ utils/                          # 프론트엔드 공용 포맷 및 표시 함수
 ├─ .env.example                       # 필수 환경 변수 예시
@@ -342,7 +360,8 @@ project-root/
 
 ```text
 src/app/api/github/webhook-receiver/route.ts
-  -> src/services/github/webhook-receiver.server.ts
+  -> src/services/webhook-receiver/webhook-receiver.server.ts
+  -> src/services/webhook-receiver/webhook-receiver.client.ts
   -> PostgreSQL
 ```
 
@@ -374,9 +393,10 @@ src/
 - 페이지 전용 컴포넌트는 해당 라우트의 `_components`에 둔다.
 - Prisma 쿼리와 비즈니스 로직은 `src/services/[resource]`에 둔다.
 - 서비스 디렉터리는 `dashboard`와 같은 화면 이름이 아니라 `problems`, `users`와 같은 리소스 이름으로 구분한다.
-- 서버에서만 실행되는 서비스 파일은 `.server.ts` 접미사를 사용한다.
-- 서비스 함수의 구현을 보조하는 함수는 같은 리소스 디렉터리의 `[resource].helper.ts`에 둔다.
-- 서비스 입력 검증 함수는 같은 리소스 디렉터리의 `[resource].validator.ts`에 둔다.
+- 내부 DB 호출과 서비스 전체 흐름은 `[resource].server.ts`에 둔다.
+- 외부 API 호출은 `[resource].client.ts`에 두고 `fetch`를 다른 역할 파일에 작성하지 않는다.
+- 입력값과 외부 API 응답값 검증은 `[resource].validator.ts`에 둔다.
+- 서비스 데이터 변형은 `[resource].helper.ts`에 둔다.
 - `src/utils`에는 프론트엔드 여러 화면에서 공통으로 사용하는 포맷 및 표시 함수만 둔다.
 - 서로 독립적인 페이지 영역은 하나의 페이지 데이터 객체로 묶지 않고 각 영역에서 필요한 서비스를 호출한다.
 - 여러 페이지에서 재사용하는 UI만 `src/components`로 이동한다.
@@ -418,7 +438,9 @@ src/
 src/
 ├─ app/api/auth/[...nextauth]/route.ts # Auth.js 라우트 핸들러
 ├─ app/api/github/.../route.ts         # GitHub 요청 진입점
-├─ services/github/                    # GitHub API 및 웹훅 처리
+├─ services/readme/                    # GitHub README 조회 처리
+├─ services/webhook-receiver/          # GitHub 웹훅 수신 처리
+├─ services/webhook-registration/      # GitHub 웹훅 등록 처리
 ├─ lib/auth/auth.ts                    # Auth.js 및 GitHub provider 설정
 └─ types/next-auth.d.ts                # Auth.js 타입 확장
 ```

@@ -5,6 +5,14 @@ import type {
 
 const repositoryNamePattern = /^[A-Za-z0-9_.-]+$/;
 
+export type GitHubWebhookResponse = {
+  config?: {
+    url?: unknown;
+  };
+  id?: unknown;
+  message?: unknown;
+};
+
 // 요청 본문에서 유효한 GitHub 저장소 정보를 추출한다.
 export function parseRepository(
   body: GitHubWebhookRequestBody,
@@ -65,4 +73,16 @@ function parseRepositoryUrl(value: string) {
   } catch {
     return null;
   }
+}
+
+// GitHub 웹훅 목록 응답이 배열인지 검증한다.
+export function isGitHubWebhookList(
+  data: unknown,
+): data is GitHubWebhookResponse[] {
+  return Array.isArray(data);
+}
+
+// GitHub 웹훅 응답에서 숫자 ID를 추출한다.
+export function getGitHubWebhookId(data: GitHubWebhookResponse | null) {
+  return typeof data?.id === "number" ? data.id : null;
 }
