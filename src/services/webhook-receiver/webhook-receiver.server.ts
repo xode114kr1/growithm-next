@@ -3,6 +3,7 @@ import "server-only";
 import { fetchGitHubReadmeContent } from "@/services/readme/readme.server";
 import { fetchGitHubRawCode } from "@/services/webhook-receiver/webhook-receiver.client";
 import {
+  getWebhookDeliveryForProcessing,
   getRepositoryOwner,
   saveProblemSubmissions,
   saveWebhookDelivery,
@@ -22,7 +23,7 @@ import {
   parseGitHubWebhookPayload,
 } from "@/services/webhook-receiver/webhook-receiver.validator";
 
-// GitHub 웹훅 요청을 검증하고 문제 제출 데이터로 처리한다.
+// GitHub 웹훅 요청을 검증하고 delivery를 저장한다.
 export async function receiveGitHubWebhook(request: Request) {
   const webhookSecret = process.env.GITHUB_WEBHOOK_SECRET;
 
@@ -92,6 +93,35 @@ export async function receiveGitHubWebhook(request: Request) {
       message: "처리 대상이 아닌 GitHub 웹훅 이벤트입니다.",
     });
   }
+
+  return processGitHubWebhookDelivery(delivery.id);
+}
+
+// 저장된 GitHub push delivery를 문제 제출 데이터로 처리한다.
+export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
+  const delivery = await getWebhookDeliveryForProcessing(webhookDeliveryId);
+
+  if (!delivery) {
+    return Response.json(
+      { message: "처리할 GitHub 웹훅 delivery를 찾을 수 없습니다." },
+      { status: 404 },
+    );
+  }
+
+  if (delivery.event !== "push") {
+    return Response.json(
+      {
+        deliveryId: delivery.deliveryId,
+        message: "처리 대상이 아닌 GitHub 웹훅 이벤트입니다.",
+      },
+      { status: 400 },
+    );
+  }
+
+  const deliveryId = delivery.deliveryId;
+  const webhookPayload = delivery.payload as GitHubWebhookPayload;
+  const repositoryFullName =
+    delivery.repositoryFullName ?? getRepositoryFullName(webhookPayload);
 
   if (!repositoryFullName) {
     await updateWebhookDeliveryStatus({
@@ -207,7 +237,7 @@ export async function receiveGitHubWebhook(request: Request) {
 
   const result = await saveProblemSubmissions({
     codeContents,
-    webhookDeliveryId: delivery.id,
+    webhookDeliveryId,
     readmes,
     repositoryFullName,
     userId: repositoryOwner.userId,

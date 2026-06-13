@@ -13,6 +13,20 @@ export type GitHubCodeContent = {
   readmePath: string;
 };
 
+// 문제 처리에 필요한 저장된 웹훅 delivery를 조회한다.
+export async function getWebhookDeliveryForProcessing(webhookDeliveryId: string) {
+  return prisma.webhookDelivery.findUnique({
+    select: {
+      deliveryId: true,
+      event: true,
+      id: true,
+      payload: true,
+      repositoryFullName: true,
+    },
+    where: { id: webhookDeliveryId },
+  });
+}
+
 // 저장된 웹훅 정보와 payload를 사용해 저장소 소유 사용자를 찾는다.
 export async function getRepositoryOwner(
   repositoryFullName: string,
