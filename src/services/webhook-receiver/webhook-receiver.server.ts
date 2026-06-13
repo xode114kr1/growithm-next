@@ -6,8 +6,8 @@ import {
   markWebhookDeliveryQueued,
   saveWebhookDelivery,
 } from "@/services/webhook-receiver/webhook-receiver.persistence.server";
+import { getRepositoryFullName } from "@/services/github/github-webhook.helper";
 import type { GitHubWebhookPayload } from "@/types/github";
-import { getRepositoryFullName } from "@/services/webhook-receiver/webhook-receiver.helper";
 import {
   isValidGitHubWebhookSignature,
   parseGitHubWebhookPayload,

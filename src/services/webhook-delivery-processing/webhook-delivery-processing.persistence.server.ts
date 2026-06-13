@@ -4,7 +4,7 @@ import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { getProblemExperienceScore } from "@/services/problems/problem.helper";
 import { parseProblemReadme } from "@/services/readme/problem-readme.helper";
-import { getRepositoryOwnerId } from "@/services/webhook-receiver/webhook-receiver.helper";
+import { getRepositoryOwnerId } from "@/services/webhook-delivery-processing/webhook-delivery-processing.helper";
 import type { GitHubReadmeContent, GitHubWebhookPayload } from "@/types/github";
 
 // 문제 처리에 필요한 저장된 웹훅 delivery를 조회한다.
