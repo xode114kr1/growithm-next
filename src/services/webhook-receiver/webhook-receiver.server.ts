@@ -18,7 +18,7 @@ import type {
   GitHubWebhookPayload,
 } from "@/types/github";
 import {
-  getReadmeChangesFromPushPayload,
+  getReadmeAndCodePathsFromPushPayload,
   getRepositoryFullName,
   buildRawGitHubContentUrl,
 } from "@/services/webhook-receiver/webhook-receiver.helper";
@@ -200,7 +200,7 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
     );
   }
 
-  const readmeChanges = getReadmeChangesFromPushPayload(webhookPayload);
+  const readmeChanges = getReadmeAndCodePathsFromPushPayload(webhookPayload);
 
   const codeContents = await Promise.all(
     readmeChanges.map(async (change) => {

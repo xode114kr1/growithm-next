@@ -42,8 +42,8 @@ export function getRepositoryOwnerId(payload: GitHubWebhookPayload) {
   return typeof ownerId === "string" && ownerId ? ownerId : null;
 }
 
-// GitHub push payload에서 처리할 README 변경 목록을 만든다.
-export function getReadmeChangesFromPushPayload(
+// GitHub push payload에서 처리할 README와 풀이 코드 경로를 추출한다.
+export function getReadmeAndCodePathsFromPushPayload(
   payload: GitHubWebhookPayload,
 ): GitHubReadmeChange[] {
   if (!Array.isArray(payload.commits)) {
