@@ -1,5 +1,6 @@
 import "server-only";
 
+import { fetchGitHubRawCode } from "@/services/webhook-delivery-processing/webhook-delivery-processing.client";
 import {
   claimWebhookDeliveryForProcessing,
   getRepositoryOwner,
@@ -9,7 +10,6 @@ import {
 } from "@/services/webhook-delivery-processing/webhook-delivery-processing.persistence.server";
 import { isRetryableGitHubFileError } from "@/services/github/github-file.error";
 import { fetchGitHubReadmeContent } from "@/services/readme/readme.server";
-import { fetchGitHubRawCode } from "@/services/webhook-receiver/webhook-receiver.client";
 import {
   buildRawGitHubContentUrl,
   getProblemFileChangeFromPushPayload,
