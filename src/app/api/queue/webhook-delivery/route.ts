@@ -1,7 +1,7 @@
 import { queue } from "@/lib/queue";
-import { processGitHubWebhookDelivery } from "@/services/webhook-receiver/webhook-receiver.server";
-import { updateWebhookDeliveryStatusById } from "@/services/webhook-receiver/webhook-receiver.persistence.server";
-import { isWebhookDeliveryQueueMessage } from "@/services/webhook-receiver/webhook-receiver.validator";
+import { updateWebhookDeliveryStatusById } from "@/services/webhook-delivery-processing/webhook-delivery-processing.persistence.server";
+import { processGitHubWebhookDelivery } from "@/services/webhook-delivery-processing/webhook-delivery-processing.server";
+import { isWebhookDeliveryQueueMessage } from "@/services/webhook-delivery-processing/webhook-delivery-processing.validator";
 
 export const POST = queue.handleCallback(async (message: unknown) => {
   if (!isWebhookDeliveryQueueMessage(message)) {
@@ -15,13 +15,13 @@ export const POST = queue.handleCallback(async (message: unknown) => {
   });
 
   try {
-    const response = await processGitHubWebhookDelivery(
+    const result = await processGitHubWebhookDelivery(
       message.webhookDeliveryId,
     );
 
     console.info("[WebhookQueue] consumer.completed", {
       durationMs: Date.now() - startedAt,
-      httpStatus: response.status,
+      processingStatus: result.status,
       webhookDeliveryId: message.webhookDeliveryId,
     });
   } catch (error) {

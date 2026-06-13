@@ -19,18 +19,6 @@ export function buildRawGitHubContentUrl({
   return `https://raw.githubusercontent.com/${repositoryFullName}/${commitSha}/${encodeGitHubPath(path)}`;
 }
 
-// GitHub 웹훅 payload에서 저장소 전체 이름을 추출한다.
-export function getRepositoryFullName(payload: GitHubWebhookPayload) {
-  return typeof payload.repository?.full_name === "string"
-    ? payload.repository.full_name
-    : null;
-}
-
-// GitHub push payload에서 최종 커밋 SHA를 추출한다.
-export function getAfterCommitSha(payload: GitHubWebhookPayload) {
-  return typeof payload.after === "string" && payload.after ? payload.after : null;
-}
-
 // GitHub 웹훅 payload에서 저장소 소유자 ID를 추출한다.
 export function getRepositoryOwnerId(payload: GitHubWebhookPayload) {
   const ownerId = payload.repository?.owner?.id;
@@ -66,6 +54,11 @@ export function getProblemFileChangeFromPushPayload(
     commitSha,
     path: readmePath,
   };
+}
+
+// GitHub push payload에서 최종 커밋 SHA를 추출한다.
+function getAfterCommitSha(payload: GitHubWebhookPayload) {
+  return typeof payload.after === "string" && payload.after ? payload.after : null;
 }
 
 // GitHub 커밋에서 추가되거나 수정된 README 경로를 추출한다.
