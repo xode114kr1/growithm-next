@@ -118,26 +118,34 @@ lib/
 
 ```text
 services/
-├─ friends/
-│  ├─ friend.server.ts
-│  ├─ friend.helper.ts
-│  └─ friend.validator.ts
-├─ webhook-receiver/
-│  ├─ webhook-receiver.server.ts
-│  ├─ webhook-receiver.client.ts
-│  └─ webhook-receiver.validator.ts
-└─ readme/
-   ├─ readme.server.ts
-   ├─ readme.client.ts
-   └─ readme.helper.ts
+└─ [resource]/
+   ├─ [resource].server.ts
+   ├─ [resource].client.ts
+   ├─ [resource].persistence.server.ts
+   ├─ [resource].helper.ts
+   └─ [resource].validator.ts
 ```
 
 서비스 파일의 역할은 다음과 같이 구분한다.
 
-- `*.server.ts`: 내부 DB 호출과 서비스 전체 흐름을 담당한다.
-- `*.client.ts`: GitHub 등 외부 API 호출만 담당한다.
-- `*.validator.ts`: 입력값과 외부 API 응답값을 검증한다.
-- `*.helper.ts`: 서비스에서 사용하는 데이터를 변형한다.
+- `[resource].server.ts`
+  - 리소스의 비즈니스 흐름과 유스케이스를 조합한다.
+  - validator, client, persistence, helper를 호출하고 처리 결과를 반환한다.
+  - Prisma 쿼리와 외부 API 요청을 직접 작성하지 않는다.
+- `[resource].client.ts`
+  - GitHub 등 애플리케이션 외부 시스템에 요청하는 함수만 둔다.
+  - HTTP 요청, 응답 상태 확인, 타임아웃과 외부 API 오류 변환을 담당한다.
+  - DB에 접근하거나 비즈니스 흐름을 조합하지 않는다.
+- `[resource].persistence.server.ts`
+  - Prisma를 사용하는 조회, 저장, 상태 변경, 트랜잭션을 담당한다.
+  - DB 저장 형태와 동시성 제어처럼 영속성에 종속된 로직을 둔다.
+  - 외부 API를 호출하거나 전체 서비스 흐름을 조합하지 않는다.
+- `[resource].helper.ts`
+  - 서비스 내부에서 사용하는 순수 데이터 변환과 계산 함수를 둔다.
+  - DB, 외부 API, 환경 변수 등 외부 상태에 의존하지 않는다.
+- `[resource].validator.ts`
+  - 서비스 입력값과 외부에서 전달받은 데이터의 형식을 검증한다.
+  - 검증 결과를 타입 가드 또는 파싱 결과로 반환하고 비즈니스 처리를 수행하지 않는다.
 
 각 역할의 함수가 실제로 있을 때만 해당 파일을 생성한다.
 같은 리소스의 조회 목적이 다르더라도 `invite.server.ts`, `layout.server.ts`처럼 화면이나 조회 목적별 파일로 나누지 않고 리소스의 `*.server.ts`에 통합한다.
@@ -315,9 +323,11 @@ project-root/
 │  │  │        └─ problems/
 │  │  └─ api/
 │  │     ├─ auth/[...nextauth]/       # Auth.js 포괄 라우트 핸들러
-│  │     └─ github/
-│  │        ├─ webhook/
-│  │        └─ webhook-receiver/
+│  │     ├─ github/
+│  │     │  ├─ webhook/
+│  │     │  └─ webhook-receiver/
+│  │     └─ queue/
+│  │        └─ webhook-delivery/
 │  ├─ components/
 │  │  ├─ layout/                      # 헤더, 내비게이션 등 앱 셸
 │  │  └─ ui/                          # 도메인에 종속되지 않는 기초 UI
@@ -339,6 +349,7 @@ project-root/
 │  │  │  ├─ study.helper.ts
 │  │  │  └─ study.validator.ts
 │  │  ├─ users/
+│  │  ├─ webhook-delivery-processing/
 │  │  ├─ webhook-receiver/
 │  │  └─ webhook-registration/
 │  ├─ types/                          # 공유 타입 및 라이브러리 타입 확장
@@ -360,14 +371,24 @@ project-root/
 - 큰 Prisma 쿼리, 재사용 가능한 비즈니스 규칙, 외부 API 연동 로직은 `src/app`에 두지 않는다.
 - 서로 독립적인 화면 영역은 각각 필요한 서비스 함수를 호출한다.
 
-예를 들어 GitHub 웹훅 라우트 핸들러는 요청 처리의 진입점만 담당한다.
+예를 들어 GitHub 웹훅 수신 라우트와 Queue callback 라우트는 각각의 서비스 진입점만 담당한다.
 
 ```text
 src/app/api/github/webhook-receiver/route.ts
   -> src/services/webhook-receiver/webhook-receiver.server.ts
-  -> src/services/webhook-receiver/webhook-receiver.client.ts
-  -> PostgreSQL
+  -> WebhookDelivery 최초 저장
+  -> Queue 발행
+
+src/app/api/queue/webhook-delivery/route.ts
+  -> src/services/webhook-delivery-processing/webhook-delivery-processing.server.ts
+  -> GitHub 파일 조회
+  -> ProblemSubmission 저장
 ```
+
+`webhook-receiver`는 GitHub 요청 검증, `WebhookDelivery` 최초 저장, Queue 발행만 담당한다.
+`webhook-delivery-processing`은 Queue 메시지 검증, Delivery 처리 권한 획득,
+GitHub 파일 조회, 문제 정보 저장, 처리 상태 갱신을 담당한다.
+두 서비스는 서로 직접 참조하지 않고 공유 GitHub 로직과 Queue 메시지 타입만 공용 영역에서 사용한다.
 
 ### 라우트 전용 UI와 서비스
 
@@ -397,8 +418,9 @@ src/
 - 페이지 전용 컴포넌트는 해당 라우트의 `_components`에 둔다.
 - Prisma 쿼리와 비즈니스 로직은 `src/services/[resource]`에 둔다.
 - 서비스 디렉터리는 `dashboard`와 같은 화면 이름이 아니라 `problems`, `users`와 같은 리소스 이름으로 구분한다.
-- 내부 DB 호출과 서비스 전체 흐름은 `[resource].server.ts`에 둔다.
+- 비즈니스 흐름과 유스케이스 조합은 `[resource].server.ts`에 둔다.
 - 외부 API 호출은 `[resource].client.ts`에 두고 `fetch`를 다른 역할 파일에 작성하지 않는다.
+- Prisma를 사용하는 DB 접근과 트랜잭션은 `[resource].persistence.server.ts`에 둔다.
 - 입력값과 외부 API 응답값 검증은 `[resource].validator.ts`에 둔다.
 - 서비스 데이터 변형은 `[resource].helper.ts`에 둔다.
 - 같은 리소스의 서버 함수는 화면이나 조회 목적별 파일로 나누지 않고 하나의 `[resource].server.ts`에 통합한다.
@@ -443,8 +465,11 @@ src/
 src/
 ├─ app/api/auth/[...nextauth]/route.ts # Auth.js 라우트 핸들러
 ├─ app/api/github/.../route.ts         # GitHub 요청 진입점
+├─ app/api/queue/webhook-delivery/     # Queue callback 진입점
+├─ services/github/                    # GitHub 공통 오류와 payload 보조 로직
 ├─ services/readme/                    # GitHub README 조회 처리
-├─ services/webhook-receiver/          # GitHub 웹훅 수신 처리
+├─ services/webhook-receiver/          # 웹훅 검증, 최초 저장, Queue 발행
+├─ services/webhook-delivery-processing/ # Queue 메시지 기반 Delivery 처리
 ├─ services/webhook-registration/      # GitHub 웹훅 등록 처리
 ├─ lib/auth/auth.ts                    # Auth.js 및 GitHub provider 설정
 └─ types/next-auth.d.ts                # Auth.js 타입 확장
