@@ -10,6 +10,8 @@ import {
   type GitHubContentResponse,
 } from "@/services/readme/readme.validator";
 
+const MAX_README_SIZE_BYTES = 2 * 1024 * 1024;
+
 // 특정 커밋의 README 내용을 GitHub API에서 조회한다.
 export async function fetchGitHubReadmeContent({
   accessToken,
@@ -39,6 +41,10 @@ export async function fetchGitHubReadmeContent({
 
   if (!isGitHubFileContentResponse(data)) {
     throw new Error("GitHub README 응답 형식이 올바르지 않습니다.");
+  }
+
+  if (data.size > MAX_README_SIZE_BYTES) {
+    throw new Error("GitHub README 파일 크기가 2MB 제한을 초과했습니다.");
   }
 
   return {

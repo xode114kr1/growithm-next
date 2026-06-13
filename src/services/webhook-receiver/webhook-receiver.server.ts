@@ -219,14 +219,14 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
         path: change.codePath,
         repositoryFullName,
       });
-      const response = await fetchGitHubRawCode(codeUrl);
+      const result = await fetchGitHubRawCode(codeUrl);
 
       return {
-        code: response.ok ? await response.text() : null,
+        code: result.code,
         codePath: change.codePath,
         codeUrl,
         readmePath: change.path,
-        status: response.status,
+        status: result.status,
       };
     }),
   );

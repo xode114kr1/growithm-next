@@ -2,6 +2,7 @@ export type GitHubContentResponse = {
   content?: unknown;
   encoding?: unknown;
   message?: unknown;
+  size?: unknown;
   type?: unknown;
 };
 
@@ -11,11 +12,13 @@ export function isGitHubFileContentResponse(
 ): data is GitHubContentResponse & {
   content: string;
   encoding: "base64";
+  size: number;
   type: "file";
 } {
   return (
     data?.type === "file" &&
     data.encoding === "base64" &&
-    typeof data.content === "string"
+    typeof data.content === "string" &&
+    typeof data.size === "number"
   );
 }
