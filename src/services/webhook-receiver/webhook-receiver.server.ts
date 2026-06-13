@@ -97,7 +97,7 @@ export async function receiveGitHubWebhook(request: Request) {
     await updateWebhookDeliveryStatus({
       deliveryId,
       errorMessage: "GitHub repository 정보를 찾을 수 없습니다.",
-      status: "FETCH_FAILED",
+      status: "FAILED",
     });
 
     return Response.json(
@@ -143,7 +143,7 @@ export async function receiveGitHubWebhook(request: Request) {
   if (readmeChanges.length === 0) {
     await updateWebhookDeliveryStatus({
       deliveryId,
-      status: "NO_README",
+      status: "PROCESSED",
     });
 
     return Response.json({
@@ -163,7 +163,7 @@ export async function receiveGitHubWebhook(request: Request) {
     await updateWebhookDeliveryStatus({
       deliveryId,
       errorMessage: "Repository에 연결된 GitHub access token을 찾을 수 없습니다.",
-      status: "FETCH_FAILED",
+      status: "FAILED",
     });
 
     return Response.json(
@@ -193,7 +193,7 @@ export async function receiveGitHubWebhook(request: Request) {
       deliveryId,
       errorMessage:
         error instanceof Error ? error.message : "GitHub README 조회 실패",
-      status: "FETCH_FAILED",
+      status: "FAILED",
     });
 
     return Response.json(
@@ -217,7 +217,7 @@ export async function receiveGitHubWebhook(request: Request) {
     await updateWebhookDeliveryStatus({
       deliveryId,
       errorMessage: "파싱 가능한 README를 찾을 수 없습니다.",
-      status: "PARSE_FAILED",
+      status: "FAILED",
     });
 
     return Response.json(

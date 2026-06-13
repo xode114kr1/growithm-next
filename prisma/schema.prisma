@@ -18,16 +18,12 @@ enum ProblemPlatform {
 }
 
 enum WebhookDeliveryStatus {
-  RECEIVED      @map("received")
-  QUEUED        @map("queued")
-  PROCESSING    @map("processing")
-  RETRY_PENDING @map("retry_pending")
-  IGNORED       @map("ignored")
-  PROCESSED     @map("processed")
-  NO_README     @map("no_readme")
-  PARSE_FAILED  @map("parse_failed")
-  FETCH_FAILED  @map("fetch_failed")
-  FAILED        @map("failed")
+  RECEIVED   @map("received")
+  QUEUED     @map("queued")
+  PROCESSING @map("processing")
+  IGNORED    @map("ignored")
+  PROCESSED  @map("processed")
+  FAILED     @map("failed")
 }
 
 enum ProblemSubmissionStatus {

@@ -245,22 +245,14 @@ export async function saveWebhookDelivery({
 }
 
 type WebhookDeliveryStatus =
-  | "FETCH_FAILED"
   | "FAILED"
   | "IGNORED"
-  | "NO_README"
-  | "PARSE_FAILED"
   | "PROCESSING"
   | "PROCESSED"
   | "QUEUED"
-  | "RECEIVED"
-  | "RETRY_PENDING";
+  | "RECEIVED";
 
 // 웹훅 처리 상태가 재시도 가능한 상태인지 확인한다.
 function isRetryableDeliveryStatus(status: string) {
-  return (
-    status === "FAILED" ||
-    status === "FETCH_FAILED" ||
-    status === "PARSE_FAILED"
-  );
+  return status === "FAILED";
 }
