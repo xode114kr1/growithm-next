@@ -17,43 +17,62 @@ import { isRetryableGitHubFileError } from "@/services/github/github-file.error"
 import { fetchGitHubReadmeContent } from "@/services/readme/readme.server";
 import type { GitHubReadmeChange, GitHubWebhookPayload } from "@/types/github";
 
+type WebhookDeliveryProcessingResult = {
+  deliveryId?: string;
+  message: string;
+  problemFileChange?: GitHubReadmeChange;
+  repository?: string;
+  status:
+    | "ALREADY_PROCESSED"
+    | "CLAIM_SKIPPED"
+    | "INVALID_EVENT"
+    | "INVALID_REPOSITORY"
+    | "NOT_FOUND"
+    | "NO_PROBLEM_CHANGE"
+    | "PARSE_FAILED"
+    | "PROCESSED"
+    | "README_FETCH_FAILED"
+    | "REPOSITORY_OWNER_NOT_FOUND";
+};
+
 // 저장된 GitHub push delivery를 문제 제출 데이터로 처리한다.
-export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
+export async function processGitHubWebhookDelivery(
+  webhookDeliveryId: string,
+): Promise<WebhookDeliveryProcessingResult> {
   const delivery = await getWebhookDeliveryForProcessing(webhookDeliveryId);
 
   if (!delivery) {
-    return Response.json(
-      { message: "처리할 GitHub 웹훅 delivery를 찾을 수 없습니다." },
-      { status: 404 },
-    );
+    return {
+      message: "처리할 GitHub 웹훅 delivery를 찾을 수 없습니다.",
+      status: "NOT_FOUND",
+    };
   }
 
   if (delivery.status === "PROCESSED") {
-    return Response.json({
+    return {
       deliveryId: delivery.deliveryId,
       message: "이미 처리한 GitHub 웹훅 delivery입니다.",
-    });
+      status: "ALREADY_PROCESSED",
+    };
   }
 
   if (delivery.event !== "push") {
-    return Response.json(
-      {
-        deliveryId: delivery.deliveryId,
-        message: "처리 대상이 아닌 GitHub 웹훅 이벤트입니다.",
-      },
-      { status: 400 },
-    );
+    return {
+      deliveryId: delivery.deliveryId,
+      message: "처리 대상이 아닌 GitHub 웹훅 이벤트입니다.",
+      status: "INVALID_EVENT",
+    };
   }
 
   const deliveryId = delivery.deliveryId;
   const claimed = await claimWebhookDeliveryForProcessing(webhookDeliveryId);
 
   if (!claimed) {
-    return Response.json({
+    return {
       deliveryId,
       message: "다른 Consumer가 이미 처리 중이거나 처리를 완료한 delivery입니다.",
-      status: delivery.status,
-    });
+      status: "CLAIM_SKIPPED",
+    };
   }
 
   const webhookPayload = delivery.payload as GitHubWebhookPayload;
@@ -67,13 +86,11 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
       status: "FAILED",
     });
 
-    return Response.json(
-      {
-        deliveryId,
-        message: "GitHub repository 정보를 찾을 수 없습니다.",
-      },
-      { status: 400 },
-    );
+    return {
+      deliveryId,
+      message: "GitHub repository 정보를 찾을 수 없습니다.",
+      status: "INVALID_REPOSITORY",
+    };
   }
 
   const problemFileChange = getProblemFileChangeFromPushPayload(webhookPayload);
@@ -84,11 +101,12 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
       status: "PROCESSED",
     });
 
-    return Response.json({
+    return {
       deliveryId,
       message: "README 변경이 없는 GitHub push 웹훅입니다.",
       repository: repositoryFullName,
-    });
+      status: "NO_PROBLEM_CHANGE",
+    };
   }
 
   const repositoryOwner = await getRepositoryOwner(
@@ -104,13 +122,11 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
       status: "FAILED",
     });
 
-    return Response.json(
-      {
-        deliveryId,
-        message: "Repository에 연결된 GitHub access token을 찾을 수 없습니다.",
-      },
-      { status: 404 },
-    );
+    return {
+      deliveryId,
+      message: "Repository에 연결된 GitHub access token을 찾을 수 없습니다.",
+      status: "REPOSITORY_OWNER_NOT_FOUND",
+    };
   }
 
   return processChangedProblemFile({
@@ -160,13 +176,11 @@ async function processChangedProblemFile({
       status: "FAILED",
     });
 
-    return Response.json(
-      {
-        deliveryId,
-        message: "README를 조회할 수 없습니다.",
-      },
-      { status: 422 },
-    );
+    return {
+      deliveryId,
+      message: "README를 조회할 수 없습니다.",
+      status: "README_FETCH_FAILED" as const,
+    };
   }
 
   const result = await saveProblemSubmission({
@@ -186,13 +200,11 @@ async function processChangedProblemFile({
       status: "FAILED",
     });
 
-    return Response.json(
-      {
-        deliveryId,
-        message: errorMessage,
-      },
-      { status: 422 },
-    );
+    return {
+      deliveryId,
+      message: errorMessage,
+      status: "PARSE_FAILED" as const,
+    };
   }
 
   await updateWebhookDeliveryStatus({
@@ -200,12 +212,13 @@ async function processChangedProblemFile({
     status: "PROCESSED",
   });
 
-  return Response.json({
+  return {
     deliveryId,
     message: "GitHub push 웹훅 처리가 완료되었습니다.",
     problemFileChange,
     repository: repositoryFullName,
-  });
+    status: "PROCESSED" as const,
+  };
 }
 
 // 변경된 풀이 코드 파일을 조회한다.

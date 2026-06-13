@@ -15,13 +15,13 @@ export const POST = queue.handleCallback(async (message: unknown) => {
   });
 
   try {
-    const response = await processGitHubWebhookDelivery(
+    const result = await processGitHubWebhookDelivery(
       message.webhookDeliveryId,
     );
 
     console.info("[WebhookQueue] consumer.completed", {
       durationMs: Date.now() - startedAt,
-      httpStatus: response.status,
+      processingStatus: result.status,
       webhookDeliveryId: message.webhookDeliveryId,
     });
   } catch (error) {
