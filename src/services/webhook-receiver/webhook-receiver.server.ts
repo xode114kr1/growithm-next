@@ -94,7 +94,15 @@ export async function receiveGitHubWebhook(request: Request) {
     });
   }
 
-  return processGitHubWebhookDelivery(delivery.id);
+  return Response.json(
+    {
+      deliveryId,
+      message: "GitHub push 웹훅을 수신했습니다.",
+      status: delivery.status,
+      webhookDeliveryId: delivery.id,
+    },
+    { status: 202 },
+  );
 }
 
 // 저장된 GitHub push delivery를 문제 제출 데이터로 처리한다.
