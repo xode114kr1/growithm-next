@@ -1,5 +1,5 @@
 import { queue } from "@/lib/queue";
-import { processGitHubWebhookDelivery } from "@/services/webhook-receiver/webhook-receiver.server";
+import { processGitHubWebhookDelivery } from "@/services/webhook-delivery-processing/webhook-delivery-processing.server";
 import { updateWebhookDeliveryStatusById } from "@/services/webhook-receiver/webhook-receiver.persistence.server";
 import { isWebhookDeliveryQueueMessage } from "@/services/webhook-receiver/webhook-receiver.validator";
 
