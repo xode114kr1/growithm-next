@@ -1,25 +1,19 @@
 import "server-only";
 
-import {
-  queue,
-  WEBHOOK_DELIVERY_QUEUE_TOPIC,
-} from "@/lib/queue";
+import { queue, WEBHOOK_DELIVERY_QUEUE_TOPIC } from "@/lib/queue";
 import { fetchGitHubReadmeContent } from "@/services/readme/readme.server";
 import { isRetryableGitHubFileError } from "@/services/github/github-file.error";
 import { fetchGitHubRawCode } from "@/services/webhook-receiver/webhook-receiver.client";
 import {
   getWebhookDeliveryForProcessing,
   getRepositoryOwner,
-  saveProblemSubmissions,
+  saveProblemSubmission,
   saveWebhookDelivery,
   updateWebhookDeliveryStatus,
 } from "@/services/webhook-receiver/webhook-receiver.persistence.server";
-import type {
-  GitHubReadmeContent,
-  GitHubWebhookPayload,
-} from "@/types/github";
+import type { GitHubReadmeChange, GitHubWebhookPayload } from "@/types/github";
 import {
-  getReadmeAndCodePathsFromPushPayload,
+  getProblemFileChangeFromPushPayload,
   getRepositoryFullName,
   buildRawGitHubContentUrl,
 } from "@/services/webhook-receiver/webhook-receiver.helper";
@@ -28,8 +22,6 @@ import {
   parseGitHubWebhookPayload,
 } from "@/services/webhook-receiver/webhook-receiver.validator";
 import type { WebhookDeliveryQueueMessage } from "@/types/queue";
-
-const GITHUB_FILE_FETCH_CONCURRENCY = 5;
 
 // GitHub 웹훅 요청을 검증하고 delivery를 저장한다.
 export async function receiveGitHubWebhook(request: Request) {
@@ -225,46 +217,9 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
     );
   }
 
-  const readmeChanges = getReadmeAndCodePathsFromPushPayload(webhookPayload);
+  const problemFileChange = getProblemFileChangeFromPushPayload(webhookPayload);
 
-  const codeContents = await mapWithConcurrencyLimit(
-    readmeChanges,
-    GITHUB_FILE_FETCH_CONCURRENCY,
-    async (change) => {
-      if (!change.codePath) {
-        return {
-          code: null,
-          codePath: null,
-          codeUrl: null,
-          readmePath: change.path,
-          status: null,
-        };
-      }
-
-      const codeUrl = buildRawGitHubContentUrl({
-        commitSha: change.commitSha,
-        path: change.codePath,
-        repositoryFullName,
-      });
-
-      try {
-        const result = await fetchGitHubRawCode(codeUrl);
-
-        return {
-          code: result.code,
-          readmePath: change.path,
-        };
-      } catch (error) {
-        return {
-          code: null,
-          error: isRetryableGitHubFileError(error) ? error : null,
-          readmePath: change.path,
-        };
-      }
-    },
-  );
-
-  if (readmeChanges.length === 0) {
+  if (!problemFileChange) {
     await updateWebhookDeliveryStatus({
       deliveryId,
       status: "PROCESSED",
@@ -273,7 +228,6 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
     return Response.json({
       deliveryId,
       message: "README 변경이 없는 GitHub push 웹훅입니다.",
-      readmeChanges,
       repository: repositoryFullName,
     });
   }
@@ -286,7 +240,8 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
   if (!repositoryOwner) {
     await updateWebhookDeliveryStatus({
       deliveryId,
-      errorMessage: "Repository에 연결된 GitHub access token을 찾을 수 없습니다.",
+      errorMessage:
+        "Repository에 연결된 GitHub access token을 찾을 수 없습니다.",
       status: "FAILED",
     });
 
@@ -299,61 +254,86 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
     );
   }
 
-  const readmeResults = await mapWithConcurrencyLimit(
-    readmeChanges,
-    GITHUB_FILE_FETCH_CONCURRENCY,
-    async (change) => {
-      try {
-        return await fetchGitHubReadmeContent({
-          accessToken: repositoryOwner.accessToken,
-          commitSha: change.commitSha,
-          path: change.path,
-          repositoryFullName,
-        });
-      } catch (error) {
-        return {
-          error: isRetryableGitHubFileError(error) ? error : null,
-          readme: null,
-        };
-      }
-    },
-  );
-  const readmes = readmeResults
-    .map((result) => ("readme" in result ? result.readme : result))
-    .filter((readme): readme is GitHubReadmeContent => readme !== null);
-  const readmeFetchFailedCount = readmeResults.length - readmes.length;
-
-  const result = await saveProblemSubmissions({
-    codeContents,
-    webhookDeliveryId,
-    readmes,
+  return processChangedProblemFile({
+    accessToken: repositoryOwner.accessToken,
+    deliveryId,
+    problemFileChange,
     repositoryFullName,
     userId: repositoryOwner.userId,
+    webhookDeliveryId,
   });
-  const retryableError =
-    codeContents.find((content) => "error" in content && content.error)?.error ??
-    readmeResults.flatMap((readme) =>
-      "error" in readme && readme.error ? [readme.error] : [],
-    )[0];
+}
+
+// 변경된 문제 파일을 조회하고 문제 제출 저장 결과에 따라 delivery를 완료한다.
+async function processChangedProblemFile({
+  accessToken,
+  deliveryId,
+  problemFileChange,
+  repositoryFullName,
+  userId,
+  webhookDeliveryId,
+}: {
+  accessToken: string;
+  deliveryId: string;
+  problemFileChange: GitHubReadmeChange;
+  repositoryFullName: string;
+  userId: string;
+  webhookDeliveryId: string;
+}) {
+  const [codeResult, readmeResult] = await Promise.all([
+    fetchChangedCodeContent(problemFileChange, repositoryFullName),
+    fetchChangedReadme({
+      accessToken,
+      problemFileChange,
+      repositoryFullName,
+    }),
+  ]);
+  const retryableError = codeResult.retryableError ?? readmeResult.retryableError;
 
   if (retryableError) {
     throw retryableError;
   }
 
-  if (result.savedCount === 0) {
+  if (!readmeResult.readme) {
     await updateWebhookDeliveryStatus({
       deliveryId,
-      errorMessage: "파싱 가능한 README를 찾을 수 없습니다.",
+      errorMessage: "README를 조회할 수 없습니다.",
       status: "FAILED",
     });
 
     return Response.json(
       {
         deliveryId,
-        message: "파싱 가능한 README를 찾을 수 없습니다.",
-        parseFailedCount: result.parseFailedCount,
-        readmeFetchFailedCount,
-        saveFailedCount: result.saveFailedCount,
+        message: "README를 조회할 수 없습니다.",
+      },
+      { status: 422 },
+    );
+  }
+
+  const result = await saveProblemSubmission({
+    code: codeResult.code,
+    readme: readmeResult.readme,
+    repositoryFullName,
+    userId,
+    webhookDeliveryId,
+  });
+
+  if (!result.saved) {
+    const errorMessage =
+      result.failureReason === "PARSE_FAILED"
+        ? "README에서 문제 정보를 파싱할 수 없습니다."
+        : "문제 제출을 저장할 수 없습니다.";
+
+    await updateWebhookDeliveryStatus({
+      deliveryId,
+      errorMessage,
+      status: "FAILED",
+    });
+
+    return Response.json(
+      {
+        deliveryId,
+        message: errorMessage,
       },
       { status: 422 },
     );
@@ -367,39 +347,61 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
   return Response.json({
     deliveryId,
     message: "GitHub push 웹훅 처리가 완료되었습니다.",
-    parseFailedCount: result.parseFailedCount,
-    readmeFetchFailedCount,
-    readmeChanges,
+    problemFileChange,
     repository: repositoryFullName,
-    saveFailedCount: result.saveFailedCount,
-    savedCount: result.savedCount,
   });
 }
 
-// 외부 파일 조회의 동시 실행 개수를 제한하면서 입력 순서대로 결과를 반환한다.
-async function mapWithConcurrencyLimit<T, R>(
-  items: T[],
-  concurrency: number,
-  callback: (item: T) => Promise<R>,
+// 변경된 풀이 코드 파일을 조회한다.
+async function fetchChangedCodeContent(
+  problemFileChange: GitHubReadmeChange,
+  repositoryFullName: string,
 ) {
-  const results = new Array<R>(items.length);
-  let nextIndex = 0;
-
-  async function worker() {
-    while (nextIndex < items.length) {
-      const currentIndex = nextIndex;
-      nextIndex += 1;
-      results[currentIndex] = await callback(items[currentIndex]);
-    }
+  if (!problemFileChange.codePath) {
+    return { code: null, retryableError: null };
   }
 
-  const workers = Array.from(
-    { length: Math.min(concurrency, items.length) },
-    () => worker(),
-  );
+  const codeUrl = buildRawGitHubContentUrl({
+    commitSha: problemFileChange.commitSha,
+    path: problemFileChange.codePath,
+    repositoryFullName,
+  });
 
-  await Promise.all(workers);
+  try {
+    const result = await fetchGitHubRawCode(codeUrl);
 
-  return results;
+    return { code: result.code, retryableError: null };
+  } catch (error) {
+    return {
+      code: null,
+      retryableError: isRetryableGitHubFileError(error) ? error : null,
+    };
+  }
 }
 
+// 변경된 README 파일을 조회한다.
+async function fetchChangedReadme({
+  accessToken,
+  problemFileChange,
+  repositoryFullName,
+}: {
+  accessToken: string;
+  problemFileChange: GitHubReadmeChange;
+  repositoryFullName: string;
+}) {
+  try {
+    const readme = await fetchGitHubReadmeContent({
+      accessToken,
+      commitSha: problemFileChange.commitSha,
+      path: problemFileChange.path,
+      repositoryFullName,
+    });
+
+    return { readme, retryableError: null };
+  } catch (error) {
+    return {
+      readme: null,
+      retryableError: isRetryableGitHubFileError(error) ? error : null,
+    };
+  }
+}
