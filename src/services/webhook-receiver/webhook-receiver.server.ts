@@ -5,8 +5,10 @@ import { fetchGitHubReadmeContent } from "@/services/readme/readme.server";
 import { isRetryableGitHubFileError } from "@/services/github/github-file.error";
 import { fetchGitHubRawCode } from "@/services/webhook-receiver/webhook-receiver.client";
 import {
+  claimWebhookDeliveryForProcessing,
   getWebhookDeliveryForProcessing,
   getRepositoryOwner,
+  markWebhookDeliveryQueued,
   saveProblemSubmission,
   saveWebhookDelivery,
   updateWebhookDeliveryStatus,
@@ -130,10 +132,7 @@ export async function receiveGitHubWebhook(request: Request) {
     );
   }
 
-  await updateWebhookDeliveryStatus({
-    deliveryId,
-    status: "QUEUED",
-  });
+  await markWebhookDeliveryQueued(deliveryId);
 
   console.info("[WebhookQueue] publish.succeeded", {
     deliveryId,
@@ -192,10 +191,15 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
   }
 
   const deliveryId = delivery.deliveryId;
-  await updateWebhookDeliveryStatus({
-    deliveryId,
-    status: "PROCESSING",
-  });
+  const claimed = await claimWebhookDeliveryForProcessing(webhookDeliveryId);
+
+  if (!claimed) {
+    return Response.json({
+      deliveryId,
+      message: "다른 Consumer가 이미 처리 중이거나 처리를 완료한 delivery입니다.",
+      status: delivery.status,
+    });
+  }
 
   const webhookPayload = delivery.payload as GitHubWebhookPayload;
   const repositoryFullName =

@@ -23,6 +23,36 @@ export async function getWebhookDeliveryForProcessing(webhookDeliveryId: string)
   });
 }
 
+// 처리 대기 상태인 delivery 하나를 원자적으로 PROCESSING 상태로 전환한다.
+export async function claimWebhookDeliveryForProcessing(
+  webhookDeliveryId: string,
+) {
+  const result = await prisma.webhookDelivery.updateMany({
+    data: {
+      errorMessage: null,
+      processedAt: null,
+      status: "PROCESSING",
+    },
+    where: {
+      id: webhookDeliveryId,
+      status: { in: ["RECEIVED", "QUEUED", "RETRY_PENDING"] },
+    },
+  });
+
+  return result.count === 1;
+}
+
+// Queue 발행 후 아직 대기 중인 delivery만 QUEUED 상태로 전환한다.
+export async function markWebhookDeliveryQueued(deliveryId: string) {
+  await prisma.webhookDelivery.updateMany({
+    data: { status: "QUEUED" },
+    where: {
+      deliveryId,
+      status: "RECEIVED",
+    },
+  });
+}
+
 // 저장된 웹훅 정보와 payload를 사용해 저장소 소유 사용자를 찾는다.
 export async function getRepositoryOwner(
   repositoryFullName: string,
