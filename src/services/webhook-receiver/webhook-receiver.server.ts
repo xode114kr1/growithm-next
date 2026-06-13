@@ -28,6 +28,8 @@ import {
 } from "@/services/webhook-receiver/webhook-receiver.validator";
 import type { WebhookDeliveryQueueMessage } from "@/types/queue";
 
+const GITHUB_FILE_FETCH_CONCURRENCY = 5;
+
 // GitHub 웹훅 요청을 검증하고 delivery를 저장한다.
 export async function receiveGitHubWebhook(request: Request) {
   const webhookSecret = process.env.GITHUB_WEBHOOK_SECRET;
@@ -202,8 +204,10 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
 
   const readmeChanges = getReadmeAndCodePathsFromPushPayload(webhookPayload);
 
-  const codeContents = await Promise.all(
-    readmeChanges.map(async (change) => {
+  const codeContents = await mapWithConcurrencyLimit(
+    readmeChanges,
+    GITHUB_FILE_FETCH_CONCURRENCY,
+    async (change) => {
       if (!change.codePath) {
         return {
           code: null,
@@ -228,7 +232,7 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
         readmePath: change.path,
         status: result.status,
       };
-    }),
+    },
   );
 
   if (readmeChanges.length === 0) {
@@ -269,15 +273,16 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
   let readmes: GitHubReadmeContent[];
 
   try {
-    readmes = await Promise.all(
-      readmeChanges.map((change) =>
+    readmes = await mapWithConcurrencyLimit(
+      readmeChanges,
+      GITHUB_FILE_FETCH_CONCURRENCY,
+      (change) =>
         fetchGitHubReadmeContent({
           accessToken: repositoryOwner.accessToken,
           commitSha: change.commitSha,
           path: change.path,
           repositoryFullName,
         }),
-      ),
     );
   } catch (error) {
     await updateWebhookDeliveryStatus({
@@ -334,5 +339,32 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
     repository: repositoryFullName,
     savedCount: result.savedCount,
   });
+}
+
+// 외부 파일 조회의 동시 실행 개수를 제한하면서 입력 순서대로 결과를 반환한다.
+async function mapWithConcurrencyLimit<T, R>(
+  items: T[],
+  concurrency: number,
+  callback: (item: T) => Promise<R>,
+) {
+  const results = new Array<R>(items.length);
+  let nextIndex = 0;
+
+  async function worker() {
+    while (nextIndex < items.length) {
+      const currentIndex = nextIndex;
+      nextIndex += 1;
+      results[currentIndex] = await callback(items[currentIndex]);
+    }
+  }
+
+  const workers = Array.from(
+    { length: Math.min(concurrency, items.length) },
+    () => worker(),
+  );
+
+  await Promise.all(workers);
+
+  return results;
 }
 
