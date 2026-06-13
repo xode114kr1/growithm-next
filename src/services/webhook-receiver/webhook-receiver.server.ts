@@ -106,15 +106,13 @@ export async function receiveGitHubWebhook(request: Request) {
 
   try {
     queueMessageId = await enqueueWebhookDelivery(delivery.id);
-    await updateWebhookDeliveryStatus({
-      deliveryId,
-      status: "QUEUED",
-    });
   } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Vercel Queue 발행 실패";
+
     await updateWebhookDeliveryStatus({
       deliveryId,
-      errorMessage:
-        error instanceof Error ? error.message : "Vercel Queue 발행 실패",
+      errorMessage,
       status: "FAILED",
     });
 
@@ -122,10 +120,17 @@ export async function receiveGitHubWebhook(request: Request) {
       {
         deliveryId,
         message: "GitHub 웹훅 처리 작업 등록에 실패했습니다.",
+        status: "FAILED",
+        webhookDeliveryId: delivery.id,
       },
-      { status: 502 },
+      { status: 503 },
     );
   }
+
+  await updateWebhookDeliveryStatus({
+    deliveryId,
+    status: "QUEUED",
+  });
 
   return Response.json(
     {
