@@ -1,6 +1,6 @@
 import { queue } from "@/lib/queue";
+import { updateWebhookDeliveryStatusById } from "@/services/webhook-delivery-processing/webhook-delivery-processing.persistence.server";
 import { processGitHubWebhookDelivery } from "@/services/webhook-delivery-processing/webhook-delivery-processing.server";
-import { updateWebhookDeliveryStatusById } from "@/services/webhook-receiver/webhook-receiver.persistence.server";
 import { isWebhookDeliveryQueueMessage } from "@/services/webhook-receiver/webhook-receiver.validator";
 
 export const POST = queue.handleCallback(async (message: unknown) => {

@@ -1,5 +1,12 @@
 import "server-only";
 
+import {
+  claimWebhookDeliveryForProcessing,
+  getRepositoryOwner,
+  getWebhookDeliveryForProcessing,
+  saveProblemSubmission,
+  updateWebhookDeliveryStatus,
+} from "@/services/webhook-delivery-processing/webhook-delivery-processing.persistence.server";
 import { isRetryableGitHubFileError } from "@/services/github/github-file.error";
 import { fetchGitHubReadmeContent } from "@/services/readme/readme.server";
 import { fetchGitHubRawCode } from "@/services/webhook-receiver/webhook-receiver.client";
@@ -8,13 +15,6 @@ import {
   getProblemFileChangeFromPushPayload,
   getRepositoryFullName,
 } from "@/services/webhook-receiver/webhook-receiver.helper";
-import {
-  claimWebhookDeliveryForProcessing,
-  getRepositoryOwner,
-  getWebhookDeliveryForProcessing,
-  saveProblemSubmission,
-  updateWebhookDeliveryStatus,
-} from "@/services/webhook-receiver/webhook-receiver.persistence.server";
 import type { GitHubReadmeChange, GitHubWebhookPayload } from "@/types/github";
 
 // 저장된 GitHub push delivery를 문제 제출 데이터로 처리한다.

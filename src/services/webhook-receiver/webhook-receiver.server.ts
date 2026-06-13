@@ -2,9 +2,9 @@ import "server-only";
 
 import { queue, WEBHOOK_DELIVERY_QUEUE_TOPIC } from "@/lib/queue";
 import {
+  markWebhookDeliveryFailed,
   markWebhookDeliveryQueued,
   saveWebhookDelivery,
-  updateWebhookDeliveryStatus,
 } from "@/services/webhook-receiver/webhook-receiver.persistence.server";
 import type { GitHubWebhookPayload } from "@/types/github";
 import { getRepositoryFullName } from "@/services/webhook-receiver/webhook-receiver.helper";
@@ -104,10 +104,9 @@ export async function receiveGitHubWebhook(request: Request) {
       webhookDeliveryId: delivery.id,
     });
 
-    await updateWebhookDeliveryStatus({
+    await markWebhookDeliveryFailed({
       deliveryId,
       errorMessage,
-      status: "FAILED",
     });
 
     return Response.json(
