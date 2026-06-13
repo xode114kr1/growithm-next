@@ -319,10 +319,7 @@ async function processChangedProblemFile({
   });
 
   if (!result.saved) {
-    const errorMessage =
-      result.failureReason === "PARSE_FAILED"
-        ? "README에서 문제 정보를 파싱할 수 없습니다."
-        : "문제 제출을 저장할 수 없습니다.";
+    const errorMessage = "README에서 문제 정보를 파싱할 수 없습니다.";
 
     await updateWebhookDeliveryStatus({
       deliveryId,

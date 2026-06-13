@@ -100,102 +100,98 @@ export async function saveProblemSubmission({
     tier: parsedReadme.tier,
   });
 
-  try {
-    await prisma.$transaction(async (tx) => {
-      const submissionKey = `${repositoryFullName}:${readme.commitSha}:${readme.path}`;
-      // 동일 제출의 upsert와 점수 계산을 직렬화해 동시 Consumer의 이중 반영을 막는다.
-      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${submissionKey}, 0))`;
+  await prisma.$transaction(async (tx) => {
+    const submissionKey = `${repositoryFullName}:${readme.commitSha}:${readme.path}`;
+    // 동일 제출의 upsert와 점수 계산을 직렬화해 동시 Consumer의 이중 반영을 막는다.
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${submissionKey}, 0))`;
 
-      const existingSubmission = await tx.problemSubmission.findUnique({
-        select: { score: true, userId: true },
-        where: {
-          repositoryFullName_commitSha_readmePath: {
-            commitSha: readme.commitSha,
-            readmePath: readme.path,
-            repositoryFullName,
-          },
-        },
-      });
-
-      await tx.problemSubmission.upsert({
-        create: {
-          accuracy: parsedReadme.accuracy,
-          code,
-          categories: parsedReadme.categories,
+    const existingSubmission = await tx.problemSubmission.findUnique({
+      select: { score: true, userId: true },
+      where: {
+        repositoryFullName_commitSha_readmePath: {
           commitSha: readme.commitSha,
-          description: parsedReadme.description,
-          link: parsedReadme.link,
-          memory: parsedReadme.memory,
-          platform: parsedReadme.platform,
-          problemId: parsedReadme.problemId,
           readmePath: readme.path,
           repositoryFullName,
-          score: experienceScore,
-          scoreMax: parsedReadme.scoreMax,
-          status: ProblemSubmissionStatus.PENDING,
-          submittedAtText: parsedReadme.submittedAtText,
-          tier: parsedReadme.tier,
-          time: parsedReadme.time,
-          title: parsedReadme.title,
-          userId,
-          webhookDeliveryId,
         },
-        update: {
-          accuracy: parsedReadme.accuracy,
-          code,
-          categories: parsedReadme.categories,
-          description: parsedReadme.description,
-          link: parsedReadme.link,
-          memory: parsedReadme.memory,
-          platform: parsedReadme.platform,
-          problemId: parsedReadme.problemId,
-          score: experienceScore,
-          scoreMax: parsedReadme.scoreMax,
-          status: ProblemSubmissionStatus.PENDING,
-          submittedAtText: parsedReadme.submittedAtText,
-          tier: parsedReadme.tier,
-          time: parsedReadme.time,
-          title: parsedReadme.title,
-          userId,
-          webhookDeliveryId,
-        },
-        where: {
-          repositoryFullName_commitSha_readmePath: {
-            commitSha: readme.commitSha,
-            readmePath: readme.path,
-            repositoryFullName,
-          },
-        },
-      });
-
-      const existingScore = existingSubmission?.score ?? 0;
-      const scoreDelta =
-        experienceScore -
-        (existingSubmission?.userId === userId ? existingScore : 0);
-
-      if (scoreDelta !== 0) {
-        await tx.user.update({
-          data: { score: { increment: scoreDelta } },
-          where: { id: userId },
-        });
-      }
-
-      if (
-        existingSubmission?.userId &&
-        existingSubmission.userId !== userId &&
-        existingScore !== 0
-      ) {
-        await tx.user.update({
-          data: { score: { decrement: existingScore } },
-          where: { id: existingSubmission.userId },
-        });
-      }
+      },
     });
 
-    return { saved: true as const };
-  } catch {
-    return { failureReason: "SAVE_FAILED" as const, saved: false as const };
-  }
+    await tx.problemSubmission.upsert({
+      create: {
+        accuracy: parsedReadme.accuracy,
+        code,
+        categories: parsedReadme.categories,
+        commitSha: readme.commitSha,
+        description: parsedReadme.description,
+        link: parsedReadme.link,
+        memory: parsedReadme.memory,
+        platform: parsedReadme.platform,
+        problemId: parsedReadme.problemId,
+        readmePath: readme.path,
+        repositoryFullName,
+        score: experienceScore,
+        scoreMax: parsedReadme.scoreMax,
+        status: ProblemSubmissionStatus.PENDING,
+        submittedAtText: parsedReadme.submittedAtText,
+        tier: parsedReadme.tier,
+        time: parsedReadme.time,
+        title: parsedReadme.title,
+        userId,
+        webhookDeliveryId,
+      },
+      update: {
+        accuracy: parsedReadme.accuracy,
+        code,
+        categories: parsedReadme.categories,
+        description: parsedReadme.description,
+        link: parsedReadme.link,
+        memory: parsedReadme.memory,
+        platform: parsedReadme.platform,
+        problemId: parsedReadme.problemId,
+        score: experienceScore,
+        scoreMax: parsedReadme.scoreMax,
+        status: ProblemSubmissionStatus.PENDING,
+        submittedAtText: parsedReadme.submittedAtText,
+        tier: parsedReadme.tier,
+        time: parsedReadme.time,
+        title: parsedReadme.title,
+        userId,
+        webhookDeliveryId,
+      },
+      where: {
+        repositoryFullName_commitSha_readmePath: {
+          commitSha: readme.commitSha,
+          readmePath: readme.path,
+          repositoryFullName,
+        },
+      },
+    });
+
+    const existingScore = existingSubmission?.score ?? 0;
+    const scoreDelta =
+      experienceScore -
+      (existingSubmission?.userId === userId ? existingScore : 0);
+
+    if (scoreDelta !== 0) {
+      await tx.user.update({
+        data: { score: { increment: scoreDelta } },
+        where: { id: userId },
+      });
+    }
+
+    if (
+      existingSubmission?.userId &&
+      existingSubmission.userId !== userId &&
+      existingScore !== 0
+    ) {
+      await tx.user.update({
+        data: { score: { decrement: existingScore } },
+        where: { id: existingSubmission.userId },
+      });
+    }
+  });
+
+  return { saved: true as const };
 }
 
 // 저장된 웹훅 delivery의 처리 상태와 오류를 갱신한다.
