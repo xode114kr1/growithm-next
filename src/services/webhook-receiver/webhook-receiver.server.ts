@@ -223,15 +223,20 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
         path: change.codePath,
         repositoryFullName,
       });
-      const result = await fetchGitHubRawCode(codeUrl);
 
-      return {
-        code: result.code,
-        codePath: change.codePath,
-        codeUrl,
-        readmePath: change.path,
-        status: result.status,
-      };
+      try {
+        const result = await fetchGitHubRawCode(codeUrl);
+
+        return {
+          code: result.code,
+          readmePath: change.path,
+        };
+      } catch {
+        return {
+          code: null,
+          readmePath: change.path,
+        };
+      }
     },
   );
 
@@ -270,36 +275,26 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
     );
   }
 
-  let readmes: GitHubReadmeContent[];
-
-  try {
-    readmes = await mapWithConcurrencyLimit(
-      readmeChanges,
-      GITHUB_FILE_FETCH_CONCURRENCY,
-      (change) =>
-        fetchGitHubReadmeContent({
+  const readmeResults = await mapWithConcurrencyLimit(
+    readmeChanges,
+    GITHUB_FILE_FETCH_CONCURRENCY,
+    async (change) => {
+      try {
+        return await fetchGitHubReadmeContent({
           accessToken: repositoryOwner.accessToken,
           commitSha: change.commitSha,
           path: change.path,
           repositoryFullName,
-        }),
-    );
-  } catch (error) {
-    await updateWebhookDeliveryStatus({
-      deliveryId,
-      errorMessage:
-        error instanceof Error ? error.message : "GitHub README 조회 실패",
-      status: "FAILED",
-    });
-
-    return Response.json(
-      {
-        deliveryId,
-        message: "GitHub README 조회에 실패했습니다.",
-      },
-      { status: 502 },
-    );
-  }
+        });
+      } catch {
+        return null;
+      }
+    },
+  );
+  const readmes = readmeResults.filter(
+    (readme): readme is GitHubReadmeContent => readme !== null,
+  );
+  const readmeFetchFailedCount = readmeResults.length - readmes.length;
 
   const result = await saveProblemSubmissions({
     codeContents,
@@ -321,6 +316,8 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
         deliveryId,
         message: "파싱 가능한 README를 찾을 수 없습니다.",
         parseFailedCount: result.parseFailedCount,
+        readmeFetchFailedCount,
+        saveFailedCount: result.saveFailedCount,
       },
       { status: 422 },
     );
@@ -335,8 +332,10 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
     deliveryId,
     message: "GitHub push 웹훅 처리가 완료되었습니다.",
     parseFailedCount: result.parseFailedCount,
+    readmeFetchFailedCount,
     readmeChanges,
     repository: repositoryFullName,
+    saveFailedCount: result.saveFailedCount,
     savedCount: result.savedCount,
   });
 }
