@@ -42,35 +42,30 @@ export function getRepositoryOwnerId(payload: GitHubWebhookPayload) {
   return typeof ownerId === "string" && ownerId ? ownerId : null;
 }
 
-// GitHub push payload에서 처리할 README 변경 목록을 만든다.
-export function getReadmeChangesFromPushPayload(
+// GitHub push payload에서 처리할 문제의 README와 풀이 코드 경로를 추출한다.
+export function getProblemFileChangeFromPushPayload(
   payload: GitHubWebhookPayload,
-): GitHubReadmeChange[] {
+): GitHubReadmeChange | null {
   if (!Array.isArray(payload.commits)) {
-    return [];
+    return null;
   }
 
-  const changes = new Map<string, GitHubReadmeChange>();
+  const commitSha =
+    getAfterCommitSha(payload) ??
+    getCommitSha(payload.commits[payload.commits.length - 1]);
+  const readmePaths = payload.commits.flatMap(getReadmePathsFromCommit);
+  const codePaths = payload.commits.flatMap(getCodePathsFromCommit);
+  const readmePath = readmePaths.at(-1);
 
-  for (const commit of payload.commits) {
-    const readmePaths = getReadmePathsFromCommit(commit);
-    const codePaths = getCodePathsFromCommit(commit);
-    const commitSha = getCommitSha(commit);
-
-    if (!commitSha) {
-      continue;
-    }
-
-    for (const path of readmePaths) {
-      changes.set(`${commitSha}:${path}`, {
-        codePath: findCodePathForReadme(path, codePaths),
-        commitSha,
-        path,
-      });
-    }
+  if (!commitSha || !readmePath) {
+    return null;
   }
 
-  return [...changes.values()];
+  return {
+    codePath: findCodePathForReadme(readmePath, codePaths),
+    commitSha,
+    path: readmePath,
+  };
 }
 
 // GitHub 커밋에서 추가되거나 수정된 README 경로를 추출한다.

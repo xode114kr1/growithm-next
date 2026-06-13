@@ -18,13 +18,13 @@ enum ProblemPlatform {
 }
 
 enum WebhookDeliveryStatus {
-  RECEIVED     @map("received")
-  IGNORED      @map("ignored")
-  PROCESSED    @map("processed")
-  NO_README    @map("no_readme")
-  PARSE_FAILED @map("parse_failed")
-  FETCH_FAILED @map("fetch_failed")
-  FAILED       @map("failed")
+  RECEIVED      @map("received")
+  QUEUED        @map("queued")
+  PROCESSING    @map("processing")
+  RETRY_PENDING @map("retry_pending")
+  IGNORED       @map("ignored")
+  PROCESSED     @map("processed")
+  FAILED        @map("failed")
 }
 
 enum ProblemSubmissionStatus {
@@ -52,17 +52,6 @@ model Account {
   @@map("accounts")
 }
 
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique @map("session_token")
-  userId       String   @map("user_id")
-  expires      DateTime
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("sessions")
-}
-
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -72,7 +61,6 @@ model User {
   score         Float     @default(0)
 
   accounts                 Account[]
-  sessions                 Session[]
   githubRepositoryWebhooks GitHubRepositoryWebhook[]
   problemSubmissions       ProblemSubmission[]
   ownedStudies             Study[]                   @relation("StudyOwner")
@@ -157,13 +145,4 @@ model ProblemSubmission {
   @@index([status])
   @@index([platform, problemId])
   @@map("problem_submissions")
-}
-
-model VerificationToken {
-  identifier String
-  token      String
-  expires    DateTime
-
-  @@unique([identifier, token])
-  @@map("verification_tokens")
 }

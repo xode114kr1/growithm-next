@@ -2,6 +2,8 @@ import "server-only";
 
 import { encodeGitHubPath } from "@/services/readme/readme.helper";
 
+const GITHUB_REQUEST_TIMEOUT_MS = 10_000;
+
 // GitHub Contents API에서 특정 커밋의 파일을 조회한다.
 export async function fetchGitHubContent({
   accessToken,
@@ -22,6 +24,7 @@ export async function fetchGitHubContent({
         Authorization: `Bearer ${accessToken}`,
         "X-GitHub-Api-Version": "2022-11-28",
       },
+      signal: AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS),
     },
   );
 }
