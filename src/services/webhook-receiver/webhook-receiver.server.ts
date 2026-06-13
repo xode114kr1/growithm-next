@@ -175,6 +175,11 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
   }
 
   const deliveryId = delivery.deliveryId;
+  await updateWebhookDeliveryStatus({
+    deliveryId,
+    status: "PROCESSING",
+  });
+
   const webhookPayload = delivery.payload as GitHubWebhookPayload;
   const repositoryFullName =
     delivery.repositoryFullName ?? getRepositoryFullName(webhookPayload);
