@@ -250,8 +250,11 @@ type WebhookDeliveryStatus =
   | "IGNORED"
   | "NO_README"
   | "PARSE_FAILED"
+  | "PROCESSING"
   | "PROCESSED"
-  | "RECEIVED";
+  | "QUEUED"
+  | "RECEIVED"
+  | "RETRY_PENDING";
 
 // 웹훅 처리 상태가 재시도 가능한 상태인지 확인한다.
 function isRetryableDeliveryStatus(status: string) {
