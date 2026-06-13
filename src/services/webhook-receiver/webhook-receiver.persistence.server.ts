@@ -22,6 +22,7 @@ export async function getWebhookDeliveryForProcessing(webhookDeliveryId: string)
       id: true,
       payload: true,
       repositoryFullName: true,
+      status: true,
     },
     where: { id: webhookDeliveryId },
   });

@@ -157,6 +157,13 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
     );
   }
 
+  if (delivery.status === "PROCESSED") {
+    return Response.json({
+      deliveryId: delivery.deliveryId,
+      message: "이미 처리한 GitHub 웹훅 delivery입니다.",
+    });
+  }
+
   if (delivery.event !== "push") {
     return Response.json(
       {
