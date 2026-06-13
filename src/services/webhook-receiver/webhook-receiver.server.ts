@@ -1,5 +1,9 @@
 import "server-only";
 
+import {
+  queue,
+  WEBHOOK_DELIVERY_QUEUE_TOPIC,
+} from "@/lib/queue";
 import { fetchGitHubReadmeContent } from "@/services/readme/readme.server";
 import { fetchGitHubRawCode } from "@/services/webhook-receiver/webhook-receiver.client";
 import {
@@ -22,6 +26,7 @@ import {
   isValidGitHubWebhookSignature,
   parseGitHubWebhookPayload,
 } from "@/services/webhook-receiver/webhook-receiver.validator";
+import type { WebhookDeliveryQueueMessage } from "@/types/queue";
 
 // GitHub 웹훅 요청을 검증하고 delivery를 저장한다.
 export async function receiveGitHubWebhook(request: Request) {
@@ -94,15 +99,47 @@ export async function receiveGitHubWebhook(request: Request) {
     });
   }
 
+  let queueMessageId: string | null;
+
+  try {
+    queueMessageId = await enqueueWebhookDelivery(delivery.id);
+  } catch (error) {
+    await updateWebhookDeliveryStatus({
+      deliveryId,
+      errorMessage:
+        error instanceof Error ? error.message : "Vercel Queue 발행 실패",
+      status: "FAILED",
+    });
+
+    return Response.json(
+      {
+        deliveryId,
+        message: "GitHub 웹훅 처리 작업 등록에 실패했습니다.",
+      },
+      { status: 502 },
+    );
+  }
+
   return Response.json(
     {
       deliveryId,
       message: "GitHub push 웹훅을 수신했습니다.",
+      queueMessageId,
       status: delivery.status,
       webhookDeliveryId: delivery.id,
     },
     { status: 202 },
   );
+}
+
+// 저장된 웹훅 delivery의 문제 처리 작업을 Queue에 발행한다.
+export async function enqueueWebhookDelivery(webhookDeliveryId: string) {
+  const message: WebhookDeliveryQueueMessage = { webhookDeliveryId };
+  const result = await queue.send(WEBHOOK_DELIVERY_QUEUE_TOPIC, message, {
+    idempotencyKey: webhookDeliveryId,
+  });
+
+  return result.messageId;
 }
 
 // 저장된 GitHub push delivery를 문제 제출 데이터로 처리한다.
