@@ -235,6 +235,26 @@ export async function updateWebhookDeliveryStatus({
   });
 }
 
+// Queue 메시지의 내부 ID로 저장된 웹훅 delivery 상태를 갱신한다.
+export async function updateWebhookDeliveryStatusById({
+  errorMessage,
+  status,
+  webhookDeliveryId,
+}: {
+  errorMessage?: string;
+  status: WebhookDeliveryStatus;
+  webhookDeliveryId: string;
+}) {
+  await prisma.webhookDelivery.update({
+    data: {
+      errorMessage,
+      processedAt: isCompletedDeliveryStatus(status) ? new Date() : null,
+      status,
+    },
+    where: { id: webhookDeliveryId },
+  });
+}
+
 // 웹훅 delivery를 중복 없이 저장하고 처리 가능 상태를 반환한다.
 export async function saveWebhookDelivery({
   deliveryId,
@@ -292,7 +312,8 @@ type WebhookDeliveryStatus =
   | "PROCESSING"
   | "PROCESSED"
   | "QUEUED"
-  | "RECEIVED";
+  | "RECEIVED"
+  | "RETRY_PENDING";
 
 // 웹훅 처리 상태가 재시도 가능한 상태인지 확인한다.
 function isRetryableDeliveryStatus(status: string) {

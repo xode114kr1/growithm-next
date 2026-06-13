@@ -5,6 +5,7 @@ import {
   WEBHOOK_DELIVERY_QUEUE_TOPIC,
 } from "@/lib/queue";
 import { fetchGitHubReadmeContent } from "@/services/readme/readme.server";
+import { isRetryableGitHubFileError } from "@/services/github/github-file.error";
 import { fetchGitHubRawCode } from "@/services/webhook-receiver/webhook-receiver.client";
 import {
   getWebhookDeliveryForProcessing,
@@ -231,9 +232,10 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
           code: result.code,
           readmePath: change.path,
         };
-      } catch {
+      } catch (error) {
         return {
           code: null,
+          error: isRetryableGitHubFileError(error) ? error : null,
           readmePath: change.path,
         };
       }
@@ -286,14 +288,17 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
           path: change.path,
           repositoryFullName,
         });
-      } catch {
-        return null;
+      } catch (error) {
+        return {
+          error: isRetryableGitHubFileError(error) ? error : null,
+          readme: null,
+        };
       }
     },
   );
-  const readmes = readmeResults.filter(
-    (readme): readme is GitHubReadmeContent => readme !== null,
-  );
+  const readmes = readmeResults
+    .map((result) => ("readme" in result ? result.readme : result))
+    .filter((readme): readme is GitHubReadmeContent => readme !== null);
   const readmeFetchFailedCount = readmeResults.length - readmes.length;
 
   const result = await saveProblemSubmissions({
@@ -303,6 +308,15 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
     repositoryFullName,
     userId: repositoryOwner.userId,
   });
+  const retryableError =
+    codeContents.find((content) => "error" in content && content.error)?.error ??
+    readmeResults.flatMap((readme) =>
+      "error" in readme && readme.error ? [readme.error] : [],
+    )[0];
+
+  if (retryableError) {
+    throw retryableError;
+  }
 
   if (result.savedCount === 0) {
     await updateWebhookDeliveryStatus({

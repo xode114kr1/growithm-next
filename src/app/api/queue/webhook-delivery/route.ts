@@ -1,5 +1,6 @@
 import { queue } from "@/lib/queue";
 import { processGitHubWebhookDelivery } from "@/services/webhook-receiver/webhook-receiver.server";
+import { updateWebhookDeliveryStatusById } from "@/services/webhook-receiver/webhook-receiver.persistence.server";
 import { isWebhookDeliveryQueueMessage } from "@/services/webhook-receiver/webhook-receiver.validator";
 
 export const POST = queue.handleCallback(async (message: unknown) => {
@@ -7,17 +8,16 @@ export const POST = queue.handleCallback(async (message: unknown) => {
     throw new Error("웹훅 Delivery Queue 메시지 형식이 올바르지 않습니다.");
   }
 
-  const response = await processGitHubWebhookDelivery(message.webhookDeliveryId);
+  try {
+    await processGitHubWebhookDelivery(message.webhookDeliveryId);
+  } catch (error) {
+    await updateWebhookDeliveryStatusById({
+      errorMessage:
+        error instanceof Error ? error.message : "웹훅 Delivery 재시도 대기",
+      status: "RETRY_PENDING",
+      webhookDeliveryId: message.webhookDeliveryId,
+    });
 
-  if (!response.ok) {
-    const result = (await response.json().catch(() => null)) as {
-      message?: unknown;
-    } | null;
-    const errorMessage =
-      typeof result?.message === "string"
-        ? result.message
-        : "웹훅 Delivery 처리에 실패했습니다.";
-
-    throw new Error(errorMessage);
+    throw error;
   }
 });

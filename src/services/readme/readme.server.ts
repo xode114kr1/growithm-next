@@ -1,6 +1,10 @@
 import "server-only";
 
 import { fetchGitHubContent } from "@/services/readme/readme.client";
+import {
+  isRetryableGitHubStatus,
+  RetryableGitHubFileError,
+} from "@/services/github/github-file.error";
 import type { GitHubReadmeContent } from "@/types/github";
 import {
   getGitHubContentErrorMessage,
@@ -24,19 +28,33 @@ export async function fetchGitHubReadmeContent({
   path: string;
   repositoryFullName: string;
 }): Promise<GitHubReadmeContent> {
-  const response = await fetchGitHubContent({
-    accessToken,
-    commitSha,
-    path,
-    repositoryFullName,
-  });
+  let response: Response;
+
+  try {
+    response = await fetchGitHubContent({
+      accessToken,
+      commitSha,
+      path,
+      repositoryFullName,
+    });
+  } catch (error) {
+    throw new RetryableGitHubFileError("GitHub README 조회 요청에 실패했습니다.", {
+      cause: error,
+    });
+  }
 
   const data = (await response.json().catch(() => null)) as
     | GitHubContentResponse
     | null;
 
   if (!response.ok) {
-    throw new Error(getGitHubContentErrorMessage(response.status, data));
+    const message = getGitHubContentErrorMessage(response.status, data);
+
+    if (isRetryableGitHubStatus(response.status)) {
+      throw new RetryableGitHubFileError(message);
+    }
+
+    throw new Error(message);
   }
 
   if (!isGitHubFileContentResponse(data)) {
