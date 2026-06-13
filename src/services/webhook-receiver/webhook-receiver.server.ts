@@ -103,6 +103,10 @@ export async function receiveGitHubWebhook(request: Request) {
 
   try {
     queueMessageId = await enqueueWebhookDelivery(delivery.id);
+    await updateWebhookDeliveryStatus({
+      deliveryId,
+      status: "QUEUED",
+    });
   } catch (error) {
     await updateWebhookDeliveryStatus({
       deliveryId,
@@ -125,7 +129,7 @@ export async function receiveGitHubWebhook(request: Request) {
       deliveryId,
       message: "GitHub push 웹훅을 수신했습니다.",
       queueMessageId,
-      status: delivery.status,
+      status: "QUEUED",
       webhookDeliveryId: delivery.id,
     },
     { status: 202 },

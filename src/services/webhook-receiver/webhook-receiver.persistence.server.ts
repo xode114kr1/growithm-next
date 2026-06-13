@@ -202,7 +202,11 @@ export async function updateWebhookDeliveryStatus({
   status: WebhookDeliveryStatus;
 }) {
   await prisma.webhookDelivery.update({
-    data: { errorMessage, processedAt: new Date(), status },
+    data: {
+      errorMessage,
+      processedAt: isCompletedDeliveryStatus(status) ? new Date() : null,
+      status,
+    },
     where: { deliveryId },
   });
 }
@@ -269,4 +273,9 @@ type WebhookDeliveryStatus =
 // 웹훅 처리 상태가 재시도 가능한 상태인지 확인한다.
 function isRetryableDeliveryStatus(status: string) {
   return status === "FAILED";
+}
+
+// 웹훅 delivery 처리가 종료된 상태인지 확인한다.
+function isCompletedDeliveryStatus(status: WebhookDeliveryStatus) {
+  return status === "FAILED" || status === "IGNORED" || status === "PROCESSED";
 }
