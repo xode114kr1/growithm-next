@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "src/app/api/queue/webhook-delivery/route.ts": {
+      "experimentalTriggers": [
+        {
+          "type": "queue/v2beta",
+          "topic": "webhook-delivery-processing",
+          "retryAfterSeconds": 60
+        }
+      ]
+    }
+  }
+}
