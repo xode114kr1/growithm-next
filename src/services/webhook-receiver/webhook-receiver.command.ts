@@ -1,56 +1,73 @@
 import "server-only";
 
-import { queue, WEBHOOK_DELIVERY_QUEUE_TOPIC } from "@/lib/queue";
+import { getRepositoryFullName } from "@/services/github/github-webhook.helper";
+import { enqueueWebhookDelivery } from "@/services/webhook-receiver/webhook-receiver.client";
 import {
   markWebhookDeliveryFailed,
   markWebhookDeliveryQueued,
   saveWebhookDelivery,
 } from "@/services/webhook-receiver/webhook-receiver.persistence.server";
-import { getRepositoryFullName } from "@/services/github/github-webhook.helper";
-import type { GitHubWebhookPayload } from "@/types/github";
 import {
   isValidGitHubWebhookSignature,
   parseGitHubWebhookPayload,
 } from "@/services/webhook-receiver/webhook-receiver.validator";
-import type { WebhookDeliveryQueueMessage } from "@/types/queue";
+import type { GitHubWebhookPayload } from "@/types/github";
 
-// GitHub 웹훅 요청을 검증하고 delivery를 저장한다.
-export async function receiveGitHubWebhook(request: Request) {
+type ReceiveGitHubWebhookInput = {
+  deliveryId: string | null;
+  event: string | null;
+  rawBody: string;
+  signature: string | null;
+};
+
+type ReceiveGitHubWebhookResult = {
+  body: {
+    deliveryId?: string;
+    message: string;
+    queueMessageId?: string | null;
+    status?: string;
+    webhookDeliveryId?: string;
+  };
+  status?: number;
+};
+
+// GitHub 웹훅을 검증하고 delivery를 저장한 뒤 처리 Queue에 등록한다.
+export async function receiveGitHubWebhook({
+  deliveryId,
+  event,
+  rawBody,
+  signature,
+}: ReceiveGitHubWebhookInput): Promise<ReceiveGitHubWebhookResult> {
   const webhookSecret = process.env.GITHUB_WEBHOOK_SECRET;
 
   if (!webhookSecret) {
-    return Response.json(
-      { message: "GitHub 웹훅 시크릿이 설정되지 않았습니다." },
-      { status: 500 },
-    );
+    return {
+      body: { message: "GitHub 웹훅 시크릿이 설정되지 않았습니다." },
+      status: 500,
+    };
   }
 
-  const signature = request.headers.get("x-hub-signature-256");
-  const event = request.headers.get("x-github-event");
-  const deliveryId = request.headers.get("x-github-delivery");
-  const rawBody = await request.text();
-
   if (!deliveryId) {
-    return Response.json(
-      { message: "GitHub 웹훅 delivery id가 없습니다." },
-      { status: 400 },
-    );
+    return {
+      body: { message: "GitHub 웹훅 delivery id가 없습니다." },
+      status: 400,
+    };
   }
 
   if (!isValidGitHubWebhookSignature(rawBody, signature, webhookSecret)) {
-    return Response.json(
-      { message: "GitHub 웹훅 서명이 올바르지 않습니다." },
-      { status: 401 },
-    );
+    return {
+      body: { message: "GitHub 웹훅 서명이 올바르지 않습니다." },
+      status: 401,
+    };
   }
 
   const payload = parseGitHubWebhookPayload(rawBody);
 
   if (!payload) {
-    return Response.json(
-      { message: "GitHub 웹훅 payload 형식이 올바르지 않습니다." },
-      { status: 400 },
-    );
+    return {
+      body: { message: "GitHub 웹훅 payload 형식이 올바르지 않습니다." },
+      status: 400,
+    };
   }
 
   const webhookPayload = payload as GitHubWebhookPayload;
@@ -64,25 +81,31 @@ export async function receiveGitHubWebhook(request: Request) {
   });
 
   if (!delivery.created) {
-    return Response.json({
-      deliveryId,
-      message: "이미 수신한 GitHub 웹훅입니다.",
-      status: delivery.status,
-    });
+    return {
+      body: {
+        deliveryId,
+        message: "이미 수신한 GitHub 웹훅입니다.",
+        status: delivery.status,
+      },
+    };
   }
 
   if (event === "ping") {
-    return Response.json({
-      deliveryId,
-      message: "GitHub 웹훅 ping을 확인했습니다.",
-    });
+    return {
+      body: {
+        deliveryId,
+        message: "GitHub 웹훅 ping을 확인했습니다.",
+      },
+    };
   }
 
   if (event !== "push") {
-    return Response.json({
-      deliveryId,
-      message: "처리 대상이 아닌 GitHub 웹훅 이벤트입니다.",
-    });
+    return {
+      body: {
+        deliveryId,
+        message: "처리 대상이 아닌 GitHub 웹훅 이벤트입니다.",
+      },
+    };
   }
 
   let queueMessageId: string | null;
@@ -109,15 +132,15 @@ export async function receiveGitHubWebhook(request: Request) {
       errorMessage,
     });
 
-    return Response.json(
-      {
+    return {
+      body: {
         deliveryId,
         message: "GitHub 웹훅 처리 작업 등록에 실패했습니다.",
         status: "FAILED",
         webhookDeliveryId: delivery.id,
       },
-      { status: 503 },
-    );
+      status: 503,
+    };
   }
 
   await markWebhookDeliveryQueued(deliveryId);
@@ -128,24 +151,14 @@ export async function receiveGitHubWebhook(request: Request) {
     webhookDeliveryId: delivery.id,
   });
 
-  return Response.json(
-    {
+  return {
+    body: {
       deliveryId,
       message: "GitHub push 웹훅을 수신했습니다.",
       queueMessageId,
       status: "QUEUED",
       webhookDeliveryId: delivery.id,
     },
-    { status: 202 },
-  );
-}
-
-// 저장된 웹훅 delivery의 문제 처리 작업을 Queue에 발행한다.
-export async function enqueueWebhookDelivery(webhookDeliveryId: string) {
-  const message: WebhookDeliveryQueueMessage = { webhookDeliveryId };
-  const result = await queue.send(WEBHOOK_DELIVERY_QUEUE_TOPIC, message, {
-    idempotencyKey: webhookDeliveryId,
-  });
-
-  return result.messageId;
+    status: 202,
+  };
 }
