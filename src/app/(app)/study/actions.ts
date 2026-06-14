@@ -3,7 +3,11 @@
 import { revalidatePath } from "next/cache";
 
 import { auth } from "@/lib/auth/auth";
-import { prisma } from "@/lib/prisma";
+import {
+  acceptStudyInvite as acceptStudyInviteCommand,
+  createStudy as createStudyCommand,
+  declineStudyInvite as declineStudyInviteCommand,
+} from "@/services/studies/study.command";
 import { validateStudyInput } from "@/services/studies/study.validator";
 
 export type CreateStudyActionState = {
@@ -42,30 +46,7 @@ export async function createStudy(
   }
 
   try {
-    const study = await prisma.study.create({
-      data: {
-        description: description || null,
-        members: {
-          create: {
-            role: "OWNER",
-            user: {
-              connect: {
-                id: userId,
-              },
-            },
-          },
-        },
-        owner: {
-          connect: {
-            id: userId,
-          },
-        },
-        title,
-      },
-      select: {
-        id: true,
-      },
-    });
+    const study = await createStudyCommand({ description, title, userId });
 
     revalidatePath("/study");
 
@@ -96,51 +77,14 @@ export async function acceptStudyInvite(formData: FormData) {
     return;
   }
 
-  const invite = await prisma.studyInvite.findFirst({
-    select: {
-      id: true,
-      studyId: true,
-    },
-    where: {
-      expiresAt: {
-        gt: new Date(),
-      },
-      id: inviteId,
-      status: "PENDING",
-      targetUserId: userId,
-    },
-  });
+  const studyId = await acceptStudyInviteCommand({ inviteId, userId });
 
-  if (!invite) {
+  if (!studyId) {
     return;
   }
 
-  await prisma.$transaction([
-    prisma.studyMember.upsert({
-      create: {
-        studyId: invite.studyId,
-        userId,
-      },
-      update: {},
-      where: {
-        studyId_userId: {
-          studyId: invite.studyId,
-          userId,
-        },
-      },
-    }),
-    prisma.studyInvite.update({
-      data: {
-        status: "ACCEPTED",
-      },
-      where: {
-        id: invite.id,
-      },
-    }),
-  ]);
-
   revalidatePath("/study");
-  revalidatePath(`/study/${invite.studyId}/overview`);
+  revalidatePath(`/study/${studyId}/overview`);
 }
 
 export async function declineStudyInvite(formData: FormData) {
@@ -152,16 +96,7 @@ export async function declineStudyInvite(formData: FormData) {
     return;
   }
 
-  await prisma.studyInvite.updateMany({
-    data: {
-      status: "CANCELED",
-    },
-    where: {
-      id: inviteId,
-      status: "PENDING",
-      targetUserId: userId,
-    },
-  });
+  await declineStudyInviteCommand({ inviteId, userId });
 
   revalidatePath("/study");
 }

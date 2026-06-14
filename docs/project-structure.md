@@ -386,7 +386,9 @@ project-root/
 │  │  │  └─ friend.validator.ts
 │  │  ├─ problems/
 │  │  ├─ studies/
-│  │  │  ├─ study.server.ts
+│  │  │  ├─ study.query.ts
+│  │  │  ├─ study.command.ts
+│  │  │  ├─ study.persistence.server.ts
 │  │  │  ├─ study.helper.ts
 │  │  │  └─ study.validator.ts
 │  │  ├─ users/

@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { auth } from "@/lib/auth/auth";
-import { getUserStudies } from "@/services/studies/study.server";
+import { getUserStudies } from "@/services/studies/study.query";
 import type { StudyListItem, StudyTier } from "@/types/study";
 import { tierThumbnails } from "@/utils/study";
 

@@ -4,13 +4,18 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth/auth";
-import { prisma } from "@/lib/prisma";
+import {
+  cancelStudyInvite as cancelStudyInviteCommand,
+  createStudyInvite as createStudyInviteCommand,
+  deleteStudy as deleteStudyCommand,
+  removeStudyMember as removeStudyMemberCommand,
+  updateStudyMemberRole as updateStudyMemberRoleCommand,
+  updateStudySettings as updateStudySettingsCommand,
+} from "@/services/studies/study.command";
 import {
   validateStudyInviteTarget,
   validateStudySettingsInput,
 } from "@/services/studies/study.validator";
-
-const INVITE_EXPIRATION_DAYS = 7;
 
 export type CreateStudyInviteActionState = {
   error: string | null;
@@ -48,87 +53,13 @@ export async function createStudyInvite(
     return createInviteErrorState(target, validationError);
   }
 
-  const study = await prisma.study.findFirst({
-    select: {
-      id: true,
-    },
-    where: {
-      id: studyId,
-      ownerId: userId,
-    },
-  });
+  const result = await createStudyInviteCommand({ studyId, target, userId });
 
-  if (!study) {
-    return createInviteErrorState(target, "초대를 보낼 수 있는 스터디를 찾을 수 없습니다.");
+  if (result.error) {
+    return createInviteErrorState(target, result.error);
   }
 
-  const targetUser = await prisma.user.findFirst({
-    select: {
-      id: true,
-      name: true,
-    },
-    where: {
-      OR: [
-        {
-          email: target,
-        },
-        {
-          name: target,
-        },
-      ],
-    },
-  });
-
-  if (!targetUser) {
-    return createInviteErrorState(target, "해당 사용자 이름 또는 이메일을 찾을 수 없습니다.");
-  }
-
-  if (targetUser.id === userId) {
-    return createInviteErrorState(target, "본인은 초대할 수 없습니다.");
-  }
-
-  const existingMember = await prisma.studyMember.findUnique({
-    select: {
-      id: true,
-    },
-    where: {
-      studyId_userId: {
-        studyId: study.id,
-        userId: targetUser.id,
-      },
-    },
-  });
-
-  if (existingMember) {
-    return createInviteErrorState(target, "이미 스터디에 참여 중인 사용자입니다.");
-  }
-
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + INVITE_EXPIRATION_DAYS);
-
-  await prisma.studyInvite.upsert({
-    create: {
-      expiresAt,
-      invitedById: userId,
-      status: "PENDING",
-      studyId: study.id,
-      target: targetUser.name ?? target,
-      targetUserId: targetUser.id,
-    },
-    update: {
-      expiresAt,
-      invitedById: userId,
-      status: "PENDING",
-    },
-    where: {
-      studyId_targetUserId: {
-        studyId: study.id,
-        targetUserId: targetUser.id,
-      },
-    },
-  });
-
-  revalidatePath(`/study/${study.id}/owner`);
+  revalidatePath(`/study/${studyId}/owner`);
 
   return {
     error: null,
@@ -147,19 +78,7 @@ export async function cancelStudyInvite(formData: FormData) {
     return;
   }
 
-  await prisma.studyInvite.updateMany({
-    data: {
-      status: "CANCELED",
-    },
-    where: {
-      id: inviteId,
-      status: "PENDING",
-      study: {
-        id: studyId,
-        ownerId: userId,
-      },
-    },
-  });
+  await cancelStudyInviteCommand({ inviteId, studyId, userId });
 
   revalidatePath(`/study/${studyId}/owner`);
 }
@@ -175,32 +94,7 @@ export async function updateStudyMemberRole(formData: FormData) {
     return;
   }
 
-  const study = await prisma.study.findFirst({
-    select: {
-      ownerId: true,
-    },
-    where: {
-      id: studyId,
-      ownerId: userId,
-    },
-  });
-
-  if (!study) {
-    return;
-  }
-
-  await prisma.studyMember.updateMany({
-    data: {
-      role,
-    },
-    where: {
-      id: memberId,
-      studyId,
-      userId: {
-        not: study.ownerId,
-      },
-    },
-  });
+  await updateStudyMemberRoleCommand({ memberId, role, studyId, userId });
 
   revalidatePath(`/study/${studyId}/owner`);
   revalidatePath(`/study/${studyId}/members`);
@@ -217,29 +111,7 @@ export async function removeStudyMember(formData: FormData) {
     return;
   }
 
-  const study = await prisma.study.findFirst({
-    select: {
-      ownerId: true,
-    },
-    where: {
-      id: studyId,
-      ownerId: userId,
-    },
-  });
-
-  if (!study) {
-    return;
-  }
-
-  await prisma.studyMember.deleteMany({
-    where: {
-      id: memberId,
-      studyId,
-      userId: {
-        not: study.ownerId,
-      },
-    },
-  });
+  await removeStudyMemberCommand({ memberId, studyId, userId });
 
   revalidatePath(`/study/${studyId}/owner`);
   revalidatePath(`/study/${studyId}/members`);
@@ -278,18 +150,14 @@ export async function updateStudySettings(
     });
   }
 
-  const updateResult = await prisma.study.updateMany({
-    data: {
-      description: description || null,
-      title,
-    },
-    where: {
-      id: studyId,
-      ownerId: userId,
-    },
+  const updated = await updateStudySettingsCommand({
+    description,
+    studyId,
+    title,
+    userId,
   });
 
-  if (updateResult.count === 0) {
+  if (!updated) {
     return createStudySettingsErrorState({
       description,
       error: "수정할 수 있는 스터디를 찾을 수 없습니다.",
@@ -320,26 +188,11 @@ export async function deleteStudy(formData: FormData) {
     return;
   }
 
-  const study = await prisma.study.findFirst({
-    select: {
-      id: true,
-      title: true,
-    },
-    where: {
-      id: studyId,
-      ownerId: userId,
-    },
-  });
+  const deleted = await deleteStudyCommand({ confirmText, studyId, userId });
 
-  if (!study || confirmText !== study.title) {
+  if (!deleted) {
     return;
   }
-
-  await prisma.study.delete({
-    where: {
-      id: study.id,
-    },
-  });
 
   revalidatePath("/study");
   redirect("/study");

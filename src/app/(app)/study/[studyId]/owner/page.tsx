@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { auth } from "@/lib/auth/auth";
-import { getStudyOwnerData } from "@/services/studies/study.server";
+import { getStudyOwnerData } from "@/services/studies/study.query";
 
 import OwnerConsole from "./_components/owner-console";
 import StudyOwnerHeading from "./_components/study-owner-heading";

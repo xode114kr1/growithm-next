@@ -3,7 +3,7 @@ import {
   declineStudyInvite,
 } from "../actions";
 import { auth } from "@/lib/auth/auth";
-import { getPendingInvites } from "@/services/studies/study.server";
+import { getPendingInvites } from "@/services/studies/study.query";
 import type { StudyInviteItem } from "@/types/study";
 
 export default async function StudyInvites() {
