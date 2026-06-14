@@ -39,12 +39,12 @@ export function getUserTier(score: number) {
 }
 
 // 개인 점수에 해당하는 티어를 계산한다.
-export function getPersonalScoreTier(score: number): PersonalScoreTier {
+function getPersonalScoreTier(score: number): PersonalScoreTier {
   return getScoreTier(score, personalScoreTierThresholds, "Bronze");
 }
 
 // 개인 점수의 현재 티어 내 진행률을 계산한다.
-export function getPersonalTierProgress(
+function getPersonalTierProgress(
   score: number,
   tier: PersonalScoreTier,
 ) {
@@ -52,7 +52,7 @@ export function getPersonalTierProgress(
 }
 
 // 개인 티어 진행도를 점수 범위 문자열로 만든다.
-export function getPersonalProgressLabel(
+function getPersonalProgressLabel(
   score: number,
   tier: PersonalScoreTier,
 ) {
@@ -60,7 +60,7 @@ export function getPersonalProgressLabel(
 }
 
 // 개인 티어의 다음 티어 진입 점수를 반환한다.
-export function getNextPersonalTierScore(tier: PersonalScoreTier) {
+function getNextPersonalTierScore(tier: PersonalScoreTier) {
   return getNextScoreTierScore(tier, personalScoreTierThresholds);
 }
 

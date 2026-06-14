@@ -1,17 +1,14 @@
 import "server-only";
 
-import { prisma } from "@/lib/prisma";
 import {
   fetchGitHubWebhooks,
   postGitHubWebhook,
 } from "@/services/webhook-registration/webhook-registration.client";
-import { getGitHubWebhookErrorMessage } from "@/services/webhook-registration/webhook-registration.helper";
 import {
-  getGitHubWebhookId,
-  isGitHubWebhookList,
-  parseRepository,
-  type GitHubWebhookResponse,
-} from "@/services/webhook-registration/webhook-registration.validator";
+  findGitHubAccessToken,
+  upsertGitHubRepositoryWebhook,
+} from "@/services/webhook-registration/webhook-registration.persistence.server";
+import { parseRepository } from "@/services/webhook-registration/webhook-registration.validator";
 import type { GitHubWebhookRequestBody } from "@/types/github";
 
 type RegisterGitHubWebhookResult =
@@ -55,15 +52,7 @@ export async function registerGitHubWebhook({
     };
   }
 
-  const account = await prisma.account.findFirst({
-    select: {
-      access_token: true,
-    },
-    where: {
-      provider: "github",
-      userId,
-    },
-  });
+  const account = await findGitHubAccessToken(userId);
 
   if (!account?.access_token) {
     return {
@@ -92,19 +81,10 @@ export async function registerGitHubWebhook({
 
   const repositoryFullName = `${repository.owner}/${repository.repo}`;
 
-  await prisma.gitHubRepositoryWebhook.upsert({
-    create: {
-      hookId: webhook.hookId,
-      repositoryFullName,
-      userId,
-    },
-    update: {
-      hookId: webhook.hookId,
-      userId,
-    },
-    where: {
-      repositoryFullName,
-    },
+  await upsertGitHubRepositoryWebhook({
+    hookId: webhook.hookId,
+    repositoryFullName,
+    userId,
   });
 
   return {
@@ -130,60 +110,26 @@ async function createGitHubWebhook({
   webhookSecret: string;
   webhookUrl: string;
 }) {
-  const listResponse = await fetchGitHubWebhooks({ accessToken, owner, repo });
-  const listData = (await listResponse.json().catch(() => null)) as
-    | GitHubWebhookResponse[]
-    | GitHubWebhookResponse
-    | null;
+  const listResult = await fetchGitHubWebhooks({ accessToken, owner, repo });
 
-  if (!listResponse.ok) {
-    const message = Array.isArray(listData) ? undefined : listData?.message;
-
-    return {
-      message: getGitHubWebhookErrorMessage(listResponse.status, message),
-      ok: false as const,
-      status: listResponse.status === 404 ? 404 : 502,
-    };
+  if (!listResult.ok) {
+    return listResult;
   }
 
-  if (!isGitHubWebhookList(listData)) {
-    return {
-      message: "GitHub 웹훅 목록 응답 형식이 올바르지 않습니다.",
-      ok: false as const,
-      status: 502,
-    };
-  }
-
-  const existingWebhook = listData.find(
-    (webhook) => webhook.config?.url === webhookUrl,
+  const existingWebhook = listResult.webhooks.find(
+    (webhook) => webhook.url === webhookUrl,
   );
-  const existingHookId = getGitHubWebhookId(existingWebhook ?? null);
+  const existingHookId = existingWebhook?.hookId ?? null;
 
   if (existingHookId !== null) {
     return { hookId: existingHookId, ok: true as const };
   }
 
-  const createResponse = await postGitHubWebhook({
+  return postGitHubWebhook({
     accessToken,
     owner,
     repo,
     webhookSecret,
     webhookUrl,
   });
-  const createData = (await createResponse.json().catch(() => null)) as
-    | GitHubWebhookResponse
-    | null;
-
-  if (!createResponse.ok) {
-    return {
-      message: getGitHubWebhookErrorMessage(
-        createResponse.status,
-        createData?.message,
-      ),
-      ok: false as const,
-      status: createResponse.status === 404 ? 404 : 502,
-    };
-  }
-
-  return { hookId: getGitHubWebhookId(createData), ok: true as const };
 }

@@ -1,6 +1,5 @@
 import "server-only";
 
-import { prisma } from "@/lib/prisma";
 import {
   getNextTierScore,
   getProgressLabel,
@@ -8,6 +7,16 @@ import {
   getUserDisplayName,
   normalizeCategories,
 } from "@/services/studies/study.helper";
+import {
+  findPendingInvites,
+  findProblemShareTargetStudies,
+  findStudyForLayout,
+  findStudyForMembers,
+  findStudyForOverview,
+  findStudyForOwner,
+  findStudyForProblems,
+  findUserStudies,
+} from "@/services/studies/study.persistence.server";
 import type {
   OwnerMember,
   ProblemShareTargetStudy,
@@ -34,48 +43,7 @@ export async function getProblemShareTargetStudies({
     return [];
   }
 
-  const studies = await prisma.study.findMany({
-    orderBy: {
-      updatedAt: "desc",
-    },
-    select: {
-      _count: {
-        select: {
-          members: true,
-        },
-      },
-      id: true,
-      owner: {
-        select: {
-          name: true,
-        },
-      },
-      score: true,
-      problemShares: {
-        select: {
-          id: true,
-        },
-        where: {
-          problemSubmissionId: problemId,
-        },
-      },
-      title: true,
-    },
-    where: {
-      OR: [
-        {
-          ownerId: userId,
-        },
-        {
-          members: {
-            some: {
-              userId,
-            },
-          },
-        },
-      ],
-    },
-  });
+  const studies = await findProblemShareTargetStudies({ problemId, userId });
 
   return studies.map((study) => ({
     hasShared: study.problemShares.length > 0,
@@ -91,30 +59,7 @@ export async function getProblemShareTargetStudies({
 export async function getPendingInvites(
   userId: string,
 ): Promise<StudyInviteItem[]> {
-  const invites = await prisma.studyInvite.findMany({
-    include: {
-      invitedBy: {
-        select: {
-          name: true,
-        },
-      },
-      study: {
-        select: {
-          title: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    where: {
-      expiresAt: {
-        gt: new Date(),
-      },
-      status: "PENDING",
-      targetUserId: userId,
-    },
-  });
+  const invites = await findPendingInvites(userId);
 
   return invites.map((invite) => ({
     id: invite.id,
@@ -132,28 +77,7 @@ export async function getStudyLayoutData({
   studyId: string;
   userId: string;
 }): Promise<StudyLayoutData | null> {
-  const study = await prisma.study.findFirst({
-    select: {
-      id: true,
-      ownerId: true,
-      title: true,
-    },
-    where: {
-      id: studyId,
-      OR: [
-        {
-          ownerId: userId,
-        },
-        {
-          members: {
-            some: {
-              userId,
-            },
-          },
-        },
-      ],
-    },
-  });
+  const study = await findStudyForLayout({ studyId, userId });
 
   if (!study) {
     return null;
@@ -168,37 +92,7 @@ export async function getStudyLayoutData({
 
 // 사용자가 참여하거나 소유한 스터디 목록을 조회한다.
 export async function getUserStudies(userId: string): Promise<StudyListItem[]> {
-  const studies = await prisma.study.findMany({
-    include: {
-      _count: {
-        select: {
-          members: true,
-        },
-      },
-      owner: {
-        select: {
-          name: true,
-        },
-      },
-    },
-    orderBy: {
-      updatedAt: "desc",
-    },
-    where: {
-      OR: [
-        {
-          ownerId: userId,
-        },
-        {
-          members: {
-            some: {
-              userId,
-            },
-          },
-        },
-      ],
-    },
-  });
+  const studies = await findUserStudies(userId);
 
   return studies.map((study) => {
     const tier = getStudyTier(study.score);
@@ -227,44 +121,7 @@ export async function getStudyMembersData({
   studyId: string;
   userId: string;
 }): Promise<StudyMembersData | null> {
-  const study = await prisma.study.findFirst({
-    include: {
-      members: {
-        include: {
-          user: {
-            select: {
-              name: true,
-            },
-          },
-        },
-        orderBy: {
-          joinedAt: "asc",
-        },
-      },
-      problemShares: {
-        select: {
-          score: true,
-          sharedAt: true,
-          userId: true,
-        },
-      },
-    },
-    where: {
-      id: studyId,
-      OR: [
-        {
-          ownerId: userId,
-        },
-        {
-          members: {
-            some: {
-              userId,
-            },
-          },
-        },
-      ],
-    },
-  });
+  const study = await findStudyForMembers({ studyId, userId });
 
   if (!study) {
     return null;
@@ -312,65 +169,7 @@ export async function getStudyOverview({
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-  const study = await prisma.study.findFirst({
-    include: {
-      members: {
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-        orderBy: {
-          joinedAt: "asc",
-        },
-      },
-      owner: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      problemShares: {
-        include: {
-          problemSubmission: {
-            select: {
-              platform: true,
-              tier: true,
-              title: true,
-            },
-          },
-          user: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-        orderBy: {
-          sharedAt: "desc",
-        },
-        take: 10,
-      },
-    },
-    where: {
-      id: studyId,
-      OR: [
-        {
-          ownerId: userId,
-        },
-        {
-          members: {
-            some: {
-              userId,
-            },
-          },
-        },
-      ],
-    },
-  });
+  const study = await findStudyForOverview({ studyId, userId });
 
   if (!study) {
     return null;
@@ -418,53 +217,7 @@ export async function getStudyOwnerData({
   studyId: string;
   userId: string;
 }): Promise<StudyOwnerData | null> {
-  const study = await prisma.study.findFirst({
-    include: {
-      invites: {
-        orderBy: {
-          createdAt: "desc",
-        },
-        select: {
-          id: true,
-          status: true,
-          target: true,
-        },
-        where: {
-          status: "PENDING",
-        },
-      },
-      members: {
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-        orderBy: {
-          joinedAt: "asc",
-        },
-      },
-      owner: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      problemShares: {
-        select: {
-          score: true,
-          sharedAt: true,
-          userId: true,
-        },
-      },
-    },
-    where: {
-      id: studyId,
-      ownerId: userId,
-    },
-  });
+  const study = await findStudyForOwner({ studyId, userId });
 
   if (!study) {
     return null;
@@ -530,72 +283,7 @@ export async function getStudyProblemsData({
   studyId: string;
   userId: string;
 }): Promise<StudyProblemsData | null> {
-  const study = await prisma.study.findFirst({
-    include: {
-      members: {
-        include: {
-          user: {
-            select: {
-              name: true,
-            },
-          },
-        },
-        orderBy: {
-          joinedAt: "asc",
-        },
-      },
-      owner: {
-        select: {
-          name: true,
-        },
-      },
-      problemShares: {
-        include: {
-          problemSubmission: {
-            select: {
-              categories: true,
-              code: true,
-              description: true,
-              id: true,
-              link: true,
-              memo: true,
-              platform: true,
-              problemId: true,
-              score: true,
-              scoreMax: true,
-              status: true,
-              submittedAtText: true,
-              tier: true,
-              title: true,
-            },
-          },
-          user: {
-            select: {
-              name: true,
-            },
-          },
-        },
-        orderBy: {
-          sharedAt: "desc",
-        },
-      },
-    },
-    where: {
-      id: studyId,
-      OR: [
-        {
-          ownerId: userId,
-        },
-        {
-          members: {
-            some: {
-              userId,
-            },
-          },
-        },
-      ],
-    },
-  });
+  const study = await findStudyForProblems({ studyId, userId });
 
   if (!study) {
     return null;

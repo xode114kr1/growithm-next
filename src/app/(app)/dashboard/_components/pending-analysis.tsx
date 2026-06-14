@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { getTierBadgeClass } from "@/utils/problem";
-import { getPendingProblems } from "@/services/problems/problem.server";
+import { getPendingProblems } from "@/services/problems/problem.query";
 import type { PendingProblem } from "@/types/problem";
 
 export default async function PendingAnalysis({
