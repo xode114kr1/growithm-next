@@ -381,9 +381,10 @@ project-root/
 │  │  └─ prisma.ts                    # PostgreSQL용 PrismaClient 인스턴스
 │  ├─ services/                       # 리소스별 데이터 요청과 비즈니스 로직
 │  │  ├─ friends/
-│  │  │  ├─ friend.server.ts
+│  │  │  ├─ friend.query.ts
+│  │  │  ├─ friend.command.ts
+│  │  │  ├─ friend.persistence.server.ts
 │  │  │  ├─ friend.helper.ts
-│  │  │  └─ friend.validator.ts
 │  │  ├─ problems/
 │  │  ├─ studies/
 │  │  │  ├─ study.query.ts
