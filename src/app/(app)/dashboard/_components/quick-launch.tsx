@@ -1,5 +1,5 @@
 import type { ProblemPlatform } from "@/generated/prisma/enums";
-import { getProblemCountsByPlatform } from "@/services/problems/problem.server";
+import { getProblemCountsByPlatform } from "@/services/problems/problem.query";
 
 const quickLinkStyles: Record<
   ProblemPlatform,

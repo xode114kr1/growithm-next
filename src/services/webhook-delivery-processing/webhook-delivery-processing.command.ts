@@ -1,9 +1,15 @@
 import "server-only";
 
-import { fetchGitHubRawCode } from "@/services/webhook-delivery-processing/webhook-delivery-processing.client";
+import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
+import { getProblemExperienceScore } from "@/services/problems/problem.helper";
+import {
+  fetchGitHubRawCode,
+  fetchGitHubReadmeContent,
+} from "@/services/webhook-delivery-processing/webhook-delivery-processing.client";
 import {
   buildRawGitHubContentUrl,
   getProblemFileChangeFromPushPayload,
+  parseProblemReadme,
 } from "@/services/webhook-delivery-processing/webhook-delivery-processing.helper";
 import {
   claimWebhookDeliveryForProcessing,
@@ -11,10 +17,10 @@ import {
   getWebhookDeliveryForProcessing,
   saveProblemSubmission,
   updateWebhookDeliveryStatus,
+  updateWebhookDeliveryStatusById,
 } from "@/services/webhook-delivery-processing/webhook-delivery-processing.persistence.server";
 import { getRepositoryFullName } from "@/services/github/github-webhook.helper";
 import { isRetryableGitHubFileError } from "@/services/github/github-file.error";
-import { fetchGitHubReadmeContent } from "@/services/readme/readme.server";
 import type { GitHubReadmeChange, GitHubWebhookPayload } from "@/types/github";
 
 type WebhookDeliveryProcessingResult = {
@@ -37,6 +43,26 @@ type WebhookDeliveryProcessingResult = {
 
 // 저장된 GitHub push delivery를 문제 제출 데이터로 처리한다.
 export async function processGitHubWebhookDelivery(
+  webhookDeliveryId: string,
+): Promise<WebhookDeliveryProcessingResult> {
+  try {
+    return await processGitHubWebhookDeliveryCommand(webhookDeliveryId);
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "웹훅 Delivery 재시도 대기";
+
+    await updateWebhookDeliveryStatusById({
+      errorMessage,
+      status: "RETRY_PENDING",
+      webhookDeliveryId,
+    });
+
+    throw error;
+  }
+}
+
+// 저장된 GitHub push delivery의 처리 흐름을 실행한다.
+async function processGitHubWebhookDeliveryCommand(
   webhookDeliveryId: string,
 ): Promise<WebhookDeliveryProcessingResult> {
   const delivery = await getWebhookDeliveryForProcessing(webhookDeliveryId);
@@ -183,15 +209,9 @@ async function processChangedProblemFile({
     };
   }
 
-  const result = await saveProblemSubmission({
-    code: codeResult.code,
-    readme: readmeResult.readme,
-    repositoryFullName,
-    userId,
-    webhookDeliveryId,
-  });
+  const parsedReadme = parseProblemReadme(readmeResult.readme.text);
 
-  if (!result.saved) {
+  if (!parsedReadme) {
     const errorMessage = "README에서 문제 정보를 파싱할 수 없습니다.";
 
     await updateWebhookDeliveryStatus({
@@ -206,6 +226,34 @@ async function processChangedProblemFile({
       status: "PARSE_FAILED" as const,
     };
   }
+
+  const experienceScore = getProblemExperienceScore({
+    platform: parsedReadme.platform,
+    tier: parsedReadme.tier,
+  });
+
+  await saveProblemSubmission({
+    accuracy: parsedReadme.accuracy,
+    categories: parsedReadme.categories,
+    code: codeResult.code,
+    commitSha: readmeResult.readme.commitSha,
+    description: parsedReadme.description,
+    link: parsedReadme.link,
+    memory: parsedReadme.memory,
+    platform: parsedReadme.platform,
+    problemId: parsedReadme.problemId,
+    readmePath: readmeResult.readme.path,
+    repositoryFullName,
+    score: experienceScore,
+    scoreMax: parsedReadme.scoreMax,
+    status: ProblemSubmissionStatus.PENDING,
+    submittedAtText: parsedReadme.submittedAtText,
+    tier: parsedReadme.tier,
+    time: parsedReadme.time,
+    title: parsedReadme.title,
+    userId,
+    webhookDeliveryId,
+  });
 
   await updateWebhookDeliveryStatus({
     deliveryId,

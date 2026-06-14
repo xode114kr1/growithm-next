@@ -13,11 +13,10 @@ export type UserPersonalTier = {
   tier: PersonalScoreTier;
 };
 
-export type UserProfilePageData = {
+export type UserProfile = {
   avatar: string;
   name: string;
   score: number;
-  solvedCount: number;
   tier: string;
   tierClass: string;
 };

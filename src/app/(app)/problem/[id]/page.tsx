@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 
 import { auth } from "@/lib/auth/auth";
-import { getProblemDetail } from "@/services/problems/problem.server";
-import { getProblemShareTargetStudies } from "@/services/studies/study.server";
+import { getProblemDetail } from "@/services/problems/problem.query";
+import { getProblemShareTargetStudies } from "@/services/studies/study.query";
 
 import ProblemDescription from "./_components/problem-description";
 import ProblemDetailHeader from "./_components/problem-detail-header";
@@ -17,11 +17,12 @@ export default async function ProblemDetailPage({
 }) {
   const { id } = await params;
   const session = await auth();
+  const userId = session?.user?.id;
   const [problem, shareTargetStudies] = await Promise.all([
-    getProblemDetail(id),
+    getProblemDetail({ id, userId }),
     getProblemShareTargetStudies({
       problemId: id,
-      userId: session?.user?.id,
+      userId,
     }),
   ]);
 
