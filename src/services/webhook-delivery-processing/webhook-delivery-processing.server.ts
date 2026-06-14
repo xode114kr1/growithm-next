@@ -1,6 +1,9 @@
 import "server-only";
 
-import { fetchGitHubRawCode } from "@/services/webhook-delivery-processing/webhook-delivery-processing.client";
+import {
+  fetchGitHubRawCode,
+  fetchGitHubReadmeContent,
+} from "@/services/webhook-delivery-processing/webhook-delivery-processing.client";
 import {
   buildRawGitHubContentUrl,
   getProblemFileChangeFromPushPayload,
@@ -14,7 +17,6 @@ import {
 } from "@/services/webhook-delivery-processing/webhook-delivery-processing.persistence.server";
 import { getRepositoryFullName } from "@/services/github/github-webhook.helper";
 import { isRetryableGitHubFileError } from "@/services/github/github-file.error";
-import { fetchGitHubReadmeContent } from "@/services/readme/readme.server";
 import type { GitHubReadmeChange, GitHubWebhookPayload } from "@/types/github";
 
 type WebhookDeliveryProcessingResult = {

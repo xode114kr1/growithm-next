@@ -1,3 +1,9 @@
+import { ProblemPlatform } from "@/generated/prisma/client";
+import {
+  type GitHubContentResponse,
+  type ParsedProblemReadme,
+  validateParsedProblemReadme,
+} from "@/services/webhook-delivery-processing/webhook-delivery-processing.validator";
 import type { GitHubReadmeChange, GitHubWebhookPayload } from "@/types/github";
 
 type GitHubPushCommit = {
@@ -17,6 +23,36 @@ export function buildRawGitHubContentUrl({
   repositoryFullName: string;
 }) {
   return `https://raw.githubusercontent.com/${repositoryFullName}/${commitSha}/${encodeGitHubPath(path)}`;
+}
+
+// GitHub API 요청에 사용할 파일 경로의 각 구간을 인코딩한다.
+export function encodeGitHubPath(path: string) {
+  return path.split("/").map(encodeURIComponent).join("/");
+}
+
+// GitHub README 조회 실패 응답을 오류 메시지로 변환한다.
+export function getGitHubContentErrorMessage(
+  status: number,
+  data: GitHubContentResponse | null,
+) {
+  if (typeof data?.message === "string" && data.message) {
+    return `GitHub README 조회 실패: ${data.message}`;
+  }
+
+  return `GitHub README 조회 실패: HTTP ${status}`;
+}
+
+// 플랫폼 형식을 판별해 README의 문제 정보를 파싱한다.
+export function parseProblemReadme(text: string) {
+  if (text.includes("https://www.acmicpc.net/problem/")) {
+    return validateParsedProblemReadme(parseBaekjoonReadme(text));
+  }
+
+  if (text.includes("https://school.programmers.co.kr/")) {
+    return validateParsedProblemReadme(parseProgrammersReadme(text));
+  }
+
+  return null;
 }
 
 // GitHub 웹훅 payload에서 저장소 소유자 ID를 추출한다.
@@ -131,7 +167,96 @@ function getDirectoryPath(path: string) {
   return lastSlashIndex === -1 ? "" : path.slice(0, lastSlashIndex);
 }
 
-// GitHub API 요청에 사용할 파일 경로의 각 구간을 인코딩한다.
-function encodeGitHubPath(path: string) {
-  return path.split("/").map(encodeURIComponent).join("/");
+type ProblemReadmeDraft = Partial<ParsedProblemReadme> & {
+  platform: ProblemPlatform;
+};
+
+// 백준 README에서 문제 제출 정보를 추출한다.
+function parseBaekjoonReadme(text: string): ProblemReadmeDraft {
+  const result: ProblemReadmeDraft = {
+    platform: ProblemPlatform.BAEKJOON,
+  };
+
+  const titleMatch = text.match(/^# \[(.+?)\] (.+?) - (\d+)/m);
+  if (titleMatch) {
+    result.tier = titleMatch[1];
+    result.title = titleMatch[2];
+    result.problemId = titleMatch[3];
+  }
+
+  const linkMatch = text.match(/\(https:\/\/www\.acmicpc\.net\/problem\/\d+\)/);
+  if (linkMatch) result.link = linkMatch[0].slice(1, -1);
+
+  const memoryMatch = text.match(/메모리:\s*([\d]+ KB)/);
+  const timeMatch = text.match(/시간:\s*([\d]+ ms)/);
+  if (memoryMatch) result.memory = memoryMatch[1];
+  if (timeMatch) result.time = timeMatch[1];
+
+  const categoryMatch = text.match(/### 분류\s+([\s\S]+?)\n\n/);
+  if (categoryMatch) result.categories = categoryMatch[1].trim().split(/,\s*/);
+
+  const dateMatch = text.match(/### 제출 일자\s+(.+)/);
+  if (dateMatch) result.submittedAtText = dateMatch[1].trim();
+
+  const descMatch = text.match(/### 문제 설명\s+([\s\S]+)/);
+  if (descMatch) result.description = descMatch[1].trim();
+
+  return result;
+}
+
+// 프로그래머스 README에서 문제 제출 정보를 추출한다.
+function parseProgrammersReadme(text: string): ProblemReadmeDraft {
+  const result: ProblemReadmeDraft = {
+    platform: ProblemPlatform.PROGRAMMERS,
+  };
+
+  const titleMatch = text.match(/^# \[(.+?)\] (.+?) - (\d+)/m);
+  if (titleMatch) {
+    result.tier = titleMatch[1];
+    result.title = titleMatch[2];
+    result.problemId = titleMatch[3];
+  }
+
+  const linkMatch = text.match(
+    /\(https:\/\/school\.programmers\.co\.kr\/[^)]+\)/,
+  );
+  if (linkMatch) result.link = linkMatch[0].slice(1, -1);
+
+  const memoryMatch = text.match(/메모리:\s*([\d.]+ MB)/);
+  const timeMatch = text.match(/시간:\s*([\d.]+ ms)/);
+  if (memoryMatch) result.memory = memoryMatch[1];
+  if (timeMatch) result.time = timeMatch[1];
+
+  const categoryMatch = text.match(/### 구분\s+(.+)\n/);
+  if (categoryMatch) {
+    result.categories = categoryMatch[1]
+      .replace(/\s+/g, " ")
+      .trim()
+      .split(">")
+      .map((item) => item.trim());
+  }
+
+  const accuracyMatch = text.match(/정확성:\s*([\d.]+)%/);
+  if (accuracyMatch) result.accuracy = Number.parseFloat(accuracyMatch[1]);
+
+  const scoreMatch = text.match(/합계:\s*([\d.]+)\s*\/\s*([\d.]+)/);
+  if (scoreMatch) {
+    result.score = Number.parseFloat(scoreMatch[1]);
+    result.scoreMax = Number.parseFloat(scoreMatch[2]);
+  }
+
+  const dateMatch = text.match(/### 제출 일자\s+(.+)/);
+  if (dateMatch) result.submittedAtText = dateMatch[1].trim();
+
+  const descMatch = text.match(/### 문제 설명\s+([\s\S]+)/);
+  if (descMatch) {
+    const rawDescription = descMatch[1];
+    const sourceIndex = rawDescription.indexOf("\n\n> 출처");
+    result.description =
+      sourceIndex === -1
+        ? rawDescription.trim()
+        : rawDescription.slice(0, sourceIndex).trim();
+  }
+
+  return result;
 }

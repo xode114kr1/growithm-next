@@ -385,7 +385,6 @@ project-root/
 │  │  │  ├─ friend.helper.ts
 │  │  │  └─ friend.validator.ts
 │  │  ├─ problems/
-│  │  ├─ readme/
 │  │  ├─ studies/
 │  │  │  ├─ study.server.ts
 │  │  │  ├─ study.helper.ts
@@ -515,9 +514,8 @@ src/
 ├─ app/api/github/.../route.ts         # GitHub 요청 진입점
 ├─ app/api/queue/webhook-delivery/     # Queue callback 진입점
 ├─ services/github/                    # GitHub 공통 오류와 payload 보조 로직
-├─ services/readme/                    # GitHub README 조회 처리
 ├─ services/webhook-receiver/          # 웹훅 검증, 최초 저장, Queue 발행
-├─ services/webhook-delivery-processing/ # Queue 메시지 기반 Delivery 처리
+├─ services/webhook-delivery-processing/ # Queue 메시지 기반 Delivery와 GitHub 파일 처리
 ├─ services/webhook-registration/      # GitHub 웹훅 등록 처리
 ├─ lib/auth/auth.ts                    # Auth.js 및 GitHub provider 설정
 └─ types/next-auth.d.ts                # Auth.js 타입 확장
