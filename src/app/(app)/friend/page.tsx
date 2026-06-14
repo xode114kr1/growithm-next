@@ -3,7 +3,7 @@ import {
   getFriendRelationsForUsers,
   getReceivedFriendRequests,
   getSentFriendRequests,
-} from "@/services/friends/friend.server";
+} from "@/services/friends/friend.query";
 import { getFriendUsers, getUsers } from "@/services/users/user.server";
 import type { FriendProfile } from "@/types/friend";
 

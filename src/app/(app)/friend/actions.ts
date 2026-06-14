@@ -8,7 +8,7 @@ import {
   deleteFriend,
   deleteReceivedFriendRequest,
   sendFriendRequest,
-} from "@/services/friends/friend.server";
+} from "@/services/friends/friend.command";
 import { auth } from "@/lib/auth/auth";
 
 type FriendActionResult =
