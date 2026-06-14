@@ -17,11 +17,12 @@ export default async function ProblemDetailPage({
 }) {
   const { id } = await params;
   const session = await auth();
+  const userId = session?.user?.id;
   const [problem, shareTargetStudies] = await Promise.all([
-    getProblemDetail(id),
+    getProblemDetail({ id, userId }),
     getProblemShareTargetStudies({
       problemId: id,
-      userId: session?.user?.id,
+      userId,
     }),
   ]);
 

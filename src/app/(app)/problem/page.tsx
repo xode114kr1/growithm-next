@@ -1,4 +1,5 @@
 import { ProblemPlatform } from "@/generated/prisma/enums";
+import { auth } from "@/lib/auth/auth";
 import {
   getAvailableProblemTiers,
   getProblemCount,
@@ -21,16 +22,18 @@ type ProblemPageProps = {
 
 export default async function ProblemPage({ searchParams }: ProblemPageProps) {
   const params = await searchParams;
+  const session = await auth();
+  const userId = session?.user?.id;
   const filters = parseFilters(params);
   const requestedPage = parsePageParam(params.page);
   const [tiers, unfilteredTotalCount, totalCount] = await Promise.all([
-    getAvailableProblemTiers(),
-    getProblemCount(),
-    getProblemCount(filters),
+    getAvailableProblemTiers(userId),
+    getProblemCount(userId),
+    getProblemCount(userId, filters),
   ]);
   const totalPages = Math.max(1, Math.ceil(totalCount / PROBLEM_PAGE_SIZE));
   const currentPage = Math.min(requestedPage, totalPages);
-  const problems = await getProblems({ filters, page: currentPage });
+  const problems = await getProblems({ filters, page: currentPage, userId });
   const emptyStateReason =
     totalCount > 0
       ? null

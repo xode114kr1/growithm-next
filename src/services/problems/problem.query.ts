@@ -32,14 +32,19 @@ const PENDING_PROBLEM_LIMIT = 3;
 export async function getProblems({
   filters,
   page,
+  userId,
 }: {
   filters: ProblemFiltersState;
   page: number;
+  userId: string | undefined;
 }): Promise<ProblemListItem[]> {
+  if (!userId) return [];
+
   const rows = await findProblems({
     filters,
     page,
     pageSize: PROBLEM_PAGE_SIZE,
+    userId,
   });
 
   return rows.map((problem) => ({
@@ -56,21 +61,34 @@ export async function getProblems({
   }));
 }
 
-// 필터 조건에 해당하는 문제 수를 조회한다.
-export async function getProblemCount(filters?: ProblemFiltersState) {
-  return countProblems(filters);
+// 사용자의 필터 조건에 해당하는 문제 수를 조회한다.
+export async function getProblemCount(
+  userId: string | undefined,
+  filters?: ProblemFiltersState,
+) {
+  return userId ? countProblems({ filters, userId }) : 0;
 }
 
-// 문제 필터에 사용할 고유 티어 목록을 조회한다.
-export async function getAvailableProblemTiers() {
-  const tiers = await findAvailableProblemTiers();
+// 사용자의 문제 필터에 사용할 고유 티어 목록을 조회한다.
+export async function getAvailableProblemTiers(userId: string | undefined) {
+  if (!userId) return [];
+
+  const tiers = await findAvailableProblemTiers(userId);
 
   return tiers.flatMap((item) => item.tier ?? []);
 }
 
-// 문제 상세 화면에 필요한 단일 문제 정보를 조회한다.
-export async function getProblemDetail(id: string): Promise<ProblemDetail | null> {
-  const problem = await findProblemDetail(id);
+// 사용자가 소유한 문제의 상세 화면 정보를 조회한다.
+export async function getProblemDetail({
+  id,
+  userId,
+}: {
+  id: string;
+  userId: string | undefined;
+}): Promise<ProblemDetail | null> {
+  if (!userId) return null;
+
+  const problem = await findProblemDetail({ id, userId });
 
   return problem
     ? { ...problem, categories: normalizeProblemCategories(problem.categories) }

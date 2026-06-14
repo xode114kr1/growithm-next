@@ -13,10 +13,12 @@ export async function findProblems({
   filters,
   page,
   pageSize,
+  userId,
 }: {
   filters: ProblemFiltersState;
   page: number;
   pageSize: number;
+  userId: string;
 }) {
   return prisma.problemSubmission.findMany({
     orderBy: buildProblemOrderBy(filters.sort),
@@ -33,30 +35,51 @@ export async function findProblems({
     },
     skip: (page - 1) * pageSize,
     take: pageSize,
-    where: buildProblemWhere(filters),
+    where: {
+      ...buildProblemWhere(filters),
+      userId,
+    },
   });
 }
 
-// 필터 조건에 해당하는 문제 제출 수를 조회한다.
-export async function countProblems(filters?: ProblemFiltersState) {
+// 사용자의 필터 조건에 해당하는 문제 제출 수를 조회한다.
+export async function countProblems({
+  filters,
+  userId,
+}: {
+  filters?: ProblemFiltersState;
+  userId: string;
+}) {
   return prisma.problemSubmission.count({
-    where: filters ? buildProblemWhere(filters) : undefined,
+    where: {
+      ...(filters ? buildProblemWhere(filters) : {}),
+      userId,
+    },
   });
 }
 
-// 문제 제출에 등록된 고유 티어 목록을 조회한다.
-export async function findAvailableProblemTiers() {
+// 사용자의 문제 제출에 등록된 고유 티어 목록을 조회한다.
+export async function findAvailableProblemTiers(userId: string) {
   return prisma.problemSubmission.findMany({
     distinct: ["tier"],
     orderBy: { tier: "asc" },
     select: { tier: true },
-    where: { tier: { not: null } },
+    where: {
+      tier: { not: null },
+      userId,
+    },
   });
 }
 
-// 문제 제출 ID에 해당하는 상세 정보를 조회한다.
-export async function findProblemDetail(id: string) {
-  return prisma.problemSubmission.findUnique({
+// 사용자가 소유한 문제 제출 ID에 해당하는 상세 정보를 조회한다.
+export async function findProblemDetail({
+  id,
+  userId,
+}: {
+  id: string;
+  userId: string;
+}) {
+  return prisma.problemSubmission.findFirst({
     select: {
       accuracy: true,
       categories: true,
@@ -78,7 +101,7 @@ export async function findProblemDetail(id: string) {
       title: true,
       updatedAt: true,
     },
-    where: { id },
+    where: { id, userId },
   });
 }
 
