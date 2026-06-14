@@ -14,6 +14,7 @@ import {
   getWebhookDeliveryForProcessing,
   saveProblemSubmission,
   updateWebhookDeliveryStatus,
+  updateWebhookDeliveryStatusById,
 } from "@/services/webhook-delivery-processing/webhook-delivery-processing.persistence.server";
 import { getRepositoryFullName } from "@/services/github/github-webhook.helper";
 import { isRetryableGitHubFileError } from "@/services/github/github-file.error";
@@ -39,6 +40,26 @@ type WebhookDeliveryProcessingResult = {
 
 // 저장된 GitHub push delivery를 문제 제출 데이터로 처리한다.
 export async function processGitHubWebhookDelivery(
+  webhookDeliveryId: string,
+): Promise<WebhookDeliveryProcessingResult> {
+  try {
+    return await processGitHubWebhookDeliveryCommand(webhookDeliveryId);
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "웹훅 Delivery 재시도 대기";
+
+    await updateWebhookDeliveryStatusById({
+      errorMessage,
+      status: "RETRY_PENDING",
+      webhookDeliveryId,
+    });
+
+    throw error;
+  }
+}
+
+// 저장된 GitHub push delivery의 처리 흐름을 실행한다.
+async function processGitHubWebhookDeliveryCommand(
   webhookDeliveryId: string,
 ): Promise<WebhookDeliveryProcessingResult> {
   const delivery = await getWebhookDeliveryForProcessing(webhookDeliveryId);

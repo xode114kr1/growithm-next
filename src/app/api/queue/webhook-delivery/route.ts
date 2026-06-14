@@ -1,5 +1,4 @@
 import { queue } from "@/lib/queue";
-import { updateWebhookDeliveryStatusById } from "@/services/webhook-delivery-processing/webhook-delivery-processing.persistence.server";
 import { processGitHubWebhookDelivery } from "@/services/webhook-delivery-processing/webhook-delivery-processing.command";
 import { isWebhookDeliveryQueueMessage } from "@/services/webhook-delivery-processing/webhook-delivery-processing.validator";
 
@@ -27,12 +26,6 @@ export const POST = queue.handleCallback(async (message: unknown) => {
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "웹훅 Delivery 재시도 대기";
-
-    await updateWebhookDeliveryStatusById({
-      errorMessage,
-      status: "RETRY_PENDING",
-      webhookDeliveryId: message.webhookDeliveryId,
-    });
 
     console.error("[WebhookQueue] consumer.retry_pending", {
       durationMs: Date.now() - startedAt,
