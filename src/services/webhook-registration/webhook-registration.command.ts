@@ -1,11 +1,14 @@
 import "server-only";
 
-import { prisma } from "@/lib/prisma";
 import {
   fetchGitHubWebhooks,
   postGitHubWebhook,
 } from "@/services/webhook-registration/webhook-registration.client";
 import { getGitHubWebhookErrorMessage } from "@/services/webhook-registration/webhook-registration.helper";
+import {
+  findGitHubAccessToken,
+  upsertGitHubRepositoryWebhook,
+} from "@/services/webhook-registration/webhook-registration.persistence.server";
 import {
   getGitHubWebhookId,
   isGitHubWebhookList,
@@ -55,15 +58,7 @@ export async function registerGitHubWebhook({
     };
   }
 
-  const account = await prisma.account.findFirst({
-    select: {
-      access_token: true,
-    },
-    where: {
-      provider: "github",
-      userId,
-    },
-  });
+  const account = await findGitHubAccessToken(userId);
 
   if (!account?.access_token) {
     return {
@@ -92,19 +87,10 @@ export async function registerGitHubWebhook({
 
   const repositoryFullName = `${repository.owner}/${repository.repo}`;
 
-  await prisma.gitHubRepositoryWebhook.upsert({
-    create: {
-      hookId: webhook.hookId,
-      repositoryFullName,
-      userId,
-    },
-    update: {
-      hookId: webhook.hookId,
-      userId,
-    },
-    where: {
-      repositoryFullName,
-    },
+  await upsertGitHubRepositoryWebhook({
+    hookId: webhook.hookId,
+    repositoryFullName,
+    userId,
   });
 
   return {
