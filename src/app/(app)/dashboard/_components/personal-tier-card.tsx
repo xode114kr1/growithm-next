@@ -1,6 +1,6 @@
 import { Award } from "lucide-react";
 
-import { getSolvedProblemCount } from "@/services/problems/problem.server";
+import { getSolvedProblemCount } from "@/services/problems/problem.query";
 import { getUserPersonalTier } from "@/services/users/user.server";
 import type { PersonalScoreTier } from "@/types/user";
 

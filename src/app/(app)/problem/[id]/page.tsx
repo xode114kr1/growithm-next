@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { auth } from "@/lib/auth/auth";
-import { getProblemDetail } from "@/services/problems/problem.server";
+import { getProblemDetail } from "@/services/problems/problem.query";
 import { getProblemShareTargetStudies } from "@/services/studies/study.server";
 
 import ProblemDescription from "./_components/problem-description";
