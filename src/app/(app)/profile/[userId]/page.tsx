@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
-import { getUserProfilePageData } from "@/services/users/user.query";
+import { getSolvedProblemCount } from "@/services/problems/problem.query";
+import { getUserProfile } from "@/services/users/user.query";
 
 type ProfilePageProps = {
   params: Promise<{
@@ -11,7 +12,10 @@ type ProfilePageProps = {
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { userId } = await params;
-  const profile = await getUserProfilePageData(userId);
+  const [profile, solvedCount] = await Promise.all([
+    getUserProfile(userId),
+    getSolvedProblemCount(userId),
+  ]);
 
   if (!profile) {
     notFound();
@@ -44,7 +48,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               />
               <ProfileStat
                 label="Solved"
-                value={profile.solvedCount.toLocaleString()}
+                value={solvedCount.toLocaleString()}
               />
             </div>
           </div>

@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  findFriendUsers,
   findFriendRelationsForUserIds,
   findReceivedFriendRequests,
   findSentFriendRequests,
@@ -12,6 +13,22 @@ import type {
   FriendSearchResult,
 } from "@/types/friend";
 import type { UserSummary } from "@/types/user";
+
+// 현재 사용자의 친구 목록을 화면용 프로필 데이터로 조회한다.
+export async function getFriendUsers(userId: string | undefined) {
+  if (!userId) {
+    return [];
+  }
+
+  const friendships = await findFriendUsers(userId);
+
+  return friendships.map((friendship) =>
+    createFriendProfile(
+      friendship.userAId === userId ? friendship.userB : friendship.userA,
+      "friend",
+    ),
+  );
+}
 
 // 현재 사용자가 받은 대기 중인 친구 요청을 화면용 데이터로 조회한다.
 export async function getReceivedFriendRequests(

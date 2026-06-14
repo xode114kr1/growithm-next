@@ -1,11 +1,11 @@
 import { auth } from "@/lib/auth/auth";
 import {
+  getFriendUsers,
   getFriendRelationsForUsers,
   getReceivedFriendRequests,
   getSentFriendRequests,
 } from "@/services/friends/friend.query";
-import { getFriendUsers, getUsers } from "@/services/users/user.query";
-import type { FriendProfile } from "@/types/friend";
+import { getUsers } from "@/services/users/user.query";
 
 import FriendContent from "./_components/friend-content";
 
@@ -18,10 +18,6 @@ export default async function FriendPage() {
     getSentFriendRequests(userId),
     userId ? getUsers({ excludedUserId: userId }) : [],
   ]);
-  const friends: FriendProfile[] = friendUsers.map((user) => ({
-    ...user,
-    relationStatus: "friend",
-  }));
   const searchResults = await getFriendRelationsForUsers({ userId, users });
 
   return (
@@ -29,7 +25,7 @@ export default async function FriendPage() {
       <div className="page-container">
         <FriendHeader />
         <FriendContent
-          friends={friends}
+          friends={friendUsers}
           receivedRequests={receivedRequests}
           searchResults={searchResults}
           sentRequests={sentRequests}

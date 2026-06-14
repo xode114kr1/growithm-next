@@ -11,6 +11,26 @@ const friendUserSelect = {
   score: true,
 } satisfies Record<keyof FriendUserRow, true>;
 
+// 현재 사용자와 친구 관계인 사용자 정보를 조회한다.
+export async function findFriendUsers(userId: string) {
+  return prisma.friendship.findMany({
+    include: {
+      userA: {
+        select: friendUserSelect,
+      },
+      userB: {
+        select: friendUserSelect,
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    where: {
+      OR: [{ userAId: userId }, { userBId: userId }],
+    },
+  });
+}
+
 // 현재 사용자가 받은 친구 요청과 요청자 정보를 조회한다.
 export async function findReceivedFriendRequests(userId: string) {
   return prisma.friendRequest.findMany({

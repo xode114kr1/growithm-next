@@ -23,7 +23,7 @@ export async function findUserScore(userId: string) {
   });
 }
 
-// 프로필 화면에 필요한 사용자 정보와 문제 제출 수를 조회한다.
+// 사용자 프로필 표시에 필요한 정보를 조회한다.
 export async function findUserProfile(userId: string) {
   return prisma.user.findUnique({
     select: {
@@ -31,11 +31,6 @@ export async function findUserProfile(userId: string) {
       image: true,
       name: true,
       score: true,
-      _count: {
-        select: {
-          problemSubmissions: true,
-        },
-      },
     },
     where: {
       id: userId,
@@ -54,26 +49,6 @@ export async function findUsersExcluding(excludedUserId: string) {
       id: {
         not: excludedUserId,
       },
-    },
-  });
-}
-
-// 현재 사용자와 친구 관계인 사용자 정보를 조회한다.
-export async function findFriendUsers(userId: string) {
-  return prisma.friendship.findMany({
-    include: {
-      userA: {
-        select: userSummarySelect,
-      },
-      userB: {
-        select: userSummarySelect,
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    where: {
-      OR: [{ userAId: userId }, { userBId: userId }],
     },
   });
 }
