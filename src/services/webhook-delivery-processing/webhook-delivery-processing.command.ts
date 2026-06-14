@@ -1,5 +1,7 @@
 import "server-only";
 
+import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
+import { getProblemExperienceScore } from "@/services/problems/problem.helper";
 import {
   fetchGitHubRawCode,
   fetchGitHubReadmeContent,
@@ -7,6 +9,7 @@ import {
 import {
   buildRawGitHubContentUrl,
   getProblemFileChangeFromPushPayload,
+  parseProblemReadme,
 } from "@/services/webhook-delivery-processing/webhook-delivery-processing.helper";
 import {
   claimWebhookDeliveryForProcessing,
@@ -206,15 +209,9 @@ async function processChangedProblemFile({
     };
   }
 
-  const result = await saveProblemSubmission({
-    code: codeResult.code,
-    readme: readmeResult.readme,
-    repositoryFullName,
-    userId,
-    webhookDeliveryId,
-  });
+  const parsedReadme = parseProblemReadme(readmeResult.readme.text);
 
-  if (!result.saved) {
+  if (!parsedReadme) {
     const errorMessage = "README에서 문제 정보를 파싱할 수 없습니다.";
 
     await updateWebhookDeliveryStatus({
@@ -229,6 +226,34 @@ async function processChangedProblemFile({
       status: "PARSE_FAILED" as const,
     };
   }
+
+  const experienceScore = getProblemExperienceScore({
+    platform: parsedReadme.platform,
+    tier: parsedReadme.tier,
+  });
+
+  await saveProblemSubmission({
+    accuracy: parsedReadme.accuracy,
+    categories: parsedReadme.categories,
+    code: codeResult.code,
+    commitSha: readmeResult.readme.commitSha,
+    description: parsedReadme.description,
+    link: parsedReadme.link,
+    memory: parsedReadme.memory,
+    platform: parsedReadme.platform,
+    problemId: parsedReadme.problemId,
+    readmePath: readmeResult.readme.path,
+    repositoryFullName,
+    score: experienceScore,
+    scoreMax: parsedReadme.scoreMax,
+    status: ProblemSubmissionStatus.PENDING,
+    submittedAtText: parsedReadme.submittedAtText,
+    tier: parsedReadme.tier,
+    time: parsedReadme.time,
+    title: parsedReadme.title,
+    userId,
+    webhookDeliveryId,
+  });
 
   await updateWebhookDeliveryStatus({
     deliveryId,

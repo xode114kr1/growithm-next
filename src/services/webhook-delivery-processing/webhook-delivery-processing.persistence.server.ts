@@ -1,13 +1,12 @@
 import "server-only";
 
-import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
+import type {
+  ProblemPlatform,
+  ProblemSubmissionStatus,
+} from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
-import { getProblemExperienceScore } from "@/services/problems/problem.helper";
-import {
-  getRepositoryOwnerId,
-  parseProblemReadme,
-} from "@/services/webhook-delivery-processing/webhook-delivery-processing.helper";
-import type { GitHubReadmeContent, GitHubWebhookPayload } from "@/types/github";
+import { getRepositoryOwnerId } from "@/services/webhook-delivery-processing/webhook-delivery-processing.helper";
+import type { GitHubWebhookPayload } from "@/types/github";
 
 // 문제 처리에 필요한 저장된 웹훅 delivery를 조회한다.
 export async function getWebhookDeliveryForProcessing(webhookDeliveryId: string) {
@@ -95,33 +94,52 @@ async function getRepositoryOwnerFromPayload(
   return { accessToken: account.access_token, userId: account.userId };
 }
 
-// README와 코드 내용을 문제 제출 데이터로 저장하고 점수를 반영한다.
+// 준비된 문제 제출 데이터를 저장하고 사용자 점수 차이를 반영한다.
 export async function saveProblemSubmission({
+  accuracy,
+  categories,
   code,
-  readme,
+  commitSha,
+  description,
+  link,
+  memory,
+  platform,
+  problemId,
+  readmePath,
   repositoryFullName,
+  score,
+  scoreMax,
+  status,
+  submittedAtText,
+  tier,
+  time,
+  title,
   userId,
   webhookDeliveryId,
 }: {
+  accuracy?: number;
+  categories?: string[];
   code: string | null;
-  readme: GitHubReadmeContent;
+  commitSha: string;
+  description?: string;
+  link?: string;
+  memory?: string;
+  platform: ProblemPlatform;
+  problemId: string;
+  readmePath: string;
   repositoryFullName: string;
+  score: number;
+  scoreMax?: number;
+  status: ProblemSubmissionStatus;
+  submittedAtText?: string;
+  tier?: string;
+  time?: string;
+  title: string;
   userId: string;
   webhookDeliveryId: string;
 }) {
-  const parsedReadme = parseProblemReadme(readme.text);
-
-  if (!parsedReadme) {
-    return { failureReason: "PARSE_FAILED" as const, saved: false as const };
-  }
-
-  const experienceScore = getProblemExperienceScore({
-    platform: parsedReadme.platform,
-    tier: parsedReadme.tier,
-  });
-
   await prisma.$transaction(async (tx) => {
-    const submissionKey = `${repositoryFullName}:${readme.commitSha}:${readme.path}`;
+    const submissionKey = `${repositoryFullName}:${commitSha}:${readmePath}`;
     // 동일 제출의 upsert와 점수 계산을 직렬화해 동시 Consumer의 이중 반영을 막는다.
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${submissionKey}, 0))`;
 
@@ -129,8 +147,8 @@ export async function saveProblemSubmission({
       select: { score: true, userId: true },
       where: {
         repositoryFullName_commitSha_readmePath: {
-          commitSha: readme.commitSha,
-          readmePath: readme.path,
+          commitSha,
+          readmePath,
           repositoryFullName,
         },
       },
@@ -138,50 +156,50 @@ export async function saveProblemSubmission({
 
     await tx.problemSubmission.upsert({
       create: {
-        accuracy: parsedReadme.accuracy,
+        accuracy,
         code,
-        categories: parsedReadme.categories,
-        commitSha: readme.commitSha,
-        description: parsedReadme.description,
-        link: parsedReadme.link,
-        memory: parsedReadme.memory,
-        platform: parsedReadme.platform,
-        problemId: parsedReadme.problemId,
-        readmePath: readme.path,
+        categories,
+        commitSha,
+        description,
+        link,
+        memory,
+        platform,
+        problemId,
+        readmePath,
         repositoryFullName,
-        score: experienceScore,
-        scoreMax: parsedReadme.scoreMax,
-        status: ProblemSubmissionStatus.PENDING,
-        submittedAtText: parsedReadme.submittedAtText,
-        tier: parsedReadme.tier,
-        time: parsedReadme.time,
-        title: parsedReadme.title,
+        score,
+        scoreMax,
+        status,
+        submittedAtText,
+        tier,
+        time,
+        title,
         userId,
         webhookDeliveryId,
       },
       update: {
-        accuracy: parsedReadme.accuracy,
+        accuracy,
         code,
-        categories: parsedReadme.categories,
-        description: parsedReadme.description,
-        link: parsedReadme.link,
-        memory: parsedReadme.memory,
-        platform: parsedReadme.platform,
-        problemId: parsedReadme.problemId,
-        score: experienceScore,
-        scoreMax: parsedReadme.scoreMax,
-        status: ProblemSubmissionStatus.PENDING,
-        submittedAtText: parsedReadme.submittedAtText,
-        tier: parsedReadme.tier,
-        time: parsedReadme.time,
-        title: parsedReadme.title,
+        categories,
+        description,
+        link,
+        memory,
+        platform,
+        problemId,
+        score,
+        scoreMax,
+        status,
+        submittedAtText,
+        tier,
+        time,
+        title,
         userId,
         webhookDeliveryId,
       },
       where: {
         repositoryFullName_commitSha_readmePath: {
-          commitSha: readme.commitSha,
-          readmePath: readme.path,
+          commitSha,
+          readmePath,
           repositoryFullName,
         },
       },
@@ -189,8 +207,7 @@ export async function saveProblemSubmission({
 
     const existingScore = existingSubmission?.score ?? 0;
     const scoreDelta =
-      experienceScore -
-      (existingSubmission?.userId === userId ? existingScore : 0);
+      score - (existingSubmission?.userId === userId ? existingScore : 0);
 
     if (scoreDelta !== 0) {
       await tx.user.update({
@@ -210,8 +227,6 @@ export async function saveProblemSubmission({
       });
     }
   });
-
-  return { saved: true as const };
 }
 
 // 저장된 웹훅 delivery의 처리 상태와 오류를 갱신한다.
