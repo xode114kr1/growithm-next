@@ -4,7 +4,7 @@ import {
   getReceivedFriendRequests,
   getSentFriendRequests,
 } from "@/services/friends/friend.query";
-import { getFriendUsers, getUsers } from "@/services/users/user.server";
+import { getFriendUsers, getUsers } from "@/services/users/user.query";
 import type { FriendProfile } from "@/types/friend";
 
 import FriendContent from "./_components/friend-content";

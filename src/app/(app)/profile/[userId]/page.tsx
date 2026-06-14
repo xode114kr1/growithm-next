@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
-import { getUserProfilePageData } from "@/services/users/user.server";
+import { getUserProfilePageData } from "@/services/users/user.query";
 
 type ProfilePageProps = {
   params: Promise<{
