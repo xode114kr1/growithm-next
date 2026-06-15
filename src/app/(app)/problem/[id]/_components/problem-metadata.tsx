@@ -2,9 +2,9 @@ import type { ProblemDetail } from "@/types/problem";
 
 export default function ProblemMetadata({ problem }: { problem: ProblemDetail }) {
   const metadata = [
-    { label: "Memory", value: problem.memory ?? "기록 없음" },
-    { label: "Time", value: problem.time ?? "기록 없음" },
-    { label: "Submitted", value: problem.submittedAtText ?? "제출 완료" },
+    { label: "메모리", value: problem.memory ?? "기록 없음" },
+    { label: "실행 시간", value: problem.time ?? "기록 없음" },
+    { label: "제출일", value: problem.submittedAtText ?? "제출 완료" },
   ].filter((item): item is { label: string; value: string } => Boolean(item.value));
 
   return (

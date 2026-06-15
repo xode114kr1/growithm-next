@@ -22,11 +22,9 @@ function DashboardHeader() {
   return (
     <header className="page-header flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
       <div>
-        <h1 className="page-title">Morning, Developer.</h1>
+        <h1 className="page-title">대시보드</h1>
         <p className="text-body-md text-on-surface-variant">
-          Your algorithmic growth is on track for{" "}
-          <span className="font-semibold text-secondary">Platinum III</span>{" "}
-          this week.
+          문제 풀이 현황과 성장 기록을 한눈에 확인하세요.
         </p>
       </div>
       <Link

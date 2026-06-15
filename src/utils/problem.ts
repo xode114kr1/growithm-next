@@ -1,17 +1,35 @@
 import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
+import type { ProblemTierBucketName } from "@/types/problem";
+
+const programmersLevelTiers: Partial<Record<number, ProblemTierBucketName>> = {
+  1: "BRONZE",
+  2: "SILVER",
+  3: "GOLD",
+  4: "PLATINUM",
+  5: "DIAMOND",
+};
+
+const growithmProblemTiers = new Set<ProblemTierBucketName>([
+  "BRONZE",
+  "SILVER",
+  "GOLD",
+  "PLATINUM",
+  "DIAMOND",
+  "RUBY",
+]);
 
 // 문제 제출 상태의 표시 이름을 반환한다.
 export function getProblemStatusLabel(status: ProblemSubmissionStatus) {
   return status === ProblemSubmissionStatus.COMPLETED
-    ? "Completed"
-    : "Memo pending";
+    ? "작성 완료"
+    : "메모 작성 대기";
 }
 
 // 문제 제출 상태의 보조 설명 문구를 반환한다.
 export function getProblemStatusDescription(status: ProblemSubmissionStatus) {
   return status === ProblemSubmissionStatus.COMPLETED
-    ? "Ready to share"
-    : "Write a memo to share";
+    ? "공유 가능"
+    : "공유하려면 메모를 작성하세요";
 }
 
 // 문제 제출 상태에 맞는 배지 스타일 클래스를 반환한다.
@@ -35,18 +53,24 @@ export function formatScore(score: number | null, scoreMax: number | null) {
 
 // 제출 시각이 없을 때 기본 문구를 적용해 표시값을 만든다.
 export function getSubmittedLabel(submittedAtText: string | null) {
-  return submittedAtText ?? "Submitted";
+  return submittedAtText ?? "제출됨";
 }
 
-// 문제 티어에 맞는 배지 스타일 클래스를 반환한다.
-export function getTierBadgeClass(tier: string | null) {
-  if (tier?.toLowerCase().includes("platinum")) {
-    return "badge-tier-platinum";
+// 플랫폼별 원본 난이도를 Growithm 문제 티어로 변환한다.
+export function getGrowithmProblemTier(tier: string | null) {
+  const normalizedTier = tier?.trim().toLowerCase() ?? "";
+
+  if (!normalizedTier) return null;
+
+  const levelMatch = normalizedTier.match(/(?:lv\.?|level)\s*(\d+)/);
+
+  if (levelMatch) {
+    return programmersLevelTiers[Number(levelMatch[1])] ?? null;
   }
 
-  if (tier?.toLowerCase().includes("gold")) {
-    return "badge-tier-gold";
-  }
+  const tierName = normalizedTier.split(/\s+/)[0]?.toUpperCase();
 
-  return "badge-tier-silver";
+  return growithmProblemTiers.has(tierName as ProblemTierBucketName)
+    ? (tierName as ProblemTierBucketName)
+    : null;
 }

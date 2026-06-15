@@ -1,3 +1,5 @@
+import type { PersonalScoreTier } from "@/types/user";
+
 export type FriendListFilter = "friends" | "received" | "sent";
 
 export type FriendRelationStatus =
@@ -11,8 +13,7 @@ export type FriendProfile = {
   id: string;
   name: string;
   relationStatus: FriendRelationStatus;
-  tier: string;
-  tierClass: string;
+  tier: PersonalScoreTier;
 };
 
 export type FriendRequest = FriendProfile & {

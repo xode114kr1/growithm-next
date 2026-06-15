@@ -17,20 +17,20 @@ export default function StudyProblemsHeading({
             className="font-semibold transition-colors hover:text-primary"
             href="/study"
           >
-            Studies
+            스터디
           </Link>
           <span>/</span>
           <span className="font-semibold text-primary">{name}</span>
           <span>/</span>
           <span>스터디 - 문제 리스트</span>
         </div>
-        <h1 className="page-title mb-2">Study Problem List</h1>
+        <h1 className="page-title mb-2">스터디 문제 목록</h1>
         <p className="max-w-xl text-body-md text-on-surface-variant">
           {description}
         </p>
       </div>
       <div className="app-card px-5 py-3">
-        <p className="text-label-caps text-slate-400">Shared Problems</p>
+        <p className="text-label-caps text-slate-400">공유된 문제</p>
         <p className="text-h3-ui text-primary">{totalCount.toLocaleString()}</p>
       </div>
     </div>

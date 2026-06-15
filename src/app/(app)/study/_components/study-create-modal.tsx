@@ -64,7 +64,7 @@ export default function StudyCreateModal() {
             <div className="border-b border-slate-100 px-6 py-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-label-caps text-slate-400">New Study</p>
+                  <p className="text-label-caps text-slate-400">새 스터디</p>
                   <h2 className="text-h3-ui text-primary" id={titleId}>
                     스터디 생성
                   </h2>

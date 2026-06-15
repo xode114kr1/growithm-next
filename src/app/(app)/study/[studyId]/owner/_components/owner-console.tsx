@@ -87,7 +87,7 @@ function InviteMembersCard({
                   defaultValue={state.status === "error" ? state.target : ""}
                   maxLength={120}
                   name="target"
-                  placeholder="github_id or email"
+                  placeholder="GitHub ID 또는 이메일"
                   required
                   type="text"
                 />
@@ -197,7 +197,7 @@ function ManageMembersCard({
                     </div>
                     <div>
                       <p className="font-semibold text-on-surface">{member.name}</p>
-                      <p className="text-xs text-slate-400">last active {member.lastActive}</p>
+                      <p className="text-xs text-slate-400">최근 활동 {member.lastActive}</p>
                     </div>
                   </div>
                 </td>
@@ -218,8 +218,8 @@ function ManageMembersCard({
                         defaultValue={member.role}
                         name="role"
                       >
-                        <option>LEADER</option>
-                        <option>MEMBER</option>
+                        <option value="LEADER">리더</option>
+                        <option value="MEMBER">멤버</option>
                       </select>
                       <button className="btn-secondary min-h-10 px-3" type="submit">
                         저장
@@ -230,7 +230,7 @@ function ManageMembersCard({
                 <td className="px-6 py-4 text-body-sm text-slate-500">{member.joinedAt}</td>
                 <td className="px-6 py-4">
                   {member.role === "OWNER" ? (
-                    <span className="text-xs italic text-slate-300">No Action</span>
+                    <span className="text-xs italic text-slate-300">작업 없음</span>
                   ) : (
                     <form action={removeStudyMember}>
                       <input name="studyId" type="hidden" value={studyId} />
@@ -276,7 +276,7 @@ function StudySettingsCard({ study }: { study: OwnerStudy }) {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <label className="block">
-          <span className="mb-2 block text-label-caps text-slate-500">Study Name</span>
+          <span className="mb-2 block text-label-caps text-slate-500">스터디 이름</span>
           <input
             className="input-field font-semibold"
             defaultValue={state.status === "error" ? state.title : study.name}
@@ -287,7 +287,7 @@ function StudySettingsCard({ study }: { study: OwnerStudy }) {
           />
         </label>
         <label className="block lg:col-span-2">
-          <span className="mb-2 block text-label-caps text-slate-500">Description</span>
+          <span className="mb-2 block text-label-caps text-slate-500">설명</span>
           <textarea
             className="min-h-32 w-full resize-y rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-body-md outline-none transition-all focus:border-primary focus:bg-white focus:ring-2 focus:ring-secondary-container/30"
             defaultValue={state.status === "error" ? state.description : study.description}
@@ -329,7 +329,7 @@ function DangerZoneCard({
     >
       <input name="studyId" type="hidden" value={studyId} />
       <div className="mb-6">
-        <p className="text-label-caps text-error">Danger Zone</p>
+        <p className="text-label-caps text-error">주의가 필요한 작업</p>
         <h2 className="section-title text-error">스터디 삭제</h2>
         <p className="mt-2 max-w-2xl text-body-sm text-on-surface-variant">
           스터디를 삭제하면 문제 풀이 내역과 멤버 정보가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
@@ -339,13 +339,13 @@ function DangerZoneCard({
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_320px] lg:items-end">
         <label className="block rounded-lg border border-error-container bg-white p-4">
           <span className="mb-2 block text-label-caps text-slate-500">
-            Confirm by typing &apos;{studyName}&apos;
+            확인을 위해 &apos;{studyName}&apos; 입력
           </span>
           <input
             className="w-full border-none bg-transparent p-0 font-mono text-body-sm text-error outline-none placeholder:text-slate-300 focus:ring-0"
             name="confirmText"
             onChange={(event) => setConfirmText(event.target.value)}
-            placeholder="Type here..."
+            placeholder="확인 문구를 입력하세요"
             type="text"
             value={confirmText}
           />

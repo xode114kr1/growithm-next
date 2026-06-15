@@ -23,21 +23,6 @@ export async function findUserScore(userId: string) {
   });
 }
 
-// 사용자 프로필 표시에 필요한 정보를 조회한다.
-export async function findUserProfile(userId: string) {
-  return prisma.user.findUnique({
-    select: {
-      email: true,
-      image: true,
-      name: true,
-      score: true,
-    },
-    where: {
-      id: userId,
-    },
-  });
-}
-
 // 제외할 사용자를 뺀 사용자 요약 목록을 조회한다.
 export async function findUsersExcluding(excludedUserId: string) {
   return prisma.user.findMany({

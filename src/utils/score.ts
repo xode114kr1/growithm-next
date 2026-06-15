@@ -46,7 +46,7 @@ export function getScoreProgressLabel<TTier extends string>(
   const nextThreshold = thresholds[currentTierIndex - 1];
 
   if (!nextThreshold) {
-    return "Max tier";
+    return "최고 티어";
   }
 
   return `${score.toLocaleString()} / ${nextThreshold.minScore.toLocaleString()} XP`;

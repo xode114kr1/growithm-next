@@ -8,9 +8,9 @@ type RoleFilter = "ALL" | StudyMember["role"];
 type SortKey = "contribution" | "lastActive" | "joinedAt" | "name";
 
 const roleLabels: Record<StudyMember["role"], string> = {
-  LEADER: "Leader",
-  MEMBER: "Member",
-  OWNER: "Owner",
+  LEADER: "리더",
+  MEMBER: "멤버",
+  OWNER: "owner",
 };
 
 export default function StudyMemberList({
@@ -83,9 +83,9 @@ export default function StudyMemberList({
             value={roleFilter}
           >
             <option value="ALL">전체</option>
-            <option value="OWNER">Owner</option>
-            <option value="LEADER">Leader</option>
-            <option value="MEMBER">Member</option>
+            <option value="OWNER">owner</option>
+            <option value="LEADER">리더</option>
+            <option value="MEMBER">멤버</option>
           </select>
         </label>
         <label className="block">
@@ -189,13 +189,13 @@ function MemberCard({
 
       <div className="grid grid-cols-1 gap-4 border-t border-slate-100 pt-5 sm:grid-cols-2">
         <div>
-          <p className="text-label-caps text-slate-400">Contribution</p>
+          <p className="text-label-caps text-slate-400">기여도</p>
           <p className="mt-1 section-title text-secondary">
             {member.contribution.toLocaleString()} XP
           </p>
         </div>
         <div>
-          <p className="text-label-caps text-slate-400">Last Active</p>
+          <p className="text-label-caps text-slate-400">최근 활동</p>
           <p className="mt-1 text-body-md font-semibold text-on-surface">
             {member.lastActive}
           </p>
@@ -247,10 +247,10 @@ function MemberProfileModal({
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <ProfileStat label="Contribution" value={`${member.contribution.toLocaleString()} XP`} />
-          <ProfileStat label="Role" value={roleLabels[member.role]} />
-          <ProfileStat label="Last Active" value={member.lastActive} />
-          <ProfileStat label="Joined" value={member.joinedAt} />
+          <ProfileStat label="기여도" value={`${member.contribution.toLocaleString()} XP`} />
+          <ProfileStat label="역할" value={roleLabels[member.role]} />
+          <ProfileStat label="최근 활동" value={member.lastActive} />
+          <ProfileStat label="참여일" value={member.joinedAt} />
         </div>
       </div>
     </div>

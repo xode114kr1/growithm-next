@@ -29,7 +29,7 @@ export default function StudyMembersHeading({
         </p>
       </div>
       <div className="app-card px-5 py-3">
-        <p className="text-label-caps text-slate-400">Members</p>
+        <p className="text-label-caps text-slate-400">멤버</p>
         <p className="text-h3-ui text-primary">{memberCount}명</p>
       </div>
     </div>

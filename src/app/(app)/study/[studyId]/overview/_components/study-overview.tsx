@@ -1,17 +1,13 @@
 import Link from "next/link";
 
-import type { StudyOverview, StudyTier } from "@/types/study";
+import type { StudyOverview } from "@/types/study";
+import {
+  studyTierBadgeColors,
+  studyTierProgressColors,
+} from "@/utils/color";
 import { getTierProgress } from "@/utils/study";
 
 import ContributionChart from "./contribution-chart";
-
-const tierStyles: Record<StudyTier, string> = {
-  Bronze: "border-amber-700/20 bg-amber-700 text-white",
-  Diamond: "border-sky-300 bg-sky-100 text-sky-800",
-  Gold: "border-yellow-400/40 bg-yellow-400 text-yellow-950",
-  Platinum: "border-cyan-200 bg-primary-fixed text-primary",
-  Silver: "border-slate-300 bg-slate-200 text-slate-700",
-};
 
 export default function StudyOverviewView({ study }: { study: StudyOverview }) {
   return (
@@ -38,7 +34,7 @@ function StudyOverviewHeader({ study }: { study: StudyOverview }) {
           className="font-semibold transition-colors hover:text-primary"
           href="/study"
         >
-          Studies
+          스터디
         </Link>
         <span>/</span>
         <span className="font-semibold text-primary">{study.name}</span>
@@ -47,7 +43,7 @@ function StudyOverviewHeader({ study }: { study: StudyOverview }) {
       </div>
       <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
-          <h1 className="page-title text-primary">{study.name} Overview</h1>
+          <h1 className="page-title text-primary">{study.name} 개요</h1>
           <p className="mt-2 max-w-2xl text-body-md text-on-surface-variant">
             {study.description}
           </p>
@@ -69,14 +65,14 @@ function StudyTierCard({ study }: { study: StudyOverview }) {
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <h2 className="text-h2-editorial text-primary">{study.tier}</h2>
             <span
-              className={`rounded-full border px-3 py-1 text-xs font-bold uppercase ${tierStyles[study.tier]}`}
+              className={`rounded-full border px-3 py-1 text-xs font-bold uppercase ${studyTierBadgeColors[study.tier]}`}
             >
-              {study.tier} Tier
+              {study.tier} 티어
             </span>
           </div>
         </div>
         <div className="md:text-right">
-          <p className="text-body-sm text-slate-400">Total XP</p>
+          <p className="text-body-sm text-slate-400">총 XP</p>
           <p className="text-h3-ui text-secondary">
             {study.score.toLocaleString()}
           </p>
@@ -85,7 +81,7 @@ function StudyTierCard({ study }: { study: StudyOverview }) {
       <div className="space-y-3">
         <div className="h-3 overflow-hidden rounded-full bg-slate-100">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-slate-300 to-slate-500"
+            className={`h-full rounded-full bg-linear-to-r ${studyTierProgressColors[study.tier]}`}
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -95,7 +91,7 @@ function StudyTierCard({ study }: { study: StudyOverview }) {
             {study.nextTierScore.toLocaleString()} XP
           </span>
           <span className="text-secondary">
-            {remainingScore.toLocaleString()} XP to next tier
+            다음 티어까지 {remainingScore.toLocaleString()} XP
           </span>
         </div>
       </div>
@@ -144,7 +140,7 @@ function ContributionSection({
           <h2 className="section-title">기여도 분석</h2>
           <p className="text-body-sm text-slate-500">스터디원별 풀이 기여도</p>
         </div>
-        <span className="text-label-caps text-slate-400">Max 4 members</span>
+        <span className="text-label-caps text-slate-400">최대 4명</span>
       </div>
       <ContributionChart data={contribution} />
     </section>
@@ -191,7 +187,7 @@ function StudyMembersCard({ members }: { members: StudyOverview["members"] }) {
             </div>
             {member.role === "owner" ? (
               <span className="rounded-full bg-secondary-fixed px-2 py-1 text-[10px] font-bold uppercase text-on-secondary-fixed">
-                Owner
+                owner
               </span>
             ) : null}
           </div>
@@ -221,7 +217,7 @@ function RecentSolvedProblems({
           className="text-body-sm font-semibold text-secondary hover:underline"
           href={`/study/${studyId}/problems`}
         >
-          View All
+          전체 보기
         </Link>
       </div>
       <div className="app-card overflow-hidden">
@@ -230,10 +226,10 @@ function RecentSolvedProblems({
             <table className="w-full border-collapse text-left">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/50">
-                  <TableHead>Problem Title</TableHead>
-                  <TableHead>Platform</TableHead>
-                  <TableHead>Tier</TableHead>
-                  <TableHead>Solved By</TableHead>
+                  <TableHead>문제 제목</TableHead>
+                  <TableHead>플랫폼</TableHead>
+                  <TableHead>티어</TableHead>
+                  <TableHead>풀이한 멤버</TableHead>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">

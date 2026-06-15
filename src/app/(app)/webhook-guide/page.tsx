@@ -47,7 +47,7 @@ export default function WebhookGuidePage() {
     <main className="page-shell">
       <div className="page-container space-y-8">
         <header className="page-header max-w-3xl">
-          <p className="mb-3 text-label-caps text-secondary">Service Setup</p>
+          <p className="mb-3 text-label-caps text-secondary">서비스 설정</p>
           <h1 className="page-title mb-4">서비스 연결 가이드</h1>
           <p className="text-body-md text-on-surface-variant">
             아래 순서를 따라 진행하면, 백준 풀이 기록이 GitHub Repo와 이
@@ -116,7 +116,7 @@ function RepoRegistrationSection() {
   return (
     <section className="app-card grid grid-cols-1 gap-8 p-6 lg:grid-cols-[1fr_420px] lg:p-8">
       <div>
-        <p className="mb-3 text-label-caps text-secondary">STEP 3</p>
+        <p className="mb-3 text-label-caps text-secondary">3단계</p>
         <h2 className="section-title mb-3">서비스에 GitHub 웹훅 연결하기</h2>
         <p className="text-body-md text-on-surface-variant">
           이 서비스가 사용자의 GitHub Repo에 웹훅을 연결할 수 있도록 깃허브
@@ -124,7 +124,7 @@ function RepoRegistrationSection() {
           정보를 바탕으로 풀이 기록과 통계가 자동으로 갱신됩니다.
         </p>
         <ol className="mt-5 grid gap-2 text-body-sm text-on-surface-variant">
-          <li>1. 본인의 깃허브 ID와 Repository 이름을 입력합니다.</li>
+          <li>1. 본인의 GitHub ID와 저장소 이름을 입력합니다.</li>
           <li>2. 웹훅 연결하기 버튼을 클릭해 연결을 요청합니다.</li>
           <li>3. 연결 완료 후 풀이 기록과 통계가 자동으로 갱신됩니다.</li>
         </ol>

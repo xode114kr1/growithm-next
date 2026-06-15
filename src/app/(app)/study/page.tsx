@@ -25,9 +25,9 @@ function StudyHeader() {
   return (
     <header className="page-header flex flex-col justify-between gap-6 md:flex-row md:items-end">
       <div>
-        <h1 className="page-title mb-2 text-primary">Collaboration Hub</h1>
+        <h1 className="page-title mb-2 text-primary">스터디</h1>
         <p className="text-body-md text-on-surface-variant">
-          Refining algorithmic intuition, together.
+          함께 문제를 풀고 알고리즘 감각을 키워보세요.
         </p>
       </div>
     </header>

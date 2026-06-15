@@ -1,9 +1,9 @@
 import type { FriendListFilter } from "@/types/friend";
 
 const tabs: { label: string; value: FriendListFilter }[] = [
-  { label: "My Friends", value: "friends" },
-  { label: "Received Requests", value: "received" },
-  { label: "Sent Requests", value: "sent" },
+  { label: "내 친구", value: "friends" },
+  { label: "받은 요청", value: "received" },
+  { label: "보낸 요청", value: "sent" },
 ];
 
 export function FriendFilterTabs({

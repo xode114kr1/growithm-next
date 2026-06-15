@@ -13,18 +13,9 @@ export type UserPersonalTier = {
   tier: PersonalScoreTier;
 };
 
-export type UserProfile = {
-  avatar: string;
-  name: string;
-  score: number;
-  tier: string;
-  tierClass: string;
-};
-
 export type UserSummary = {
   avatar: string;
   id: string;
   name: string;
-  tier: string;
-  tierClass: string;
+  tier: PersonalScoreTier;
 };

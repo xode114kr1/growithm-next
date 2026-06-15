@@ -2,38 +2,11 @@ import { Award } from "lucide-react";
 
 import { getSolvedProblemCount } from "@/services/problems/problem.query";
 import { getUserPersonalTier } from "@/services/users/user.query";
-import type { PersonalScoreTier } from "@/types/user";
-
-const tierStyles: Record<
-  PersonalScoreTier,
-  { badge: string; icon: string; ring: string }
-> = {
-  Bronze: {
-    badge: "border-amber-700/20 bg-amber-700 text-white",
-    icon: "bg-amber-700 text-white",
-    ring: "from-amber-700 to-amber-500",
-  },
-  Diamond: {
-    badge: "border-sky-300 bg-sky-100 text-sky-800",
-    icon: "bg-sky-100 text-sky-800",
-    ring: "from-sky-400 to-cyan-300",
-  },
-  Gold: {
-    badge: "border-yellow-400/40 bg-yellow-400 text-yellow-950",
-    icon: "bg-yellow-400 text-yellow-950",
-    ring: "from-yellow-400 to-amber-300",
-  },
-  Platinum: {
-    badge: "border-cyan-200 bg-primary-fixed text-primary",
-    icon: "bg-primary-fixed text-primary",
-    ring: "from-cyan-300 to-teal-300",
-  },
-  Silver: {
-    badge: "border-slate-300 bg-slate-200 text-slate-700",
-    icon: "bg-slate-200 text-slate-700",
-    ring: "from-slate-300 to-slate-400",
-  },
-};
+import {
+  awardIconColors,
+  tierBadgeColors,
+  tierProgressColors,
+} from "@/utils/color";
 
 export default async function PersonalTierCard({
   userId,
@@ -46,7 +19,6 @@ export default async function PersonalTierCard({
   ]);
   const personalTier = { ...tier, solvedCount };
 
-  const styles = tierStyles[personalTier.tier];
   const remainingScore = Math.max(
     personalTier.nextTierScore - personalTier.score,
     0,
@@ -57,17 +29,17 @@ export default async function PersonalTierCard({
       <div>
         <div className="mb-5 flex items-start justify-between gap-3">
           <span
-            className={`flex size-11 shrink-0 items-center justify-center rounded-lg ${styles.icon}`}
+            className={`flex size-11 shrink-0 items-center justify-center rounded-lg ${awardIconColors[personalTier.tier]}`}
           >
             <Award aria-hidden="true" size={22} strokeWidth={2.4} />
           </span>
           <span
-            className={`rounded-full border px-3 py-1 text-xs font-bold uppercase ${styles.badge}`}
+            className={`rounded-full border px-3 py-1 text-xs font-bold uppercase ${tierBadgeColors[personalTier.tier]}`}
           >
             {personalTier.tier}
           </span>
         </div>
-        <h2 className="mb-1 text-label-caps text-slate-500">My Tier</h2>
+        <h2 className="mb-1 text-label-caps text-slate-500">내 티어</h2>
         <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
           <p className="font-serif text-8 font-semibold leading-tight text-primary">
             {personalTier.tier}
@@ -77,7 +49,7 @@ export default async function PersonalTierCard({
       <div className="mt-6 space-y-3">
         <div className="h-2 overflow-hidden rounded-full bg-surface-container">
           <div
-            className={`h-full rounded-full bg-linear-to-r ${styles.ring}`}
+            className={`h-full rounded-full bg-linear-to-r ${tierProgressColors[personalTier.tier]}`}
             style={{ width: `${personalTier.progress}%` }}
           />
         </div>
@@ -85,12 +57,12 @@ export default async function PersonalTierCard({
           <span>{personalTier.progressLabel}</span>
           <span className="text-secondary">
             {remainingScore > 0
-              ? `${remainingScore.toLocaleString()} XP left`
-              : "Max tier"}
+              ? `다음 티어까지 ${remainingScore.toLocaleString()} XP`
+              : "최고 티어"}
           </span>
         </div>
         <p className="text-xs font-medium text-on-surface-variant">
-          {personalTier.solvedCount.toLocaleString()} submitted problems counted
+          제출한 문제 {personalTier.solvedCount.toLocaleString()}개 반영
         </p>
       </div>
     </section>

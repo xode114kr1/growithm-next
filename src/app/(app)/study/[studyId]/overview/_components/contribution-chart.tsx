@@ -12,6 +12,7 @@ import {
 } from "recharts";
 
 import { useMounted } from "@/hooks/use-mounted";
+import { chartColors } from "@/utils/color";
 
 type Contribution = {
   name: string;
@@ -35,11 +36,11 @@ export default function ContributionChart({
             layout="vertical"
             margin={{ bottom: 4, left: 20, right: 18, top: 4 }}
           >
-            <CartesianGrid horizontal={false} stroke="#eff4ff" />
+            <CartesianGrid horizontal={false} stroke={chartColors.grid} />
             <XAxis
               axisLine={false}
               domain={[0, 80000]}
-              tick={{ fill: "#717978", fontSize: 12 }}
+              tick={{ fill: chartColors.axisMuted, fontSize: 12 }}
               tickCount={5}
               tickLine={false}
               type="number"
@@ -47,24 +48,28 @@ export default function ContributionChart({
             <YAxis
               axisLine={false}
               dataKey="name"
-              tick={{ fill: "#0b1c30", fontSize: 12, fontWeight: 700 }}
+              tick={{
+                fill: chartColors.axisStrong,
+                fontSize: 12,
+                fontWeight: 700,
+              }}
               tickLine={false}
               type="category"
               width={96}
             />
             <Tooltip
               contentStyle={{
-                border: "1px solid #c0c8c8",
+                border: `1px solid ${chartColors.tooltipBorder}`,
                 borderRadius: "12px",
                 boxShadow: "0 18px 45px rgb(59 101 102 / 14%)",
               }}
-              cursor={{ fill: "#eff4ff" }}
+              cursor={{ fill: chartColors.grid }}
               formatter={(value) => [`${Number(value).toLocaleString()} XP`, "기여도"]}
             />
             <Bar
-              background={{ fill: "#f8fafc", radius: 8 }}
+              background={{ fill: chartColors.barBackground, radius: 8 }}
               dataKey="score"
-              fill="#006875"
+              fill={chartColors.contributionBar}
               radius={[0, 8, 8, 0]}
             />
           </BarChart>

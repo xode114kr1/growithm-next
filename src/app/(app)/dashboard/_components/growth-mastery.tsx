@@ -13,6 +13,7 @@ import {
 
 import { useMounted } from "@/hooks/use-mounted";
 import type { ProblemTierBucket } from "@/types/problem";
+import { chartColors, problemTierChartColors } from "@/utils/color";
 
 const masteryTooltipLabels: Record<string, string> = {
   BRONZE: "Bronze / Level 1",
@@ -34,9 +35,9 @@ export default function GrowthMastery({
     <section className="app-card p-6 md:col-span-12 lg:p-8">
       <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h2 className="section-title mb-1">Growth Mastery</h2>
+          <h2 className="section-title mb-1">티어별 문제 분포</h2>
           <p className="text-body-sm text-on-surface-variant">
-            Problem distribution across six difficulty tiers.
+            해결한 문제를 여섯 난이도 구간으로 나누어 보여줍니다.
           </p>
         </div>
       </div>
@@ -47,25 +48,32 @@ export default function GrowthMastery({
               data={mastery}
               margin={{ bottom: 0, left: -20, right: 8, top: 8 }}
             >
-              <CartesianGrid stroke="#eff4ff" vertical={false} />
+              <CartesianGrid stroke={chartColors.grid} vertical={false} />
               <XAxis
                 axisLine={false}
                 dataKey="tier"
-                tick={{ fill: "#404848", fontSize: 12, fontWeight: 700 }}
+                tick={{
+                  fill: chartColors.axisPrimary,
+                  fontSize: 12,
+                  fontWeight: 700,
+                }}
                 tickLine={false}
               />
               <YAxis
                 axisLine={false}
-                tick={{ fill: "#717978", fontSize: 12 }}
+                tick={{ fill: chartColors.axisMuted, fontSize: 12 }}
                 tickLine={false}
               />
               <Tooltip
                 content={<MasteryTooltip />}
-                cursor={{ fill: "#eff4ff" }}
+                cursor={{ fill: chartColors.grid }}
               />
               <Bar dataKey="solved" radius={[10, 10, 0, 0]}>
                 {mastery.map((entry) => (
-                  <Cell fill={entry.fill} key={entry.tier} />
+                  <Cell
+                    fill={problemTierChartColors[entry.tier]}
+                    key={entry.tier}
+                  />
                 ))}
               </Bar>
             </BarChart>
@@ -97,7 +105,7 @@ function MasteryTooltip({
         {masteryTooltipLabels[bucket.tier] ?? bucket.tier}
       </p>
       <p className="mt-1 text-mono-code text-xs text-on-surface-variant">
-        {bucket.solved.toLocaleString()} solved
+        해결한 문제 {bucket.solved.toLocaleString()}개
       </p>
     </div>
   );

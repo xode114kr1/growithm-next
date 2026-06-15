@@ -24,7 +24,7 @@ export function FriendSearchInput({
         className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-20 pr-4 text-body-md shadow-sm outline-none transition-all focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
         onFocus={onFocus}
         onChange={(event) => onQueryChange(event.target.value)}
-        placeholder="Find developers..."
+        placeholder="친구를 검색하세요"
         type="search"
         value={query}
       />

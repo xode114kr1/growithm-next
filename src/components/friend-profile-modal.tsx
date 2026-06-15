@@ -3,10 +3,10 @@ import Image from "next/image";
 import type { FriendProfile } from "@/types/friend";
 
 const relationLabels: Record<FriendProfile["relationStatus"], string> = {
-  friend: "Friend",
-  none: "Not connected",
-  received_request: "Request received",
-  sent_request: "Request sent",
+  friend: "친구",
+  none: "연결되지 않음",
+  received_request: "받은 친구 요청",
+  sent_request: "보낸 친구 요청",
 };
 
 export function FriendProfileModal({
@@ -42,19 +42,19 @@ export function FriendProfileModal({
             </div>
           </div>
           <button
-            aria-label="Close profile"
+            aria-label="프로필 닫기"
             className="rounded-lg px-3 py-2 text-body-sm font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary"
             onClick={onClose}
             type="button"
           >
-            Close
+            닫기
           </button>
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <ProfileStat label="Name" value={profile.name} />
+          <ProfileStat label="이름" value={profile.name} />
           <ProfileStat
-            label="Connection"
+            label="친구 상태"
             value={relationLabels[profile.relationStatus]}
           />
         </div>

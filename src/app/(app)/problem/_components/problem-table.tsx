@@ -1,9 +1,7 @@
 import Link from "next/link";
 
-import type {
-  ProblemEmptyStateReason,
-  ProblemListItem,
-} from "@/types/problem";
+import ProblemTierBadge from "@/components/ui/problem-tier-badge";
+import type { ProblemEmptyStateReason, ProblemListItem } from "@/types/problem";
 import {
   getProblemStatusBadgeClass,
   getProblemStatusLabel,
@@ -32,9 +30,9 @@ export default function ProblemTable({
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/50">
-              <TableHead>Problem Details</TableHead>
-              <TableHead>Tags</TableHead>
-              <TableHead>State</TableHead>
+              <TableHead>문제 정보</TableHead>
+              <TableHead>태그</TableHead>
+              <TableHead>상태</TableHead>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
@@ -45,23 +43,16 @@ export default function ProblemTable({
               >
                 <td className="min-w-90 max-w-140 px-6 py-5">
                   <Link
-                    className="flex items-start gap-4 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-secondary-container"
+                    className="block rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-secondary-container"
                     href={`/problem/${problem.id}`}
                   >
-                    <span
-                      className={`mt-1 flex size-10 shrink-0 items-center justify-center rounded-full shadow-sm ${getTierBadgeClass(problem.tier)}`}
-                    >
-                      {getPlatformInitial(problem.platform)}
-                    </span>
                     <div className="min-w-0 space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="rounded bg-slate-100 px-1.5 py-0.5 text-mono-code text-2.75 text-slate-500">
                           {problem.code}
                         </span>
                         {problem.tier ? (
-                          <span className={getTierBadgeClass(problem.tier)}>
-                            {problem.tier}
-                          </span>
+                          <ProblemTierBadge tier={problem.tier} />
                         ) : null}
                       </div>
                       <h3 className="text-pretty wrap-break-word font-semibold leading-snug text-on-surface transition-colors group-hover:text-secondary">
@@ -82,7 +73,9 @@ export default function ProblemTable({
                         </span>
                       ))
                     ) : (
-                      <span className="text-body-sm text-slate-400">No tags</span>
+                      <span className="text-body-sm text-slate-400">
+                        태그 없음
+                      </span>
                     )}
                   </div>
                 </td>
@@ -140,8 +133,10 @@ function Pagination({
   return (
     <div className="flex flex-col items-start justify-between gap-4 border-t border-slate-100 bg-slate-50/30 px-6 py-4 sm:flex-row sm:items-center">
       <p className="text-body-sm text-slate-500">
-        Showing <span className="font-semibold text-on-surface">{start} - {end}</span>{" "}
-        of {totalCount.toLocaleString()} problems
+        전체 {totalCount.toLocaleString()}개 중{" "}
+        <span className="font-semibold text-on-surface">
+          {start} - {end}
+        </span>
       </p>
       <div className="flex items-center gap-1">
         <PaginationLink
@@ -199,12 +194,14 @@ function EmptyState({ reason }: { reason: ProblemEmptyStateReason }) {
   if (reason === "no-filter-results") {
     return (
       <div className="border-t border-slate-100 px-6 py-14 text-center">
-        <p className="font-semibold text-on-surface">No matching problems</p>
+        <p className="font-semibold text-on-surface">
+          조건에 맞는 문제가 없습니다.
+        </p>
         <p className="mt-2 text-body-sm text-slate-500">
-          Adjust the platform, tier, or search text to broaden the result set.
+          플랫폼, 티어 또는 검색어를 변경해 보세요.
         </p>
         <Link className="btn-secondary mt-5" href="/problem">
-          Clear filters
+          필터 초기화
         </Link>
       </div>
     );
@@ -212,30 +209,14 @@ function EmptyState({ reason }: { reason: ProblemEmptyStateReason }) {
 
   return (
     <div className="border-t border-slate-100 px-6 py-14 text-center">
-      <p className="font-semibold text-on-surface">No problems submitted yet</p>
+      <p className="font-semibold text-on-surface">
+        아직 제출한 문제가 없습니다.
+      </p>
       <p className="mt-2 text-body-sm text-slate-500">
-        Registered submissions will appear here after webhook processing.
+        웹훅 처리가 완료된 제출 기록이 이곳에 표시됩니다.
       </p>
     </div>
   );
-}
-
-// 앞쪽 배지에 표시할 플랫폼 축약 문자를 만든다.
-function getPlatformInitial(platform: string) {
-  return platform.charAt(0);
-}
-
-// tier 텍스트를 가장 가까운 배지 스타일로 매핑한다.
-function getTierBadgeClass(tier: string | null) {
-  if (tier?.toLowerCase().includes("platinum")) {
-    return "badge-tier-platinum";
-  }
-
-  if (tier?.toLowerCase().includes("gold")) {
-    return "badge-tier-gold";
-  }
-
-  return "badge-tier-silver";
 }
 
 // 활성 링크와 비활성 페이지네이션 컨트롤을 같은 크기로 렌더링한다.
@@ -303,7 +284,9 @@ function TableHead({
   className?: string;
 }) {
   return (
-    <th className={`px-6 py-4 text-label-caps text-slate-400 ${className ?? ""}`}>
+    <th
+      className={`px-6 py-4 text-label-caps text-slate-400 ${className ?? ""}`}
+    >
       {children}
     </th>
   );

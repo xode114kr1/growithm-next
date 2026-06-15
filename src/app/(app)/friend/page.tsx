@@ -39,10 +39,9 @@ function FriendHeader() {
   return (
     <header className="page-header flex flex-col justify-between gap-4 md:flex-row md:items-end">
       <div>
-        <h1 className="page-title mb-2">Connections</h1>
+        <h1 className="page-title mb-2">친구</h1>
         <p className="max-w-xl text-body-md text-on-surface-variant">
-          Manage your study circle, track friend progress, and collaborate on
-          complex algorithmic challenges together.
+          함께 성장할 친구를 찾고 학습 현황을 확인하세요.
         </p>
       </div>
     </header>
