@@ -63,10 +63,17 @@ export type ProblemShareResult = {
   skippedCount: number;
 };
 
+export type ProblemTierBucketName =
+  | "BRONZE"
+  | "SILVER"
+  | "GOLD"
+  | "PLATINUM"
+  | "DIAMOND"
+  | "RUBY";
+
 export type ProblemTierBucket = {
-  fill: string;
   solved: number;
-  tier: string;
+  tier: ProblemTierBucketName;
 };
 
 export type PendingProblem = {

@@ -10,12 +10,12 @@ import type {
 } from "@/types/problem";
 
 const MASTERY_BUCKETS = [
-  { fill: "#a5663f", key: "BRONZE" },
-  { fill: "#dde3eb", key: "SILVER" },
-  { fill: "#f4bf3a", key: "GOLD" },
-  { fill: "#a3cfcf", key: "PLATINUM" },
-  { fill: "#00daf3", key: "DIAMOND" },
-  { fill: "#ba1a1a", key: "RUBY" },
+  "BRONZE",
+  "SILVER",
+  "GOLD",
+  "PLATINUM",
+  "DIAMOND",
+  "RUBY",
 ] as const;
 
 const QUICK_LAUNCH_PLATFORMS = [
@@ -97,10 +97,9 @@ export function createProblemTierBuckets(
     if (bucket) counts.set(bucket, (counts.get(bucket) ?? 0) + 1);
   }
 
-  return MASTERY_BUCKETS.map((bucket) => ({
-    fill: bucket.fill,
-    solved: counts.get(bucket.key) ?? 0,
-    tier: bucket.key,
+  return MASTERY_BUCKETS.map((tier) => ({
+    solved: counts.get(tier) ?? 0,
+    tier,
   }));
 }
 

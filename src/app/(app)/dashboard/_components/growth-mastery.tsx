@@ -13,6 +13,7 @@ import {
 
 import { useMounted } from "@/hooks/use-mounted";
 import type { ProblemTierBucket } from "@/types/problem";
+import { chartColors, problemTierChartColors } from "@/utils/color";
 
 const masteryTooltipLabels: Record<string, string> = {
   BRONZE: "Bronze / Level 1",
@@ -47,25 +48,32 @@ export default function GrowthMastery({
               data={mastery}
               margin={{ bottom: 0, left: -20, right: 8, top: 8 }}
             >
-              <CartesianGrid stroke="#eff4ff" vertical={false} />
+              <CartesianGrid stroke={chartColors.grid} vertical={false} />
               <XAxis
                 axisLine={false}
                 dataKey="tier"
-                tick={{ fill: "#404848", fontSize: 12, fontWeight: 700 }}
+                tick={{
+                  fill: chartColors.axisPrimary,
+                  fontSize: 12,
+                  fontWeight: 700,
+                }}
                 tickLine={false}
               />
               <YAxis
                 axisLine={false}
-                tick={{ fill: "#717978", fontSize: 12 }}
+                tick={{ fill: chartColors.axisMuted, fontSize: 12 }}
                 tickLine={false}
               />
               <Tooltip
                 content={<MasteryTooltip />}
-                cursor={{ fill: "#eff4ff" }}
+                cursor={{ fill: chartColors.grid }}
               />
               <Bar dataKey="solved" radius={[10, 10, 0, 0]}>
                 {mastery.map((entry) => (
-                  <Cell fill={entry.fill} key={entry.tier} />
+                  <Cell
+                    fill={problemTierChartColors[entry.tier]}
+                    key={entry.tier}
+                  />
                 ))}
               </Bar>
             </BarChart>
