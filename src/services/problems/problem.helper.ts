@@ -10,7 +10,7 @@ import type {
 } from "@/types/problem";
 
 const MASTERY_BUCKETS = [
-  { fill: "#c1c7cf", key: "BRONZE" },
+  { fill: "#a5663f", key: "BRONZE" },
   { fill: "#dde3eb", key: "SILVER" },
   { fill: "#f4bf3a", key: "GOLD" },
   { fill: "#a3cfcf", key: "PLATINUM" },
