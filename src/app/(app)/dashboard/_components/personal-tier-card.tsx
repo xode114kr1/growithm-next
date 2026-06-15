@@ -1,6 +1,5 @@
 import { Award } from "lucide-react";
 
-import { getSolvedProblemCount } from "@/services/problems/problem.query";
 import { getUserPersonalTier } from "@/services/users/user.query";
 import {
   awardIconColors,
@@ -13,11 +12,7 @@ export default async function PersonalTierCard({
 }: {
   userId: string | undefined;
 }) {
-  const [tier, solvedCount] = await Promise.all([
-    getUserPersonalTier(userId),
-    getSolvedProblemCount(userId),
-  ]);
-  const personalTier = { ...tier, solvedCount };
+  const personalTier = await getUserPersonalTier(userId);
 
   const remainingScore = Math.max(
     personalTier.nextTierScore - personalTier.score,
@@ -61,9 +56,6 @@ export default async function PersonalTierCard({
               : "최고 티어"}
           </span>
         </div>
-        <p className="text-xs font-medium text-on-surface-variant">
-          제출한 문제 {personalTier.solvedCount.toLocaleString()}개 반영
-        </p>
       </div>
     </section>
   );

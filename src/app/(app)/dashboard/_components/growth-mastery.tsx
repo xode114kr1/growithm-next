@@ -26,8 +26,10 @@ const masteryTooltipLabels: Record<string, string> = {
 
 export default function GrowthMastery({
   mastery,
+  solvedCount,
 }: {
   mastery: ProblemTierBucket[];
+  solvedCount: number;
 }) {
   const isMounted = useMounted();
 
@@ -38,6 +40,12 @@ export default function GrowthMastery({
           <h2 className="section-title mb-1">티어별 문제 분포</h2>
           <p className="text-body-sm text-on-surface-variant">
             해결한 문제를 여섯 난이도 구간으로 나누어 보여줍니다.
+          </p>
+        </div>
+        <div className="sm:text-right">
+          <p className="text-label-caps text-on-surface-variant">해결한 문제</p>
+          <p className="mt-1 text-xl font-bold text-on-surface">
+            {solvedCount.toLocaleString()}개
           </p>
         </div>
       </div>
