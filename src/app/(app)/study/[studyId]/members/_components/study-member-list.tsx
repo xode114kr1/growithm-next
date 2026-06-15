@@ -10,7 +10,7 @@ type SortKey = "contribution" | "lastActive" | "joinedAt" | "name";
 const roleLabels: Record<StudyMember["role"], string> = {
   LEADER: "리더",
   MEMBER: "멤버",
-  OWNER: "방장",
+  OWNER: "owner",
 };
 
 export default function StudyMemberList({
@@ -83,7 +83,7 @@ export default function StudyMemberList({
             value={roleFilter}
           >
             <option value="ALL">전체</option>
-            <option value="OWNER">방장</option>
+            <option value="OWNER">owner</option>
             <option value="LEADER">리더</option>
             <option value="MEMBER">멤버</option>
           </select>

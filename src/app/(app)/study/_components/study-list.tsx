@@ -37,8 +37,8 @@ function StudyCard({ study }: { study: StudyListItem }) {
     <article className="app-card relative overflow-hidden p-6 transition-all duration-300 hover:shadow-lg hover:shadow-teal-900/5">
       {study.isOwner ? (
         <div className="absolute right-0 top-0 p-4">
-          <span className="rounded-full bg-secondary-container px-2 py-1 text-2.5 font-bold uppercase tracking-widest text-on-secondary-container">
-            방장
+          <span className="rounded-full bg-secondary-container px-1.5 py-0.5 text-xs font-medium leading-none text-on-secondary-container">
+            owner
           </span>
         </div>
       ) : null}
@@ -84,18 +84,12 @@ function StudyCard({ study }: { study: StudyListItem }) {
           </span>
         </div>
       </Link>
-      <div className="mt-6 flex gap-2 border-t border-slate-50 pt-6">
+      <div className="mt-6 border-t border-slate-50 pt-6">
         <Link
           href={`/study/${study.id}/overview`}
-          className="flex-1 rounded-lg bg-primary py-2 text-center text-body-sm font-semibold text-on-primary transition-all hover:opacity-90"
+          className="block w-full rounded-lg bg-primary py-2 text-center text-body-sm font-semibold text-on-primary transition-all hover:opacity-90"
         >
           입장하기
-        </Link>
-        <Link
-          className="rounded-lg bg-surface-container-low px-3 py-2 text-primary transition-all hover:bg-surface-container"
-          href={`/study/${study.id}/members`}
-        >
-          멤버
         </Link>
       </div>
     </article>

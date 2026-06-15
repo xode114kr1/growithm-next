@@ -187,7 +187,7 @@ function StudyMembersCard({ members }: { members: StudyOverview["members"] }) {
             </div>
             {member.role === "owner" ? (
               <span className="rounded-full bg-secondary-fixed px-2 py-1 text-[10px] font-bold uppercase text-on-secondary-fixed">
-                방장
+                owner
               </span>
             ) : null}
           </div>

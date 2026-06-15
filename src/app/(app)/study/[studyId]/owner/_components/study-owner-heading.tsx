@@ -19,7 +19,7 @@ export default function StudyOwnerHeading({ study }: { study: OwnerStudy }) {
           스터디 관리
         </h1>
         <span className="w-fit rounded bg-primary px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-on-primary">
-          방장 전용
+          owner 전용
         </span>
       </div>
       <p className="mt-2 max-w-2xl text-body-md text-on-surface-variant">
