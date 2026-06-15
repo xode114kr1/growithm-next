@@ -2,16 +2,11 @@ import { Award } from "lucide-react";
 
 import { getSolvedProblemCount } from "@/services/problems/problem.query";
 import { getUserPersonalTier } from "@/services/users/user.query";
-import type { PersonalScoreTier } from "@/types/user";
-import { awardIconColors, tierBadgeColors } from "@/utils/color";
-
-const tierProgressColors: Record<PersonalScoreTier, string> = {
-  Bronze: "from-amber-700 to-amber-500",
-  Diamond: "from-sky-400 to-cyan-300",
-  Gold: "from-yellow-400 to-amber-300",
-  Platinum: "from-cyan-300 to-teal-300",
-  Silver: "from-slate-300 to-slate-400",
-};
+import {
+  awardIconColors,
+  tierBadgeColors,
+  tierProgressColors,
+} from "@/utils/color";
 
 export default async function PersonalTierCard({
   userId,

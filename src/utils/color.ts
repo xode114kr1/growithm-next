@@ -39,3 +39,12 @@ export const tierBadgeColors: Record<PersonalScoreTier, string> = {
   Platinum: "border-cyan-200 bg-primary-fixed text-primary",
   Silver: "border-slate-300 bg-slate-200 text-slate-700",
 };
+
+// 대시보드 개인 티어 프로그레스 바 색상입니다.
+export const tierProgressColors: Record<PersonalScoreTier, string> = {
+  Bronze: "from-amber-700 to-amber-500",
+  Diamond: "from-sky-400 to-cyan-300",
+  Gold: "from-yellow-400 to-amber-300",
+  Platinum: "from-cyan-300 to-teal-300",
+  Silver: "from-slate-300 to-slate-400",
+};
