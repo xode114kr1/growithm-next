@@ -41,7 +41,7 @@ export default function ProblemShareModal({
   const selectedLabel = useMemo(
     () =>
       selectedCount === 0
-        ? "Select studies"
+        ? "공유할 스터디 선택"
         : `${selectedCount.toLocaleString()} selected`,
     [selectedCount],
   );
@@ -65,8 +65,8 @@ export default function ProblemShareModal({
         onClick={() => setIsOpen(true)}
         title={
           isShareDisabled
-            ? "Write a memo before sharing this problem."
-            : "Share this problem to studies"
+            ? "문제를 공유하려면 먼저 메모를 작성하세요."
+            : "이 문제를 스터디에 공유"
         }
         type="button"
       >
@@ -82,7 +82,7 @@ export default function ProblemShareModal({
           role="dialog"
         >
           <button
-            aria-label="Close share modal"
+            aria-label="공유 창 닫기"
             className="absolute inset-0 cursor-default"
             onClick={() => setIsOpen(false)}
             type="button"
@@ -99,7 +99,7 @@ export default function ProblemShareModal({
                   </h2>
                 </div>
                 <button
-                  aria-label="Close"
+                  aria-label="닫기"
                   className="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary"
                   onClick={() => setIsOpen(false)}
                   type="button"

@@ -4,7 +4,7 @@ import { getSolvedProblemCount } from "@/services/problems/problem.query";
 
 const statStyle = {
   accent: "bg-secondary-fixed text-on-secondary-container",
-  label: "Total Solved",
+  label: "해결한 문제",
 } as const;
 
 export default async function DashboardStats({

@@ -34,9 +34,9 @@ export default function GrowthMastery({
     <section className="app-card p-6 md:col-span-12 lg:p-8">
       <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h2 className="section-title mb-1">Growth Mastery</h2>
+          <h2 className="section-title mb-1">티어별 문제 분포</h2>
           <p className="text-body-sm text-on-surface-variant">
-            Problem distribution across six difficulty tiers.
+            해결한 문제를 여섯 난이도 구간으로 나누어 보여줍니다.
           </p>
         </div>
       </div>
@@ -97,7 +97,7 @@ function MasteryTooltip({
         {masteryTooltipLabels[bucket.tier] ?? bucket.tier}
       </p>
       <p className="mt-1 text-mono-code text-xs text-on-surface-variant">
-        {bucket.solved.toLocaleString()} solved
+        해결한 문제 {bucket.solved.toLocaleString()}개
       </p>
     </div>
   );

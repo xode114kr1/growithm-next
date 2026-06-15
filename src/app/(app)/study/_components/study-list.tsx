@@ -15,7 +15,7 @@ export default async function StudyList() {
   return (
     <section>
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="section-title text-on-surface">Participating Studies</h2>
+        <h2 className="section-title text-on-surface">참여 중인 스터디</h2>
         <StudyCreateModal />
       </div>
       <div className="grid grid-cols-1 gap-gutter md:grid-cols-2">
@@ -35,7 +35,7 @@ function StudyCard({ study }: { study: StudyListItem }) {
       {study.isOwner ? (
         <div className="absolute right-0 top-0 p-4">
           <span className="rounded-full bg-secondary-container px-2 py-1 text-2.5 font-bold uppercase tracking-widest text-on-secondary-container">
-            Owner
+            방장
           </span>
         </div>
       ) : null}
@@ -49,7 +49,7 @@ function StudyCard({ study }: { study: StudyListItem }) {
             {study.title}
           </h3>
           <p className="text-body-sm text-outline">
-            {study.ownerName} · {study.tier} Tier
+            {study.ownerName} · {study.tier} 티어
           </p>
         </div>
       </Link>
@@ -62,7 +62,7 @@ function StudyCard({ study }: { study: StudyListItem }) {
         </p>
         <div>
           <div className="mb-1.5 flex justify-between text-xs">
-            <span className="font-semibold text-on-surface">Study Score</span>
+            <span className="font-semibold text-on-surface">스터디 점수</span>
             <span className="text-secondary">{study.progressLabel}</span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-container">
@@ -74,7 +74,7 @@ function StudyCard({ study }: { study: StudyListItem }) {
         </div>
         <div className="flex items-center justify-between gap-3 pt-2">
           <span className="text-xs font-medium text-on-surface-variant">
-            {study.memberCount.toLocaleString()} Members
+            멤버 {study.memberCount.toLocaleString()}명
           </span>
           <span className="text-xs font-medium text-secondary">
             {study.score.toLocaleString()} XP
@@ -86,13 +86,13 @@ function StudyCard({ study }: { study: StudyListItem }) {
           href={`/study/${study.id}/overview`}
           className="flex-1 rounded-lg bg-primary py-2 text-center text-body-sm font-semibold text-on-primary transition-all hover:opacity-90"
         >
-          Enter Room
+          입장하기
         </Link>
         <Link
           className="rounded-lg bg-surface-container-low px-3 py-2 text-primary transition-all hover:bg-surface-container"
           href={`/study/${study.id}/members`}
         >
-          Members
+          멤버
         </Link>
       </div>
     </article>
@@ -104,9 +104,9 @@ function TierThumbnail({ tier }: { tier: StudyTier }) {
 
   return (
     <div
-      aria-label={`${tier} tier`}
+      aria-label={`${tier} 티어`}
       className={`flex size-12 shrink-0 items-center justify-center rounded-lg border text-base font-black shadow-sm ${thumbnail.className}`}
-      title={`${tier} tier`}
+      title={`${tier} 티어`}
     >
       {thumbnail.label}
     </div>
@@ -116,7 +116,7 @@ function TierThumbnail({ tier }: { tier: StudyTier }) {
 function EmptyStudyCard({ isSignedIn }: { isSignedIn: boolean }) {
   return (
     <div className="app-card flex min-h-70.5 flex-col justify-center p-6">
-      <p className="text-label-caps text-slate-400">No Studies</p>
+      <p className="text-label-caps text-slate-400">참여 중인 스터디 없음</p>
       <h3 className="mt-2 text-base font-bold text-primary">
         {isSignedIn ? "참여 중인 스터디가 없습니다." : "로그인이 필요합니다."}
       </h3>
@@ -138,9 +138,9 @@ function FindStudyCard() {
       <div className="mb-3 flex size-12 items-center justify-center rounded-full bg-slate-100 text-2xl text-slate-400">
         +
       </div>
-      <h3 className="mb-1 font-bold text-primary">Find New Study</h3>
+      <h3 className="mb-1 font-bold text-primary">새 스터디 찾기</h3>
       <p className="max-w-45 text-xs leading-relaxed text-outline">
-        Explore the directory to find study labs matching your level.
+        내 수준과 목표에 맞는 스터디를 찾아보세요.
       </p>
     </button>
   );

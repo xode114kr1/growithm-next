@@ -124,11 +124,11 @@ function ProblemHeading({
     <div className="page-header flex flex-col justify-between gap-4 md:flex-row md:items-end">
       <div>
         <h1 className="page-title mb-2">
-          Algorithm Repository
+          문제 풀이 기록
         </h1>
         <p className="max-w-xl text-body-md text-on-surface-variant">
-          Curated collection of {totalCount.toLocaleString()} submitted
-          challenges across major competitive platforms.
+          주요 알고리즘 플랫폼에서 제출한 문제 {totalCount.toLocaleString()}개를
+          모아 보여줍니다.
         </p>
       </div>
       <ProblemSortSelect sort={filters.sort} />

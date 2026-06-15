@@ -47,7 +47,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                 value={profile.score.toLocaleString()}
               />
               <ProfileStat
-                label="Solved"
+                label="해결한 문제"
                 value={solvedCount.toLocaleString()}
               />
             </div>

@@ -32,9 +32,9 @@ export default function ProblemTable({
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/50">
-              <TableHead>Problem Details</TableHead>
-              <TableHead>Tags</TableHead>
-              <TableHead>State</TableHead>
+              <TableHead>문제 정보</TableHead>
+              <TableHead>태그</TableHead>
+              <TableHead>상태</TableHead>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
@@ -82,7 +82,7 @@ export default function ProblemTable({
                         </span>
                       ))
                     ) : (
-                      <span className="text-body-sm text-slate-400">No tags</span>
+                      <span className="text-body-sm text-slate-400">태그 없음</span>
                     )}
                   </div>
                 </td>
@@ -140,8 +140,8 @@ function Pagination({
   return (
     <div className="flex flex-col items-start justify-between gap-4 border-t border-slate-100 bg-slate-50/30 px-6 py-4 sm:flex-row sm:items-center">
       <p className="text-body-sm text-slate-500">
-        Showing <span className="font-semibold text-on-surface">{start} - {end}</span>{" "}
-        of {totalCount.toLocaleString()} problems
+        전체 {totalCount.toLocaleString()}개 중{" "}
+        <span className="font-semibold text-on-surface">{start} - {end}</span>
       </p>
       <div className="flex items-center gap-1">
         <PaginationLink
@@ -199,12 +199,12 @@ function EmptyState({ reason }: { reason: ProblemEmptyStateReason }) {
   if (reason === "no-filter-results") {
     return (
       <div className="border-t border-slate-100 px-6 py-14 text-center">
-        <p className="font-semibold text-on-surface">No matching problems</p>
+        <p className="font-semibold text-on-surface">조건에 맞는 문제가 없습니다.</p>
         <p className="mt-2 text-body-sm text-slate-500">
-          Adjust the platform, tier, or search text to broaden the result set.
+          플랫폼, 티어 또는 검색어를 변경해 보세요.
         </p>
         <Link className="btn-secondary mt-5" href="/problem">
-          Clear filters
+          필터 초기화
         </Link>
       </div>
     );
@@ -212,9 +212,9 @@ function EmptyState({ reason }: { reason: ProblemEmptyStateReason }) {
 
   return (
     <div className="border-t border-slate-100 px-6 py-14 text-center">
-      <p className="font-semibold text-on-surface">No problems submitted yet</p>
+      <p className="font-semibold text-on-surface">아직 제출한 문제가 없습니다.</p>
       <p className="mt-2 text-body-sm text-slate-500">
-        Registered submissions will appear here after webhook processing.
+        웹훅 처리가 완료된 제출 기록이 이곳에 표시됩니다.
       </p>
     </div>
   );

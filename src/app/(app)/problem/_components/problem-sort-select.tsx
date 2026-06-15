@@ -15,17 +15,17 @@ export default function ProblemSortSelect({ sort }: { sort: ProblemSort }) {
   return (
     <label className="flex items-center gap-2">
       <span className="text-body-sm font-medium text-slate-400">
-        Sort by:
+        정렬:
       </span>
       <select
         className="cursor-pointer border-none bg-transparent text-body-sm font-semibold text-primary outline-none"
         onChange={(event) => handleSortChange(event.target.value as ProblemSort)}
         value={sort}
       >
-        <option value="newest">Latest Published</option>
-        <option value="oldest">Oldest Published</option>
-        <option value="title">Title</option>
-        <option value="platform">Platform</option>
+        <option value="newest">최신 제출순</option>
+        <option value="oldest">오래된 제출순</option>
+        <option value="title">제목순</option>
+        <option value="platform">플랫폼순</option>
       </select>
     </label>
   );

@@ -67,7 +67,7 @@ export default async function PersonalTierCard({
             {personalTier.tier}
           </span>
         </div>
-        <h2 className="mb-1 text-label-caps text-slate-500">My Tier</h2>
+        <h2 className="mb-1 text-label-caps text-slate-500">내 티어</h2>
         <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
           <p className="font-serif text-8 font-semibold leading-tight text-primary">
             {personalTier.tier}
@@ -85,12 +85,12 @@ export default async function PersonalTierCard({
           <span>{personalTier.progressLabel}</span>
           <span className="text-secondary">
             {remainingScore > 0
-              ? `${remainingScore.toLocaleString()} XP left`
-              : "Max tier"}
+              ? `다음 티어까지 ${remainingScore.toLocaleString()} XP`
+              : "최고 티어"}
           </span>
         </div>
         <p className="text-xs font-medium text-on-surface-variant">
-          {personalTier.solvedCount.toLocaleString()} submitted problems counted
+          제출한 문제 {personalTier.solvedCount.toLocaleString()}개 반영
         </p>
       </div>
     </section>

@@ -14,7 +14,7 @@ export default async function StudyInvites() {
   return (
     <section className="app-card flex h-[min(520px,calc(100vh-9rem))] flex-col overflow-hidden">
       <div className="flex shrink-0 items-center justify-between border-b border-slate-50 p-6">
-        <h2 className="section-title">Invites & Requests</h2>
+        <h2 className="section-title">초대 및 요청</h2>
         {invites.length > 0 ? (
           <span className="rounded-full bg-error px-1.5 py-0.5 text-2.5 font-bold text-white">
             {invites.length}
@@ -47,10 +47,11 @@ function InviteCard({ invite }: { invite: StudyInviteItem }) {
             <span className="font-bold text-on-surface">
               {invite.invitedByName}
             </span>{" "}
-            invited you to{" "}
+            님이{" "}
             <span className="font-semibold text-primary">
               {invite.studyTitle}
-            </span>
+            </span>{" "}
+            스터디에 초대했습니다.
           </p>
           <span className="text-2.5 uppercase tracking-wider text-outline">
             {invite.timeLabel}
@@ -64,7 +65,7 @@ function InviteCard({ invite }: { invite: StudyInviteItem }) {
             className="w-full rounded-md bg-primary py-1.5 text-xs font-bold text-on-primary transition-all hover:opacity-90"
             type="submit"
           >
-            Accept
+            수락
           </button>
         </form>
         <form action={declineStudyInvite} className="flex-1">
@@ -73,7 +74,7 @@ function InviteCard({ invite }: { invite: StudyInviteItem }) {
             className="w-full rounded-md bg-surface-container py-1.5 text-xs font-bold text-on-surface-variant transition-all hover:bg-outline-variant/20"
             type="submit"
           >
-            Decline
+            거절
           </button>
         </form>
       </div>

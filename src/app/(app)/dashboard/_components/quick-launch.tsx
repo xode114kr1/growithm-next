@@ -37,7 +37,7 @@ export default async function QuickLaunch({
   return (
     <section className="app-card-muted p-6 md:col-span-4">
       <h2 className="mb-6 text-label-caps text-on-primary-fixed-variant">
-        Quick Launch
+        바로가기
       </h2>
       <div className="grid grid-cols-1 gap-3">
         {quickLaunches.map((quickLaunch) => {
@@ -62,7 +62,7 @@ export default async function QuickLaunch({
                     {link.label}
                   </span>
                   <span className="mt-0.5 block text-mono-code text-xs text-slate-400">
-                    {quickLaunch.problemCount.toLocaleString()} problems
+                    문제 {quickLaunch.problemCount.toLocaleString()}개
                   </span>
                 </span>
               </span>

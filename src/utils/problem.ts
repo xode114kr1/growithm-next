@@ -3,15 +3,15 @@ import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 // 문제 제출 상태의 표시 이름을 반환한다.
 export function getProblemStatusLabel(status: ProblemSubmissionStatus) {
   return status === ProblemSubmissionStatus.COMPLETED
-    ? "Completed"
-    : "Memo pending";
+    ? "작성 완료"
+    : "메모 작성 대기";
 }
 
 // 문제 제출 상태의 보조 설명 문구를 반환한다.
 export function getProblemStatusDescription(status: ProblemSubmissionStatus) {
   return status === ProblemSubmissionStatus.COMPLETED
-    ? "Ready to share"
-    : "Write a memo to share";
+    ? "공유 가능"
+    : "공유하려면 메모를 작성하세요";
 }
 
 // 문제 제출 상태에 맞는 배지 스타일 클래스를 반환한다.
@@ -35,7 +35,7 @@ export function formatScore(score: number | null, scoreMax: number | null) {
 
 // 제출 시각이 없을 때 기본 문구를 적용해 표시값을 만든다.
 export function getSubmittedLabel(submittedAtText: string | null) {
-  return submittedAtText ?? "Submitted";
+  return submittedAtText ?? "제출됨";
 }
 
 // 문제 티어에 맞는 배지 스타일 클래스를 반환한다.

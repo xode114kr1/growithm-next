@@ -12,14 +12,14 @@ export default function StudyOwnerHeading({ study }: { study: OwnerStudy }) {
         <span>/</span>
         <span className="font-semibold text-primary">{study.name}</span>
         <span>/</span>
-        <span>스터디 - Owner</span>
+        <span>스터디 - 관리</span>
       </div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <h1 className="page-title">
-          Study Owner Console
+          스터디 관리
         </h1>
         <span className="w-fit rounded bg-primary px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-on-primary">
-          Owner Only
+          방장 전용
         </span>
       </div>
       <p className="mt-2 max-w-2xl text-body-md text-on-surface-variant">

@@ -21,7 +21,7 @@ export default function ProblemFilters({
 
   return (
     <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-      <FilterCard title="Platform">
+      <FilterCard title="플랫폼">
         <div className="flex flex-wrap gap-2">
           {platforms.map((platform) => {
             const isActive =
@@ -44,19 +44,19 @@ export default function ProblemFilters({
                 }
                 type="button"
               >
-                {platform}
+                {platform === "All" ? "전체" : platform}
               </button>
             );
           })}
         </div>
       </FilterCard>
-      <FilterCard title="Difficulty Tier">
+      <FilterCard title="난이도 티어">
         <select
           className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
           onChange={(event) => replaceQuery({ tier: event.target.value || null })}
           value={filters.tier}
         >
-          <option value="">All Tiers</option>
+          <option value="">전체 티어</option>
           {tiers.map((tier) => (
             <option key={tier} value={tier}>
               {tier}
@@ -64,7 +64,7 @@ export default function ProblemFilters({
           ))}
         </select>
       </FilterCard>
-      <FilterCard className="md:col-span-2 xl:col-span-1" title="Search">
+      <FilterCard className="md:col-span-2 xl:col-span-1" title="검색">
         <input
           className="input-field min-h-10"
           defaultValue={filters.q}
@@ -73,7 +73,7 @@ export default function ProblemFilters({
             const value = event.target.value;
             replaceQuery({ q: value.trim() || null });
           }}
-          placeholder="Title or problem ID"
+          placeholder="문제 제목 또는 ID"
           type="search"
         />
       </FilterCard>

@@ -116,11 +116,11 @@ export default function StudyProblemModalTable({
           <table className="w-full border-collapse text-left">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/50">
-                <TableHead>Problem Details</TableHead>
-                <TableHead>Tags</TableHead>
-                <TableHead>Shared By</TableHead>
-                <TableHead>Shared At</TableHead>
-                <TableHead>State</TableHead>
+                <TableHead>문제 정보</TableHead>
+                <TableHead>태그</TableHead>
+                <TableHead>공유한 멤버</TableHead>
+                <TableHead>공유일</TableHead>
+                <TableHead>상태</TableHead>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -253,7 +253,7 @@ function StudyProblemFilters({
 
   return (
     <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
-      <FilterCard title="Platform">
+      <FilterCard title="플랫폼">
         <div className="flex flex-wrap gap-2">
           {["All", "BAEKJOON", "PROGRAMMERS"].map((platform) => (
             <button
@@ -267,36 +267,36 @@ function StudyProblemFilters({
               onClick={() => onPlatformChange(platform)}
               type="button"
             >
-              {platform}
+              {platform === "All" ? "전체" : platform}
             </button>
           ))}
         </div>
       </FilterCard>
-      <FilterCard title="Tier">
+      <FilterCard title="티어">
         <select
           className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
           onChange={(event) => onTierChange(event.target.value)}
           value={tierFilter}
         >
-          <option>All</option>
+          <option value="All">전체</option>
           {tiers.map((tier) => (
             <option key={tier}>{tier}</option>
           ))}
         </select>
       </FilterCard>
-      <FilterCard title="Shared By">
+      <FilterCard title="공유한 멤버">
         <select
           className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
           onChange={(event) => onSharedByChange(event.target.value)}
           value={sharedByFilter}
         >
-          <option>All</option>
+          <option value="All">전체</option>
           {memberNames.map((memberName) => (
             <option key={memberName}>{memberName}</option>
           ))}
         </select>
       </FilterCard>
-      <FilterCard title="Sort">
+      <FilterCard title="정렬">
         <select
           className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
           onChange={(event) =>
@@ -304,21 +304,21 @@ function StudyProblemFilters({
           }
           value={sort}
         >
-          <option value="latest">Latest shared</option>
-          <option value="oldest">Oldest shared</option>
-          <option value="title">Title</option>
-          <option value="tier">Tier</option>
-          <option value="member">Member</option>
+          <option value="latest">최근 공유순</option>
+          <option value="oldest">오래된 공유순</option>
+          <option value="title">제목순</option>
+          <option value="tier">티어순</option>
+          <option value="member">멤버순</option>
         </select>
       </FilterCard>
-      <FilterCard title="Result">
+      <FilterCard title="결과">
         <div className="flex items-end justify-between gap-3">
           <div>
             <p className="text-h3-ui text-primary">
               {filteredCount.toLocaleString()}
             </p>
             <p className="text-body-sm text-slate-500">
-              of {totalCount.toLocaleString()} shared
+              전체 {totalCount.toLocaleString()}개
             </p>
           </div>
           {hasActiveFilters ? (
@@ -348,7 +348,7 @@ function PaginationControls({
   return (
     <div className="flex items-center gap-1">
       <button
-        aria-label="Previous page"
+        aria-label="이전 페이지"
         className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
         disabled={currentPage === 1}
         onClick={() => onPageChange(currentPage - 1)}
@@ -360,7 +360,7 @@ function PaginationControls({
         {currentPage} / {totalPages}
       </span>
       <button
-        aria-label="Next page"
+        aria-label="다음 페이지"
         className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
         disabled={currentPage === totalPages}
         onClick={() => onPageChange(currentPage + 1)}
@@ -504,7 +504,7 @@ function StudyProblemModal({
           </div>
           <div className="flex shrink-0 items-center gap-1">
             <button
-              aria-label="Previous problem"
+              aria-label="이전 문제"
               className="flex size-10 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary disabled:cursor-not-allowed disabled:text-slate-300"
               disabled={!previousProblem}
               onClick={() => previousProblem && onSelectProblem(previousProblem)}
@@ -513,7 +513,7 @@ function StudyProblemModal({
               <ChevronLeft aria-hidden="true" size={20} />
             </button>
             <button
-              aria-label="Next problem"
+              aria-label="다음 문제"
               className="flex size-10 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary disabled:cursor-not-allowed disabled:text-slate-300"
               disabled={!nextProblem}
               onClick={() => nextProblem && onSelectProblem(nextProblem)}
@@ -522,7 +522,7 @@ function StudyProblemModal({
               <ChevronRight aria-hidden="true" size={20} />
             </button>
             <button
-              aria-label="Close problem modal"
+              aria-label="문제 상세 창 닫기"
               className="flex size-10 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary"
               onClick={onClose}
               type="button"
@@ -542,7 +542,7 @@ function StudyProblemModal({
             <ProblemTags categories={problem.categories} />
             {problem.memo ? (
               <section>
-                <h3 className="mb-2 text-label-caps text-slate-500">Memo</h3>
+                <h3 className="mb-2 text-label-caps text-slate-500">메모</h3>
                 <p className="rounded-lg border border-slate-100 bg-white p-3 text-body-sm leading-relaxed text-on-surface-variant">
                   {problem.memo}
                 </p>
@@ -577,10 +577,10 @@ function ProblemMetaList({ problem }: { problem: StudyProblem }) {
 
   return (
     <dl className="grid gap-3">
-      <MetaItem label="Submitted" value={problem.submittedAtText ?? "-"} />
-      <MetaItem label="Score" value={score} />
-      <MetaItem label="Shared By" value={problem.sharedBy} />
-      <MetaItem label="Shared At" value={problem.sharedAtLabel} />
+      <MetaItem label="제출일" value={problem.submittedAtText ?? "-"} />
+      <MetaItem label="점수" value={score} />
+      <MetaItem label="공유한 멤버" value={problem.sharedBy} />
+      <MetaItem label="공유일" value={problem.sharedAtLabel} />
     </dl>
   );
 }
@@ -645,7 +645,7 @@ function ProblemSolutionCode({ code }: { code: string | null }) {
             ) : (
               <Copy aria-hidden="true" size={14} />
             )}
-            {copied ? "Copied" : "Copy"}
+            {copied ? "복사됨" : "복사"}
           </button>
         ) : null}
       </div>
@@ -675,7 +675,7 @@ function ProblemTags({ categories }: { categories: string[] }) {
           </span>
         ))
       ) : (
-        <span className="text-body-sm text-slate-400">No tags</span>
+        <span className="text-body-sm text-slate-400">태그 없음</span>
       )}
     </div>
   );
@@ -704,7 +704,7 @@ function EmptyState({
   if (hasActiveFilters) {
     return (
       <div className="border-t border-slate-100 px-6 py-14 text-center">
-        <p className="font-semibold text-on-surface">No matching problems</p>
+        <p className="font-semibold text-on-surface">조건에 맞는 문제가 없습니다.</p>
         <p className="mt-2 text-body-sm text-slate-500">
           Change or reset the filters to see more shared problems.
         </p>
@@ -717,7 +717,7 @@ function EmptyState({
 
   return (
     <div className="border-t border-slate-100 px-6 py-14 text-center">
-      <p className="font-semibold text-on-surface">No shared problems yet</p>
+      <p className="font-semibold text-on-surface">아직 공유된 문제가 없습니다.</p>
       <p className="mt-2 text-body-sm text-slate-500">
         Share a completed submission from your problem detail page to populate
         this study list.

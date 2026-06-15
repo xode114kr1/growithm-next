@@ -22,11 +22,11 @@ function DashboardHeader() {
   return (
     <header className="page-header flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
       <div>
-        <h1 className="page-title">Morning, Developer.</h1>
+        <h1 className="page-title">오늘도 성장해 볼까요?</h1>
         <p className="text-body-md text-on-surface-variant">
-          Your algorithmic growth is on track for{" "}
-          <span className="font-semibold text-secondary">Platinum III</span>{" "}
-          this week.
+          이번 주 목표는{" "}
+          <span className="font-semibold text-secondary">Platinum III</span>
+          입니다.
         </p>
       </div>
       <Link

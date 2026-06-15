@@ -6,7 +6,7 @@ export default function StudyFab() {
           Start a New Study Session
         </div>
         <button
-          aria-label="Start a new study session"
+          aria-label="새 스터디 만들기"
           className="flex size-14 items-center justify-center rounded-full bg-primary text-3xl text-on-primary shadow-2xl transition-all hover:scale-110 active:scale-95"
           type="button"
         >
