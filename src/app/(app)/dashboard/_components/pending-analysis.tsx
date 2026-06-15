@@ -13,23 +13,22 @@ export default async function PendingAnalysis({
 
   return (
     <section className="app-card mb-12 overflow-hidden md:col-span-12">
-      <div className="flex items-center justify-between border-b border-slate-50 p-6 lg:p-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-50 p-6 lg:p-8">
         <h2 className="section-title">메모 작성 대기</h2>
         <Link
-          className="text-body-sm font-semibold text-secondary hover:underline"
+          className="text-body-sm font-semibold whitespace-nowrap text-secondary hover:underline"
           href="/problem"
         >
           전체 문제 보기
         </Link>
       </div>
-      <div className="overflow-x-auto">
+      <div className="hidden md:block">
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="bg-slate-50/50">
               <TableHead>문제 이름</TableHead>
               <TableHead>플랫폼</TableHead>
               <TableHead>티어</TableHead>
-              <TableHead>제출일</TableHead>
               <TableHead className="text-right">작업</TableHead>
             </tr>
           </thead>
@@ -50,12 +49,9 @@ export default async function PendingAnalysis({
                 <td className="px-8 py-5">
                   <ProblemTierBadge className="shadow-sm" tier={problem.tier} />
                 </td>
-                <td className="px-8 py-5 text-body-sm text-slate-500">
-                  {problem.submittedAtText}
-                </td>
                 <td className="px-8 py-5 text-right">
                   <Link
-                    className="rounded-lg bg-secondary-container px-4 py-2 text-body-sm font-bold text-secondary transition-colors hover:bg-secondary-fixed"
+                    className="inline-flex rounded-lg bg-secondary-container px-4 py-2 text-body-sm font-bold whitespace-nowrap text-secondary transition-colors hover:bg-secondary-fixed"
                     href={`/problem/${problem.id}`}
                   >
                     메모 작성
@@ -65,6 +61,27 @@ export default async function PendingAnalysis({
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="divide-y divide-slate-100 md:hidden">
+        {pendingProblems.map((problem) => (
+          <article className="p-5" key={problem.id}>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded bg-slate-100 px-2 py-1 text-mono-code text-xs text-slate-600">
+                {getProblemCode(problem)}
+              </span>
+              <ProblemTierBadge className="shadow-sm" tier={problem.tier} />
+            </div>
+            <h3 className="mt-3 wrap-break-word font-semibold leading-snug text-on-background">
+              {problem.title}
+            </h3>
+            <Link
+              className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-secondary-container px-4 py-2.5 text-body-sm font-bold text-secondary transition-colors hover:bg-secondary-fixed"
+              href={`/problem/${problem.id}`}
+            >
+              메모 작성
+            </Link>
+          </article>
+        ))}
       </div>
       {pendingProblems.length === 0 ? (
         <div className="border-t border-slate-50 px-6 py-12 text-center">
