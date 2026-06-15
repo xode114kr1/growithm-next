@@ -3,32 +3,14 @@ import { Award } from "lucide-react";
 import { getSolvedProblemCount } from "@/services/problems/problem.query";
 import { getUserPersonalTier } from "@/services/users/user.query";
 import type { PersonalScoreTier } from "@/types/user";
-import { awardIconColors } from "@/utils/color";
+import { awardIconColors, tierBadgeColors } from "@/utils/color";
 
-const tierStyles: Record<
-  PersonalScoreTier,
-  { badge: string; ring: string }
-> = {
-  Bronze: {
-    badge: "border-amber-700/20 bg-amber-700 text-white",
-    ring: "from-amber-700 to-amber-500",
-  },
-  Diamond: {
-    badge: "border-sky-300 bg-sky-100 text-sky-800",
-    ring: "from-sky-400 to-cyan-300",
-  },
-  Gold: {
-    badge: "border-yellow-400/40 bg-yellow-400 text-yellow-950",
-    ring: "from-yellow-400 to-amber-300",
-  },
-  Platinum: {
-    badge: "border-cyan-200 bg-primary-fixed text-primary",
-    ring: "from-cyan-300 to-teal-300",
-  },
-  Silver: {
-    badge: "border-slate-300 bg-slate-200 text-slate-700",
-    ring: "from-slate-300 to-slate-400",
-  },
+const tierProgressColors: Record<PersonalScoreTier, string> = {
+  Bronze: "from-amber-700 to-amber-500",
+  Diamond: "from-sky-400 to-cyan-300",
+  Gold: "from-yellow-400 to-amber-300",
+  Platinum: "from-cyan-300 to-teal-300",
+  Silver: "from-slate-300 to-slate-400",
 };
 
 export default async function PersonalTierCard({
@@ -42,7 +24,6 @@ export default async function PersonalTierCard({
   ]);
   const personalTier = { ...tier, solvedCount };
 
-  const styles = tierStyles[personalTier.tier];
   const remainingScore = Math.max(
     personalTier.nextTierScore - personalTier.score,
     0,
@@ -58,7 +39,7 @@ export default async function PersonalTierCard({
             <Award aria-hidden="true" size={22} strokeWidth={2.4} />
           </span>
           <span
-            className={`rounded-full border px-3 py-1 text-xs font-bold uppercase ${styles.badge}`}
+            className={`rounded-full border px-3 py-1 text-xs font-bold uppercase ${tierBadgeColors[personalTier.tier]}`}
           >
             {personalTier.tier}
           </span>
@@ -73,7 +54,7 @@ export default async function PersonalTierCard({
       <div className="mt-6 space-y-3">
         <div className="h-2 overflow-hidden rounded-full bg-surface-container">
           <div
-            className={`h-full rounded-full bg-linear-to-r ${styles.ring}`}
+            className={`h-full rounded-full bg-linear-to-r ${tierProgressColors[personalTier.tier]}`}
             style={{ width: `${personalTier.progress}%` }}
           />
         </div>
