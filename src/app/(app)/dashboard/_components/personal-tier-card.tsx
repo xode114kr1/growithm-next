@@ -3,34 +3,30 @@ import { Award } from "lucide-react";
 import { getSolvedProblemCount } from "@/services/problems/problem.query";
 import { getUserPersonalTier } from "@/services/users/user.query";
 import type { PersonalScoreTier } from "@/types/user";
+import { awardIconColors } from "@/utils/color";
 
 const tierStyles: Record<
   PersonalScoreTier,
-  { badge: string; icon: string; ring: string }
+  { badge: string; ring: string }
 > = {
   Bronze: {
     badge: "border-amber-700/20 bg-amber-700 text-white",
-    icon: "bg-amber-700 text-white",
     ring: "from-amber-700 to-amber-500",
   },
   Diamond: {
     badge: "border-sky-300 bg-sky-100 text-sky-800",
-    icon: "bg-sky-100 text-sky-800",
     ring: "from-sky-400 to-cyan-300",
   },
   Gold: {
     badge: "border-yellow-400/40 bg-yellow-400 text-yellow-950",
-    icon: "bg-yellow-400 text-yellow-950",
     ring: "from-yellow-400 to-amber-300",
   },
   Platinum: {
     badge: "border-cyan-200 bg-primary-fixed text-primary",
-    icon: "bg-primary-fixed text-primary",
     ring: "from-cyan-300 to-teal-300",
   },
   Silver: {
     badge: "border-slate-300 bg-slate-200 text-slate-700",
-    icon: "bg-slate-200 text-slate-700",
     ring: "from-slate-300 to-slate-400",
   },
 };
@@ -57,7 +53,7 @@ export default async function PersonalTierCard({
       <div>
         <div className="mb-5 flex items-start justify-between gap-3">
           <span
-            className={`flex size-11 shrink-0 items-center justify-center rounded-lg ${styles.icon}`}
+            className={`flex size-11 shrink-0 items-center justify-center rounded-lg ${awardIconColors[personalTier.tier]}`}
           >
             <Award aria-hidden="true" size={22} strokeWidth={2.4} />
           </span>
