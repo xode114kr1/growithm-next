@@ -22,6 +22,16 @@ export const problemTierChartColors: Record<ProblemTierBucketName, string> = {
   RUBY: "#e58a9b",
 } as const;
 
+// 문제 목록의 난이도 뱃지 색상입니다.
+export const problemTierBadgeColors: Record<ProblemTierBucketName, string> = {
+  BRONZE: "bg-[#c58b68] text-[#4b2615]",
+  SILVER: "bg-tertiary-fixed text-on-tertiary-fixed",
+  GOLD: "bg-[#f4bf3a] text-[#3b2a00]",
+  PLATINUM: "bg-[#9fd8d2] text-[#174e49]",
+  DIAMOND: "bg-sky-100 text-sky-800",
+  RUBY: "bg-rose-100 text-rose-800",
+};
+
 // 대시보드 Award 아이콘 색상입니다.
 export const awardIconColors: Record<PersonalScoreTier, string> = {
   Bronze: "bg-amber-700 text-white",

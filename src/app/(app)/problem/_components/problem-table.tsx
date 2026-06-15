@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 import type { ProblemEmptyStateReason, ProblemListItem } from "@/types/problem";
+import { problemTierBadgeColors } from "@/utils/color";
 import {
+  getGrowithmProblemTier,
   getProblemStatusBadgeClass,
   getProblemStatusLabel,
 } from "@/utils/problem";
@@ -51,7 +53,9 @@ export default function ProblemTable({
                           {problem.code}
                         </span>
                         {problem.tier ? (
-                          <span className={getTierBadgeClass(problem.tier)}>
+                          <span
+                            className={`inline-flex items-center rounded-full px-2.5 py-1.5 text-xs font-bold leading-none ${problemTierBadgeColors[getGrowithmProblemTier(problem.tier) ?? "BRONZE"]}`}
+                          >
                             {problem.tier}
                           </span>
                         ) : null}
@@ -218,19 +222,6 @@ function EmptyState({ reason }: { reason: ProblemEmptyStateReason }) {
       </p>
     </div>
   );
-}
-
-// tier 텍스트를 가장 가까운 배지 스타일로 매핑한다.
-function getTierBadgeClass(tier: string | null) {
-  if (tier?.toLowerCase().includes("platinum")) {
-    return "badge-tier-platinum";
-  }
-
-  if (tier?.toLowerCase().includes("gold")) {
-    return "badge-tier-gold";
-  }
-
-  return "badge-tier-silver";
 }
 
 // 활성 링크와 비활성 페이지네이션 컨트롤을 같은 크기로 렌더링한다.
