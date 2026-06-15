@@ -13,7 +13,6 @@ import type {
 } from "@/types/problem";
 
 import ProblemFilters from "./_components/problem-filters";
-import ProblemSortSelect from "./_components/problem-sort-select";
 import ProblemTable from "./_components/problem-table";
 
 type ProblemPageProps = {
@@ -44,7 +43,6 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
   return (
     <main className="page-shell">
       <div className="page-container">
-        <ProblemHeading filters={filters} totalCount={totalCount} />
         <ProblemFilters filters={filters} tiers={tiers} />
         <ProblemTable
           currentPage={currentPage}
@@ -110,28 +108,4 @@ function buildQueryString(params: ProblemPageSearchParams) {
   }
 
   return query.toString();
-}
-
-// 현재 필터를 유지하면서 페이지 제목과 정렬 컨트롤을 렌더링한다.
-function ProblemHeading({
-  filters,
-  totalCount,
-}: {
-  filters: ProblemFiltersState;
-  totalCount: number;
-}) {
-  return (
-    <div className="page-header flex flex-col justify-between gap-4 md:flex-row md:items-end">
-      <div>
-        <h1 className="page-title mb-2">
-          문제 풀이 기록
-        </h1>
-        <p className="max-w-xl text-body-md text-on-surface-variant">
-          주요 알고리즘 플랫폼에서 제출한 문제 {totalCount.toLocaleString()}개를
-          모아 보여줍니다.
-        </p>
-      </div>
-      <ProblemSortSelect sort={filters.sort} />
-    </div>
-  );
 }
