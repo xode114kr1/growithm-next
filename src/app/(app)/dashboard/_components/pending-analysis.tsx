@@ -14,7 +14,7 @@ export default async function PendingAnalysis({
   return (
     <section className="app-card mb-12 overflow-hidden md:col-span-12">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-50 p-6 lg:p-8">
-        <h2 className="section-title">메모 작성 대기</h2>
+        <h2 className="section-title">최근 푼 문제</h2>
         <Link
           className="text-body-sm font-semibold whitespace-nowrap text-secondary hover:underline"
           href="/problem"
@@ -29,32 +29,41 @@ export default async function PendingAnalysis({
               <TableHead>문제 이름</TableHead>
               <TableHead>플랫폼</TableHead>
               <TableHead>티어</TableHead>
-              <TableHead className="text-right">작업</TableHead>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
             {pendingProblems.map((problem) => (
               <tr
-                className="transition-colors hover:bg-slate-50/50"
+                className="group transition-colors hover:bg-slate-50/50"
                 key={problem.id}
               >
-                <td className="px-8 py-5 font-semibold text-on-background">
-                  {problem.title}
-                </td>
-                <td className="px-8 py-5">
-                  <span className="rounded bg-slate-100 px-2 py-1 text-mono-code text-xs text-slate-600">
-                    {getProblemCode(problem)}
-                  </span>
-                </td>
-                <td className="px-8 py-5">
-                  <ProblemTierBadge className="shadow-sm" tier={problem.tier} />
-                </td>
-                <td className="px-8 py-5 text-right">
+                <td className="p-0 font-semibold text-on-background">
                   <Link
-                    className="inline-flex rounded-lg bg-secondary-container px-4 py-2 text-body-sm font-bold whitespace-nowrap text-secondary transition-colors hover:bg-secondary-fixed"
+                    className="block px-8 py-5 transition-colors group-hover:text-secondary"
                     href={`/problem/${problem.id}`}
                   >
-                    메모 작성
+                    {problem.title}
+                  </Link>
+                </td>
+                <td className="p-0">
+                  <Link
+                    className="block px-8 py-5"
+                    href={`/problem/${problem.id}`}
+                  >
+                    <span className="rounded bg-slate-100 px-2 py-1 text-mono-code text-xs text-slate-600">
+                      {getProblemCode(problem)}
+                    </span>
+                  </Link>
+                </td>
+                <td className="p-0">
+                  <Link
+                    className="block px-8 py-5"
+                    href={`/problem/${problem.id}`}
+                  >
+                    <ProblemTierBadge
+                      className="shadow-sm"
+                      tier={problem.tier}
+                    />
                   </Link>
                 </td>
               </tr>
@@ -64,7 +73,11 @@ export default async function PendingAnalysis({
       </div>
       <div className="divide-y divide-slate-100 md:hidden">
         {pendingProblems.map((problem) => (
-          <article className="p-5" key={problem.id}>
+          <Link
+            className="block p-5 transition-colors hover:bg-slate-50/50"
+            href={`/problem/${problem.id}`}
+            key={problem.id}
+          >
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded bg-slate-100 px-2 py-1 text-mono-code text-xs text-slate-600">
                 {getProblemCode(problem)}
@@ -74,13 +87,7 @@ export default async function PendingAnalysis({
             <h3 className="mt-3 wrap-break-word font-semibold leading-snug text-on-background">
               {problem.title}
             </h3>
-            <Link
-              className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-secondary-container px-4 py-2.5 text-body-sm font-bold text-secondary transition-colors hover:bg-secondary-fixed"
-              href={`/problem/${problem.id}`}
-            >
-              메모 작성
-            </Link>
-          </article>
+          </Link>
         ))}
       </div>
       {pendingProblems.length === 0 ? (
@@ -101,15 +108,11 @@ function getProblemCode(problem: PendingProblem) {
 
 function TableHead({
   children,
-  className,
 }: {
   children: React.ReactNode;
-  className?: string;
 }) {
   return (
-    <th
-      className={`px-8 py-4 text-label-caps text-slate-500 ${className ?? ""}`}
-    >
+    <th className="px-8 py-4 text-label-caps text-slate-500">
       {children}
     </th>
   );
