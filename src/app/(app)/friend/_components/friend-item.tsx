@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 
 import type { FriendProfile } from "@/types/friend";
+import { getUserTierBadgeClass } from "@/utils/user";
 
 export function FriendItem({
   children,
@@ -34,9 +35,9 @@ export function FriendItem({
             {profile.name}
           </h2>
           <span
-            className={`mx-auto w-fit rounded-full border px-2.5 py-0.5 text-2.5 font-bold uppercase tracking-widest md:mx-0 ${profile.tierClass}`}
+            className={`mx-auto w-fit rounded-full border px-2.5 py-0.5 text-2.5 font-bold uppercase tracking-widest md:mx-0 ${getUserTierBadgeClass(profile.tier)}`}
           >
-            {profile.tier}
+            {profile.tier} Tier
           </span>
         </div>
       </div>

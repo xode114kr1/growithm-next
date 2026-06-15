@@ -19,23 +19,9 @@ const personalScoreTierThresholds = [
   { minScore: 0, tier: "Bronze" },
 ] satisfies Array<{ minScore: number; tier: PersonalScoreTier }>;
 
-const tierClasses = {
-  Bronze: "bg-orange-50 border-orange-200 text-orange-800",
-  Diamond: "bg-cyan-50 border-cyan-200 text-cyan-800",
-  Gold: "bg-gradient-to-r from-amber-100 to-amber-50 border-amber-200 text-amber-700",
-  Platinum:
-    "bg-gradient-to-r from-slate-100 to-white border-slate-200 text-slate-600",
-  Silver: "bg-slate-200 border-slate-300 text-slate-600",
-};
-
-// 사용자 점수에 맞는 티어 이름과 스타일을 반환한다.
+// 사용자 점수에 맞는 티어를 반환한다.
 export function getUserTier(score: number) {
-  const tier = getPersonalScoreTier(score);
-
-  return {
-    tier: `${tier} Tier`,
-    tierClass: tierClasses[tier],
-  };
+  return getPersonalScoreTier(score);
 }
 
 // 개인 점수에 해당하는 티어를 계산한다.
@@ -97,13 +83,10 @@ export function createPersonalTier(score: number): UserPersonalTier {
 
 // 사용자 조회 결과를 공용 사용자 요약 데이터로 변환한다.
 export function createUserSummary(user: UserSummaryRow): UserSummary {
-  const tier = getUserTier(user.score);
-
   return {
     avatar: getUserAvatar(user.image),
     id: user.id,
     name: getUserDisplayName(user.name, user.email),
-    tier: tier.tier,
-    tierClass: tier.tierClass,
+    tier: getUserTier(user.score),
   };
 }

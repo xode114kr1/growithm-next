@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { getSolvedProblemCount } from "@/services/problems/problem.query";
 import { getUserProfile } from "@/services/users/user.query";
+import { getUserTierBadgeClass } from "@/utils/user";
 
 type ProfilePageProps = {
   params: Promise<{
@@ -36,9 +37,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             <div className="mb-3 flex flex-col gap-3 md:flex-row md:items-center">
               <h1 className="page-title">{profile.name}</h1>
               <span
-                className={`w-fit rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-widest ${profile.tierClass}`}
+                className={`w-fit rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-widest ${getUserTierBadgeClass(profile.tier)}`}
               >
-                {profile.tier}
+                {profile.tier} Tier
               </span>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">

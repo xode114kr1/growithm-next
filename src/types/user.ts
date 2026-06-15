@@ -17,14 +17,12 @@ export type UserProfile = {
   avatar: string;
   name: string;
   score: number;
-  tier: string;
-  tierClass: string;
+  tier: PersonalScoreTier;
 };
 
 export type UserSummary = {
   avatar: string;
   id: string;
   name: string;
-  tier: string;
-  tierClass: string;
+  tier: PersonalScoreTier;
 };

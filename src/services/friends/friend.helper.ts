@@ -14,15 +14,12 @@ export function createFriendProfile(
   user: FriendUserRow,
   relationStatus: FriendProfile["relationStatus"],
 ): FriendProfile {
-  const tier = getUserTier(user.score);
-
   return {
     avatar: getUserAvatar(user.image),
     id: user.id,
     name: getUserDisplayName(user.name, user.email),
     relationStatus,
-    tier: tier.tier,
-    tierClass: tier.tierClass,
+    tier: getUserTier(user.score),
   };
 }
 

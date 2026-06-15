@@ -35,14 +35,11 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
     return null;
   }
 
-  const tier = getUserTier(user.score);
-
   return {
     avatar: getUserAvatar(user.image),
     name: getUserDisplayName(user.name, user.email),
     score: user.score,
-    tier: tier.tier,
-    tierClass: tier.tierClass,
+    tier: getUserTier(user.score),
   };
 }
 

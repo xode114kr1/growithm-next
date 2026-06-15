@@ -13,10 +13,10 @@ export const chartColors = {
 
 // 문제 티어별 분포 차트의 막대 색상입니다.
 export const problemTierChartColors: Record<ProblemTierBucketName, string> = {
-  BRONZE: "#a5663f",
-  SILVER: "#dde3eb",
-  GOLD: "#f4bf3a",
-  PLATINUM: "#a3cfcf",
-  DIAMOND: "#00daf3",
-  RUBY: "#ba1a1a",
+  BRONZE: "#c58b68",
+  SILVER: "#cbd5e1",
+  GOLD: "#f2cc72",
+  PLATINUM: "#9fd8d2",
+  DIAMOND: "#7dd3e8",
+  RUBY: "#e58a9b",
 } as const;
