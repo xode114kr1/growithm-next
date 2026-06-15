@@ -1,10 +1,9 @@
 import Link from "next/link";
 
-import type {
-  ProblemEmptyStateReason,
-  ProblemListItem,
-} from "@/types/problem";
+import type { ProblemEmptyStateReason, ProblemListItem } from "@/types/problem";
+import { problemIconColors } from "@/utils/color";
 import {
+  getGrowithmProblemTier,
   getProblemStatusBadgeClass,
   getProblemStatusLabel,
 } from "@/utils/problem";
@@ -49,7 +48,7 @@ export default function ProblemTable({
                     href={`/problem/${problem.id}`}
                   >
                     <span
-                      className={`mt-1 flex size-10 shrink-0 items-center justify-center rounded-full shadow-sm ${getTierBadgeClass(problem.tier)}`}
+                      className={`mt-1 flex size-10 shrink-0 items-center justify-center rounded-full shadow-sm ${problemIconColors[getGrowithmProblemTier(problem.tier) ?? "BRONZE"]}`}
                     >
                       {getPlatformInitial(problem.platform)}
                     </span>
@@ -82,7 +81,9 @@ export default function ProblemTable({
                         </span>
                       ))
                     ) : (
-                      <span className="text-body-sm text-slate-400">태그 없음</span>
+                      <span className="text-body-sm text-slate-400">
+                        태그 없음
+                      </span>
                     )}
                   </div>
                 </td>
@@ -141,7 +142,9 @@ function Pagination({
     <div className="flex flex-col items-start justify-between gap-4 border-t border-slate-100 bg-slate-50/30 px-6 py-4 sm:flex-row sm:items-center">
       <p className="text-body-sm text-slate-500">
         전체 {totalCount.toLocaleString()}개 중{" "}
-        <span className="font-semibold text-on-surface">{start} - {end}</span>
+        <span className="font-semibold text-on-surface">
+          {start} - {end}
+        </span>
       </p>
       <div className="flex items-center gap-1">
         <PaginationLink
@@ -199,7 +202,9 @@ function EmptyState({ reason }: { reason: ProblemEmptyStateReason }) {
   if (reason === "no-filter-results") {
     return (
       <div className="border-t border-slate-100 px-6 py-14 text-center">
-        <p className="font-semibold text-on-surface">조건에 맞는 문제가 없습니다.</p>
+        <p className="font-semibold text-on-surface">
+          조건에 맞는 문제가 없습니다.
+        </p>
         <p className="mt-2 text-body-sm text-slate-500">
           플랫폼, 티어 또는 검색어를 변경해 보세요.
         </p>
@@ -212,7 +217,9 @@ function EmptyState({ reason }: { reason: ProblemEmptyStateReason }) {
 
   return (
     <div className="border-t border-slate-100 px-6 py-14 text-center">
-      <p className="font-semibold text-on-surface">아직 제출한 문제가 없습니다.</p>
+      <p className="font-semibold text-on-surface">
+        아직 제출한 문제가 없습니다.
+      </p>
       <p className="mt-2 text-body-sm text-slate-500">
         웹훅 처리가 완료된 제출 기록이 이곳에 표시됩니다.
       </p>
@@ -303,7 +310,9 @@ function TableHead({
   className?: string;
 }) {
   return (
-    <th className={`px-6 py-4 text-label-caps text-slate-400 ${className ?? ""}`}>
+    <th
+      className={`px-6 py-4 text-label-caps text-slate-400 ${className ?? ""}`}
+    >
       {children}
     </th>
   );
