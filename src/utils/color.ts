@@ -22,16 +22,6 @@ export const problemTierChartColors: Record<ProblemTierBucketName, string> = {
   RUBY: "#e58a9b",
 } as const;
 
-// 문제 목록의 플랫폼 아이콘 색상입니다.
-export const problemIconColors: Record<ProblemTierBucketName, string> = {
-  BRONZE: "bg-amber-100 text-amber-800",
-  SILVER: "bg-slate-200 text-slate-700",
-  GOLD: "bg-yellow-100 text-yellow-800",
-  PLATINUM: "bg-teal-100 text-teal-800",
-  DIAMOND: "bg-sky-100 text-sky-800",
-  RUBY: "bg-rose-100 text-rose-800",
-};
-
 // 대시보드 Award 아이콘 색상입니다.
 export const awardIconColors: Record<PersonalScoreTier, string> = {
   Bronze: "bg-amber-700 text-white",

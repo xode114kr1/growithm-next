@@ -1,9 +1,7 @@
 import Link from "next/link";
 
 import type { ProblemEmptyStateReason, ProblemListItem } from "@/types/problem";
-import { problemIconColors } from "@/utils/color";
 import {
-  getGrowithmProblemTier,
   getProblemStatusBadgeClass,
   getProblemStatusLabel,
 } from "@/utils/problem";
@@ -44,14 +42,9 @@ export default function ProblemTable({
               >
                 <td className="min-w-90 max-w-140 px-6 py-5">
                   <Link
-                    className="flex items-start gap-4 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-secondary-container"
+                    className="block rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-secondary-container"
                     href={`/problem/${problem.id}`}
                   >
-                    <span
-                      className={`mt-1 flex size-10 shrink-0 items-center justify-center rounded-full shadow-sm ${problemIconColors[getGrowithmProblemTier(problem.tier) ?? "BRONZE"]}`}
-                    >
-                      {getPlatformInitial(problem.platform)}
-                    </span>
                     <div className="min-w-0 space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="rounded bg-slate-100 px-1.5 py-0.5 text-mono-code text-2.75 text-slate-500">
@@ -225,11 +218,6 @@ function EmptyState({ reason }: { reason: ProblemEmptyStateReason }) {
       </p>
     </div>
   );
-}
-
-// 앞쪽 배지에 표시할 플랫폼 축약 문자를 만든다.
-function getPlatformInitial(platform: string) {
-  return platform.charAt(0);
 }
 
 // tier 텍스트를 가장 가까운 배지 스타일로 매핑한다.

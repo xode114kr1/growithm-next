@@ -1,22 +1,4 @@
 import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
-import type { ProblemTierBucketName } from "@/types/problem";
-
-const programmersLevelTiers: Partial<Record<number, ProblemTierBucketName>> = {
-  1: "BRONZE",
-  2: "SILVER",
-  3: "GOLD",
-  4: "PLATINUM",
-  5: "DIAMOND",
-};
-
-const growithmProblemTiers = new Set<ProblemTierBucketName>([
-  "BRONZE",
-  "SILVER",
-  "GOLD",
-  "PLATINUM",
-  "DIAMOND",
-  "RUBY",
-]);
 
 // 문제 제출 상태의 표시 이름을 반환한다.
 export function getProblemStatusLabel(status: ProblemSubmissionStatus) {
@@ -54,25 +36,6 @@ export function formatScore(score: number | null, scoreMax: number | null) {
 // 제출 시각이 없을 때 기본 문구를 적용해 표시값을 만든다.
 export function getSubmittedLabel(submittedAtText: string | null) {
   return submittedAtText ?? "제출됨";
-}
-
-// 플랫폼별 원본 난이도를 Growithm 문제 티어로 변환한다.
-export function getGrowithmProblemTier(tier: string | null) {
-  const normalizedTier = tier?.trim().toLowerCase() ?? "";
-
-  if (!normalizedTier) return null;
-
-  const levelMatch = normalizedTier.match(/(?:lv\.?|level)\s*(\d+)/);
-
-  if (levelMatch) {
-    return programmersLevelTiers[Number(levelMatch[1])] ?? null;
-  }
-
-  const tierName = normalizedTier.split(/\s+/)[0]?.toUpperCase();
-
-  return growithmProblemTiers.has(tierName as ProblemTierBucketName)
-    ? (tierName as ProblemTierBucketName)
-    : null;
 }
 
 // 문제 티어에 맞는 배지 스타일 클래스를 반환한다.
