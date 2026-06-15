@@ -3,7 +3,10 @@ import Link from "next/link";
 import { auth } from "@/lib/auth/auth";
 import { getUserStudies } from "@/services/studies/study.query";
 import type { StudyListItem, StudyTier } from "@/types/study";
-import { tierThumbnails } from "@/utils/study";
+import {
+  studyTierProgressColors,
+  studyTierThumbnailColors,
+} from "@/utils/color";
 
 import StudyCreateModal from "./study-create-modal";
 
@@ -67,7 +70,7 @@ function StudyCard({ study }: { study: StudyListItem }) {
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-container">
             <div
-              className="h-full rounded-full bg-secondary"
+              className={`h-full rounded-full bg-linear-to-r ${studyTierProgressColors[study.tier]}`}
               style={{ width: `${study.progress}%` }}
             />
           </div>
@@ -100,15 +103,13 @@ function StudyCard({ study }: { study: StudyListItem }) {
 }
 
 function TierThumbnail({ tier }: { tier: StudyTier }) {
-  const thumbnail = tierThumbnails[tier];
-
   return (
     <div
       aria-label={`${tier} 티어`}
-      className={`flex size-12 shrink-0 items-center justify-center rounded-lg border text-base font-black shadow-sm ${thumbnail.className}`}
+      className={`flex size-12 shrink-0 items-center justify-center rounded-lg border text-base font-black shadow-sm ${studyTierThumbnailColors[tier]}`}
       title={`${tier} 티어`}
     >
-      {thumbnail.label}
+      {tier.charAt(0)}
     </div>
   );
 }

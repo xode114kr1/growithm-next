@@ -1,17 +1,13 @@
 import Link from "next/link";
 
-import type { StudyOverview, StudyTier } from "@/types/study";
+import type { StudyOverview } from "@/types/study";
+import {
+  studyTierBadgeColors,
+  studyTierProgressColors,
+} from "@/utils/color";
 import { getTierProgress } from "@/utils/study";
 
 import ContributionChart from "./contribution-chart";
-
-const tierStyles: Record<StudyTier, string> = {
-  Bronze: "border-amber-700/20 bg-amber-700 text-white",
-  Diamond: "border-sky-300 bg-sky-100 text-sky-800",
-  Gold: "border-yellow-400/40 bg-yellow-400 text-yellow-950",
-  Platinum: "border-cyan-200 bg-primary-fixed text-primary",
-  Silver: "border-slate-300 bg-slate-200 text-slate-700",
-};
 
 export default function StudyOverviewView({ study }: { study: StudyOverview }) {
   return (
@@ -69,7 +65,7 @@ function StudyTierCard({ study }: { study: StudyOverview }) {
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <h2 className="text-h2-editorial text-primary">{study.tier}</h2>
             <span
-              className={`rounded-full border px-3 py-1 text-xs font-bold uppercase ${tierStyles[study.tier]}`}
+              className={`rounded-full border px-3 py-1 text-xs font-bold uppercase ${studyTierBadgeColors[study.tier]}`}
             >
               {study.tier} 티어
             </span>
@@ -85,7 +81,7 @@ function StudyTierCard({ study }: { study: StudyOverview }) {
       <div className="space-y-3">
         <div className="h-3 overflow-hidden rounded-full bg-slate-100">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-slate-300 to-slate-500"
+            className={`h-full rounded-full bg-linear-to-r ${studyTierProgressColors[study.tier]}`}
             style={{ width: `${progress}%` }}
           />
         </div>
