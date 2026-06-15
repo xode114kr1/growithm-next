@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 import ProblemShareModal from "./problem-share-modal";
+import ProblemTierBadge from "@/components/ui/problem-tier-badge";
 import type { ProblemDetail } from "@/types/problem";
 import type { ProblemShareTargetStudy } from "@/types/study";
-import { getTierBadgeClass } from "@/utils/problem";
 
 export default function ProblemDetailHeader({
   problem,
@@ -34,9 +34,7 @@ export default function ProblemDetailHeader({
               {problem.platform}
             </span>
             {problem.tier ? (
-              <span className={getTierBadgeClass(problem.tier)}>
-                {problem.tier}
-              </span>
+              <ProblemTierBadge tier={problem.tier} />
             ) : null}
           </div>
           <p className="mb-2 text-label-caps text-slate-400">

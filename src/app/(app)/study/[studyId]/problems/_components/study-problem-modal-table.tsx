@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import ProblemTierBadge from "@/components/ui/problem-tier-badge";
 import { usePagination } from "@/hooks/use-pagination";
 import {
   getProblemStatusBadgeClass,
@@ -146,9 +147,7 @@ export default function StudyProblemModalTable({
                             {problem.code}
                           </span>
                           {problem.tier ? (
-                            <span className={getTierBadgeClass(problem.tier)}>
-                              {problem.tier}
-                            </span>
+                            <ProblemTierBadge tier={problem.tier} />
                           ) : null}
                         </span>
                         <span className="block text-pretty wrap-break-word font-semibold leading-snug text-on-surface transition-colors group-hover:text-secondary">
@@ -484,9 +483,7 @@ function StudyProblemModal({
                 {problem.code}
               </span>
               {problem.tier ? (
-                <span className={getTierBadgeClass(problem.tier)}>
-                  {problem.tier}
-                </span>
+                <ProblemTierBadge tier={problem.tier} />
               ) : null}
               <span className="text-2.75 font-semibold text-slate-400">
                 {problem.platform}

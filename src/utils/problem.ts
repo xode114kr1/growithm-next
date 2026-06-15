@@ -74,16 +74,3 @@ export function getGrowithmProblemTier(tier: string | null) {
     ? (tierName as ProblemTierBucketName)
     : null;
 }
-
-// 문제 티어에 맞는 배지 스타일 클래스를 반환한다.
-export function getTierBadgeClass(tier: string | null) {
-  if (tier?.toLowerCase().includes("platinum")) {
-    return "badge-tier-platinum";
-  }
-
-  if (tier?.toLowerCase().includes("gold")) {
-    return "badge-tier-gold";
-  }
-
-  return "badge-tier-silver";
-}

@@ -1,9 +1,8 @@
 import Link from "next/link";
 
+import ProblemTierBadge from "@/components/ui/problem-tier-badge";
 import type { ProblemEmptyStateReason, ProblemListItem } from "@/types/problem";
-import { problemTierBadgeColors } from "@/utils/color";
 import {
-  getGrowithmProblemTier,
   getProblemStatusBadgeClass,
   getProblemStatusLabel,
 } from "@/utils/problem";
@@ -53,11 +52,7 @@ export default function ProblemTable({
                           {problem.code}
                         </span>
                         {problem.tier ? (
-                          <span
-                            className={`inline-flex items-center rounded-full px-2.5 py-1.5 text-xs font-bold leading-none ${problemTierBadgeColors[getGrowithmProblemTier(problem.tier) ?? "BRONZE"]}`}
-                          >
-                            {problem.tier}
-                          </span>
+                          <ProblemTierBadge tier={problem.tier} />
                         ) : null}
                       </div>
                       <h3 className="text-pretty wrap-break-word font-semibold leading-snug text-on-surface transition-colors group-hover:text-secondary">

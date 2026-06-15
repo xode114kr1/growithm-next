@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { getTierBadgeClass } from "@/utils/problem";
+import ProblemTierBadge from "@/components/ui/problem-tier-badge";
 import { getPendingProblems } from "@/services/problems/problem.query";
 import type { PendingProblem } from "@/types/problem";
 
@@ -48,9 +48,7 @@ export default async function PendingAnalysis({
                   </span>
                 </td>
                 <td className="px-8 py-5">
-                  <span className={`${getTierBadgeClass(problem.tier)} shadow-sm`}>
-                    {problem.tier}
-                  </span>
+                  <ProblemTierBadge className="shadow-sm" tier={problem.tier} />
                 </td>
                 <td className="px-8 py-5 text-body-sm text-slate-500">
                   {problem.submittedAtText}
