@@ -1,8 +1,7 @@
 import Link from "next/link";
 
-import ProblemTierBadge from "@/components/ui/problem-tier-badge";
 import { getPendingProblems } from "@/services/problems/problem.query";
-import type { PendingProblem } from "@/types/problem";
+import PendingItem from "./pending-item";
 
 export default async function PendingList({
   userId,
@@ -33,61 +32,14 @@ export default async function PendingList({
           </thead>
           <tbody className="divide-y divide-slate-50">
             {pendingProblems.map((problem) => (
-              <tr
-                className="group transition-colors hover:bg-slate-50/50"
-                key={problem.id}
-              >
-                <td className="p-0 font-semibold text-on-background">
-                  <Link
-                    className="block px-8 py-5 transition-colors group-hover:text-secondary"
-                    href={`/problem/${problem.id}`}
-                  >
-                    {problem.title}
-                  </Link>
-                </td>
-                <td className="p-0">
-                  <Link
-                    className="block px-8 py-5"
-                    href={`/problem/${problem.id}`}
-                  >
-                    <span className="rounded bg-slate-100 px-2 py-1 text-mono-code text-xs text-slate-600">
-                      {getProblemCode(problem)}
-                    </span>
-                  </Link>
-                </td>
-                <td className="p-0">
-                  <Link
-                    className="block px-8 py-5"
-                    href={`/problem/${problem.id}`}
-                  >
-                    <ProblemTierBadge
-                      className="shadow-sm"
-                      tier={problem.tier}
-                    />
-                  </Link>
-                </td>
-              </tr>
+              <PendingItem problem={problem} key={problem.id} variant="table" />
             ))}
           </tbody>
         </table>
       </div>
       <div className="divide-y divide-slate-100 md:hidden">
         {pendingProblems.map((problem) => (
-          <Link
-            className="block p-5 transition-colors hover:bg-slate-50/50"
-            href={`/problem/${problem.id}`}
-            key={problem.id}
-          >
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded bg-slate-100 px-2 py-1 text-mono-code text-xs text-slate-600">
-                {getProblemCode(problem)}
-              </span>
-              <ProblemTierBadge className="shadow-sm" tier={problem.tier} />
-            </div>
-            <h3 className="mt-3 wrap-break-word font-semibold leading-snug text-on-background">
-              {problem.title}
-            </h3>
-          </Link>
+          <PendingItem key={problem.id} problem={problem} variant="card" />
         ))}
       </div>
       {pendingProblems.length === 0 ? (
@@ -102,10 +54,6 @@ export default async function PendingList({
       ) : null}
     </section>
   );
-}
-
-function getProblemCode(problem: PendingProblem) {
-  return `${problem.platform}-${problem.problemId}`;
 }
 
 function TableHead({ children }: { children: React.ReactNode }) {
