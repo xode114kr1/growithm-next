@@ -25,7 +25,6 @@ export default function ProblemFilters({
         <input
           className="input-field min-h-10"
           defaultValue={filters.q}
-          key={filters.q}
           onChange={(event) => {
             const value = event.target.value;
             replaceQuery({ q: value.trim() || null });
