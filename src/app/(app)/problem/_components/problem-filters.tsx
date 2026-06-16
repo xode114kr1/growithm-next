@@ -21,6 +21,19 @@ export default function ProblemFilters({
 
   return (
     <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <FilterCard className="md:col-span-2 xl:col-span-1" title="검색">
+        <input
+          className="input-field min-h-10"
+          defaultValue={filters.q}
+          key={filters.q}
+          onChange={(event) => {
+            const value = event.target.value;
+            replaceQuery({ q: value.trim() || null });
+          }}
+          placeholder="문제 제목 또는 ID"
+          type="search"
+        />
+      </FilterCard>
       <FilterCard title="플랫폼">
         <div className="flex flex-wrap gap-2">
           {platforms.map((platform) => {
@@ -86,19 +99,6 @@ export default function ProblemFilters({
             </select>
           </label>
         </div>
-      </FilterCard>
-      <FilterCard className="md:col-span-2 xl:col-span-1" title="검색">
-        <input
-          className="input-field min-h-10"
-          defaultValue={filters.q}
-          key={filters.q}
-          onChange={(event) => {
-            const value = event.target.value;
-            replaceQuery({ q: value.trim() || null });
-          }}
-          placeholder="문제 제목 또는 ID"
-          type="search"
-        />
       </FilterCard>
     </section>
   );
