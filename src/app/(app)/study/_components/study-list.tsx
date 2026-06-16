@@ -1,6 +1,5 @@
 import type { StudyListItem } from "@/types/study";
 
-import StudyCreateModal from "./study-create-modal";
 import StudyItem from "./study-item";
 
 export default async function StudyList({
@@ -12,10 +11,6 @@ export default async function StudyList({
 }) {
   return (
     <section>
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="section-title text-on-surface">참여 중인 스터디</h2>
-        <StudyCreateModal />
-      </div>
       <div className="grid grid-cols-1 gap-gutter md:grid-cols-2">
         {studies.map((study) => (
           <StudyItem key={study.id} study={study} />

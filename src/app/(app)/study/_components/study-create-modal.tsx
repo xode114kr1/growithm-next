@@ -1,13 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useCallback, useEffect, useId, useState } from "react";
+import { useActionState, useEffect, useId } from "react";
 
-import { useEscapeKey } from "@/hooks/use-escape-key";
-import {
-  createStudy,
-  type CreateStudyActionState,
-} from "../actions";
+import { createStudy, type CreateStudyActionState } from "../actions";
 
 const initialCreateStudyActionState: CreateStudyActionState = {
   description: "",
@@ -17,17 +13,20 @@ const initialCreateStudyActionState: CreateStudyActionState = {
   title: "",
 };
 
-export default function StudyCreateModal() {
+export default function StudyCreateModal({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
+
   const [state, formAction, isPending] = useActionState(
     createStudy,
     initialCreateStudyActionState,
   );
   const titleId = useId();
-  const closeModal = useCallback(() => setIsOpen(false), []);
-
-  useEscapeKey({ enabled: isOpen, onEscape: closeModal });
 
   useEffect(() => {
     if (state.status !== "success" || !state.studyId) {
@@ -39,14 +38,6 @@ export default function StudyCreateModal() {
 
   return (
     <>
-      <button
-        className="rounded-lg bg-primary px-4 py-2 text-body-sm font-semibold text-on-primary transition-all hover:opacity-90"
-        onClick={() => setIsOpen(true)}
-        type="button"
-      >
-        스터디 생성
-      </button>
-
       {isOpen ? (
         <div
           aria-labelledby={titleId}
@@ -57,7 +48,7 @@ export default function StudyCreateModal() {
           <button
             aria-label="스터디 생성 모달 닫기"
             className="absolute inset-0 cursor-default"
-            onClick={() => setIsOpen(false)}
+            onClick={onClose}
             type="button"
           />
           <section className="relative max-h-[calc(100svh-4rem)] w-full max-w-2xl overflow-y-auto rounded-xl border border-slate-100 bg-white shadow-2xl shadow-slate-950/20">
@@ -74,7 +65,7 @@ export default function StudyCreateModal() {
                 </div>
                 <button
                   className="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-50 text-xl font-semibold text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary"
-                  onClick={() => setIsOpen(false)}
+                  onClick={onClose}
                   type="button"
                 >
                   ×
@@ -132,12 +123,16 @@ export default function StudyCreateModal() {
                 <button
                   className="btn-secondary"
                   disabled={isPending}
-                  onClick={() => setIsOpen(false)}
+                  onClick={onClose}
                   type="button"
                 >
                   취소
                 </button>
-                <button className="btn-primary" disabled={isPending} type="submit">
+                <button
+                  className="btn-primary"
+                  disabled={isPending}
+                  type="submit"
+                >
                   스터디 생성
                 </button>
               </div>
