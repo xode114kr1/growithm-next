@@ -57,8 +57,9 @@ export async function getProblemShareTargetStudies({
 
 // 사용자에게 도착한 유효한 대기 중 스터디 초대를 조회한다.
 export async function getPendingInvites(
-  userId: string,
+  userId: string | undefined,
 ): Promise<StudyInviteItem[]> {
+  if (!userId) return [];
   const invites = await findPendingInvites(userId);
 
   return invites.map((invite) => ({
@@ -91,7 +92,11 @@ export async function getStudyLayoutData({
 }
 
 // 사용자가 참여하거나 소유한 스터디 목록을 조회한다.
-export async function getUserStudies(userId: string): Promise<StudyListItem[]> {
+export async function getUserStudies(
+  userId: string | undefined,
+): Promise<StudyListItem[]> {
+  if (!userId) return [];
+
   const studies = await findUserStudies(userId);
 
   return studies.map((study) => {
@@ -129,7 +134,8 @@ export async function getStudyMembersData({
 
   return {
     description:
-      study.description ?? "스터디 멤버의 기여도와 최근 활동 상태를 확인합니다.",
+      study.description ??
+      "스터디 멤버의 기여도와 최근 활동 상태를 확인합니다.",
     memberCount: study.members.length,
     members: study.members.map((member) => {
       const shares = study.problemShares.filter(
@@ -204,8 +210,9 @@ export async function getStudyOverview({
     score: study.score,
     tier,
     totalSolved: study.problemShares.length,
-    weeklySolved: study.problemShares.filter((share) => share.sharedAt >= oneWeekAgo)
-      .length,
+    weeklySolved: study.problemShares.filter(
+      (share) => share.sharedAt >= oneWeekAgo,
+    ).length,
   };
 }
 
