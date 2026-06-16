@@ -1,4 +1,3 @@
-import StudyFab from "./_components/study-fab";
 import StudyInvites from "./_components/study-invites";
 import StudyList from "./_components/study-list";
 
@@ -15,7 +14,6 @@ export default function StudyPage() {
           </aside>
         </div>
       </div>
-      <StudyFab />
     </main>
   );
 }
