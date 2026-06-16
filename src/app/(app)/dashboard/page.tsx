@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth/auth";
 import DashboardChartSection from "./_components/dashboard-chart-section";
-import DashboardPendingList from "./_components/dashboard-pending-list";
+import PendingList from "./_components/pending-list";
 import DashboardOverviewSection from "./_components/dashboard-overview-section";
 
 export default async function DashboardPage() {
@@ -12,7 +12,7 @@ export default async function DashboardPage() {
       <div className="page-container space-y-6">
         <DashboardOverviewSection userId={userId} />
         <DashboardChartSection userId={userId} />
-        <DashboardPendingList userId={userId} />
+        <PendingList userId={userId} />
       </div>
     </main>
   );

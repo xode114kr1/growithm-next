@@ -4,7 +4,7 @@ import ProblemTierBadge from "@/components/ui/problem-tier-badge";
 import { getPendingProblems } from "@/services/problems/problem.query";
 import type { PendingProblem } from "@/types/problem";
 
-export default async function DashboardPendingList({
+export default async function PendingList({
   userId,
 }: {
   userId: string | undefined;
