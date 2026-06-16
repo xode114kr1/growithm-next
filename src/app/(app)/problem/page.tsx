@@ -13,7 +13,7 @@ import type {
 } from "@/types/problem";
 
 import ProblemFilters from "./_components/problem-filters";
-import ProblemTable from "./_components/problem-table";
+import ProblemList from "./_components/problem-list";
 
 type ProblemPageProps = {
   searchParams: Promise<ProblemPageSearchParams>;
@@ -44,7 +44,7 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
     <main className="page-shell">
       <div className="page-container">
         <ProblemFilters filters={filters} tiers={tiers} />
-        <ProblemTable
+        <ProblemList
           currentPage={currentPage}
           emptyStateReason={emptyStateReason}
           pageSize={PROBLEM_PAGE_SIZE}

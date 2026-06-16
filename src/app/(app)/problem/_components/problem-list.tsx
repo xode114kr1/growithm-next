@@ -7,7 +7,7 @@ import {
   getProblemStatusLabel,
 } from "@/utils/problem";
 
-export default function ProblemTable({
+export default function ProblemList({
   currentPage,
   emptyStateReason,
   pageSize,
