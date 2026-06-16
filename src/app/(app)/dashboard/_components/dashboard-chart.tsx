@@ -24,7 +24,7 @@ const masteryTooltipLabels: Record<string, string> = {
   SILVER: "Silver / Level 2",
 };
 
-export default function GrowthMastery({
+export default function DashboardChart({
   mastery,
   solvedCount,
 }: {

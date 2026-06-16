@@ -2,10 +2,9 @@ import {
   getProblemTierDistribution,
   getSolvedProblemCount,
 } from "@/services/problems/problem.query";
+import DashboardChart from "./dashboard-chart";
 
-import GrowthMastery from "./growth-mastery";
-
-export default async function GrowthMasterySection({
+export default async function DashboardChartSection({
   userId,
 }: {
   userId: string | undefined;
@@ -15,5 +14,5 @@ export default async function GrowthMasterySection({
     getSolvedProblemCount(userId),
   ]);
 
-  return <GrowthMastery mastery={mastery} solvedCount={solvedCount} />;
+  return <DashboardChart mastery={mastery} solvedCount={solvedCount} />;
 }
