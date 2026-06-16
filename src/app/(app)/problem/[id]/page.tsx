@@ -1,14 +1,6 @@
-import { notFound } from "next/navigation";
-
 import { auth } from "@/lib/auth/auth";
-import { getProblemDetail } from "@/services/problems/problem.query";
-import { getProblemShareTargetStudies } from "@/services/studies/study.query";
 
-import ProblemDescription from "./_components/problem-description";
-import ProblemDetailHeader from "./_components/problem-detail-header";
-import ProblemMemoEditor from "./_components/problem-memo-editor";
-import ProblemMetadata from "./_components/problem-metadata";
-import ProblemSolutionCode from "./_components/problem-solution-code";
+import ProblemSection from "./_components/problem-section";
 
 export default async function ProblemDetailPage({
   params,
@@ -18,29 +10,11 @@ export default async function ProblemDetailPage({
   const { id } = await params;
   const session = await auth();
   const userId = session?.user?.id;
-  const [problem, shareTargetStudies] = await Promise.all([
-    getProblemDetail({ id, userId }),
-    getProblemShareTargetStudies({
-      problemId: id,
-      userId,
-    }),
-  ]);
-
-  if (!problem) {
-    notFound();
-  }
 
   return (
     <main className="page-shell">
       <div className="page-container max-w-280 space-y-8">
-        <ProblemDetailHeader
-          problem={problem}
-          shareTargetStudies={shareTargetStudies}
-        />
-        <ProblemMetadata problem={problem} />
-        <ProblemMemoEditor initialMemo={problem.memo} problemId={problem.id} />
-        <ProblemSolutionCode code={problem.code} />
-        <ProblemDescription description={problem.description} />
+        <ProblemSection problemId={id} userId={userId} />
       </div>
     </main>
   );
