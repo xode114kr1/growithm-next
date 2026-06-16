@@ -6,7 +6,6 @@ export default function StudyPage() {
   return (
     <main className="page-shell bg-linear-to-b from-surface to-surface-container-low">
       <div className="page-container">
-        <StudyHeader />
         <div className="grid grid-cols-1 gap-gutter xl:grid-cols-12">
           <div className="space-y-gutter xl:col-span-8">
             <StudyList />
@@ -18,18 +17,5 @@ export default function StudyPage() {
       </div>
       <StudyFab />
     </main>
-  );
-}
-
-function StudyHeader() {
-  return (
-    <header className="page-header flex flex-col justify-between gap-6 md:flex-row md:items-end">
-      <div>
-        <h1 className="page-title mb-2 text-primary">스터디</h1>
-        <p className="text-body-md text-on-surface-variant">
-          함께 문제를 풀고 알고리즘 감각을 키워보세요.
-        </p>
-      </div>
-    </header>
   );
 }
