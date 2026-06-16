@@ -4,7 +4,7 @@ import ProblemTierBadge from "@/components/ui/problem-tier-badge";
 import { getPendingProblems } from "@/services/problems/problem.query";
 import type { PendingProblem } from "@/types/problem";
 
-export default async function PendingAnalysis({
+export default async function DashboardPendingList({
   userId,
 }: {
   userId: string | undefined;
@@ -92,7 +92,9 @@ export default async function PendingAnalysis({
       </div>
       {pendingProblems.length === 0 ? (
         <div className="border-t border-slate-50 px-6 py-12 text-center">
-          <p className="font-semibold text-on-surface">작성할 메모가 없습니다.</p>
+          <p className="font-semibold text-on-surface">
+            작성할 메모가 없습니다.
+          </p>
           <p className="mt-2 text-body-sm text-slate-500">
             제출 후 메모가 필요한 문제가 이곳에 표시됩니다.
           </p>
@@ -106,14 +108,8 @@ function getProblemCode(problem: PendingProblem) {
   return `${problem.platform}-${problem.problemId}`;
 }
 
-function TableHead({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function TableHead({ children }: { children: React.ReactNode }) {
   return (
-    <th className="px-8 py-4 text-label-caps text-slate-500">
-      {children}
-    </th>
+    <th className="px-8 py-4 text-label-caps text-slate-500">{children}</th>
   );
 }
