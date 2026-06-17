@@ -17,7 +17,7 @@ export default async function StudyDetailLayout({
   const { studyId } = await params;
   const session = await auth();
   const userId = session?.user?.id;
-  const study = userId ? await getStudyLayoutData({ studyId, userId }) : null;
+  const study = await getStudyLayoutData({ studyId, userId });
 
   if (!study) {
     notFound();

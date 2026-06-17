@@ -75,9 +75,11 @@ export async function getStudyLayoutData({
   studyId,
   userId,
 }: {
-  studyId: string;
-  userId: string;
+  studyId: string | undefined;
+  userId: string | undefined;
 }): Promise<StudyLayoutData | null> {
+  if (!studyId || !userId) return null;
+
   const study = await findStudyForLayout({ studyId, userId });
 
   if (!study) {
