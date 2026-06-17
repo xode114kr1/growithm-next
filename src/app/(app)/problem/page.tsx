@@ -1,23 +1,70 @@
 import { auth } from "@/lib/auth/auth";
-import type { ProblemPageSearchParams } from "@/types/problem";
+import type {
+  ProblemEmptyStateReason,
+  ProblemPageSearchParams,
+} from "@/types/problem";
 
-import ProblemFiltersSection from "./_components/problem-filters-section";
-import ProblemListSection from "./_components/problem-list-section";
+import {
+  getAvailableProblemTiers,
+  getProblemCount,
+  getProblems,
+  PROBLEM_PAGE_SIZE,
+} from "@/services/problems/problem.query";
+import { buildQueryString, parseFilters, parsePageParam } from "./_lib/parse";
+import ProblemFilters from "./_components/problem-filters";
+import ProblemList from "./_components/problem-list";
 
 type ProblemPageProps = {
   searchParams: Promise<ProblemPageSearchParams>;
 };
 
 export default async function ProblemPage({ searchParams }: ProblemPageProps) {
+  // params와 id호출
   const params = await searchParams;
   const session = await auth();
   const userId = session?.user?.id;
 
+  // paese filters
+  const filters = parseFilters(params);
+  const requestedPage = parsePageParam(params.page);
+  const queryString = buildQueryString(params);
+
+  // fetch
+  const [tiers, unfilteredTotalCount, totalCount] = await Promise.all([
+    getAvailableProblemTiers(userId),
+    getProblemCount(userId),
+    getProblemCount(userId, filters),
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / PROBLEM_PAGE_SIZE));
+  const currentPage = Math.min(requestedPage, totalPages);
+
+  const problems = await getProblems({
+    filters,
+    page: currentPage,
+    userId,
+  });
+
+  const emptyStateReason: ProblemEmptyStateReason | null =
+    totalCount > 0
+      ? null
+      : unfilteredTotalCount > 0
+        ? "no-filter-results"
+        : "no-submissions";
+
   return (
     <main className="page-shell">
       <div className="page-container">
-        <ProblemFiltersSection searchParams={params} userId={userId} />
-        <ProblemListSection searchParams={params} userId={userId} />
+        <ProblemFilters filters={filters} tiers={tiers} />
+        <ProblemList
+          currentPage={currentPage}
+          emptyStateReason={emptyStateReason}
+          pageSize={PROBLEM_PAGE_SIZE}
+          problems={problems}
+          queryString={queryString}
+          totalCount={totalCount}
+          totalPages={totalPages}
+        />
       </div>
     </main>
   );
