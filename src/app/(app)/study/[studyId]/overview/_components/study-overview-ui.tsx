@@ -1,37 +1,15 @@
-import Link from "next/link";
-
-import type { StudyOverview } from "@/types/study";
+import { StudyOverview } from "@/types/study";
 import { studyTierBadgeColors, studyTierProgressColors } from "@/utils/color";
 import { getTierProgress } from "@/utils/study";
-
 import ContributionChart from "./contribution-chart";
+import Link from "next/link";
 
-export default function StudyOverviewView({ study }: { study: StudyOverview }) {
-  return (
-    <div className="space-y-8">
-      <StudyOverviewHeader study={study} />
-      <div className="grid grid-cols-1 gap-gutter xl:grid-cols-3">
-        <StudyTierCard study={study} />
-        <StudyStatsCard study={study} />
-      </div>
-      <div className="grid grid-cols-1 gap-gutter xl:grid-cols-3">
-        <ContributionSection contribution={study.contribution} />
-        <StudyMembersCard members={study.members} />
-      </div>
-      <RecentSolvedProblems
-        problems={study.recentProblems}
-        studyId={study.id}
-      />
-    </div>
-  );
-}
-
-function StudyOverviewHeader({ study }: { study: StudyOverview }) {
+export function StudyOverviewHeader({ study }: { study: StudyOverview }) {
   return (
     <header className="border-b border-outline-variant/40 pb-8">
       <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
-          <h1 className="page-title text-primary">{study.name} 개요</h1>
+          <h1 className="page-title text-primary">{study.name}</h1>
           <p className="mt-2 max-w-2xl text-body-md text-on-surface-variant">
             {study.description}
           </p>
@@ -41,7 +19,7 @@ function StudyOverviewHeader({ study }: { study: StudyOverview }) {
   );
 }
 
-function StudyTierCard({ study }: { study: StudyOverview }) {
+export function StudyTierCard({ study }: { study: StudyOverview }) {
   const progress = getTierProgress(study.score, study.tier);
   const remainingScore = Math.max(study.nextTierScore - study.score, 0);
 
@@ -87,7 +65,7 @@ function StudyTierCard({ study }: { study: StudyOverview }) {
   );
 }
 
-function StudyStatsCard({ study }: { study: StudyOverview }) {
+export function StudyStatsCard({ study }: { study: StudyOverview }) {
   const stats = [
     { label: "전체 푼 문제", value: study.totalSolved },
     { label: "이번 주 푼 문제", value: study.weeklySolved },
@@ -116,7 +94,7 @@ function StudyStatsCard({ study }: { study: StudyOverview }) {
   );
 }
 
-function ContributionSection({
+export function ContributionSection({
   contribution,
 }: {
   contribution: StudyOverview["contribution"];
@@ -135,7 +113,11 @@ function ContributionSection({
   );
 }
 
-function StudyMembersCard({ members }: { members: StudyOverview["members"] }) {
+export function StudyMembersCard({
+  members,
+}: {
+  members: StudyOverview["members"];
+}) {
   return (
     <section className="app-card p-6">
       <div className="mb-6">
@@ -185,7 +167,7 @@ function StudyMembersCard({ members }: { members: StudyOverview["members"] }) {
   );
 }
 
-function RecentSolvedProblems({
+export function RecentSolvedProblems({
   problems,
   studyId,
 }: {
@@ -226,7 +208,7 @@ function RecentSolvedProblems({
                     className="transition-colors hover:bg-slate-50/80"
                     key={`${problem.title}-${problem.solvedBy}`}
                   >
-                    <td className="min-w-[240px] px-6 py-4 text-body-sm font-semibold text-on-surface">
+                    <td className="min-w-60 px-6 py-4 text-body-sm font-semibold text-on-surface">
                       {problem.title}
                     </td>
                     <td className="px-6 py-4 text-body-sm text-slate-500">
@@ -255,7 +237,7 @@ function RecentSolvedProblems({
   );
 }
 
-function TableHead({ children }: { children: React.ReactNode }) {
+export function TableHead({ children }: { children: React.ReactNode }) {
   return (
     <th className="px-6 py-4 text-label-caps text-slate-400">{children}</th>
   );
