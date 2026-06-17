@@ -18,7 +18,6 @@ export default async function StudyList({
         {studies.length === 0 ? (
           <EmptyStudyCard isSignedIn={Boolean(userId)} />
         ) : null}
-        <FindStudyCard />
       </div>
     </section>
   );
@@ -37,22 +36,5 @@ function EmptyStudyCard({ isSignedIn }: { isSignedIn: boolean }) {
           : "스터디를 만들거나 참여하려면 먼저 GitHub로 로그인해주세요."}
       </p>
     </div>
-  );
-}
-
-function FindStudyCard() {
-  return (
-    <button
-      className="flex min-h-70.5 flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-8 text-center transition-all hover:border-primary/20 hover:bg-white"
-      type="button"
-    >
-      <div className="mb-3 flex size-12 items-center justify-center rounded-full bg-slate-100 text-2xl text-slate-400">
-        +
-      </div>
-      <h3 className="mb-1 font-bold text-primary">새 스터디 찾기</h3>
-      <p className="max-w-45 text-xs leading-relaxed text-outline">
-        내 수준과 목표에 맞는 스터디를 찾아보세요.
-      </p>
-    </button>
   );
 }
