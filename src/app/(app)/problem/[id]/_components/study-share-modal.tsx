@@ -9,6 +9,7 @@ import {
   type ProblemShareActionState,
 } from "@/app/(app)/problem/[id]/actions";
 import type { ProblemShareTargetStudy } from "@/types/study";
+import StudyShareItem from "./problem-share-item";
 
 type ProblemShareModalProps = {
   problemId: string;
@@ -114,43 +115,13 @@ export default function ProblemShareModal({
                     const isStudyDisabled = study.hasShared || isPending;
 
                     return (
-                      <label
-                        className={`flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors ${
-                          isStudyDisabled
-                            ? "cursor-not-allowed border-slate-100 bg-slate-50 opacity-70"
-                            : isSelected
-                              ? "border-primary bg-secondary-container/40"
-                              : "border-slate-200 bg-white hover:bg-slate-50"
-                        }`}
+                      <StudyShareItem
                         key={study.id}
-                      >
-                        <input
-                          checked={isSelected}
-                          className="size-4 accent-primary"
-                          disabled={isStudyDisabled}
-                          name="studyIds"
-                          onChange={() => toggleStudy(study.id)}
-                          value={study.id}
-                          type="checkbox"
-                        />
-                        <span className="min-w-0 flex-1">
-                          <span className="flex min-w-0 items-center gap-2">
-                            <span className="block truncate font-semibold text-on-surface">
-                              {study.title}
-                            </span>
-                            {study.hasShared ? (
-                              <span className="shrink-0 rounded-full bg-slate-200 px-2 py-0.5 text-2.5 font-bold uppercase text-slate-500">
-                                Shared
-                              </span>
-                            ) : null}
-                          </span>
-                          <span className="mt-1 block text-body-sm text-slate-500">
-                            {study.ownerName} -{" "}
-                            {study.memberCount.toLocaleString()} members -{" "}
-                            {study.score.toLocaleString()} XP
-                          </span>
-                        </span>
-                      </label>
+                        study={study}
+                        isSelected={isSelected}
+                        isDisabled={isStudyDisabled}
+                        onToggle={toggleStudy}
+                      />
                     );
                   })}
                 </div>
