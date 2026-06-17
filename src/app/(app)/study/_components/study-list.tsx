@@ -2,7 +2,7 @@ import type { StudyListItem } from "@/types/study";
 
 import StudyItem from "./study-item";
 
-export default async function StudyList({
+export default function StudyList({
   userId,
   studies,
 }: {
