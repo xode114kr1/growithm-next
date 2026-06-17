@@ -1,16 +1,11 @@
-import {
-  acceptStudyInvite,
-  declineStudyInvite,
-} from "../actions";
-import { auth } from "@/lib/auth/auth";
-import { getPendingInvites } from "@/services/studies/study.query";
+import { acceptStudyInvite, declineStudyInvite } from "../actions";
 import type { StudyInviteItem } from "@/types/study";
 
-export default async function StudyInvites() {
-  const session = await auth();
-  const userId = session?.user?.id;
-  const invites = userId ? await getPendingInvites(userId) : [];
-
+export default function StudyInvites({
+  invites,
+}: {
+  invites: StudyInviteItem[];
+}) {
   return (
     <section className="app-card flex h-[min(520px,calc(100vh-9rem))] flex-col overflow-hidden">
       <div className="flex shrink-0 items-center justify-between border-b border-slate-50 p-6">
@@ -81,4 +76,3 @@ function InviteCard({ invite }: { invite: StudyInviteItem }) {
     </article>
   );
 }
-
