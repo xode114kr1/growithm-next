@@ -1,15 +1,13 @@
 import Link from "next/link";
 
-import { getPendingProblems } from "@/services/problems/problem.query";
 import PendingItem from "./pending-item";
+import { PendingProblem } from "@/types/problem";
 
-export default async function PendingList({
-  userId,
+export default function PendingList({
+  pendingProblems,
 }: {
-  userId: string | undefined;
+  pendingProblems: PendingProblem[];
 }) {
-  const pendingProblems = await getPendingProblems(userId);
-
   return (
     <section className="app-card mb-12 overflow-hidden md:col-span-12">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-50 p-6 lg:p-8">

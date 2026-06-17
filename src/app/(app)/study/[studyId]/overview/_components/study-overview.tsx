@@ -1,10 +1,7 @@
 import Link from "next/link";
 
 import type { StudyOverview } from "@/types/study";
-import {
-  studyTierBadgeColors,
-  studyTierProgressColors,
-} from "@/utils/color";
+import { studyTierBadgeColors, studyTierProgressColors } from "@/utils/color";
 import { getTierProgress } from "@/utils/study";
 
 import ContributionChart from "./contribution-chart";
@@ -21,7 +18,10 @@ export default function StudyOverviewView({ study }: { study: StudyOverview }) {
         <ContributionSection contribution={study.contribution} />
         <StudyMembersCard members={study.members} />
       </div>
-      <RecentSolvedProblems problems={study.recentProblems} studyId={study.id} />
+      <RecentSolvedProblems
+        problems={study.recentProblems}
+        studyId={study.id}
+      />
     </div>
   );
 }
@@ -29,18 +29,6 @@ export default function StudyOverviewView({ study }: { study: StudyOverview }) {
 function StudyOverviewHeader({ study }: { study: StudyOverview }) {
   return (
     <header className="border-b border-outline-variant/40 pb-8">
-      <div className="mb-5 flex flex-wrap items-center gap-2 text-body-sm text-slate-500">
-        <Link
-          className="font-semibold transition-colors hover:text-primary"
-          href="/study"
-        >
-          스터디
-        </Link>
-        <span>/</span>
-        <span className="font-semibold text-primary">{study.name}</span>
-        <span>/</span>
-        <span>스터디 - 오버뷰</span>
-      </div>
       <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
           <h1 className="page-title text-primary">{study.name} 개요</h1>

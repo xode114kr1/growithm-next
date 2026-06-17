@@ -1,19 +1,17 @@
 import { Award } from "lucide-react";
 
-import { getUserPersonalTier } from "@/services/users/user.query";
 import {
   awardIconColors,
   tierBadgeColors,
   tierProgressColors,
 } from "@/utils/color";
+import { UserPersonalTier } from "@/types/user";
 
-export default async function PersonalTierCard({
-  userId,
+export default function PersonalTierCard({
+  personalTier,
 }: {
-  userId: string | undefined;
+  personalTier: UserPersonalTier;
 }) {
-  const personalTier = await getUserPersonalTier(userId);
-
   const remainingScore = Math.max(
     personalTier.nextTierScore - personalTier.score,
     0,

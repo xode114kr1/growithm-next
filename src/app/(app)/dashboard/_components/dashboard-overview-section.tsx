@@ -1,15 +1,16 @@
 import { BookOpenCheck } from "lucide-react";
 import PersonalTierCard from "./personal-tier-card";
 import Link from "next/link";
+import { UserPersonalTier } from "@/types/user";
 
 export default function DashboardOverviewSection({
-  userId,
+  personalTier,
 }: {
-  userId: string | undefined;
+  personalTier: UserPersonalTier;
 }) {
   return (
     <section className="grid grid-cols-1 gap-6 md:grid-cols-12">
-      <PersonalTierCard userId={userId} />
+      <PersonalTierCard personalTier={personalTier} />
       <IntegrationGuideCard />
       <QuickLaunchCard />
     </section>

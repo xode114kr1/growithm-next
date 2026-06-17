@@ -1,18 +1,32 @@
 import { auth } from "@/lib/auth/auth";
-import DashboardChartSection from "./_components/dashboard-chart-section";
 import PendingList from "./_components/pending-list";
 import DashboardOverviewSection from "./_components/dashboard-overview-section";
+import { getUserPersonalTier } from "@/services/users/user.query";
+import {
+  getPendingProblems,
+  getProblemTierDistribution,
+  getSolvedProblemCount,
+} from "@/services/problems/problem.query";
+import DashboardChart from "./_components/dashboard-chart";
 
 export default async function DashboardPage() {
   const session = await auth();
   const userId = session?.user?.id;
 
+  const [personalTier, mastery, solvedCount, pendingProblems] =
+    await Promise.all([
+      getUserPersonalTier(userId),
+      getProblemTierDistribution(userId),
+      getSolvedProblemCount(userId),
+      getPendingProblems(userId),
+    ]);
+
   return (
     <main className="page-shell">
       <div className="page-container space-y-6">
-        <DashboardOverviewSection userId={userId} />
-        <DashboardChartSection userId={userId} />
-        <PendingList userId={userId} />
+        <DashboardOverviewSection personalTier={personalTier} />
+        <DashboardChart mastery={mastery} solvedCount={solvedCount} />
+        <PendingList pendingProblems={pendingProblems} />
       </div>
     </main>
   );
