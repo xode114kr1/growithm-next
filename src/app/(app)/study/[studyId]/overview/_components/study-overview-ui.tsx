@@ -1,17 +1,27 @@
-import { StudyOverview } from "@/types/study";
+import type {
+  StudyContributionItem,
+  StudyOverviewMember,
+  StudyOverviewStats,
+  StudyOverviewSummary,
+  StudyRecentProblem,
+} from "@/types/study";
 import { studyTierBadgeColors, studyTierProgressColors } from "@/utils/color";
 import { getTierProgress } from "@/utils/study";
 import ContributionChart from "./contribution-chart";
 import Link from "next/link";
 
-export function StudyOverviewHeader({ study }: { study: StudyOverview }) {
+export function StudyOverviewHeader({
+  summary,
+}: {
+  summary: StudyOverviewSummary;
+}) {
   return (
     <header className="border-b border-outline-variant/40 pb-8">
       <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
-          <h1 className="page-title text-primary">{study.name}</h1>
+          <h1 className="page-title text-primary">{summary.name}</h1>
           <p className="mt-2 max-w-2xl text-body-md text-on-surface-variant">
-            {study.description}
+            {summary.description}
           </p>
         </div>
       </div>
@@ -19,9 +29,16 @@ export function StudyOverviewHeader({ study }: { study: StudyOverview }) {
   );
 }
 
-export function StudyTierCard({ study }: { study: StudyOverview }) {
-  const progress = getTierProgress(study.score, study.tier);
-  const remainingScore = Math.max(study.nextTierScore - study.score, 0);
+export function StudyTierCard({
+  summary,
+}: {
+  summary: StudyOverviewSummary;
+}) {
+  const progress = getTierProgress(summary.score, summary.tier);
+  const remainingScore = Math.max(
+    summary.nextTierScore - summary.score,
+    0,
+  );
 
   return (
     <section className="app-card p-6 xl:col-span-2">
@@ -29,32 +46,32 @@ export function StudyTierCard({ study }: { study: StudyOverview }) {
         <div>
           <p className="text-label-caps text-slate-400">현재 스터디 티어</p>
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            <h2 className="text-h2-editorial text-primary">{study.tier}</h2>
+            <h2 className="text-h2-editorial text-primary">{summary.tier}</h2>
             <span
-              className={`rounded-full border px-3 py-1 text-xs font-bold uppercase ${studyTierBadgeColors[study.tier]}`}
+              className={`rounded-full border px-3 py-1 text-xs font-bold uppercase ${studyTierBadgeColors[summary.tier]}`}
             >
-              {study.tier} 티어
+              {summary.tier} 티어
             </span>
           </div>
         </div>
         <div className="md:text-right">
           <p className="text-body-sm text-slate-400">총 XP</p>
           <p className="text-h3-ui text-secondary">
-            {study.score.toLocaleString()}
+            {summary.score.toLocaleString()}
           </p>
         </div>
       </div>
       <div className="space-y-3">
         <div className="h-3 overflow-hidden rounded-full bg-slate-100">
           <div
-            className={`h-full rounded-full bg-linear-to-r ${studyTierProgressColors[study.tier]}`}
+            className={`h-full rounded-full bg-linear-to-r ${studyTierProgressColors[summary.tier]}`}
             style={{ width: `${progress}%` }}
           />
         </div>
         <div className="flex flex-col justify-between gap-1 text-xs font-semibold text-slate-500 sm:flex-row">
           <span>
-            {study.score.toLocaleString()} /{" "}
-            {study.nextTierScore.toLocaleString()} XP
+            {summary.score.toLocaleString()} /{" "}
+            {summary.nextTierScore.toLocaleString()} XP
           </span>
           <span className="text-secondary">
             다음 티어까지 {remainingScore.toLocaleString()} XP
@@ -65,11 +82,11 @@ export function StudyTierCard({ study }: { study: StudyOverview }) {
   );
 }
 
-export function StudyStatsCard({ study }: { study: StudyOverview }) {
-  const stats = [
-    { label: "전체 푼 문제", value: study.totalSolved },
-    { label: "이번 주 푼 문제", value: study.weeklySolved },
-    { label: "스터디원 수", value: study.memberCount },
+export function StudyStatsCard({ stats }: { stats: StudyOverviewStats }) {
+  const statItems = [
+    { label: "전체 푼 문제", value: stats.totalSolved },
+    { label: "이번 주 푼 문제", value: stats.weeklySolved },
+    { label: "스터디원 수", value: stats.memberCount },
   ];
 
   return (
@@ -79,7 +96,7 @@ export function StudyStatsCard({ study }: { study: StudyOverview }) {
         <p className="text-body-sm text-slate-500">최근 활동 기준</p>
       </div>
       <div className="space-y-5">
-        {stats.map((stat) => (
+        {statItems.map((stat) => (
           <div className="flex items-center justify-between" key={stat.label}>
             <span className="text-body-sm font-medium text-slate-500">
               {stat.label}
@@ -97,7 +114,7 @@ export function StudyStatsCard({ study }: { study: StudyOverview }) {
 export function ContributionSection({
   contribution,
 }: {
-  contribution: StudyOverview["contribution"];
+  contribution: StudyContributionItem[];
 }) {
   return (
     <section className="app-card p-6 xl:col-span-2">
@@ -116,7 +133,7 @@ export function ContributionSection({
 export function StudyMembersCard({
   members,
 }: {
-  members: StudyOverview["members"];
+  members: StudyOverviewMember[];
 }) {
   return (
     <section className="app-card p-6">
@@ -171,7 +188,7 @@ export function RecentSolvedProblems({
   problems,
   studyId,
 }: {
-  problems: StudyOverview["recentProblems"];
+  problems: StudyRecentProblem[];
   studyId: string;
 }) {
   return (

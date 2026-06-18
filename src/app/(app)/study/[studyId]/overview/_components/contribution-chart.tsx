@@ -12,17 +12,13 @@ import {
 } from "recharts";
 
 import { useMounted } from "@/hooks/use-mounted";
+import type { StudyContributionItem } from "@/types/study";
 import { chartColors } from "@/utils/color";
-
-type Contribution = {
-  name: string;
-  score: number;
-};
 
 export default function ContributionChart({
   data,
 }: {
-  data: Contribution[];
+  data: StudyContributionItem[];
 }) {
   const isMounted = useMounted();
   const chartData = useMemo(() => data.slice(0, 4), [data]);

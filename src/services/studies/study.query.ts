@@ -30,9 +30,13 @@ import type {
   StudyLayoutData,
   StudyListItem,
   StudyMembersData,
-  StudyOverview,
+  StudyContributionItem,
+  StudyOverviewMember,
+  StudyOverviewStats,
+  StudyOverviewSummary,
   StudyOwnerData,
   StudyProblemsData,
+  StudyRecentProblem,
 } from "@/types/study";
 import { formatRelativeDate, formatShortDate } from "@/utils/date";
 import { getTierProgress } from "@/utils/study";
@@ -184,18 +188,7 @@ export async function getStudySummary({
 }: {
   studyId: string;
   userId: string;
-}): Promise<
-  Pick<
-    StudyOverview,
-    | "description"
-    | "id"
-    | "isOwner"
-    | "name"
-    | "nextTierScore"
-    | "score"
-    | "tier"
-  > | null
-> {
+}): Promise<StudyOverviewSummary | null> {
   const study = await findStudySummary({ studyId, userId });
 
   if (!study) {
@@ -207,7 +200,6 @@ export async function getStudySummary({
   return {
     description: study.description ?? "아직 스터디 설명이 없습니다.",
     id: study.id,
-    isOwner: study.ownerId === userId,
     name: study.title,
     nextTierScore: getNextTierScore(tier),
     score: study.score,
@@ -222,9 +214,7 @@ export async function getStudyStats({
 }: {
   studyId: string;
   userId: string;
-}): Promise<
-  Pick<StudyOverview, "memberCount" | "totalSolved" | "weeklySolved"> | null
-> {
+}): Promise<StudyOverviewStats | null> {
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
@@ -250,7 +240,7 @@ export async function getStudyContribution({
 }: {
   studyId: string;
   userId: string;
-}): Promise<StudyOverview["contribution"] | null> {
+}): Promise<StudyContributionItem[] | null> {
   const [study, contributionScores] = await Promise.all([
     getStudyMembersSource(studyId, userId),
     sumStudyProblemShareScoresByUser({ studyId, userId }),
@@ -280,7 +270,7 @@ export async function getStudyMemberPreviews({
 }: {
   studyId: string;
   userId: string;
-}): Promise<StudyOverview["members"] | null> {
+}): Promise<StudyOverviewMember[] | null> {
   const study = await getStudyMembersSource(studyId, userId);
 
   if (!study) {
@@ -300,7 +290,7 @@ export async function getRecentStudyProblems({
 }: {
   studyId: string;
   userId: string;
-}): Promise<StudyOverview["recentProblems"] | null> {
+}): Promise<StudyRecentProblem[]> {
   const problems = await findRecentStudyProblems({
     limit: 10,
     studyId,

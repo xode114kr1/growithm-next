@@ -112,7 +112,6 @@ export async function findStudySummary({
     select: {
       description: true,
       id: true,
-      ownerId: true,
       score: true,
       title: true,
     },

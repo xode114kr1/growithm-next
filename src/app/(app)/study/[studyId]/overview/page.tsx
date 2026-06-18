@@ -44,28 +44,20 @@ export default async function StudyOverviewPage({
     notFound();
   }
 
-  const study = {
-    ...summary,
-    ...stats,
-    contribution,
-    members,
-    recentProblems,
-  };
-
   return (
     <div className="space-y-8">
-      <StudyOverviewHeader study={study} />
+      <StudyOverviewHeader summary={summary} />
       <div className="grid grid-cols-1 gap-gutter xl:grid-cols-3">
-        <StudyTierCard study={study} />
-        <StudyStatsCard study={study} />
+        <StudyTierCard summary={summary} />
+        <StudyStatsCard stats={stats} />
       </div>
       <div className="grid grid-cols-1 gap-gutter xl:grid-cols-3">
-        <ContributionSection contribution={study.contribution} />
-        <StudyMembersCard members={study.members} />
+        <ContributionSection contribution={contribution} />
+        <StudyMembersCard members={members} />
       </div>
       <RecentSolvedProblems
-        problems={study.recentProblems}
-        studyId={study.id}
+        problems={recentProblems}
+        studyId={summary.id}
       />
     </div>
   );

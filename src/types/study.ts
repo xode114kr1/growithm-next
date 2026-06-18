@@ -40,25 +40,36 @@ export type StudyMembersData = {
   name: string;
 };
 
-export type StudyOverview = {
-  contribution: Array<{ name: string; score: number }>;
+export type StudyOverviewSummary = {
   description: string;
   id: string;
-  isOwner: boolean;
-  memberCount: number;
-  members: Array<{ name: string; role: "owner" | "member" }>;
   name: string;
   nextTierScore: number;
-  recentProblems: Array<{
-    platform: string;
-    solvedBy: string;
-    tier: string;
-    title: string;
-  }>;
   score: number;
   tier: StudyTier;
+};
+
+export type StudyOverviewStats = {
+  memberCount: number;
   totalSolved: number;
   weeklySolved: number;
+};
+
+export type StudyContributionItem = {
+  name: string;
+  score: number;
+};
+
+export type StudyOverviewMember = {
+  name: string;
+  role: "owner" | "member";
+};
+
+export type StudyRecentProblem = {
+  platform: string;
+  solvedBy: string;
+  tier: string;
+  title: string;
 };
 
 export type OwnerStudy = {
