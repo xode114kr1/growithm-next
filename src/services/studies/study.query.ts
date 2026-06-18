@@ -132,7 +132,7 @@ export async function getUserStudies(
 }
 
 // 스터디 멤버 화면의 제목과 설명을 조회한다.
-export async function getStudyMembersSummary({
+export async function getStudyBasicInfo({
   studyId,
   userId,
 }: {
