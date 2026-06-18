@@ -10,12 +10,13 @@ import {
   normalizeCategories,
 } from "@/services/studies/study.helper";
 import {
+  aggregateStudyMemberActivity,
   countStudyProblemShares,
   findPendingInvites,
   findProblemShareTargetStudies,
   findRecentStudyProblems,
   findStudyForLayout,
-  findStudyForMembers,
+  findStudyMemberDetails,
   findStudyForOwner,
   findStudyForProblems,
   findStudyMembers,
@@ -138,31 +139,30 @@ export async function getStudyMembers({
   studyId: string;
   userId: string;
 }): Promise<StudyMember[] | null> {
-  const study = await findStudyForMembers({ studyId, userId });
+  const [study, activityByMember] = await Promise.all([
+    findStudyMemberDetails({ studyId, userId }),
+    aggregateStudyMemberActivity({ studyId, userId }),
+  ]);
 
   if (!study) {
     return null;
   }
 
+  const activityByUserId = new Map(
+    activityByMember.map((activity) => [activity.userId, activity]),
+  );
+
   return study.members.map((member) => {
-    const shares = study.problemShares.filter(
-      (share) => share.userId === member.userId,
-    );
-    const lastSharedAt = shares.reduce<Date | null>(
-      (latestSharedAt, share) =>
-        !latestSharedAt || share.sharedAt > latestSharedAt
-          ? share.sharedAt
-          : latestSharedAt,
-      null,
-    );
+    const activity = activityByUserId.get(member.userId);
+    const lastActiveAt = activity?._max.sharedAt ?? member.joinedAt;
 
     return {
-      contribution: shares.reduce((total, share) => total + share.score, 0),
+      contribution: activity?._sum.score ?? 0,
       id: member.id,
       joinedAt: formatShortDate(member.joinedAt),
       joinedAtTime: member.joinedAt.getTime(),
-      lastActive: formatShortDate(lastSharedAt ?? member.joinedAt),
-      lastActiveTime: (lastSharedAt ?? member.joinedAt).getTime(),
+      lastActive: formatShortDate(lastActiveAt),
+      lastActiveTime: lastActiveAt.getTime(),
       name: getUserDisplayName(member.user.name),
       role: member.role,
     };

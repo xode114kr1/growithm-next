@@ -80,8 +80,8 @@ export async function findUserStudies(userId: string) {
   });
 }
 
-// 사용자가 접근 가능한 스터디의 멤버와 기여 정보를 조회한다.
-export async function findStudyForMembers({
+// 사용자가 접근 가능한 스터디의 멤버 기본 정보를 조회한다.
+export async function findStudyMemberDetails({
   studyId,
   userId,
 }: {
@@ -89,14 +89,38 @@ export async function findStudyForMembers({
   userId: string;
 }) {
   return prisma.study.findFirst({
-    include: {
+    select: {
       members: {
-        include: { user: { select: { name: true } } },
         orderBy: { joinedAt: "asc" },
+        select: {
+          id: true,
+          joinedAt: true,
+          role: true,
+          user: { select: { name: true } },
+          userId: true,
+        },
       },
-      problemShares: { select: { score: true, sharedAt: true, userId: true } },
     },
     where: accessibleStudyWhere(studyId, userId),
+  });
+}
+
+// 사용자가 접근 가능한 스터디의 멤버별 기여도와 최근 활동을 집계한다.
+export async function aggregateStudyMemberActivity({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}) {
+  return prisma.studyProblemShare.groupBy({
+    by: ["userId"],
+    _max: { sharedAt: true },
+    _sum: { score: true },
+    where: {
+      study: accessibleRelatedStudyWhere(userId),
+      studyId,
+    },
   });
 }
 
