@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import {
   getNextTierScore,
   getProgressLabel,
@@ -166,56 +168,139 @@ export async function getStudyMembersData({
   };
 }
 
-// 스터디 개요 화면에 필요한 통계와 최근 활동을 조회한다.
-export async function getStudyOverview({
+const getStudySource = cache(
+  async (studyId: string, userId: string) =>
+    findStudyForOverview({ studyId, userId }),
+);
+
+// 스터디 개요 화면의 기본 정보와 티어 정보를 조회한다.
+export async function getStudySummary({
   studyId,
   userId,
 }: {
   studyId: string;
   userId: string;
-}): Promise<StudyOverview | null> {
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-  const study = await findStudyForOverview({ studyId, userId });
+}): Promise<
+  Pick<
+    StudyOverview,
+    | "description"
+    | "id"
+    | "isOwner"
+    | "name"
+    | "nextTierScore"
+    | "score"
+    | "tier"
+  > | null
+> {
+  const study = await getStudySource(studyId, userId);
 
   if (!study) {
     return null;
   }
 
   const tier = getStudyTier(study.score);
-  const contribution = study.members.map((member) => ({
-    name: getUserDisplayName(member.user.name),
-    score: study.problemShares
-      .filter((share) => share.userId === member.userId)
-      .reduce((total, share) => total + share.score, 0),
-  }));
 
   return {
-    contribution,
     description: study.description ?? "아직 스터디 설명이 없습니다.",
     id: study.id,
     isOwner: study.ownerId === userId,
-    memberCount: study.members.length,
-    members: study.members.map((member) => ({
-      name: getUserDisplayName(member.user.name),
-      role: member.userId === study.ownerId ? "owner" : "member",
-    })),
     name: study.title,
     nextTierScore: getNextTierScore(tier),
-    recentProblems: study.problemShares.map((share) => ({
-      platform: share.problemSubmission.platform,
-      solvedBy: getUserDisplayName(share.user.name),
-      tier: share.problemSubmission.tier ?? "-",
-      title: share.problemSubmission.title,
-    })),
     score: study.score,
     tier,
+  };
+}
+
+// 스터디 개요 화면의 풀이 통계를 조회한다.
+export async function getStudyStats({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}): Promise<
+  Pick<StudyOverview, "memberCount" | "totalSolved" | "weeklySolved"> | null
+> {
+  const study = await getStudySource(studyId, userId);
+
+  if (!study) {
+    return null;
+  }
+
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+  return {
+    memberCount: study.members.length,
     totalSolved: study.problemShares.length,
     weeklySolved: study.problemShares.filter(
       (share) => share.sharedAt >= oneWeekAgo,
     ).length,
   };
+}
+
+// 스터디 개요 화면의 멤버별 기여도를 조회한다.
+export async function getStudyContribution({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}): Promise<StudyOverview["contribution"] | null> {
+  const study = await getStudySource(studyId, userId);
+
+  if (!study) {
+    return null;
+  }
+
+  return study.members.map((member) => ({
+    name: getUserDisplayName(member.user.name),
+    score: study.problemShares
+      .filter((share) => share.userId === member.userId)
+      .reduce((total, share) => total + share.score, 0),
+  }));
+}
+
+// 스터디 개요 화면의 멤버 목록을 조회한다.
+export async function getStudyMemberPreviews({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}): Promise<StudyOverview["members"] | null> {
+  const study = await getStudySource(studyId, userId);
+
+  if (!study) {
+    return null;
+  }
+
+  return study.members.map((member) => ({
+    name: getUserDisplayName(member.user.name),
+    role: member.userId === study.ownerId ? "owner" : "member",
+  }));
+}
+
+// 스터디 개요 화면의 최근 공유 문제를 조회한다.
+export async function getRecentStudyProblems({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}): Promise<StudyOverview["recentProblems"] | null> {
+  const study = await getStudySource(studyId, userId);
+
+  if (!study) {
+    return null;
+  }
+
+  return study.problemShares.map((share) => ({
+    platform: share.problemSubmission.platform,
+    solvedBy: getUserDisplayName(share.user.name),
+    tier: share.problemSubmission.tier ?? "-",
+    title: share.problemSubmission.title,
+  }));
 }
 
 // 스터디 소유자 관리 화면에 필요한 멤버와 초대 정보를 조회한다.
