@@ -4,7 +4,6 @@ import { auth } from "@/lib/auth/auth";
 import { getStudyProblemsData } from "@/services/studies/study.query";
 
 import StudyProblemModalTable from "./_components/study-problem-modal-table";
-import StudyProblemsHeading from "./_components/study-problems-heading";
 
 export default async function StudyProblemsPage({
   params,
@@ -21,17 +20,10 @@ export default async function StudyProblemsPage({
   }
 
   return (
-    <>
-      <StudyProblemsHeading
-        description={data.description}
-        name={data.name}
-        totalCount={data.problems.length}
-      />
-      <StudyProblemModalTable
-        memberNames={data.memberNames}
-        problems={data.problems}
-        tiers={data.tiers}
-      />
-    </>
+    <StudyProblemModalTable
+      memberNames={data.memberNames}
+      problems={data.problems}
+      tiers={data.tiers}
+    />
   );
 }

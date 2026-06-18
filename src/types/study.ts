@@ -127,9 +127,7 @@ export type StudyProblem = {
 };
 
 export type StudyProblemsData = {
-  description: string;
   memberNames: string[];
-  name: string;
   problems: StudyProblem[];
   tiers: string[];
 };

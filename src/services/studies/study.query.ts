@@ -418,13 +418,10 @@ export async function getStudyProblemsData({
   }));
 
   return {
-    description:
-      study.description ?? "스터디원들이 함께 공유한 문제를 확인합니다.",
     memberNames: [
       getUserDisplayName(study.owner.name),
       ...study.members.map((member) => getUserDisplayName(member.user.name)),
     ].filter((name, index, names) => names.indexOf(name) === index),
-    name: study.title,
     problems,
     tiers: problems
       .flatMap((problem) => problem.tier ?? [])
