@@ -10,13 +10,13 @@ import {
 } from "@/services/studies/study.query";
 
 import {
-  ContributionSection,
   RecentSolvedProblems,
   StudyMembersCard,
   StudyOverviewHeader,
   StudyStatsCard,
   StudyTierCard,
 } from "./_components/study-overview-ui";
+import ContributionChart from "./_components/contribution-chart";
 
 export default async function StudyOverviewPage({
   params,
@@ -63,7 +63,7 @@ export default async function StudyOverviewPage({
         <StudyStatsCard stats={stats} />
       </div>
       <div className="grid grid-cols-1 gap-gutter xl:grid-cols-3">
-        <ContributionSection contribution={contribution} />
+        <ContributionChart data={contribution} />
         <StudyMembersCard members={members} />
       </div>
       <RecentSolvedProblems

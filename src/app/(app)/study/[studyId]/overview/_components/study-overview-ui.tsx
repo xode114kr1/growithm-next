@@ -1,5 +1,4 @@
 import type {
-  StudyContributionItem,
   StudyOverviewMember,
   StudyOverviewStats,
   StudyRecentProblem,
@@ -7,7 +6,6 @@ import type {
 } from "@/types/study";
 import { studyTierBadgeColors, studyTierProgressColors } from "@/utils/color";
 import { getTierProgress } from "@/utils/study";
-import ContributionChart from "./contribution-chart";
 import Link from "next/link";
 
 export function StudyOverviewHeader({
@@ -109,25 +107,6 @@ export function StudyStatsCard({ stats }: { stats: StudyOverviewStats }) {
           </div>
         ))}
       </div>
-    </section>
-  );
-}
-
-export function ContributionSection({
-  contribution,
-}: {
-  contribution: StudyContributionItem[];
-}) {
-  return (
-    <section className="app-card p-6 xl:col-span-2">
-      <div className="mb-6 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
-        <div>
-          <h2 className="section-title">기여도 분석</h2>
-          <p className="text-body-sm text-slate-500">스터디원별 풀이 기여도</p>
-        </div>
-        <span className="text-label-caps text-slate-400">최대 4명</span>
-      </div>
-      <ContributionChart data={contribution} />
     </section>
   );
 }
