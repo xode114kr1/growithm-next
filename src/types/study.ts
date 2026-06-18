@@ -33,13 +33,6 @@ export type StudyMember = {
   role: "OWNER" | "LEADER" | "MEMBER";
 };
 
-export type StudyMembersData = {
-  description: string;
-  memberCount: number;
-  members: StudyMember[];
-  name: string;
-};
-
 export type StudyOverviewSummary = {
   description: string;
   id: string;
