@@ -2,8 +2,8 @@ import type {
   StudyContributionItem,
   StudyOverviewMember,
   StudyOverviewStats,
-  StudyOverviewSummary,
   StudyRecentProblem,
+  StudyTier,
 } from "@/types/study";
 import { studyTierBadgeColors, studyTierProgressColors } from "@/utils/color";
 import { getTierProgress } from "@/utils/study";
@@ -11,17 +11,19 @@ import ContributionChart from "./contribution-chart";
 import Link from "next/link";
 
 export function StudyOverviewHeader({
-  summary,
+  description,
+  name,
 }: {
-  summary: StudyOverviewSummary;
+  description: string;
+  name: string;
 }) {
   return (
     <header className="border-b border-outline-variant/40 pb-8">
       <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
-          <h1 className="page-title text-primary">{summary.name}</h1>
+          <h1 className="page-title text-primary">{name}</h1>
           <p className="mt-2 max-w-2xl text-body-md text-on-surface-variant">
-            {summary.description}
+            {description}
           </p>
         </div>
       </div>
@@ -30,15 +32,16 @@ export function StudyOverviewHeader({
 }
 
 export function StudyTierCard({
-  summary,
+  nextTierScore,
+  score,
+  tier,
 }: {
-  summary: StudyOverviewSummary;
+  nextTierScore: number;
+  score: number;
+  tier: StudyTier;
 }) {
-  const progress = getTierProgress(summary.score, summary.tier);
-  const remainingScore = Math.max(
-    summary.nextTierScore - summary.score,
-    0,
-  );
+  const progress = getTierProgress(score, tier);
+  const remainingScore = Math.max(nextTierScore - score, 0);
 
   return (
     <section className="app-card p-6 xl:col-span-2">
@@ -46,32 +49,31 @@ export function StudyTierCard({
         <div>
           <p className="text-label-caps text-slate-400">현재 스터디 티어</p>
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            <h2 className="text-h2-editorial text-primary">{summary.tier}</h2>
+            <h2 className="text-h2-editorial text-primary">{tier}</h2>
             <span
-              className={`rounded-full border px-3 py-1 text-xs font-bold uppercase ${studyTierBadgeColors[summary.tier]}`}
+              className={`rounded-full border px-3 py-1 text-xs font-bold uppercase ${studyTierBadgeColors[tier]}`}
             >
-              {summary.tier} 티어
+              {tier} 티어
             </span>
           </div>
         </div>
         <div className="md:text-right">
           <p className="text-body-sm text-slate-400">총 XP</p>
           <p className="text-h3-ui text-secondary">
-            {summary.score.toLocaleString()}
+            {score.toLocaleString()}
           </p>
         </div>
       </div>
       <div className="space-y-3">
         <div className="h-3 overflow-hidden rounded-full bg-slate-100">
           <div
-            className={`h-full rounded-full bg-linear-to-r ${studyTierProgressColors[summary.tier]}`}
+            className={`h-full rounded-full bg-linear-to-r ${studyTierProgressColors[tier]}`}
             style={{ width: `${progress}%` }}
           />
         </div>
         <div className="flex flex-col justify-between gap-1 text-xs font-semibold text-slate-500 sm:flex-row">
           <span>
-            {summary.score.toLocaleString()} /{" "}
-            {summary.nextTierScore.toLocaleString()} XP
+            {score.toLocaleString()} / {nextTierScore.toLocaleString()} XP
           </span>
           <span className="text-secondary">
             다음 티어까지 {remainingScore.toLocaleString()} XP

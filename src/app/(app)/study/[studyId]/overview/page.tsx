@@ -50,9 +50,16 @@ export default async function StudyOverviewPage({
 
   return (
     <div className="space-y-8">
-      <StudyOverviewHeader summary={summary} />
+      <StudyOverviewHeader
+        description={summary.description}
+        name={summary.name}
+      />
       <div className="grid grid-cols-1 gap-gutter xl:grid-cols-3">
-        <StudyTierCard summary={summary} />
+        <StudyTierCard
+          nextTierScore={summary.nextTierScore}
+          score={summary.score}
+          tier={summary.tier}
+        />
         <StudyStatsCard stats={stats} />
       </div>
       <div className="grid grid-cols-1 gap-gutter xl:grid-cols-3">
