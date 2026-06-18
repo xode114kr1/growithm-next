@@ -31,16 +31,20 @@ export default async function StudyOverviewPage({
     notFound();
   }
 
-  const [summary, stats, contribution, members, recentProblems] =
-    await Promise.all([
-      getStudySummary({ studyId, userId }),
-      getStudyStats({ studyId, userId }),
-      getStudyContribution({ studyId, userId }),
-      getStudyMemberPreviews({ studyId, userId }),
-      getRecentStudyProblems({ studyId, userId }),
-    ]);
+  const summary = await getStudySummary({ studyId, userId });
 
-  if (!summary || !stats || !contribution || !members || !recentProblems) {
+  if (!summary) {
+    notFound();
+  }
+
+  const [stats, contribution, members, recentProblems] = await Promise.all([
+    getStudyStats({ studyId, userId }),
+    getStudyContribution({ studyId, userId }),
+    getStudyMemberPreviews({ studyId, userId }),
+    getRecentStudyProblems({ studyId, userId }),
+  ]);
+
+  if (!stats || !contribution || !members) {
     notFound();
   }
 
