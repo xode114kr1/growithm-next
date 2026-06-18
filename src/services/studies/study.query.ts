@@ -14,7 +14,6 @@ import {
   findPendingInvites,
   findProblemShareTargetStudies,
   findRecentStudyProblems,
-  findStudyBasicInfo,
   findStudyForLayout,
   findStudyForMembers,
   findStudyForOwner,
@@ -129,28 +128,6 @@ export async function getUserStudies(
       title: study.title,
     };
   });
-}
-
-// 스터디 멤버 화면의 제목과 설명을 조회한다.
-export async function getStudyBasicInfo({
-  studyId,
-  userId,
-}: {
-  studyId: string;
-  userId: string;
-}): Promise<{ description: string; name: string } | null> {
-  const study = await findStudyBasicInfo({ studyId, userId });
-
-  if (!study) {
-    return null;
-  }
-
-  return {
-    description:
-      study.description ??
-      "스터디 멤버의 기여도와 최근 활동 상태를 확인합니다.",
-    name: study.title,
-  };
 }
 
 // 스터디 멤버 화면의 멤버와 활동·기여도 정보를 조회한다.
