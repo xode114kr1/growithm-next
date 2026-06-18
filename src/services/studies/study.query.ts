@@ -11,6 +11,7 @@ import {
 } from "@/services/studies/study.helper";
 import {
   aggregateStudyMemberActivity,
+  countFilteredStudyProblems,
   countStudyProblemShares,
   findPendingInvites,
   findProblemShareTargetStudies,
@@ -18,7 +19,8 @@ import {
   findStudyForLayout,
   findStudyMemberDetails,
   findStudyForOwner,
-  findStudyForProblems,
+  findStudyProblemFilterOptions,
+  findStudyProblems,
   findStudyMembers,
   findStudySummary,
   findUserStudies,
@@ -38,6 +40,7 @@ import type {
   StudyOverviewSummary,
   StudyOwnerData,
   StudyProblem,
+  StudyProblemFilters,
   StudyProblemFilterOptions,
   StudyRecentProblem,
 } from "@/types/study";
@@ -384,26 +387,29 @@ export async function getStudyOwnerData({
   };
 }
 
-const getStudyProblemsSource = cache(
-  async (studyId: string, userId: string) =>
-    findStudyForProblems({ studyId, userId }),
-);
+export const STUDY_PROBLEM_PAGE_SIZE = 10;
 
 // 스터디에 공유된 문제 목록을 조회한다.
 export async function getStudyProblems({
+  filters,
+  page,
   studyId,
   userId,
 }: {
+  filters: StudyProblemFilters;
+  page: number;
   studyId: string;
   userId: string;
-}): Promise<StudyProblem[] | null> {
-  const study = await getStudyProblemsSource(studyId, userId);
+}): Promise<StudyProblem[]> {
+  const shares = await findStudyProblems({
+    filters,
+    page,
+    pageSize: STUDY_PROBLEM_PAGE_SIZE,
+    studyId,
+    userId,
+  });
 
-  if (!study) {
-    return null;
-  }
-
-  return study.problemShares.map((share) => ({
+  return shares.map((share) => ({
     categories: normalizeCategories(share.problemSubmission.categories),
     code: `${share.problemSubmission.platform}-${share.problemSubmission.problemId}`,
     description: share.problemSubmission.description,
@@ -426,15 +432,15 @@ export async function getStudyProblems({
 
 // 스터디에 공유된 전체 문제 수를 조회한다.
 export async function getStudyProblemCount({
+  filters,
   studyId,
   userId,
 }: {
+  filters?: StudyProblemFilters;
   studyId: string;
   userId: string;
-}): Promise<number | null> {
-  const study = await getStudyProblemsSource(studyId, userId);
-
-  return study ? study.problemShares.length : null;
+}): Promise<number> {
+  return countFilteredStudyProblems({ filters, studyId, userId });
 }
 
 // 스터디 문제 필터에 필요한 티어와 공유 멤버 목록을 조회한다.
@@ -445,19 +451,16 @@ export async function getStudyProblemFilterOptions({
   studyId: string;
   userId: string;
 }): Promise<StudyProblemFilterOptions | null> {
-  const study = await getStudyProblemsSource(studyId, userId);
+  const options = await findStudyProblemFilterOptions({ studyId, userId });
 
-  if (!study) {
+  if (!options) {
     return null;
   }
 
   return {
-    memberNames: [
-      getUserDisplayName(study.owner.name),
-      ...study.members.map((member) => getUserDisplayName(member.user.name)),
-    ].filter((name, index, names) => names.indexOf(name) === index),
-    tiers: study.problemShares
-      .flatMap((share) => share.problemSubmission.tier ?? [])
-      .filter((tier, index, tiers) => tiers.indexOf(tier) === index),
+    memberNames: options.memberNames
+      .map(getUserDisplayName)
+      .filter((name, index, names) => names.indexOf(name) === index),
+    tiers: options.tiers,
   };
 }

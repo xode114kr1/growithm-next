@@ -1,18 +1,7 @@
-import type { ProblemPlatform } from "@/generated/prisma/enums";
-
-export type StudyProblemSort =
-  | "latest"
-  | "oldest"
-  | "title"
-  | "tier"
-  | "member";
-
-export type StudyProblemFilters = {
-  member: string | null;
-  platform: ProblemPlatform | null;
-  sort: StudyProblemSort;
-  tier: string | null;
-};
+export type {
+  StudyProblemFilters,
+  StudyProblemSort,
+} from "@/types/study";
 
 export type StudyProblemPageSearchParams = {
   member?: string | string[];

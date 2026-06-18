@@ -1,4 +1,5 @@
 import type { ScoreTier } from "@/types/score";
+import type { ProblemPlatform } from "@/generated/prisma/enums";
 
 export type StudyTier = ScoreTier;
 
@@ -129,6 +130,20 @@ export type StudyProblem = {
 export type StudyProblemFilterOptions = {
   memberNames: string[];
   tiers: string[];
+};
+
+export type StudyProblemSort =
+  | "latest"
+  | "oldest"
+  | "title"
+  | "tier"
+  | "member";
+
+export type StudyProblemFilters = {
+  member: string | null;
+  platform: ProblemPlatform | null;
+  sort: StudyProblemSort;
+  tier: string | null;
 };
 
 export type StudyLayoutData = {

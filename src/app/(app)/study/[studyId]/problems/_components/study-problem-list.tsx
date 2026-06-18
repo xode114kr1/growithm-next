@@ -6,56 +6,39 @@ import { useState } from "react";
 
 import type { StudyProblem } from "@/types/study";
 
-import type { StudyProblemFilters, StudyProblemSort } from "../types";
+import type { StudyProblemFilters } from "../types";
 import StudyProblemFiltersComponent from "./study-problem-filters";
 import StudyProblemItem from "./study-problem-item";
 import StudyProblemModal from "./study-problem-modal";
 
-const PAGE_SIZE = 10;
-const tierRank = {
-  Ruby: 6,
-  Diamond: 5,
-  Platinum: 4,
-  Gold: 3,
-  Silver: 2,
-  Bronze: 1,
-} as const;
-
 export default function StudyProblemList({
+  currentPage,
+  filteredCount,
   filters,
   memberNames,
-  page,
+  pageSize,
   problems,
   queryString,
   tiers,
   totalCount,
+  totalPages,
 }: {
+  currentPage: number;
+  filteredCount: number;
   filters: StudyProblemFilters;
   memberNames: string[];
-  page: number;
+  pageSize: number;
   problems: StudyProblem[];
   queryString: string;
   tiers: string[];
   totalCount: number;
+  totalPages: number;
 }) {
   const [selectedProblem, setSelectedProblem] = useState<StudyProblem | null>(
     null,
   );
-  const filteredProblems = problems.filter((problem) => {
-    const matchesPlatform =
-      filters.platform === null || problem.platform === filters.platform;
-    const matchesTier = filters.tier === null || problem.tier === filters.tier;
-    const matchesSharedBy =
-      filters.member === null || problem.sharedBy === filters.member;
-
-    return matchesPlatform && matchesTier && matchesSharedBy;
-  });
-  const sortedProblems = sortProblems(filteredProblems, filters.sort);
-  const totalPages = Math.max(1, Math.ceil(sortedProblems.length / PAGE_SIZE));
-  const currentPage = Math.min(page, totalPages);
-  const startIndex = (currentPage - 1) * PAGE_SIZE;
-  const endIndex = startIndex + PAGE_SIZE;
-  const paginatedProblems = sortedProblems.slice(startIndex, endIndex);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + problems.length;
   const hasActiveFilters =
     filters.platform !== null ||
     filters.tier !== null ||
@@ -67,7 +50,7 @@ export default function StudyProblemList({
     <>
       <StudyProblemFiltersComponent
         filters={filters}
-        filteredCount={filteredProblems.length}
+        filteredCount={filteredCount}
         memberNames={memberNames}
         tiers={tiers}
         totalCount={totalCount}
@@ -85,7 +68,7 @@ export default function StudyProblemList({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {paginatedProblems.map((problem) => (
+              {problems.map((problem) => (
                 <StudyProblemItem
                   key={problem.id}
                   onSelect={setSelectedProblem}
@@ -95,7 +78,7 @@ export default function StudyProblemList({
             </tbody>
           </table>
         </div>
-        {sortedProblems.length === 0 ? (
+        {problems.length === 0 ? (
           <EmptyState
             clearFiltersHref={getStudyProblemsHref(
               1,
@@ -108,10 +91,9 @@ export default function StudyProblemList({
           <p className="text-body-sm text-slate-500">
             Showing{" "}
             <span className="font-semibold text-on-surface">
-              {sortedProblems.length > 0 ? startIndex + 1 : "0"} -{" "}
-              {Math.min(endIndex, sortedProblems.length)}
+              {filteredCount > 0 ? startIndex + 1 : "0"} - {endIndex}
             </span>{" "}
-            of {sortedProblems.length.toLocaleString()} study problems
+            of {filteredCount.toLocaleString()} study problems
           </p>
           <div className="flex items-center gap-2">
             {hasActiveFilters ? (
@@ -133,7 +115,7 @@ export default function StudyProblemList({
           onClose={() => setSelectedProblem(null)}
           onSelectProblem={setSelectedProblem}
           problem={selectedProblem}
-          problems={sortedProblems}
+          problems={problems}
         />
       </section>
     </>
@@ -261,38 +243,4 @@ function TableHead({ children }: { children: React.ReactNode }) {
   return (
     <th className="px-6 py-4 text-label-caps text-slate-400">{children}</th>
   );
-}
-
-function sortProblems(problems: StudyProblem[], sort: StudyProblemSort) {
-  return [...problems].sort((firstProblem, secondProblem) => {
-    if (sort === "oldest") {
-      return firstProblem.sharedAtTime - secondProblem.sharedAtTime;
-    }
-
-    if (sort === "title") {
-      return firstProblem.title.localeCompare(secondProblem.title);
-    }
-
-    if (sort === "tier") {
-      return getTierRank(secondProblem.tier) - getTierRank(firstProblem.tier);
-    }
-
-    if (sort === "member") {
-      return firstProblem.sharedBy.localeCompare(secondProblem.sharedBy);
-    }
-
-    return secondProblem.sharedAtTime - firstProblem.sharedAtTime;
-  });
-}
-
-function getTierRank(tier: string | null) {
-  const normalizedTier = tier?.toLowerCase() ?? "";
-
-  for (const [tierName, rank] of Object.entries(tierRank)) {
-    if (normalizedTier.includes(tierName.toLowerCase())) {
-      return rank;
-    }
-  }
-
-  return 0;
 }
