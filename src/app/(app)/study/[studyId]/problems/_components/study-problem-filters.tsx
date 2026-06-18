@@ -1,72 +1,73 @@
 "use client";
 
-export type StudyProblemSort =
-  | "latest"
-  | "oldest"
-  | "title"
-  | "tier"
-  | "member";
+import type { ProblemPlatform } from "@/generated/prisma/enums";
+import { useReplacePaginatedQueryParams } from "@/hooks/use-replace-paginated-query-params";
+
+import type { StudyProblemFilters, StudyProblemSort } from "../types";
 
 export default function StudyProblemFilters({
+  filters,
   filteredCount,
   memberNames,
-  onClearFilters,
-  onPlatformChange,
-  onSharedByChange,
-  onSortChange,
-  onTierChange,
-  platformFilter,
-  sharedByFilter,
-  sort,
   tiers,
-  tierFilter,
   totalCount,
 }: {
+  filters: StudyProblemFilters;
   filteredCount: number;
   memberNames: string[];
-  onClearFilters: () => void;
-  onPlatformChange: (platform: string) => void;
-  onSharedByChange: (sharedBy: string) => void;
-  onSortChange: (sort: StudyProblemSort) => void;
-  onTierChange: (tier: string) => void;
-  platformFilter: string;
-  sharedByFilter: string;
-  sort: StudyProblemSort;
   tiers: string[];
-  tierFilter: string;
   totalCount: number;
 }) {
+  const replaceQuery = useReplacePaginatedQueryParams();
   const hasActiveFilters =
-    platformFilter !== "All" || tierFilter !== "All" || sharedByFilter !== "All";
+    filters.platform !== null ||
+    filters.tier !== null ||
+    filters.member !== null;
 
   return (
     <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
       <FilterCard title="플랫폼">
         <div className="flex flex-wrap gap-2">
-          {["All", "BAEKJOON", "PROGRAMMERS"].map((platform) => (
-            <button
-              aria-pressed={platformFilter === platform}
-              className={
-                platformFilter === platform
+          {["All", "BAEKJOON", "PROGRAMMERS"].map((platform) => {
+            const isActive =
+                platform === "All"
+                  ? filters.platform === null
+                  : filters.platform === platform;
+
+            return (
+              <button
+                aria-pressed={isActive}
+                className={
+                  isActive
                   ? "rounded-lg border border-primary-container/20 bg-primary-container px-3 py-1.5 text-body-sm font-medium text-on-primary-container"
                   : "rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-body-sm font-medium text-slate-600 transition-colors hover:border-primary-container hover:text-primary"
-              }
-              key={platform}
-              onClick={() => onPlatformChange(platform)}
-              type="button"
-            >
-              {platform === "All" ? "전체" : platform}
-            </button>
-          ))}
+                }
+                key={platform}
+                onClick={() =>
+                  replaceQuery({
+                    platform:
+                      platform === "All"
+                        ? null
+                        : (platform as ProblemPlatform),
+                  })
+                }
+                type="button"
+              >
+                {platform === "All" ? "전체" : platform}
+              </button>
+            );
+          })}
         </div>
       </FilterCard>
       <FilterCard title="티어">
         <select
           className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
-          onChange={(event) => onTierChange(event.target.value)}
-          value={tierFilter}
+          onChange={(event) =>
+            replaceQuery({ tier: event.target.value || null })
+          }
+          value={filters.tier ?? ""}
         >
-          <option value="All">전체</option>
+          <option value="">전체</option>
           {tiers.map((tier) => (
             <option key={tier}>{tier}</option>
           ))}
@@ -75,10 +76,12 @@ export default function StudyProblemFilters({
       <FilterCard title="공유한 멤버">
         <select
           className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
-          onChange={(event) => onSharedByChange(event.target.value)}
-          value={sharedByFilter}
+          onChange={(event) =>
+            replaceQuery({ member: event.target.value || null })
+          }
+          value={filters.member ?? ""}
         >
-          <option value="All">전체</option>
+          <option value="">전체</option>
           {memberNames.map((memberName) => (
             <option key={memberName}>{memberName}</option>
           ))}
@@ -87,10 +90,11 @@ export default function StudyProblemFilters({
       <FilterCard title="정렬">
         <select
           className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
-          onChange={(event) =>
-            onSortChange(event.target.value as StudyProblemSort)
-          }
-          value={sort}
+          onChange={(event) => {
+            const sort = event.target.value as StudyProblemSort;
+            replaceQuery({ sort: sort === "latest" ? null : sort });
+          }}
+          value={filters.sort}
         >
           <option value="latest">최근 공유순</option>
           <option value="oldest">오래된 공유순</option>
@@ -112,7 +116,13 @@ export default function StudyProblemFilters({
           {hasActiveFilters ? (
             <button
               className="rounded-lg border border-slate-200 px-3 py-1.5 text-body-sm font-semibold text-slate-600 transition-colors hover:border-secondary hover:text-secondary"
-              onClick={onClearFilters}
+              onClick={() =>
+                replaceQuery({
+                  member: null,
+                  platform: null,
+                  tier: null,
+                })
+              }
               type="button"
             >
               Reset

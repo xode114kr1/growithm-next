@@ -4,12 +4,10 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { usePagination } from "@/hooks/use-pagination";
 import type { StudyProblem } from "@/types/study";
 
-import StudyProblemFilters, {
-  type StudyProblemSort,
-} from "./study-problem-filters";
+import type { StudyProblemFilters, StudyProblemSort } from "../types";
+import StudyProblemFiltersComponent from "./study-problem-filters";
 import StudyProblemItem from "./study-problem-item";
 import StudyProblemModal from "./study-problem-modal";
 
@@ -24,74 +22,52 @@ const tierRank = {
 } as const;
 
 export default function StudyProblemList({
+  filters,
   memberNames,
+  page,
   problems,
+  queryString,
   tiers,
 }: {
+  filters: StudyProblemFilters;
   memberNames: string[];
+  page: number;
   problems: StudyProblem[];
+  queryString: string;
   tiers: string[];
 }) {
-  const [platformFilter, setPlatformFilter] = useState("All");
   const [selectedProblem, setSelectedProblem] = useState<StudyProblem | null>(
     null,
   );
-  const [sharedByFilter, setSharedByFilter] = useState("All");
-  const [sort, setSort] = useState<StudyProblemSort>("latest");
-  const [tierFilter, setTierFilter] = useState("All");
   const filteredProblems = problems.filter((problem) => {
     const matchesPlatform =
-      platformFilter === "All" || problem.platform === platformFilter;
-    const matchesTier = tierFilter === "All" || problem.tier === tierFilter;
+      filters.platform === null || problem.platform === filters.platform;
+    const matchesTier = filters.tier === null || problem.tier === filters.tier;
     const matchesSharedBy =
-      sharedByFilter === "All" || problem.sharedBy === sharedByFilter;
+      filters.member === null || problem.sharedBy === filters.member;
 
     return matchesPlatform && matchesTier && matchesSharedBy;
   });
-  const sortedProblems = sortProblems(filteredProblems, sort);
-  const { currentPage, endIndex, setCurrentPage, startIndex, totalPages } =
-    usePagination({
-      itemCount: sortedProblems.length,
-      pageSize: PAGE_SIZE,
-    });
+  const sortedProblems = sortProblems(filteredProblems, filters.sort);
+  const totalPages = Math.max(1, Math.ceil(sortedProblems.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const endIndex = startIndex + PAGE_SIZE;
   const paginatedProblems = sortedProblems.slice(startIndex, endIndex);
   const hasActiveFilters =
-    platformFilter !== "All" || tierFilter !== "All" || sharedByFilter !== "All";
-
-  function clearFilters() {
-    setPlatformFilter("All");
-    setSharedByFilter("All");
-    setTierFilter("All");
-    setCurrentPage(1);
-  }
+    filters.platform !== null ||
+    filters.tier !== null ||
+    filters.member !== null;
+  const clearedFiltersQueryString =
+    filters.sort === "latest" ? "" : `sort=${filters.sort}`;
 
   return (
     <>
-      <StudyProblemFilters
+      <StudyProblemFiltersComponent
+        filters={filters}
         filteredCount={filteredProblems.length}
         memberNames={memberNames}
-        onClearFilters={clearFilters}
-        onPlatformChange={(platform) => {
-          setPlatformFilter(platform);
-          setCurrentPage(1);
-        }}
-        onSharedByChange={(sharedBy) => {
-          setSharedByFilter(sharedBy);
-          setCurrentPage(1);
-        }}
-        onSortChange={(nextSort) => {
-          setSort(nextSort);
-          setCurrentPage(1);
-        }}
-        onTierChange={(tier) => {
-          setTierFilter(tier);
-          setCurrentPage(1);
-        }}
-        platformFilter={platformFilter}
-        sharedByFilter={sharedByFilter}
-        sort={sort}
         tiers={tiers}
-        tierFilter={tierFilter}
         totalCount={problems.length}
       />
       <section className="app-card overflow-hidden">
@@ -119,8 +95,11 @@ export default function StudyProblemList({
         </div>
         {sortedProblems.length === 0 ? (
           <EmptyState
+            clearFiltersHref={getStudyProblemsHref(
+              1,
+              clearedFiltersQueryString,
+            )}
             hasActiveFilters={hasActiveFilters}
-            onClearFilters={clearFilters}
           />
         ) : null}
         <div className="flex flex-col items-start justify-between gap-4 border-t border-slate-100 bg-slate-50/30 px-6 py-4 sm:flex-row sm:items-center">
@@ -134,17 +113,16 @@ export default function StudyProblemList({
           </p>
           <div className="flex items-center gap-2">
             {hasActiveFilters ? (
-              <button
+              <Link
                 className="text-body-sm font-semibold text-secondary hover:underline"
-                onClick={clearFilters}
-                type="button"
+                href={getStudyProblemsHref(1, clearedFiltersQueryString)}
               >
                 Clear filters
-              </button>
+              </Link>
             ) : null}
             <PaginationControls
               currentPage={currentPage}
-              onPageChange={setCurrentPage}
+              queryString={queryString}
               totalPages={totalPages}
             />
           </div>
@@ -162,46 +140,42 @@ export default function StudyProblemList({
 
 function PaginationControls({
   currentPage,
-  onPageChange,
+  queryString,
   totalPages,
 }: {
   currentPage: number;
-  onPageChange: (page: number) => void;
+  queryString: string;
   totalPages: number;
 }) {
   return (
     <div className="flex items-center gap-1">
-      <button
+      <PaginationLink
         aria-label="이전 페이지"
-        className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
         disabled={currentPage === 1}
-        onClick={() => onPageChange(currentPage - 1)}
-        type="button"
+        href={getStudyProblemsHref(currentPage - 1, queryString)}
       >
         <ChevronLeft aria-hidden="true" size={16} />
-      </button>
+      </PaginationLink>
       <span className="px-2 text-body-sm font-semibold text-on-surface">
         {currentPage} / {totalPages}
       </span>
-      <button
+      <PaginationLink
         aria-label="다음 페이지"
-        className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-300"
         disabled={currentPage === totalPages}
-        onClick={() => onPageChange(currentPage + 1)}
-        type="button"
+        href={getStudyProblemsHref(currentPage + 1, queryString)}
       >
         <ChevronRight aria-hidden="true" size={16} />
-      </button>
+      </PaginationLink>
     </div>
   );
 }
 
 function EmptyState({
+  clearFiltersHref,
   hasActiveFilters,
-  onClearFilters,
 }: {
+  clearFiltersHref: string;
   hasActiveFilters: boolean;
-  onClearFilters: () => void;
 }) {
   if (hasActiveFilters) {
     return (
@@ -210,13 +184,9 @@ function EmptyState({
         <p className="mt-2 text-body-sm text-slate-500">
           Change or reset the filters to see more shared problems.
         </p>
-        <button
-          className="btn-secondary mt-5"
-          onClick={onClearFilters}
-          type="button"
-        >
+        <Link className="btn-secondary mt-5" href={clearFiltersHref}>
           Clear filters
-        </button>
+        </Link>
       </div>
     );
   }
@@ -233,6 +203,56 @@ function EmptyState({
       </Link>
     </div>
   );
+}
+
+function PaginationLink({
+  children,
+  disabled,
+  href,
+  ...props
+}: {
+  children: React.ReactNode;
+  disabled: boolean;
+  href: string;
+  "aria-label": string;
+}) {
+  const className =
+    "flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-100";
+
+  if (disabled) {
+    return (
+      <span
+        aria-disabled="true"
+        aria-label={props["aria-label"]}
+        className={`${className} cursor-not-allowed text-slate-300`}
+      >
+        {children}
+      </span>
+    );
+  }
+
+  return (
+    <Link
+      aria-label={props["aria-label"]}
+      className={className}
+      href={href}
+      scroll={false}
+    >
+      {children}
+    </Link>
+  );
+}
+
+function getStudyProblemsHref(page: number, queryString: string) {
+  const params = new URLSearchParams(queryString);
+
+  if (page > 1) {
+    params.set("page", String(page));
+  }
+
+  const nextQueryString = params.toString();
+
+  return nextQueryString ? `?${nextQueryString}` : "?";
 }
 
 function TableHead({ children }: { children: React.ReactNode }) {
