@@ -19,7 +19,8 @@ import {
   findStudyForLayout,
   findStudyMemberDetails,
   findStudyForOwner,
-  findStudyProblemFilterOptions,
+  findStudyProblemSharingMembers,
+  findStudyProblemTiers,
   findStudyProblems,
   findStudyMembers,
   findStudySummary,
@@ -451,16 +452,20 @@ export async function getStudyProblemFilterOptions({
   studyId: string;
   userId: string;
 }): Promise<StudyProblemFilterOptions | null> {
-  const options = await findStudyProblemFilterOptions({ studyId, userId });
+  const [members, tiers] = await Promise.all([
+    findStudyProblemSharingMembers({ studyId, userId }),
+    findStudyProblemTiers({ studyId, userId }),
+  ]);
 
-  if (!options) {
+  if (!members) {
     return null;
   }
 
   return {
-    memberNames: options.memberNames
+    memberNames: members
+      .map((member) => member.name)
       .map(getUserDisplayName)
       .filter((name, index, names) => names.indexOf(name) === index),
-    tiers: options.tiers,
+    tiers: tiers.flatMap((problem) => problem.tier ?? []),
   };
 }

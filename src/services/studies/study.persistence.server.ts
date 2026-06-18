@@ -385,8 +385,8 @@ export async function countFilteredStudyProblems({
   });
 }
 
-// 스터디 문제 필터에 필요한 멤버와 티어를 조회한다.
-export async function findStudyProblemFilterOptions({
+// 사용자가 접근 가능한 스터디에서 문제를 공유한 멤버를 조회한다.
+export async function findStudyProblemSharingMembers({
   studyId,
   userId,
 }: {
@@ -394,13 +394,7 @@ export async function findStudyProblemFilterOptions({
   userId: string;
 }) {
   const study = await prisma.study.findFirst({
-    select: {
-      members: {
-        orderBy: { joinedAt: "asc" },
-        select: { user: { select: { name: true } } },
-      },
-      owner: { select: { name: true } },
-    },
+    select: { id: true },
     where: accessibleStudyWhere(studyId, userId),
   });
 
@@ -408,7 +402,26 @@ export async function findStudyProblemFilterOptions({
     return null;
   }
 
-  const tiers = await prisma.problemSubmission.findMany({
+  return prisma.user.findMany({
+    orderBy: { name: "asc" },
+    select: { name: true },
+    where: {
+      studyProblemShares: {
+        some: { studyId: study.id },
+      },
+    },
+  });
+}
+
+// 사용자가 접근 가능한 스터디에 공유된 문제의 고유 티어를 조회한다.
+export async function findStudyProblemTiers({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}) {
+  return prisma.problemSubmission.findMany({
     distinct: ["tier"],
     orderBy: { tier: "asc" },
     select: { tier: true },
@@ -422,14 +435,6 @@ export async function findStudyProblemFilterOptions({
       tier: { not: null },
     },
   });
-
-  return {
-    memberNames: [
-      study.owner.name,
-      ...study.members.map((member) => member.user.name),
-    ],
-    tiers: tiers.flatMap((problem) => problem.tier ?? []),
-  };
 }
 
 // 스터디를 생성하고 소유자를 OWNER 멤버로 추가한다.
