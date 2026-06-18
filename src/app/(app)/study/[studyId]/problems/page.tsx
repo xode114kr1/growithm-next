@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
 import { getStudyProblemsData } from "@/services/studies/study.query";
 
-import StudyProblemModalTable from "./_components/study-problem-modal-table";
+import StudyProblemList from "./_components/study-problem-list";
 
 export default async function StudyProblemsPage({
   params,
@@ -20,7 +20,7 @@ export default async function StudyProblemsPage({
   }
 
   return (
-    <StudyProblemModalTable
+    <StudyProblemList
       memberNames={data.memberNames}
       problems={data.problems}
       tiers={data.tiers}
