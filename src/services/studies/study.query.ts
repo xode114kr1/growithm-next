@@ -10,14 +10,18 @@ import {
   normalizeCategories,
 } from "@/services/studies/study.helper";
 import {
+  countStudyProblemShares,
   findPendingInvites,
   findProblemShareTargetStudies,
+  findRecentStudyProblems,
   findStudyForLayout,
   findStudyForMembers,
-  findStudyForOverview,
   findStudyForOwner,
   findStudyForProblems,
+  findStudyMembers,
+  findStudySummary,
   findUserStudies,
+  sumStudyProblemShareScoresByUser,
 } from "@/services/studies/study.persistence.server";
 import type {
   OwnerMember,
@@ -168,9 +172,9 @@ export async function getStudyMembersData({
   };
 }
 
-const getStudySource = cache(
+const getStudyMembersSource = cache(
   async (studyId: string, userId: string) =>
-    findStudyForOverview({ studyId, userId }),
+    findStudyMembers({ studyId, userId }),
 );
 
 // 스터디 개요 화면의 기본 정보와 티어 정보를 조회한다.
@@ -192,7 +196,7 @@ export async function getStudySummary({
     | "tier"
   > | null
 > {
-  const study = await getStudySource(studyId, userId);
+  const study = await findStudySummary({ studyId, userId });
 
   if (!study) {
     return null;
@@ -221,21 +225,21 @@ export async function getStudyStats({
 }): Promise<
   Pick<StudyOverview, "memberCount" | "totalSolved" | "weeklySolved"> | null
 > {
-  const study = await getStudySource(studyId, userId);
-
-  if (!study) {
-    return null;
-  }
-
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
+  const [members, problemShareCounts] = await Promise.all([
+    getStudyMembersSource(studyId, userId),
+    countStudyProblemShares({ oneWeekAgo, studyId, userId }),
+  ]);
+
+  if (!members) {
+    return null;
+  }
+
   return {
-    memberCount: study.members.length,
-    totalSolved: study.problemShares.length,
-    weeklySolved: study.problemShares.filter(
-      (share) => share.sharedAt >= oneWeekAgo,
-    ).length,
+    memberCount: members.members.length,
+    ...problemShareCounts,
   };
 }
 
@@ -247,17 +251,25 @@ export async function getStudyContribution({
   studyId: string;
   userId: string;
 }): Promise<StudyOverview["contribution"] | null> {
-  const study = await getStudySource(studyId, userId);
+  const [study, contributionScores] = await Promise.all([
+    getStudyMembersSource(studyId, userId),
+    sumStudyProblemShareScoresByUser({ studyId, userId }),
+  ]);
 
   if (!study) {
     return null;
   }
 
+  const scoreByUserId = new Map(
+    contributionScores.map((contribution) => [
+      contribution.userId,
+      contribution._sum.score ?? 0,
+    ]),
+  );
+
   return study.members.map((member) => ({
     name: getUserDisplayName(member.user.name),
-    score: study.problemShares
-      .filter((share) => share.userId === member.userId)
-      .reduce((total, share) => total + share.score, 0),
+    score: scoreByUserId.get(member.userId) ?? 0,
   }));
 }
 
@@ -269,7 +281,7 @@ export async function getStudyMemberPreviews({
   studyId: string;
   userId: string;
 }): Promise<StudyOverview["members"] | null> {
-  const study = await getStudySource(studyId, userId);
+  const study = await getStudyMembersSource(studyId, userId);
 
   if (!study) {
     return null;
@@ -289,13 +301,13 @@ export async function getRecentStudyProblems({
   studyId: string;
   userId: string;
 }): Promise<StudyOverview["recentProblems"] | null> {
-  const study = await getStudySource(studyId, userId);
+  const problems = await findRecentStudyProblems({
+    limit: 10,
+    studyId,
+    userId,
+  });
 
-  if (!study) {
-    return null;
-  }
-
-  return study.problemShares.map((share) => ({
+  return problems.map((share) => ({
     platform: share.problemSubmission.platform,
     solvedBy: getUserDisplayName(share.user.name),
     tier: share.problemSubmission.tier ?? "-",
