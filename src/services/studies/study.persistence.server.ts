@@ -80,6 +80,23 @@ export async function findUserStudies(userId: string) {
   });
 }
 
+// 사용자가 접근 가능한 스터디의 제목과 설명을 조회한다.
+export async function findStudyBasicInfo({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}) {
+  return prisma.study.findFirst({
+    select: {
+      description: true,
+      title: true,
+    },
+    where: accessibleStudyWhere(studyId, userId),
+  });
+}
+
 // 사용자가 접근 가능한 스터디의 멤버와 기여 정보를 조회한다.
 export async function findStudyForMembers({
   studyId,

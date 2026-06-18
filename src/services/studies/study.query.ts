@@ -14,6 +14,7 @@ import {
   findPendingInvites,
   findProblemShareTargetStudies,
   findRecentStudyProblems,
+  findStudyBasicInfo,
   findStudyForLayout,
   findStudyForMembers,
   findStudyForOwner,
@@ -29,7 +30,7 @@ import type {
   StudyInviteItem,
   StudyLayoutData,
   StudyListItem,
-  StudyMembersData,
+  StudyMember,
   StudyContributionItem,
   StudyOverviewMember,
   StudyOverviewStats,
@@ -130,15 +131,15 @@ export async function getUserStudies(
   });
 }
 
-// 스터디 멤버 화면에 필요한 멤버와 기여도 정보를 조회한다.
-export async function getStudyMembersData({
+// 스터디 멤버 화면의 제목과 설명을 조회한다.
+export async function getStudyMembersSummary({
   studyId,
   userId,
 }: {
   studyId: string;
   userId: string;
-}): Promise<StudyMembersData | null> {
-  const study = await findStudyForMembers({ studyId, userId });
+}): Promise<{ description: string; name: string } | null> {
+  const study = await findStudyBasicInfo({ studyId, userId });
 
   if (!study) {
     return null;
@@ -148,32 +149,47 @@ export async function getStudyMembersData({
     description:
       study.description ??
       "스터디 멤버의 기여도와 최근 활동 상태를 확인합니다.",
-    memberCount: study.members.length,
-    members: study.members.map((member) => {
-      const shares = study.problemShares.filter(
-        (share) => share.userId === member.userId,
-      );
-      const lastSharedAt = shares.reduce<Date | null>(
-        (latestSharedAt, share) =>
-          !latestSharedAt || share.sharedAt > latestSharedAt
-            ? share.sharedAt
-            : latestSharedAt,
-        null,
-      );
-
-      return {
-        contribution: shares.reduce((total, share) => total + share.score, 0),
-        id: member.id,
-        joinedAt: formatShortDate(member.joinedAt),
-        joinedAtTime: member.joinedAt.getTime(),
-        lastActive: formatShortDate(lastSharedAt ?? member.joinedAt),
-        lastActiveTime: (lastSharedAt ?? member.joinedAt).getTime(),
-        name: getUserDisplayName(member.user.name),
-        role: member.role,
-      };
-    }),
     name: study.title,
   };
+}
+
+// 스터디 멤버 화면의 멤버와 활동·기여도 정보를 조회한다.
+export async function getStudyMembers({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}): Promise<StudyMember[] | null> {
+  const study = await findStudyForMembers({ studyId, userId });
+
+  if (!study) {
+    return null;
+  }
+
+  return study.members.map((member) => {
+    const shares = study.problemShares.filter(
+      (share) => share.userId === member.userId,
+    );
+    const lastSharedAt = shares.reduce<Date | null>(
+      (latestSharedAt, share) =>
+        !latestSharedAt || share.sharedAt > latestSharedAt
+          ? share.sharedAt
+          : latestSharedAt,
+      null,
+    );
+
+    return {
+      contribution: shares.reduce((total, share) => total + share.score, 0),
+      id: member.id,
+      joinedAt: formatShortDate(member.joinedAt),
+      joinedAtTime: member.joinedAt.getTime(),
+      lastActive: formatShortDate(lastSharedAt ?? member.joinedAt),
+      lastActiveTime: (lastSharedAt ?? member.joinedAt).getTime(),
+      name: getUserDisplayName(member.user.name),
+      role: member.role,
+    };
+  });
 }
 
 const getStudyMembersSource = cache(

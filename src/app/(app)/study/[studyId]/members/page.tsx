@@ -1,7 +1,10 @@
 import { notFound } from "next/navigation";
 
 import { auth } from "@/lib/auth/auth";
-import { getStudyMembersData } from "@/services/studies/study.query";
+import {
+  getStudyMembers,
+  getStudyMembersSummary,
+} from "@/services/studies/study.query";
 
 import StudyMemberList from "./_components/study-member-list";
 import StudyMembersHeading from "./_components/study-members-heading";
@@ -14,20 +17,28 @@ export default async function StudyMembersPage({
   const { studyId } = await params;
   const session = await auth();
   const userId = session?.user?.id;
-  const data = userId ? await getStudyMembersData({ studyId, userId }) : null;
+  const summary = userId
+    ? await getStudyMembersSummary({ studyId, userId })
+    : null;
 
-  if (!data) {
+  if (!summary || !userId) {
+    notFound();
+  }
+
+  const members = await getStudyMembers({ studyId, userId });
+
+  if (!members) {
     notFound();
   }
 
   return (
     <>
       <StudyMembersHeading
-        memberCount={data.memberCount}
-        studyDescription={data.description}
-        studyName={data.name}
+        memberCount={members.length}
+        studyDescription={summary.description}
+        studyName={summary.name}
       />
-      <StudyMemberList members={data.members} />
+      <StudyMemberList members={members} />
     </>
   );
 }
