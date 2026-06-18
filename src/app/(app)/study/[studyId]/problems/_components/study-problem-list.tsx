@@ -28,6 +28,7 @@ export default function StudyProblemList({
   problems,
   queryString,
   tiers,
+  totalCount,
 }: {
   filters: StudyProblemFilters;
   memberNames: string[];
@@ -35,6 +36,7 @@ export default function StudyProblemList({
   problems: StudyProblem[];
   queryString: string;
   tiers: string[];
+  totalCount: number;
 }) {
   const [selectedProblem, setSelectedProblem] = useState<StudyProblem | null>(
     null,
@@ -68,7 +70,7 @@ export default function StudyProblemList({
         filteredCount={filteredProblems.length}
         memberNames={memberNames}
         tiers={tiers}
-        totalCount={problems.length}
+        totalCount={totalCount}
       />
       <section className="app-card overflow-hidden">
         <div className="overflow-x-auto">

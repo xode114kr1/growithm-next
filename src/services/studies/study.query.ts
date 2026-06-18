@@ -37,7 +37,8 @@ import type {
   StudyOverviewStats,
   StudyOverviewSummary,
   StudyOwnerData,
-  StudyProblemsData,
+  StudyProblem,
+  StudyProblemFilterOptions,
   StudyRecentProblem,
 } from "@/types/study";
 import { formatRelativeDate, formatShortDate } from "@/utils/date";
@@ -383,21 +384,26 @@ export async function getStudyOwnerData({
   };
 }
 
-// 스터디에 공유된 문제 목록과 필터 정보를 조회한다.
-export async function getStudyProblemsData({
+const getStudyProblemsSource = cache(
+  async (studyId: string, userId: string) =>
+    findStudyForProblems({ studyId, userId }),
+);
+
+// 스터디에 공유된 문제 목록을 조회한다.
+export async function getStudyProblems({
   studyId,
   userId,
 }: {
   studyId: string;
   userId: string;
-}): Promise<StudyProblemsData | null> {
-  const study = await findStudyForProblems({ studyId, userId });
+}): Promise<StudyProblem[] | null> {
+  const study = await getStudyProblemsSource(studyId, userId);
 
   if (!study) {
     return null;
   }
 
-  const problems = study.problemShares.map((share) => ({
+  return study.problemShares.map((share) => ({
     categories: normalizeCategories(share.problemSubmission.categories),
     code: `${share.problemSubmission.platform}-${share.problemSubmission.problemId}`,
     description: share.problemSubmission.description,
@@ -416,15 +422,42 @@ export async function getStudyProblemsData({
     tier: share.problemSubmission.tier,
     title: share.problemSubmission.title,
   }));
+}
+
+// 스터디에 공유된 전체 문제 수를 조회한다.
+export async function getStudyProblemCount({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}): Promise<number | null> {
+  const study = await getStudyProblemsSource(studyId, userId);
+
+  return study ? study.problemShares.length : null;
+}
+
+// 스터디 문제 필터에 필요한 티어와 공유 멤버 목록을 조회한다.
+export async function getStudyProblemFilterOptions({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}): Promise<StudyProblemFilterOptions | null> {
+  const study = await getStudyProblemsSource(studyId, userId);
+
+  if (!study) {
+    return null;
+  }
 
   return {
     memberNames: [
       getUserDisplayName(study.owner.name),
       ...study.members.map((member) => getUserDisplayName(member.user.name)),
     ].filter((name, index, names) => names.indexOf(name) === index),
-    problems,
-    tiers: problems
-      .flatMap((problem) => problem.tier ?? [])
+    tiers: study.problemShares
+      .flatMap((share) => share.problemSubmission.tier ?? [])
       .filter((tier, index, tiers) => tiers.indexOf(tier) === index),
   };
 }

@@ -1,7 +1,11 @@
 import { notFound } from "next/navigation";
 
 import { auth } from "@/lib/auth/auth";
-import { getStudyProblemsData } from "@/services/studies/study.query";
+import {
+  getStudyProblemCount,
+  getStudyProblemFilterOptions,
+  getStudyProblems,
+} from "@/services/studies/study.query";
 
 import StudyProblemList from "./_components/study-problem-list";
 import {
@@ -24,26 +28,36 @@ export default async function StudyProblemsPage({
   ]);
   const session = await auth();
   const userId = session?.user?.id;
-  const data = userId ? await getStudyProblemsData({ studyId, userId }) : null;
 
-  if (!data) {
+  if (!userId) {
+    notFound();
+  }
+
+  const [problems, totalCount, filterOptions] = await Promise.all([
+    getStudyProblems({ studyId, userId }),
+    getStudyProblemCount({ studyId, userId }),
+    getStudyProblemFilterOptions({ studyId, userId }),
+  ]);
+
+  if (!problems || totalCount === null || !filterOptions) {
     notFound();
   }
 
   const filters = parseStudyProblemFilters({
-    memberNames: data.memberNames,
+    memberNames: filterOptions.memberNames,
     params: urlSearchParams,
-    tiers: data.tiers,
+    tiers: filterOptions.tiers,
   });
 
   return (
     <StudyProblemList
       filters={filters}
-      memberNames={data.memberNames}
+      memberNames={filterOptions.memberNames}
       page={parseStudyProblemPage(urlSearchParams.page)}
-      problems={data.problems}
+      problems={problems}
       queryString={buildStudyProblemQueryString(filters)}
-      tiers={data.tiers}
+      tiers={filterOptions.tiers}
+      totalCount={totalCount}
     />
   );
 }

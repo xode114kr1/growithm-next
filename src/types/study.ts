@@ -126,9 +126,8 @@ export type StudyProblem = {
   title: string;
 };
 
-export type StudyProblemsData = {
+export type StudyProblemFilterOptions = {
   memberNames: string[];
-  problems: StudyProblem[];
   tiers: string[];
 };
 
