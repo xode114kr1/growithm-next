@@ -2,6 +2,7 @@ import "server-only";
 
 import type { StudyMemberRole } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
+import type { StudyMemberFilters } from "@/types/study";
 
 // 스터디 접근 권한을 소유자 또는 멤버 조건으로 구성한다.
 const accessibleStudyWhere = (studyId: string, userId: string) => ({
@@ -82,22 +83,37 @@ export async function findUserStudies(userId: string) {
 
 // 사용자가 접근 가능한 스터디의 멤버 기본 정보를 조회한다.
 export async function findStudyMemberDetails({
+  filters,
   studyId,
   userId,
 }: {
+  filters: StudyMemberFilters;
   studyId: string;
   userId: string;
 }) {
   return prisma.study.findFirst({
     select: {
       members: {
-        orderBy: { joinedAt: "asc" },
+        orderBy:
+          filters.sort === "name"
+            ? { user: { name: "asc" } }
+            : { joinedAt: "asc" },
         select: {
           id: true,
           joinedAt: true,
           role: true,
           user: { select: { name: true } },
           userId: true,
+        },
+        where: {
+          ...(filters.role === "ALL" ? {} : { role: filters.role }),
+          ...(filters.q
+            ? {
+                user: {
+                  name: { contains: filters.q, mode: "insensitive" },
+                },
+              }
+            : {}),
         },
       },
     },

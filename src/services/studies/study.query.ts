@@ -31,6 +31,7 @@ import type {
   StudyLayoutData,
   StudyListItem,
   StudyMember,
+  StudyMemberFilters,
   StudyContributionItem,
   StudyOverviewMember,
   StudyOverviewStats,
@@ -133,14 +134,16 @@ export async function getUserStudies(
 
 // 스터디 멤버 화면의 멤버와 활동·기여도 정보를 조회한다.
 export async function getStudyMembers({
+  filters,
   studyId,
   userId,
 }: {
+  filters: StudyMemberFilters;
   studyId: string;
   userId: string;
 }): Promise<StudyMember[] | null> {
   const [study, activityByMember] = await Promise.all([
-    findStudyMemberDetails({ studyId, userId }),
+    findStudyMemberDetails({ filters, studyId, userId }),
     aggregateStudyMemberActivity({ studyId, userId }),
   ]);
 
@@ -152,7 +155,7 @@ export async function getStudyMembers({
     activityByMember.map((activity) => [activity.userId, activity]),
   );
 
-  return study.members.map((member) => {
+  const members = study.members.map((member) => {
     const activity = activityByUserId.get(member.userId);
     const lastActiveAt = activity?._max.sharedAt ?? member.joinedAt;
 
@@ -167,6 +170,22 @@ export async function getStudyMembers({
       role: member.role,
     };
   });
+
+  if (filters.sort === "lastActive") {
+    return members.toSorted(
+      (firstMember, secondMember) =>
+        secondMember.lastActiveTime - firstMember.lastActiveTime,
+    );
+  }
+
+  if (filters.sort === "contribution") {
+    return members.toSorted(
+      (firstMember, secondMember) =>
+        secondMember.contribution - firstMember.contribution,
+    );
+  }
+
+  return members;
 }
 
 const getStudyMembersSource = cache(

@@ -5,7 +5,7 @@ import { getStudyMembers } from "@/services/studies/study.query";
 
 import StudyMemberFilters from "./_components/study-member-filters";
 import StudyMemberList from "./_components/study-member-list";
-import { filterAndSortStudyMembers, parseStudyMemberFilters } from "./_lib/parse";
+import { parseStudyMemberFilters } from "./_lib/parse";
 import type { StudyMembersPageSearchParams } from "./types";
 
 export default async function StudyMembersPage({
@@ -26,19 +26,17 @@ export default async function StudyMembersPage({
     notFound();
   }
 
-  const members = await getStudyMembers({ studyId, userId });
+  const filters = parseStudyMemberFilters(urlSearchParams);
+  const members = await getStudyMembers({ filters, studyId, userId });
 
   if (!members) {
     notFound();
   }
 
-  const filters = parseStudyMemberFilters(urlSearchParams);
-  const filteredMembers = filterAndSortStudyMembers(members, filters);
-
   return (
     <section className="space-y-5">
       <StudyMemberFilters filters={filters} />
-      <StudyMemberList members={filteredMembers} />
+      <StudyMemberList members={members} />
     </section>
   );
 }

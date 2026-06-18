@@ -1,17 +1,11 @@
-import type { StudyMember } from "@/types/study";
+import type { StudyMemberFilters } from "@/types/study";
 
-export type StudyMemberRoleFilter = "ALL" | StudyMember["role"];
-export type StudyMemberSort =
-  | "contribution"
-  | "lastActive"
-  | "joinedAt"
-  | "name";
+export type {
+  StudyMemberRoleFilter,
+  StudyMemberSort,
+} from "@/types/study";
 
-export type StudyMemberFiltersState = {
-  q: string;
-  role: StudyMemberRoleFilter;
-  sort: StudyMemberSort;
-};
+export type StudyMemberFiltersState = StudyMemberFilters;
 
 export type StudyMembersPageSearchParams = {
   q?: string | string[];

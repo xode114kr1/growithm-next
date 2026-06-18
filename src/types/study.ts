@@ -33,6 +33,19 @@ export type StudyMember = {
   role: "OWNER" | "LEADER" | "MEMBER";
 };
 
+export type StudyMemberRoleFilter = "ALL" | StudyMember["role"];
+export type StudyMemberSort =
+  | "contribution"
+  | "lastActive"
+  | "joinedAt"
+  | "name";
+
+export type StudyMemberFilters = {
+  q: string;
+  role: StudyMemberRoleFilter;
+  sort: StudyMemberSort;
+};
+
 export type StudyOverviewSummary = {
   description: string;
   id: string;

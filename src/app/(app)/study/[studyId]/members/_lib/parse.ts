@@ -1,6 +1,3 @@
-import type { StudyMember } from "@/types/study";
-
-import { studyMemberRoleLabels } from "../constants";
 import type {
   StudyMemberFiltersState,
   StudyMemberRoleFilter,
@@ -16,49 +13,6 @@ export function parseStudyMemberFilters(
     role: parseRoleParam(params.role),
     sort: parseSortParam(params.sort),
   };
-}
-
-export function filterAndSortStudyMembers(
-  members: StudyMember[],
-  filters: StudyMemberFiltersState,
-) {
-  const normalizedQuery = filters.q.toLowerCase();
-
-  return members
-    .filter((member) => {
-      if (filters.role !== "ALL" && member.role !== filters.role) {
-        return false;
-      }
-
-      if (!normalizedQuery) {
-        return true;
-      }
-
-      return [
-        member.name,
-        studyMemberRoleLabels[member.role],
-        member.role,
-        member.lastActive,
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(normalizedQuery);
-    })
-    .toSorted((firstMember, secondMember) => {
-      if (filters.sort === "name") {
-        return firstMember.name.localeCompare(secondMember.name);
-      }
-
-      if (filters.sort === "lastActive") {
-        return secondMember.lastActiveTime - firstMember.lastActiveTime;
-      }
-
-      if (filters.sort === "joinedAt") {
-        return firstMember.joinedAtTime - secondMember.joinedAtTime;
-      }
-
-      return secondMember.contribution - firstMember.contribution;
-    });
 }
 
 function parseRoleParam(

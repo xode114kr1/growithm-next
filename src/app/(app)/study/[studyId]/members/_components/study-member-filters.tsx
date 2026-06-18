@@ -27,7 +27,7 @@ export default function StudyMemberFilters({
           onChange={(event) =>
             replaceQuery({ q: event.target.value.trim() || null })
           }
-          placeholder="이름, 역할, 활동일로 검색"
+          placeholder="이름 검색"
           type="search"
         />
       </label>
