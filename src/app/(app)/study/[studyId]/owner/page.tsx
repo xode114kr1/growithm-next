@@ -4,7 +4,6 @@ import { auth } from "@/lib/auth/auth";
 import { getStudyOwnerData } from "@/services/studies/study.query";
 
 import OwnerConsole from "./_components/owner-console";
-import StudyOwnerHeading from "./_components/study-owner-heading";
 
 export default async function StudyOwnerPage({
   params,
@@ -21,13 +20,10 @@ export default async function StudyOwnerPage({
   }
 
   return (
-    <>
-      <StudyOwnerHeading study={ownerData.study} />
-      <OwnerConsole
-        initialInvites={ownerData.pendingInvites}
-        members={ownerData.members}
-        study={ownerData.study}
-      />
-    </>
+    <OwnerConsole
+      initialInvites={ownerData.pendingInvites}
+      members={ownerData.members}
+      study={ownerData.study}
+    />
   );
 }
