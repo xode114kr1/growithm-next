@@ -23,7 +23,6 @@ export default async function FriendPage() {
   return (
     <main className="page-shell">
       <div className="page-container">
-        <FriendHeader />
         <FriendContent
           friends={friendUsers}
           receivedRequests={receivedRequests}
@@ -32,18 +31,5 @@ export default async function FriendPage() {
         />
       </div>
     </main>
-  );
-}
-
-function FriendHeader() {
-  return (
-    <header className="page-header flex flex-col justify-between gap-4 md:flex-row md:items-end">
-      <div>
-        <h1 className="page-title mb-2">친구</h1>
-        <p className="max-w-xl text-body-md text-on-surface-variant">
-          함께 성장할 친구를 찾고 학습 현황을 확인하세요.
-        </p>
-      </div>
-    </header>
   );
 }
