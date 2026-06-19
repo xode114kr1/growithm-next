@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import type { StudyProblem } from "@/types/study";
+import type { StudyProblemListItem } from "@/types/study";
 
 import type { StudyProblemFilters } from "../types";
 import StudyProblemFiltersComponent from "./study-problem-filters";
@@ -19,6 +19,7 @@ export default function StudyProblemList({
   pageSize,
   problems,
   queryString,
+  studyId,
   tiers,
   totalCount,
   totalPages,
@@ -28,15 +29,15 @@ export default function StudyProblemList({
   filters: StudyProblemFilters;
   memberNames: string[];
   pageSize: number;
-  problems: StudyProblem[];
+  problems: StudyProblemListItem[];
   queryString: string;
+  studyId: string;
   tiers: string[];
   totalCount: number;
   totalPages: number;
 }) {
-  const [selectedProblem, setSelectedProblem] = useState<StudyProblem | null>(
-    null,
-  );
+  const [selectedProblem, setSelectedProblem] =
+    useState<StudyProblemListItem | null>(null);
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + problems.length;
   const hasActiveFilters =
@@ -116,6 +117,7 @@ export default function StudyProblemList({
           onSelectProblem={setSelectedProblem}
           problem={selectedProblem}
           problems={problems}
+          studyId={studyId}
         />
       </section>
     </>

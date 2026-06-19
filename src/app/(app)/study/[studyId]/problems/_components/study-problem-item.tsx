@@ -1,6 +1,6 @@
 import ProblemTierBadge from "@/components/ui/problem-tier-badge";
 import type { ProblemSubmissionStatus } from "@/generated/prisma/enums";
-import type { StudyProblem } from "@/types/study";
+import type { StudyProblemListItem } from "@/types/study";
 import {
   getProblemStatusBadgeClass,
   getProblemStatusDescription,
@@ -11,8 +11,8 @@ export default function StudyProblemItem({
   onSelect,
   problem,
 }: {
-  onSelect: (problem: StudyProblem) => void;
-  problem: StudyProblem;
+  onSelect: (problem: StudyProblemListItem) => void;
+  problem: StudyProblemListItem;
 }) {
   return (
     <tr className="group transition-colors hover:bg-slate-50/80">

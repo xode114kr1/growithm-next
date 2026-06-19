@@ -73,6 +73,7 @@ export default async function StudyProblemsPage({
       pageSize={STUDY_PROBLEM_PAGE_SIZE}
       problems={problems}
       queryString={buildStudyProblemQueryString(filters)}
+      studyId={studyId}
       tiers={filterOptions.tiers}
       totalCount={totalCount}
       totalPages={totalPages}

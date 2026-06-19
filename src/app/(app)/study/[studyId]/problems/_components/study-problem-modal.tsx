@@ -12,7 +12,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import ProblemTierBadge from "@/components/ui/problem-tier-badge";
-import type { StudyProblem } from "@/types/study";
+import type {
+  StudyProblemDetail,
+  StudyProblemListItem,
+} from "@/types/study";
 
 import { ProblemState, ProblemTags } from "./study-problem-item";
 
@@ -21,12 +24,19 @@ export default function StudyProblemModal({
   onSelectProblem,
   problem,
   problems,
+  studyId,
 }: {
   onClose: () => void;
-  onSelectProblem: (problem: StudyProblem) => void;
-  problem: StudyProblem | null;
-  problems: StudyProblem[];
+  onSelectProblem: (problem: StudyProblemListItem) => void;
+  problem: StudyProblemListItem | null;
+  problems: StudyProblemListItem[];
+  studyId: string;
 }) {
+  const [detail, setDetail] = useState<StudyProblemDetail | null>(null);
+  const [loadErrorProblemId, setLoadErrorProblemId] = useState<string | null>(
+    null,
+  );
+  const [reloadKey, setReloadKey] = useState(0);
   const selectedIndex = problem
     ? problems.findIndex((studyProblem) => studyProblem.id === problem.id)
     : -1;
@@ -35,6 +45,43 @@ export default function StudyProblemModal({
     selectedIndex >= 0 && selectedIndex < problems.length - 1
       ? problems[selectedIndex + 1]
       : null;
+
+  useEffect(() => {
+    const problemId = problem?.id;
+
+    if (!problemId) {
+      return;
+    }
+
+    const selectedProblemId = problemId;
+    const controller = new AbortController();
+
+    async function loadDetail() {
+      try {
+        const response = await fetch(
+          `/api/studies/${encodeURIComponent(studyId)}/problems/${encodeURIComponent(selectedProblemId)}`,
+          { cache: "no-store", signal: controller.signal },
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to load study problem detail");
+        }
+
+        setDetail((await response.json()) as StudyProblemDetail);
+        setLoadErrorProblemId(null);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
+        setLoadErrorProblemId(selectedProblemId);
+      }
+    }
+
+    void loadDetail();
+
+    return () => controller.abort();
+  }, [problem, reloadKey, studyId]);
 
   useEffect(() => {
     if (!problem) {
@@ -124,45 +171,81 @@ export default function StudyProblemModal({
             </button>
           </div>
         </header>
-        <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto lg:grid-cols-[minmax(0,1fr)_320px]">
-          <div className="min-w-0 space-y-6 p-5 md:p-6">
-            <ProblemDescription description={problem.description} />
-            <ProblemSolutionCode code={problem.solutionCode} />
-          </div>
-          <aside className="space-y-5 border-t border-slate-100 bg-slate-50/50 p-5 md:p-6 lg:border-l lg:border-t-0">
-            <ProblemState status={problem.status} />
-            <ProblemMetaList problem={problem} />
-            <ProblemTags categories={problem.categories} />
-            {problem.memo ? (
-              <section>
-                <h3 className="mb-2 text-label-caps text-slate-500">메모</h3>
-                <p className="rounded-lg border border-slate-100 bg-white p-3 text-body-sm leading-relaxed text-on-surface-variant">
-                  {problem.memo}
-                </p>
-              </section>
-            ) : null}
-            {problem.link ? (
-              <a
-                className="btn-secondary w-full"
-                href={problem.link}
-                rel="noreferrer"
-                target="_blank"
-              >
-                <ExternalLink aria-hidden="true" size={16} />
-                Open Original
-              </a>
-            ) : null}
-            <Link className="btn-primary w-full" href={`/problem/${problem.id}`}>
-              Open Detail Page
-            </Link>
-          </aside>
-        </div>
+        {detail?.id === problem.id ? (
+          <ProblemDetailContent problem={detail} />
+        ) : (
+          <ProblemDetailState
+            hasLoadError={loadErrorProblemId === problem.id}
+            onRetry={() => setReloadKey((key) => key + 1)}
+          />
+        )}
       </div>
     </div>
   );
 }
 
-function ProblemMetaList({ problem }: { problem: StudyProblem }) {
+function ProblemDetailContent({ problem }: { problem: StudyProblemDetail }) {
+  return (
+    <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="min-w-0 space-y-6 p-5 md:p-6">
+        <ProblemDescription description={problem.description} />
+        <ProblemSolutionCode code={problem.solutionCode} />
+      </div>
+      <aside className="space-y-5 border-t border-slate-100 bg-slate-50/50 p-5 md:p-6 lg:border-l lg:border-t-0">
+        <ProblemState status={problem.status} />
+        <ProblemMetaList problem={problem} />
+        <ProblemTags categories={problem.categories} />
+        {problem.memo ? (
+          <section>
+            <h3 className="mb-2 text-label-caps text-slate-500">메모</h3>
+            <p className="rounded-lg border border-slate-100 bg-white p-3 text-body-sm leading-relaxed text-on-surface-variant">
+              {problem.memo}
+            </p>
+          </section>
+        ) : null}
+        {problem.link ? (
+          <a
+            className="btn-secondary w-full"
+            href={problem.link}
+            rel="noreferrer"
+            target="_blank"
+          >
+            <ExternalLink aria-hidden="true" size={16} />
+            Open Original
+          </a>
+        ) : null}
+        <Link className="btn-primary w-full" href={`/problem/${problem.id}`}>
+          Open Detail Page
+        </Link>
+      </aside>
+    </div>
+  );
+}
+
+function ProblemDetailState({
+  hasLoadError,
+  onRetry,
+}: {
+  hasLoadError: boolean;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="flex min-h-72 flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
+      <p className="font-semibold text-on-surface">
+        {hasLoadError
+          ? "문제 상세 정보를 불러오지 못했습니다."
+          : "문제 상세 정보를 불러오는 중입니다."}
+      </p>
+      {hasLoadError ? (
+        <button className="btn-secondary" onClick={onRetry} type="button">
+          다시 시도
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+function ProblemMetaList({ problem }: { problem: StudyProblemDetail }) {
   const score =
     problem.score !== null
       ? `${problem.score.toLocaleString()}${problem.scoreMax !== null ? ` / ${problem.scoreMax.toLocaleString()}` : ""}`

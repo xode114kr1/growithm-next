@@ -346,6 +346,38 @@ export async function findStudyProblems({
       problemSubmission: {
         select: {
           categories: true,
+          id: true,
+          platform: true,
+          problemId: true,
+          status: true,
+          tier: true,
+          title: true,
+        },
+      },
+      user: { select: { name: true } },
+    },
+    orderBy: buildStudyProblemShareOrderBy(filters.sort),
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+    where: buildStudyProblemShareWhere({ filters, studyId, userId }),
+  });
+}
+
+// 사용자가 접근 가능한 스터디에 공유된 문제의 상세 정보를 조회한다.
+export async function findStudyProblemDetail({
+  problemId,
+  studyId,
+  userId,
+}: {
+  problemId: string;
+  studyId: string;
+  userId: string;
+}) {
+  return prisma.studyProblemShare.findFirst({
+    include: {
+      problemSubmission: {
+        select: {
+          categories: true,
           code: true,
           description: true,
           id: true,
@@ -363,10 +395,11 @@ export async function findStudyProblems({
       },
       user: { select: { name: true } },
     },
-    orderBy: buildStudyProblemShareOrderBy(filters.sort),
-    skip: (page - 1) * pageSize,
-    take: pageSize,
-    where: buildStudyProblemShareWhere({ filters, studyId, userId }),
+    where: {
+      problemSubmissionId: problemId,
+      study: accessibleRelatedStudyWhere(userId),
+      studyId,
+    },
   });
 }
 

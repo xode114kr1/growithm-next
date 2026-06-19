@@ -19,6 +19,7 @@ import {
   findStudyForLayout,
   findStudyMemberDetails,
   findStudyForOwner,
+  findStudyProblemDetail,
   findStudyProblemSharingMembers,
   findStudyProblemTiers,
   findStudyProblems,
@@ -40,9 +41,10 @@ import type {
   StudyOverviewStats,
   StudyOverviewSummary,
   StudyOwnerData,
-  StudyProblem,
+  StudyProblemDetail,
   StudyProblemFilters,
   StudyProblemFilterOptions,
+  StudyProblemListItem,
   StudyRecentProblem,
 } from "@/types/study";
 import { formatRelativeDate, formatShortDate } from "@/utils/date";
@@ -401,7 +403,7 @@ export async function getStudyProblems({
   page: number;
   studyId: string;
   userId: string;
-}): Promise<StudyProblem[]> {
+}): Promise<StudyProblemListItem[]> {
   const shares = await findStudyProblems({
     filters,
     page,
@@ -413,6 +415,35 @@ export async function getStudyProblems({
   return shares.map((share) => ({
     categories: normalizeCategories(share.problemSubmission.categories),
     code: `${share.problemSubmission.platform}-${share.problemSubmission.problemId}`,
+    id: share.problemSubmission.id,
+    platform: share.problemSubmission.platform,
+    sharedAtLabel: formatShortDate(share.sharedAt),
+    sharedBy: getUserDisplayName(share.user.name),
+    status: share.problemSubmission.status,
+    tier: share.problemSubmission.tier,
+    title: share.problemSubmission.title,
+  }));
+}
+
+// 스터디에 공유된 문제의 모달 상세 정보를 조회한다.
+export async function getStudyProblemDetail({
+  problemId,
+  studyId,
+  userId,
+}: {
+  problemId: string;
+  studyId: string;
+  userId: string;
+}): Promise<StudyProblemDetail | null> {
+  const share = await findStudyProblemDetail({ problemId, studyId, userId });
+
+  if (!share) {
+    return null;
+  }
+
+  return {
+    categories: normalizeCategories(share.problemSubmission.categories),
+    code: `${share.problemSubmission.platform}-${share.problemSubmission.problemId}`,
     description: share.problemSubmission.description,
     id: share.problemSubmission.id,
     link: share.problemSubmission.link,
@@ -421,14 +452,13 @@ export async function getStudyProblems({
     score: share.problemSubmission.score,
     scoreMax: share.problemSubmission.scoreMax,
     sharedAtLabel: formatShortDate(share.sharedAt),
-    sharedAtTime: share.sharedAt.getTime(),
     sharedBy: getUserDisplayName(share.user.name),
     solutionCode: share.problemSubmission.code,
     status: share.problemSubmission.status,
     submittedAtText: share.problemSubmission.submittedAtText,
     tier: share.problemSubmission.tier,
     title: share.problemSubmission.title,
-  }));
+  };
 }
 
 // 스터디에 공유된 전체 문제 수를 조회한다.
