@@ -6,23 +6,17 @@ import type {
   StudyProblemSort,
 } from "../types";
 
-export function parseStudyProblemFilters({
-  memberNames,
-  params,
-  tiers,
-}: {
-  memberNames: string[];
-  params: StudyProblemPageSearchParams;
-  tiers: string[];
-}): StudyProblemFilters {
+export function parseStudyProblemFilters(
+  params: StudyProblemPageSearchParams,
+): StudyProblemFilters {
   const member = parseStringParam(params.member);
   const tier = parseStringParam(params.tier);
 
   return {
-    member: memberNames.includes(member) ? member : null,
+    member: member || null,
     platform: parsePlatformParam(params.platform),
     sort: parseSortParam(params.sort),
-    tier: tiers.includes(tier) ? tier : null,
+    tier: tier || null,
   };
 }
 

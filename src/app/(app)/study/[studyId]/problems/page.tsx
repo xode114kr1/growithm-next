@@ -8,6 +8,7 @@ import {
   STUDY_PROBLEM_PAGE_SIZE,
 } from "@/services/studies/study.query";
 
+import StudyProblemFilters from "./_components/study-problem-filters";
 import StudyProblemList from "./_components/study-problem-list";
 import {
   buildStudyProblemQueryString,
@@ -34,21 +35,17 @@ export default async function StudyProblemsPage({
     notFound();
   }
 
-  const filterOptions = await getStudyProblemFilterOptions({ studyId, userId });
+  const filters = parseStudyProblemFilters(urlSearchParams);
+  const [filteredCount, totalCount, filterOptions] = await Promise.all([
+    getStudyProblemCount({ filters, studyId, userId }),
+    getStudyProblemCount({ studyId, userId }),
+    getStudyProblemFilterOptions({ studyId, userId }),
+  ]);
 
   if (!filterOptions) {
     notFound();
   }
 
-  const filters = parseStudyProblemFilters({
-    memberNames: filterOptions.memberNames,
-    params: urlSearchParams,
-    tiers: filterOptions.tiers,
-  });
-  const [filteredCount, totalCount] = await Promise.all([
-    getStudyProblemCount({ filters, studyId, userId }),
-    getStudyProblemCount({ studyId, userId }),
-  ]);
   const totalPages = Math.max(
     1,
     Math.ceil(filteredCount / STUDY_PROBLEM_PAGE_SIZE),
@@ -63,20 +60,34 @@ export default async function StudyProblemsPage({
     studyId,
     userId,
   });
+  const hasActiveFilters =
+    filters.platform !== null ||
+    filters.tier !== null ||
+    filters.member !== null;
+  const clearedFiltersQueryString =
+    filters.sort === "latest" ? "" : `sort=${filters.sort}`;
+  const queryString = buildStudyProblemQueryString(filters);
 
   return (
-    <StudyProblemList
-      currentPage={currentPage}
-      filteredCount={filteredCount}
-      filters={filters}
-      memberNames={filterOptions.memberNames}
-      pageSize={STUDY_PROBLEM_PAGE_SIZE}
-      problems={problems}
-      queryString={buildStudyProblemQueryString(filters)}
-      studyId={studyId}
-      tiers={filterOptions.tiers}
-      totalCount={totalCount}
-      totalPages={totalPages}
-    />
+    <>
+      <StudyProblemFilters
+        filters={filters}
+        filteredCount={filteredCount}
+        memberNames={filterOptions.memberNames}
+        tiers={filterOptions.tiers}
+        totalCount={totalCount}
+      />
+      <StudyProblemList
+        clearedFiltersQueryString={clearedFiltersQueryString}
+        currentPage={currentPage}
+        filteredCount={filteredCount}
+        hasActiveFilters={hasActiveFilters}
+        pageSize={STUDY_PROBLEM_PAGE_SIZE}
+        problems={problems}
+        queryString={queryString}
+        studyId={studyId}
+        totalPages={totalPages}
+      />
+    </>
   );
 }

@@ -6,57 +6,37 @@ import { useState } from "react";
 
 import type { StudyProblemListItem } from "@/types/study";
 
-import type { StudyProblemFilters } from "../types";
-import StudyProblemFiltersComponent from "./study-problem-filters";
 import StudyProblemItem from "./study-problem-item";
 import StudyProblemModal from "./study-problem-modal";
 
 export default function StudyProblemList({
+  clearedFiltersQueryString,
   currentPage,
   filteredCount,
-  filters,
-  memberNames,
+  hasActiveFilters,
   pageSize,
   problems,
   queryString,
   studyId,
-  tiers,
-  totalCount,
   totalPages,
 }: {
+  clearedFiltersQueryString: string;
   currentPage: number;
   filteredCount: number;
-  filters: StudyProblemFilters;
-  memberNames: string[];
+  hasActiveFilters: boolean;
   pageSize: number;
   problems: StudyProblemListItem[];
   queryString: string;
   studyId: string;
-  tiers: string[];
-  totalCount: number;
   totalPages: number;
 }) {
   const [selectedProblem, setSelectedProblem] =
     useState<StudyProblemListItem | null>(null);
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + problems.length;
-  const hasActiveFilters =
-    filters.platform !== null ||
-    filters.tier !== null ||
-    filters.member !== null;
-  const clearedFiltersQueryString =
-    filters.sort === "latest" ? "" : `sort=${filters.sort}`;
 
   return (
-    <>
-      <StudyProblemFiltersComponent
-        filters={filters}
-        filteredCount={filteredCount}
-        memberNames={memberNames}
-        tiers={tiers}
-        totalCount={totalCount}
-      />
-      <section className="app-card overflow-hidden">
+    <section className="app-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left">
             <thead>
@@ -119,8 +99,7 @@ export default function StudyProblemList({
           problems={problems}
           studyId={studyId}
         />
-      </section>
-    </>
+    </section>
   );
 }
 
