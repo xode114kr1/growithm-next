@@ -23,17 +23,17 @@ export default function StudyLocalNav({
     id: StudyLocalNavItemId;
     label: string;
   }> = [
-    { href: `/study/${studyId}/overview`, id: "overview", label: "Overview" },
+    { href: `/study/${studyId}/overview`, id: "overview", label: "개요" },
     {
       href: `/study/${studyId}/problems`,
       id: "problems",
-      label: "Problem List",
+      label: "문제 목록",
     },
-    { href: `/study/${studyId}/members`, id: "members", label: "Members" },
+    { href: `/study/${studyId}/members`, id: "members", label: "멤버" },
   ];
 
   if (showOwner) {
-    items.push({ href: `/study/${studyId}/owner`, id: "owner", label: "Owner" });
+    items.push({ href: `/study/${studyId}/owner`, id: "owner", label: "관리" });
   }
 
   return (
@@ -42,7 +42,7 @@ export default function StudyLocalNav({
         <h2 className="truncate text-lg font-black text-primary">
           {studyName}
         </h2>
-        <p className="text-label-caps text-slate-400">Active Study Group</p>
+        <p className="text-label-caps text-slate-400">현재 스터디</p>
       </div>
       <nav className="flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
         {items.map((item) => (

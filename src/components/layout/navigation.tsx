@@ -10,10 +10,10 @@ const links: Array<{
   icon: LucideIcon;
   label: string;
 }> = [
-  { href: "/dashboard", icon: Home, label: "Home" },
-  { href: "/problem", icon: BookOpen, label: "Problem" },
-  { href: "/study", icon: Users, label: "Study" },
-  { href: "/friend", icon: Network, label: "Friend" },
+  { href: "/dashboard", icon: Home, label: "대시보드" },
+  { href: "/problem", icon: BookOpen, label: "문제" },
+  { href: "/study", icon: Users, label: "스터디" },
+  { href: "/friend", icon: Network, label: "친구" },
 ];
 
 export default function Navigation() {

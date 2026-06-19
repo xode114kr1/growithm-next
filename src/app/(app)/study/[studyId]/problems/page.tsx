@@ -1,36 +1,94 @@
 import { notFound } from "next/navigation";
 
 import { auth } from "@/lib/auth/auth";
-import { getStudyProblemsData } from "@/services/studies/study.query";
+import {
+  getStudyProblemCount,
+  getStudyProblemMemberNames,
+  getStudyProblemTiers,
+  getStudyProblems,
+  STUDY_PROBLEM_PAGE_SIZE,
+} from "@/services/studies/study.query";
 
-import StudyProblemModalTable from "./_components/study-problem-modal-table";
-import StudyProblemsHeading from "./_components/study-problems-heading";
+import StudyProblemFilters from "./_components/study-problem-filters";
+import StudyProblemList from "./_components/study-problem-list";
+import {
+  buildStudyProblemQueryString,
+  parseStudyProblemFilters,
+  parseStudyProblemPage,
+} from "./_lib/parse";
+import type { StudyProblemPageSearchParams } from "./types";
 
 export default async function StudyProblemsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ studyId: string }>;
+  searchParams: Promise<StudyProblemPageSearchParams>;
 }) {
-  const { studyId } = await params;
+  const [{ studyId }, urlSearchParams] = await Promise.all([
+    params,
+    searchParams,
+  ]);
   const session = await auth();
   const userId = session?.user?.id;
-  const data = userId ? await getStudyProblemsData({ studyId, userId }) : null;
 
-  if (!data) {
+  if (!userId) {
     notFound();
   }
 
+  const filters = parseStudyProblemFilters(urlSearchParams);
+  const [filteredCount, totalCount, memberNames, tiers] = await Promise.all([
+    getStudyProblemCount({ filters, studyId, userId }),
+    getStudyProblemCount({ studyId, userId }),
+    getStudyProblemMemberNames({ studyId, userId }),
+    getStudyProblemTiers({ studyId, userId }),
+  ]);
+
+  if (!memberNames) {
+    notFound();
+  }
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredCount / STUDY_PROBLEM_PAGE_SIZE),
+  );
+  const currentPage = Math.min(
+    parseStudyProblemPage(urlSearchParams.page),
+    totalPages,
+  );
+  const problems = await getStudyProblems({
+    filters,
+    page: currentPage,
+    studyId,
+    userId,
+  });
+  const hasActiveFilters =
+    filters.platform !== null ||
+    filters.tier !== null ||
+    filters.member !== null;
+  const clearedFiltersQueryString =
+    filters.sort === "latest" ? "" : `sort=${filters.sort}`;
+  const queryString = buildStudyProblemQueryString(filters);
+
   return (
     <>
-      <StudyProblemsHeading
-        description={data.description}
-        name={data.name}
-        totalCount={data.problems.length}
+      <StudyProblemFilters
+        filters={filters}
+        filteredCount={filteredCount}
+        memberNames={memberNames}
+        tiers={tiers}
+        totalCount={totalCount}
       />
-      <StudyProblemModalTable
-        memberNames={data.memberNames}
-        problems={data.problems}
-        tiers={data.tiers}
+      <StudyProblemList
+        clearedFiltersQueryString={clearedFiltersQueryString}
+        currentPage={currentPage}
+        filteredCount={filteredCount}
+        hasActiveFilters={hasActiveFilters}
+        pageSize={STUDY_PROBLEM_PAGE_SIZE}
+        problems={problems}
+        queryString={queryString}
+        studyId={studyId}
+        totalPages={totalPages}
       />
     </>
   );

@@ -1,41 +1,33 @@
-import { BookOpenCheck } from "lucide-react";
-import Link from "next/link";
-
 import { auth } from "@/lib/auth/auth";
-
-import DashboardContent from "./_components/dashboard-content";
+import PendingList from "./_components/pending-list";
+import DashboardOverviewSection from "./_components/dashboard-overview-section";
+import { getUserPersonalTier } from "@/services/users/user.query";
+import {
+  getPendingProblems,
+  getProblemTierDistribution,
+  getSolvedProblemCount,
+} from "@/services/problems/problem.query";
+import DashboardChart from "./_components/dashboard-chart";
 
 export default async function DashboardPage() {
   const session = await auth();
+  const userId = session?.user?.id;
+
+  const [personalTier, mastery, solvedCount, pendingProblems] =
+    await Promise.all([
+      getUserPersonalTier(userId),
+      getProblemTierDistribution(userId),
+      getSolvedProblemCount(userId),
+      getPendingProblems(userId),
+    ]);
 
   return (
     <main className="page-shell">
-      <div className="page-container">
-        <DashboardHeader />
-        <DashboardContent userId={session?.user?.id} />
+      <div className="page-container space-y-6">
+        <DashboardOverviewSection personalTier={personalTier} />
+        <DashboardChart mastery={mastery} solvedCount={solvedCount} />
+        <PendingList pendingProblems={pendingProblems} />
       </div>
     </main>
-  );
-}
-
-function DashboardHeader() {
-  return (
-    <header className="page-header flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-      <div>
-        <h1 className="page-title">Morning, Developer.</h1>
-        <p className="text-body-md text-on-surface-variant">
-          Your algorithmic growth is on track for{" "}
-          <span className="font-semibold text-secondary">Platinum III</span>{" "}
-          this week.
-        </p>
-      </div>
-      <Link
-        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-body-sm font-semibold text-primary shadow-sm transition-colors hover:border-secondary hover:text-secondary"
-        href="/webhook-guide"
-      >
-        <BookOpenCheck aria-hidden="true" size={18} strokeWidth={2.2} />
-        연동 가이드
-      </Link>
-    </header>
   );
 }

@@ -1,35 +1,33 @@
-import StudyFab from "./_components/study-fab";
-import StudyInvites from "./_components/study-invites";
-import StudyList from "./_components/study-list";
+import { auth } from "@/lib/auth/auth";
 
-export default function StudyPage() {
+import {
+  getPendingInvites,
+  getUserStudies,
+} from "@/services/studies/study.query";
+import StudyListHeader from "./_components/study-list-header";
+import StudyList from "./_components/study-list";
+import StudyInvites from "./_components/study-invites";
+
+export default async function StudyPage() {
+  const session = await auth();
+  const userId = session?.user?.id;
+
+  const [studies, invites] = await Promise.all([
+    getUserStudies(userId),
+    getPendingInvites(userId),
+  ]);
+
   return (
     <main className="page-shell bg-linear-to-b from-surface to-surface-container-low">
-      <div className="page-container">
-        <StudyHeader />
-        <div className="grid grid-cols-1 gap-gutter xl:grid-cols-12">
-          <div className="space-y-gutter xl:col-span-8">
-            <StudyList />
-          </div>
-          <aside className="space-y-gutter xl:sticky xl:top-28 xl:col-span-4 xl:self-start">
-            <StudyInvites />
-          </aside>
-        </div>
+      <div className="page-container grid grid-cols-1 gap-gutter xl:grid-cols-12">
+        <section className="space-y-gutter xl:col-span-8">
+          <StudyListHeader />
+          <StudyList studies={studies} userId={userId} />
+        </section>
+        <aside className="space-y-gutter xl:sticky xl:top-28 xl:col-span-4 xl:self-start">
+          <StudyInvites invites={invites} />
+        </aside>
       </div>
-      <StudyFab />
     </main>
-  );
-}
-
-function StudyHeader() {
-  return (
-    <header className="page-header flex flex-col justify-between gap-6 md:flex-row md:items-end">
-      <div>
-        <h1 className="page-title mb-2 text-primary">Collaboration Hub</h1>
-        <p className="text-body-md text-on-surface-variant">
-          Refining algorithmic intuition, together.
-        </p>
-      </div>
-    </header>
   );
 }

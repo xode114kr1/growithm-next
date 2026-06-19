@@ -1,11 +1,20 @@
 import "server-only";
 
+import type { Prisma } from "@/generated/prisma/client";
 import type { StudyMemberRole } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
+import type {
+  StudyMemberFilters,
+  StudyProblemFilters,
+} from "@/types/study";
 
 // 스터디 접근 권한을 소유자 또는 멤버 조건으로 구성한다.
 const accessibleStudyWhere = (studyId: string, userId: string) => ({
   id: studyId,
+  OR: [{ ownerId: userId }, { members: { some: { userId } } }],
+});
+
+const accessibleRelatedStudyWhere = (userId: string) => ({
   OR: [{ ownerId: userId }, { members: { some: { userId } } }],
 });
 
@@ -76,58 +85,67 @@ export async function findUserStudies(userId: string) {
   });
 }
 
-// 사용자가 접근 가능한 스터디의 멤버와 기여 정보를 조회한다.
-export async function findStudyForMembers({
+// 사용자가 접근 가능한 스터디의 멤버 기본 정보를 조회한다.
+export async function findStudyMemberDetails({
+  filters,
   studyId,
   userId,
 }: {
+  filters: StudyMemberFilters;
   studyId: string;
   userId: string;
 }) {
   return prisma.study.findFirst({
-    include: {
+    select: {
       members: {
-        include: { user: { select: { name: true } } },
-        orderBy: { joinedAt: "asc" },
-      },
-      problemShares: { select: { score: true, sharedAt: true, userId: true } },
-    },
-    where: accessibleStudyWhere(studyId, userId),
-  });
-}
-
-// 사용자가 접근 가능한 스터디의 개요 정보를 조회한다.
-export async function findStudyForOverview({
-  studyId,
-  userId,
-}: {
-  studyId: string;
-  userId: string;
-}) {
-  return prisma.study.findFirst({
-    include: {
-      members: {
-        include: { user: { select: { id: true, name: true } } },
-        orderBy: { joinedAt: "asc" },
-      },
-      owner: { select: { id: true, name: true } },
-      problemShares: {
-        include: {
-          problemSubmission: {
-            select: { platform: true, tier: true, title: true },
-          },
-          user: { select: { id: true, name: true } },
+        orderBy:
+          filters.sort === "name"
+            ? { user: { name: "asc" } }
+            : { joinedAt: "asc" },
+        select: {
+          id: true,
+          joinedAt: true,
+          role: true,
+          user: { select: { name: true } },
+          userId: true,
         },
-        orderBy: { sharedAt: "desc" },
-        take: 10,
+        where: {
+          ...(filters.role === "ALL" ? {} : { role: filters.role }),
+          ...(filters.q
+            ? {
+                user: {
+                  name: { contains: filters.q, mode: "insensitive" },
+                },
+              }
+            : {}),
+        },
       },
     },
     where: accessibleStudyWhere(studyId, userId),
   });
 }
 
-// 소유자가 관리할 스터디의 멤버와 초대 정보를 조회한다.
-export async function findStudyForOwner({
+// 사용자가 접근 가능한 스터디의 멤버별 기여도와 최근 활동을 집계한다.
+export async function aggregateStudyMemberActivity({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}) {
+  return prisma.studyProblemShare.groupBy({
+    by: ["userId"],
+    _max: { sharedAt: true },
+    _sum: { score: true },
+    where: {
+      study: accessibleRelatedStudyWhere(userId),
+      studyId,
+    },
+  });
+}
+
+// 사용자가 접근 가능한 스터디의 기본 정보를 조회한다.
+export async function findStudySummary({
   studyId,
   userId,
 }: {
@@ -135,25 +153,133 @@ export async function findStudyForOwner({
   userId: string;
 }) {
   return prisma.study.findFirst({
-    include: {
-      invites: {
-        orderBy: { createdAt: "desc" },
-        select: { id: true, status: true, target: true },
-        where: { status: "PENDING" },
-      },
+    select: {
+      description: true,
+      id: true,
+      score: true,
+      title: true,
+    },
+    where: accessibleStudyWhere(studyId, userId),
+  });
+}
+
+// 사용자가 접근 가능한 스터디의 멤버를 조회한다.
+export async function findStudyMembers({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}) {
+  return prisma.study.findFirst({
+    select: {
       members: {
-        include: { user: { select: { id: true, name: true } } },
         orderBy: { joinedAt: "asc" },
+        select: {
+          user: { select: { name: true } },
+          userId: true,
+        },
       },
-      owner: { select: { id: true, name: true } },
-      problemShares: { select: { score: true, sharedAt: true, userId: true } },
+      ownerId: true,
+    },
+    where: accessibleStudyWhere(studyId, userId),
+  });
+}
+
+// 사용자가 접근 가능한 스터디의 전체 및 최근 공유 수를 집계한다.
+export async function countStudyProblemShares({
+  oneWeekAgo,
+  studyId,
+  userId,
+}: {
+  oneWeekAgo: Date;
+  studyId: string;
+  userId: string;
+}) {
+  const accessibleShareWhere = {
+    study: accessibleRelatedStudyWhere(userId),
+    studyId,
+  };
+
+  const [totalSolved, weeklySolved] = await prisma.$transaction([
+    prisma.studyProblemShare.count({
+      where: accessibleShareWhere,
+    }),
+    prisma.studyProblemShare.count({
+      where: {
+        ...accessibleShareWhere,
+        sharedAt: { gte: oneWeekAgo },
+      },
+    }),
+  ]);
+
+  return { totalSolved, weeklySolved };
+}
+
+// 사용자가 접근 가능한 스터디의 사용자별 공유 점수를 집계한다.
+export async function sumStudyProblemShareScoresByUser({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}) {
+  return prisma.studyProblemShare.groupBy({
+    by: ["userId"],
+    _sum: { score: true },
+    where: {
+      study: accessibleRelatedStudyWhere(userId),
+      studyId,
+    },
+  });
+}
+
+// 사용자가 접근 가능한 스터디의 최근 공유 문제를 조회한다.
+export async function findRecentStudyProblems({
+  limit,
+  studyId,
+  userId,
+}: {
+  limit: number;
+  studyId: string;
+  userId: string;
+}) {
+  return prisma.studyProblemShare.findMany({
+    include: {
+      problemSubmission: {
+        select: { platform: true, tier: true, title: true },
+      },
+      user: { select: { name: true } },
+    },
+    orderBy: { sharedAt: "desc" },
+    take: limit,
+    where: {
+      study: accessibleRelatedStudyWhere(userId),
+      studyId,
+    },
+  });
+}
+
+// 소유자가 관리할 스터디의 설정 정보를 조회한다.
+export async function findOwnedStudy({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}) {
+  return prisma.study.findFirst({
+    select: {
+      description: true,
+      id: true,
+      title: true,
     },
     where: { id: studyId, ownerId: userId },
   });
 }
 
-// 사용자가 접근 가능한 스터디에 공유된 문제 정보를 조회한다.
-export async function findStudyForProblems({
+// 소유자가 관리할 스터디의 멤버 기본 정보를 조회한다.
+export async function findOwnedStudyMembers({
   studyId,
   userId,
 }: {
@@ -161,38 +287,246 @@ export async function findStudyForProblems({
   userId: string;
 }) {
   return prisma.study.findFirst({
-    include: {
+    select: {
+      createdAt: true,
       members: {
-        include: { user: { select: { name: true } } },
         orderBy: { joinedAt: "asc" },
+        select: {
+          id: true,
+          joinedAt: true,
+          role: true,
+          user: { select: { name: true } },
+          userId: true,
+        },
       },
       owner: { select: { name: true } },
-      problemShares: {
-        include: {
+      ownerId: true,
+    },
+    where: { id: studyId, ownerId: userId },
+  });
+}
+
+// 소유자가 관리할 스터디의 멤버별 기여도와 최근 활동을 집계한다.
+export async function aggregateOwnedStudyMemberActivity({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}) {
+  return prisma.studyProblemShare.groupBy({
+    by: ["userId"],
+    _max: { sharedAt: true },
+    _sum: { score: true },
+    where: {
+      study: { ownerId: userId },
+      studyId,
+    },
+  });
+}
+
+// 소유자가 보낸 대기 중인 스터디 초대를 조회한다.
+export async function findOwnedStudyPendingInvites({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}) {
+  return prisma.studyInvite.findMany({
+    orderBy: { createdAt: "desc" },
+    select: { id: true, target: true },
+    where: {
+      status: "PENDING",
+      study: { ownerId: userId },
+      studyId,
+    },
+  });
+}
+
+function buildStudyProblemShareWhere({
+  filters,
+  studyId,
+  userId,
+}: {
+  filters?: StudyProblemFilters;
+  studyId: string;
+  userId: string;
+}): Prisma.StudyProblemShareWhereInput {
+  return {
+    study: accessibleRelatedStudyWhere(userId),
+    studyId,
+    ...(filters?.member ? { user: { name: filters.member } } : {}),
+    ...(filters?.platform || filters?.tier
+      ? {
           problemSubmission: {
-            select: {
-              categories: true,
-              code: true,
-              description: true,
-              id: true,
-              link: true,
-              memo: true,
-              platform: true,
-              problemId: true,
-              score: true,
-              scoreMax: true,
-              status: true,
-              submittedAtText: true,
-              tier: true,
-              title: true,
-            },
+            ...(filters.platform ? { platform: filters.platform } : {}),
+            ...(filters.tier ? { tier: filters.tier } : {}),
           },
-          user: { select: { name: true } },
+        }
+      : {}),
+  };
+}
+
+function buildStudyProblemShareOrderBy(
+  sort: StudyProblemFilters["sort"],
+): Prisma.StudyProblemShareOrderByWithRelationInput[] {
+  const orderBy: Prisma.StudyProblemShareOrderByWithRelationInput[] = [];
+
+  if (sort === "oldest") orderBy.push({ sharedAt: "asc" });
+  else if (sort === "title")
+    orderBy.push({ problemSubmission: { title: "asc" } });
+  else if (sort === "tier") orderBy.push({ score: "desc" });
+  else if (sort === "member") orderBy.push({ user: { name: "asc" } });
+  else orderBy.push({ sharedAt: "desc" });
+
+  orderBy.push({ id: "asc" });
+
+  return orderBy;
+}
+
+// 사용자가 접근 가능한 스터디에 공유된 문제를 필터와 페이지 조건으로 조회한다.
+export async function findStudyProblems({
+  filters,
+  page,
+  pageSize,
+  studyId,
+  userId,
+}: {
+  filters: StudyProblemFilters;
+  page: number;
+  pageSize: number;
+  studyId: string;
+  userId: string;
+}) {
+  return prisma.studyProblemShare.findMany({
+    select: {
+      problemSubmission: {
+        select: {
+          categories: true,
+          id: true,
+          platform: true,
+          problemId: true,
+          status: true,
+          tier: true,
+          title: true,
         },
-        orderBy: { sharedAt: "desc" },
+      },
+      sharedAt: true,
+      user: { select: { name: true } },
+    },
+    orderBy: buildStudyProblemShareOrderBy(filters.sort),
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+    where: buildStudyProblemShareWhere({ filters, studyId, userId }),
+  });
+}
+
+// 사용자가 접근 가능한 스터디에 공유된 문제의 상세 정보를 조회한다.
+export async function findStudyProblemDetail({
+  problemId,
+  studyId,
+  userId,
+}: {
+  problemId: string;
+  studyId: string;
+  userId: string;
+}) {
+  return prisma.studyProblemShare.findFirst({
+    select: {
+      problemSubmission: {
+        select: {
+          categories: true,
+          code: true,
+          description: true,
+          id: true,
+          link: true,
+          memo: true,
+          platform: true,
+          problemId: true,
+          score: true,
+          scoreMax: true,
+          status: true,
+          submittedAtText: true,
+          tier: true,
+          title: true,
+        },
+      },
+      sharedAt: true,
+      user: { select: { name: true } },
+    },
+    where: {
+      problemSubmissionId: problemId,
+      study: accessibleRelatedStudyWhere(userId),
+      studyId,
+    },
+  });
+}
+
+// 사용자가 접근 가능한 스터디의 공유 문제 수를 필터 조건으로 조회한다.
+export async function countFilteredStudyProblems({
+  filters,
+  studyId,
+  userId,
+}: {
+  filters?: StudyProblemFilters;
+  studyId: string;
+  userId: string;
+}) {
+  return prisma.studyProblemShare.count({
+    where: buildStudyProblemShareWhere({ filters, studyId, userId }),
+  });
+}
+
+// 사용자가 접근 가능한 스터디에서 문제를 공유한 멤버를 조회한다.
+export async function findStudyProblemSharingMembers({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}) {
+  const study = await prisma.study.findFirst({
+    select: { id: true },
+    where: accessibleStudyWhere(studyId, userId),
+  });
+
+  if (!study) {
+    return null;
+  }
+
+  return prisma.user.findMany({
+    orderBy: { name: "asc" },
+    select: { name: true },
+    where: {
+      studyProblemShares: {
+        some: { studyId: study.id },
       },
     },
-    where: accessibleStudyWhere(studyId, userId),
+  });
+}
+
+// 사용자가 접근 가능한 스터디에 공유된 문제의 고유 티어를 조회한다.
+export async function findStudyProblemTiers({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}) {
+  return prisma.problemSubmission.findMany({
+    distinct: ["tier"],
+    orderBy: { tier: "asc" },
+    select: { tier: true },
+    where: {
+      studyShares: {
+        some: {
+          study: accessibleRelatedStudyWhere(userId),
+          studyId,
+        },
+      },
+      tier: { not: null },
+    },
   });
 }
 

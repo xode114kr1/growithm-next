@@ -1,27 +1,29 @@
-import { notFound } from "next/navigation";
-
 import { auth } from "@/lib/auth/auth";
+
 import { getProblemDetail } from "@/services/problems/problem.query";
 import { getProblemShareTargetStudies } from "@/services/studies/study.query";
-
-import ProblemDescription from "./_components/problem-description";
-import ProblemDetailHeader from "./_components/problem-detail-header";
+import {
+  ProblemDescription,
+  ProblemMetadata,
+  ProblemSolutionCode,
+} from "./_components/problem-detail-ui";
 import ProblemMemoEditor from "./_components/problem-memo-editor";
-import ProblemMetadata from "./_components/problem-metadata";
-import ProblemSolutionCode from "./_components/problem-solution-code";
+import { notFound } from "next/navigation";
+import ProblemHeader from "./_components/problem-detail-header";
 
 export default async function ProblemDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
+  const { id: problemId } = await params;
   const session = await auth();
   const userId = session?.user?.id;
+
   const [problem, shareTargetStudies] = await Promise.all([
-    getProblemDetail({ id, userId }),
+    getProblemDetail({ id: problemId, userId }),
     getProblemShareTargetStudies({
-      problemId: id,
+      problemId,
       userId,
     }),
   ]);
@@ -33,7 +35,7 @@ export default async function ProblemDetailPage({
   return (
     <main className="page-shell">
       <div className="page-container max-w-280 space-y-8">
-        <ProblemDetailHeader
+        <ProblemHeader
           problem={problem}
           shareTargetStudies={shareTargetStudies}
         />

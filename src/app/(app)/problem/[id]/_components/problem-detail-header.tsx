@@ -1,11 +1,12 @@
 import Link from "next/link";
 
-import ProblemShareModal from "./problem-share-modal";
+import ProblemTierBadge from "@/components/ui/problem-tier-badge";
 import type { ProblemDetail } from "@/types/problem";
 import type { ProblemShareTargetStudy } from "@/types/study";
-import { getTierBadgeClass } from "@/utils/problem";
 
-export default function ProblemDetailHeader({
+import ProblemShareModal from "./study-share-modal";
+
+export default function ProblemHeader({
   problem,
   shareTargetStudies,
 }: {
@@ -33,18 +34,17 @@ export default function ProblemDetailHeader({
             <span className="rounded-full bg-primary px-3 py-1 text-body-sm font-semibold text-on-primary">
               {problem.platform}
             </span>
-            {problem.tier ? (
-              <span className={getTierBadgeClass(problem.tier)}>
-                {problem.tier}
-              </span>
-            ) : null}
+            {problem.tier ? <ProblemTierBadge tier={problem.tier} /> : null}
           </div>
+
           <p className="mb-2 text-label-caps text-slate-400">
             Problem {problem.problemId}
           </p>
+
           <h1 className="page-title text-pretty wrap-break-word text-primary">
             {problem.title}
           </h1>
+
           <p className="mt-3 max-w-2xl text-body-md text-on-surface-variant">
             제출 기록에서 수집한 문제 정보와 풀이 메타데이터를 확인합니다.
           </p>
@@ -56,9 +56,11 @@ export default function ProblemDetailHeader({
             problemStatus={problem.status}
             studies={shareTargetStudies}
           />
+
           <Link className="btn-secondary" href="/problem">
             뒤로가기
           </Link>
+
           {problem.link ? (
             <a
               className="btn-primary"

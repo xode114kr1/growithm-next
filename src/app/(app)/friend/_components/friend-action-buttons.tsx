@@ -113,7 +113,7 @@ export function SendFriendRequestButton({
       onClick={handleSendFriendRequest}
       type="button"
     >
-      {isSent ? "Request Sent" : "Add Friend"}
+      {isSent ? "요청 보냄" : "친구 추가"}
     </button>
   );
 }

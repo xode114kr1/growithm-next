@@ -1,13 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useCallback, useEffect, useId, useState } from "react";
+import { useActionState, useEffect, useId, useState } from "react";
 
-import { useEscapeKey } from "@/hooks/use-escape-key";
-import {
-  createStudy,
-  type CreateStudyActionState,
-} from "../actions";
+import { createStudy, type CreateStudyActionState } from "../actions";
 
 const initialCreateStudyActionState: CreateStudyActionState = {
   description: "",
@@ -25,9 +21,6 @@ export default function StudyCreateModal() {
     initialCreateStudyActionState,
   );
   const titleId = useId();
-  const closeModal = useCallback(() => setIsOpen(false), []);
-
-  useEscapeKey({ enabled: isOpen, onEscape: closeModal });
 
   useEffect(() => {
     if (state.status !== "success" || !state.studyId) {
@@ -46,7 +39,6 @@ export default function StudyCreateModal() {
       >
         스터디 생성
       </button>
-
       {isOpen ? (
         <div
           aria-labelledby={titleId}
@@ -64,7 +56,7 @@ export default function StudyCreateModal() {
             <div className="border-b border-slate-100 px-6 py-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-label-caps text-slate-400">New Study</p>
+                  <p className="text-label-caps text-slate-400">새 스터디</p>
                   <h2 className="text-h3-ui text-primary" id={titleId}>
                     스터디 생성
                   </h2>
@@ -137,7 +129,11 @@ export default function StudyCreateModal() {
                 >
                   취소
                 </button>
-                <button className="btn-primary" disabled={isPending} type="submit">
+                <button
+                  className="btn-primary"
+                  disabled={isPending}
+                  type="submit"
+                >
                   스터디 생성
                 </button>
               </div>
