@@ -10,6 +10,7 @@ import {
   normalizeCategories,
 } from "@/services/studies/study.helper";
 import {
+  aggregateOwnedStudyMemberActivity,
   aggregateStudyMemberActivity,
   countFilteredStudyProblems,
   countStudyProblemShares,
@@ -18,7 +19,9 @@ import {
   findRecentStudyProblems,
   findStudyForLayout,
   findStudyMemberDetails,
-  findStudyForOwner,
+  findOwnedStudy,
+  findOwnedStudyMembers,
+  findOwnedStudyPendingInvites,
   findStudyProblemDetail,
   findStudyProblemSharingMembers,
   findStudyProblemTiers,
@@ -30,6 +33,8 @@ import {
 } from "@/services/studies/study.persistence.server";
 import type {
   OwnerMember,
+  OwnerInvite,
+  OwnerStudy,
   ProblemShareTargetStudy,
   StudyInviteItem,
   StudyLayoutData,
@@ -40,7 +45,6 @@ import type {
   StudyOverviewMember,
   StudyOverviewStats,
   StudyOverviewSummary,
-  StudyOwnerData,
   StudyProblemDetail,
   StudyProblemFilters,
   StudyProblemListItem,
@@ -323,70 +327,98 @@ export async function getRecentStudyProblems({
   }));
 }
 
-// 스터디 소유자 관리 화면에 필요한 멤버와 초대 정보를 조회한다.
-export async function getStudyOwnerData({
+// 스터디 소유자 관리 화면의 설정 정보를 조회한다.
+export async function getOwnedStudy({
   studyId,
   userId,
 }: {
   studyId: string;
   userId: string;
-}): Promise<StudyOwnerData | null> {
-  const study = await findStudyForOwner({ studyId, userId });
+}): Promise<OwnerStudy | null> {
+  const study = await findOwnedStudy({ studyId, userId });
 
   if (!study) {
     return null;
   }
 
+  return {
+    description: study.description ?? "아직 스터디 설명이 없습니다.",
+    id: study.id,
+    name: study.title,
+  };
+}
+
+// 스터디 소유자 관리 화면의 멤버와 활동 정보를 조회한다.
+export async function getOwnedStudyMembers({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}): Promise<OwnerMember[] | null> {
+  const [study, activityByMember] = await Promise.all([
+    findOwnedStudyMembers({ studyId, userId }),
+    aggregateOwnedStudyMemberActivity({ studyId, userId }),
+  ]);
+
+  if (!study) {
+    return null;
+  }
+
+  const activityByUserId = new Map(
+    activityByMember.map((activity) => [activity.userId, activity]),
+  );
+
   const members = study.members.map((member): OwnerMember => {
-    const shares = study.problemShares.filter(
-      (share) => share.userId === member.userId,
-    );
-    const lastSharedAt = shares.reduce<Date | null>(
-      (latestSharedAt, share) =>
-        !latestSharedAt || share.sharedAt > latestSharedAt
-          ? share.sharedAt
-          : latestSharedAt,
-      null,
-    );
+    const activity = activityByUserId.get(member.userId);
 
     return {
-      contribution: shares.reduce((total, share) => total + share.score, 0),
+      contribution: activity?._sum.score ?? 0,
       id: member.id,
       isCurrentUser: member.userId === userId,
       joinedAt: formatShortDate(member.joinedAt),
-      lastActive: formatShortDate(lastSharedAt ?? member.joinedAt),
+      lastActive: formatShortDate(
+        activity?._max.sharedAt ?? member.joinedAt,
+      ),
       name: getUserDisplayName(member.user.name),
       role: member.userId === study.ownerId ? "OWNER" : member.role,
     };
   });
 
   if (!members.some((member) => member.role === "OWNER")) {
+    const ownerActivity = activityByUserId.get(study.ownerId);
+
     members.unshift({
-      contribution: study.problemShares
-        .filter((share) => share.userId === study.ownerId)
-        .reduce((total, share) => total + share.score, 0),
+      contribution: ownerActivity?._sum.score ?? 0,
       id: study.ownerId,
       isCurrentUser: study.ownerId === userId,
       joinedAt: formatShortDate(study.createdAt),
-      lastActive: formatShortDate(study.createdAt),
+      lastActive: formatShortDate(
+        ownerActivity?._max.sharedAt ?? study.createdAt,
+      ),
       name: getUserDisplayName(study.owner.name),
       role: "OWNER",
     });
   }
 
-  return {
-    members,
-    pendingInvites: study.invites.map((invite) => ({
-      id: invite.id,
-      status: "Pending",
-      target: invite.target,
-    })),
-    study: {
-      description: study.description ?? "아직 스터디 설명이 없습니다.",
-      id: study.id,
-      name: study.title,
-    },
-  };
+  return members;
+}
+
+// 스터디 소유자 관리 화면의 대기 중인 초대를 조회한다.
+export async function getOwnedStudyPendingInvites({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}): Promise<OwnerInvite[]> {
+  const invites = await findOwnedStudyPendingInvites({ studyId, userId });
+
+  return invites.map((invite) => ({
+    id: invite.id,
+    status: "Pending",
+    target: invite.target,
+  }));
 }
 
 export const STUDY_PROBLEM_PAGE_SIZE = 10;

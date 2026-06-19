@@ -101,12 +101,6 @@ export type OwnerInvite = {
   target: string;
 };
 
-export type StudyOwnerData = {
-  members: OwnerMember[];
-  pendingInvites: OwnerInvite[];
-  study: OwnerStudy;
-};
-
 export type StudyProblemListItem = {
   categories: string[];
   code: string;

@@ -260,8 +260,8 @@ export async function findRecentStudyProblems({
   });
 }
 
-// 소유자가 관리할 스터디의 멤버와 초대 정보를 조회한다.
-export async function findStudyForOwner({
+// 소유자가 관리할 스터디의 설정 정보를 조회한다.
+export async function findOwnedStudy({
   studyId,
   userId,
 }: {
@@ -269,20 +269,78 @@ export async function findStudyForOwner({
   userId: string;
 }) {
   return prisma.study.findFirst({
-    include: {
-      invites: {
-        orderBy: { createdAt: "desc" },
-        select: { id: true, status: true, target: true },
-        where: { status: "PENDING" },
-      },
-      members: {
-        include: { user: { select: { id: true, name: true } } },
-        orderBy: { joinedAt: "asc" },
-      },
-      owner: { select: { id: true, name: true } },
-      problemShares: { select: { score: true, sharedAt: true, userId: true } },
+    select: {
+      description: true,
+      id: true,
+      title: true,
     },
     where: { id: studyId, ownerId: userId },
+  });
+}
+
+// 소유자가 관리할 스터디의 멤버 기본 정보를 조회한다.
+export async function findOwnedStudyMembers({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}) {
+  return prisma.study.findFirst({
+    select: {
+      createdAt: true,
+      members: {
+        orderBy: { joinedAt: "asc" },
+        select: {
+          id: true,
+          joinedAt: true,
+          role: true,
+          user: { select: { name: true } },
+          userId: true,
+        },
+      },
+      owner: { select: { name: true } },
+      ownerId: true,
+    },
+    where: { id: studyId, ownerId: userId },
+  });
+}
+
+// 소유자가 관리할 스터디의 멤버별 기여도와 최근 활동을 집계한다.
+export async function aggregateOwnedStudyMemberActivity({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}) {
+  return prisma.studyProblemShare.groupBy({
+    by: ["userId"],
+    _max: { sharedAt: true },
+    _sum: { score: true },
+    where: {
+      study: { ownerId: userId },
+      studyId,
+    },
+  });
+}
+
+// 소유자가 보낸 대기 중인 스터디 초대를 조회한다.
+export async function findOwnedStudyPendingInvites({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}) {
+  return prisma.studyInvite.findMany({
+    orderBy: { createdAt: "desc" },
+    select: { id: true, target: true },
+    where: {
+      status: "PENDING",
+      study: { ownerId: userId },
+      studyId,
+    },
   });
 }
 

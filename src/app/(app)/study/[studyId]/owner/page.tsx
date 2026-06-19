@@ -1,7 +1,11 @@
 import { notFound } from "next/navigation";
 
 import { auth } from "@/lib/auth/auth";
-import { getStudyOwnerData } from "@/services/studies/study.query";
+import {
+  getOwnedStudy,
+  getOwnedStudyMembers,
+  getOwnedStudyPendingInvites,
+} from "@/services/studies/study.query";
 
 import InviteMembersCard from "./_components/invite-members-card";
 import ManageMembersCard from "./_components/manage-members-card";
@@ -16,27 +20,35 @@ export default async function StudyOwnerPage({
   const { studyId } = await params;
   const session = await auth();
   const userId = session?.user?.id;
-  const ownerData = userId ? await getStudyOwnerData({ studyId, userId }) : null;
 
-  if (!ownerData) {
+  if (!userId) {
+    notFound();
+  }
+
+  const study = await getOwnedStudy({ studyId, userId });
+
+  if (!study) {
+    notFound();
+  }
+
+  const [members, pendingInvites] = await Promise.all([
+    getOwnedStudyMembers({ studyId, userId }),
+    getOwnedStudyPendingInvites({ studyId, userId }),
+  ]);
+
+  if (!members) {
     notFound();
   }
 
   return (
     <div className="space-y-10">
       <InviteMembersCard
-        initialInvites={ownerData.pendingInvites}
-        studyId={ownerData.study.id}
+        initialInvites={pendingInvites}
+        studyId={study.id}
       />
-      <ManageMembersCard
-        members={ownerData.members}
-        studyId={ownerData.study.id}
-      />
-      <StudySettingsCard study={ownerData.study} />
-      <StudyDeleteCard
-        studyId={ownerData.study.id}
-        studyName={ownerData.study.name}
-      />
+      <ManageMembersCard members={members} studyId={study.id} />
+      <StudySettingsCard study={study} />
+      <StudyDeleteCard studyId={study.id} studyName={study.name} />
     </div>
   );
 }
