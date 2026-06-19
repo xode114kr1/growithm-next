@@ -46,26 +46,6 @@ export default function WebhookGuidePage() {
   return (
     <main className="page-shell">
       <div className="page-container space-y-8">
-        <header className="page-header max-w-3xl">
-          <p className="mb-3 text-label-caps text-secondary">서비스 설정</p>
-          <h1 className="page-title mb-4">서비스 연결 가이드</h1>
-          <p className="text-body-md text-on-surface-variant">
-            아래 순서를 따라 진행하면, 백준 풀이 기록이 GitHub Repo와 이
-            서비스에 자동으로 연동됩니다.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-2 text-body-sm font-semibold text-primary">
-            <span className="rounded-full bg-primary-fixed px-3 py-1">
-              1. GitHub Repo 생성
-            </span>
-            <span className="rounded-full bg-primary-fixed px-3 py-1">
-              2. 백준 허브 설치
-            </span>
-            <span className="rounded-full bg-primary-fixed px-3 py-1">
-              3. 웹훅 연결
-            </span>
-          </div>
-        </header>
-
         <section className="grid grid-cols-1 gap-gutter xl:grid-cols-2">
           {steps.map((step) => (
             <GuideStepCard key={step.badge} step={step} />
