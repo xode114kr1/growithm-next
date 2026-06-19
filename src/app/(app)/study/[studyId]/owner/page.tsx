@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
 import { getStudyOwnerData } from "@/services/studies/study.query";
 
-import OwnerConsole from "./_components/owner-console";
+import InviteMembersCard from "./_components/invite-members-card";
+import ManageMembersCard from "./_components/manage-members-card";
+import StudyDeleteCard from "./_components/study-delete-card";
+import StudySettingsCard from "./_components/study-settings-card";
 
 export default async function StudyOwnerPage({
   params,
@@ -20,10 +23,20 @@ export default async function StudyOwnerPage({
   }
 
   return (
-    <OwnerConsole
-      initialInvites={ownerData.pendingInvites}
-      members={ownerData.members}
-      study={ownerData.study}
-    />
+    <div className="space-y-10">
+      <InviteMembersCard
+        initialInvites={ownerData.pendingInvites}
+        studyId={ownerData.study.id}
+      />
+      <ManageMembersCard
+        members={ownerData.members}
+        studyId={ownerData.study.id}
+      />
+      <StudySettingsCard study={ownerData.study} />
+      <StudyDeleteCard
+        studyId={ownerData.study.id}
+        studyName={ownerData.study.name}
+      />
+    </div>
   );
 }
