@@ -129,11 +129,6 @@ export type StudyProblemDetail = StudyProblemListItem & {
   submittedAtText: string | null;
 };
 
-export type StudyProblemFilterOptions = {
-  memberNames: string[];
-  tiers: string[];
-};
-
 export type StudyProblemSort =
   | "latest"
   | "oldest"

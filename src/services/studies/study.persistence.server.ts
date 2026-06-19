@@ -342,7 +342,7 @@ export async function findStudyProblems({
   userId: string;
 }) {
   return prisma.studyProblemShare.findMany({
-    include: {
+    select: {
       problemSubmission: {
         select: {
           categories: true,
@@ -354,6 +354,7 @@ export async function findStudyProblems({
           title: true,
         },
       },
+      sharedAt: true,
       user: { select: { name: true } },
     },
     orderBy: buildStudyProblemShareOrderBy(filters.sort),
@@ -374,7 +375,7 @@ export async function findStudyProblemDetail({
   userId: string;
 }) {
   return prisma.studyProblemShare.findFirst({
-    include: {
+    select: {
       problemSubmission: {
         select: {
           categories: true,
@@ -393,6 +394,7 @@ export async function findStudyProblemDetail({
           title: true,
         },
       },
+      sharedAt: true,
       user: { select: { name: true } },
     },
     where: {

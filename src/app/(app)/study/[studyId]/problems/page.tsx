@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
 import {
   getStudyProblemCount,
-  getStudyProblemFilterOptions,
+  getStudyProblemMemberNames,
+  getStudyProblemTiers,
   getStudyProblems,
   STUDY_PROBLEM_PAGE_SIZE,
 } from "@/services/studies/study.query";
@@ -36,13 +37,14 @@ export default async function StudyProblemsPage({
   }
 
   const filters = parseStudyProblemFilters(urlSearchParams);
-  const [filteredCount, totalCount, filterOptions] = await Promise.all([
+  const [filteredCount, totalCount, memberNames, tiers] = await Promise.all([
     getStudyProblemCount({ filters, studyId, userId }),
     getStudyProblemCount({ studyId, userId }),
-    getStudyProblemFilterOptions({ studyId, userId }),
+    getStudyProblemMemberNames({ studyId, userId }),
+    getStudyProblemTiers({ studyId, userId }),
   ]);
 
-  if (!filterOptions) {
+  if (!memberNames) {
     notFound();
   }
 
@@ -73,8 +75,8 @@ export default async function StudyProblemsPage({
       <StudyProblemFilters
         filters={filters}
         filteredCount={filteredCount}
-        memberNames={filterOptions.memberNames}
-        tiers={filterOptions.tiers}
+        memberNames={memberNames}
+        tiers={tiers}
         totalCount={totalCount}
       />
       <StudyProblemList

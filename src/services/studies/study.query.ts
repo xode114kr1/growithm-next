@@ -43,7 +43,6 @@ import type {
   StudyOwnerData,
   StudyProblemDetail,
   StudyProblemFilters,
-  StudyProblemFilterOptions,
   StudyProblemListItem,
   StudyRecentProblem,
 } from "@/types/study";
@@ -474,28 +473,35 @@ export async function getStudyProblemCount({
   return countFilteredStudyProblems({ filters, studyId, userId });
 }
 
-// 스터디 문제 필터에 필요한 티어와 공유 멤버 목록을 조회한다.
-export async function getStudyProblemFilterOptions({
+// 스터디 문제 필터에 필요한 공유 멤버 이름을 조회한다.
+export async function getStudyProblemMemberNames({
   studyId,
   userId,
 }: {
   studyId: string;
   userId: string;
-}): Promise<StudyProblemFilterOptions | null> {
-  const [members, tiers] = await Promise.all([
-    findStudyProblemSharingMembers({ studyId, userId }),
-    findStudyProblemTiers({ studyId, userId }),
-  ]);
+}): Promise<string[] | null> {
+  const members = await findStudyProblemSharingMembers({ studyId, userId });
 
   if (!members) {
     return null;
   }
 
-  return {
-    memberNames: members
-      .map((member) => member.name)
-      .map(getUserDisplayName)
-      .filter((name, index, names) => names.indexOf(name) === index),
-    tiers: tiers.flatMap((problem) => problem.tier ?? []),
-  };
+  return members
+    .map((member) => member.name)
+    .map(getUserDisplayName)
+    .filter((name, index, names) => names.indexOf(name) === index);
+}
+
+// 스터디 문제 필터에 필요한 고유 티어를 조회한다.
+export async function getStudyProblemTiers({
+  studyId,
+  userId,
+}: {
+  studyId: string;
+  userId: string;
+}): Promise<string[]> {
+  const tiers = await findStudyProblemTiers({ studyId, userId });
+
+  return tiers.flatMap((problem) => problem.tier ?? []);
 }
