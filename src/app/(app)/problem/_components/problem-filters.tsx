@@ -1,7 +1,7 @@
 "use client";
 
 import type { ProblemPlatform } from "@/generated/prisma/enums";
-import { useReplacePaginatedQueryParams } from "@/hooks/use-replace-paginated-query-params";
+import { useReplacePaginatedQueryParams } from "@/hooks/use-paginated-query-params";
 import type { ProblemFiltersState, ProblemSort } from "@/types/problem";
 
 const platforms: Array<ProblemPlatform | "All"> = [

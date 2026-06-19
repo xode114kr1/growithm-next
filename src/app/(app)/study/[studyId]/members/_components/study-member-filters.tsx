@@ -1,6 +1,6 @@
 "use client";
 
-import { useReplacePaginatedQueryParams } from "@/hooks/use-replace-paginated-query-params";
+import { useReplacePaginatedQueryParams } from "@/hooks/use-paginated-query-params";
 
 import type {
   StudyMemberFiltersState,

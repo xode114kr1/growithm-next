@@ -4,6 +4,14 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
 export function useReplacePaginatedQueryParams() {
+  return usePaginatedQueryParams("replace");
+}
+
+export function usePushPaginatedQueryParams() {
+  return usePaginatedQueryParams("push");
+}
+
+function usePaginatedQueryParams(method: "push" | "replace") {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -23,10 +31,10 @@ export function useReplacePaginatedQueryParams() {
       params.delete("page");
 
       const queryString = params.toString();
-      router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
+      router[method](queryString ? `${pathname}?${queryString}` : pathname, {
         scroll: false,
       });
     },
-    [pathname, router, searchParams],
+    [method, pathname, router, searchParams],
   );
 }
