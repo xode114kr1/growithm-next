@@ -14,7 +14,6 @@ const steps = [
     href: githubNewRepoUrl,
     linkLabel: "깃허브 Repo 만들러 가기",
     notes: ["예시 이름: algorithm-study", "Public 설정"],
-    previewTitle: "깃허브 레포 생성 화면 예시",
     title: "깃허브 Repo 생성하기",
   },
   {
@@ -27,9 +26,7 @@ const steps = [
       "확장 프로그램 옵션에서 1단계에서 만든 GitHub Repo와 연동",
       "Pick an Option 항목에서 생성한 GitHub Repository 선택",
       "Organize by platform 옵션 선택",
-      "Chrome, Edge 등 크롬 기반 브라우저 권장",
     ],
-    previewTitle: "백준 허브 확장프로그램 설치/연동 예시",
     title: "백준 허브 확장 프로그램 설치",
   },
 ] satisfies Array<{
@@ -38,7 +35,6 @@ const steps = [
   href: string;
   linkLabel: string;
   notes: string[];
-  previewTitle: string;
   title: string;
 }>;
 
@@ -72,7 +68,7 @@ function GuideStepCard({ step }: { step: (typeof steps)[number] }) {
           </li>
         ))}
       </ul>
-      <div className="mt-6">
+      <div className="mt-auto pt-6">
         <a
           className="btn-primary"
           href={step.href}
@@ -82,11 +78,6 @@ function GuideStepCard({ step }: { step: (typeof steps)[number] }) {
           {step.linkLabel}
           <ExternalLink aria-hidden="true" size={16} strokeWidth={2.2} />
         </a>
-      </div>
-      <div className="mt-8 flex min-h-48 flex-1 items-center justify-center rounded-xl border border-dashed border-outline-variant bg-surface-container-low p-6 text-center">
-        <p className="text-body-sm font-semibold text-on-surface-variant">
-          {step.previewTitle}
-        </p>
       </div>
     </article>
   );
