@@ -1,5 +1,9 @@
 import type { ScoreTier } from "@/types/score";
 import type { ProblemPlatform } from "@/generated/prisma/enums";
+import type {
+  InfiniteScrollRequest,
+  InfiniteScrollResponse,
+} from "@/types/infinite-scroll";
 
 export type StudyTier = ScoreTier;
 
@@ -136,6 +140,19 @@ export type StudyProblemFilters = {
   sort: StudyProblemSort;
   tier: string | null;
 };
+
+export type StudyProblemInfiniteScrollFilters = Omit<
+  StudyProblemFilters,
+  "sort"
+>;
+
+export type StudyProblemInfiniteScrollRequest = InfiniteScrollRequest<
+  StudyProblemInfiniteScrollFilters,
+  StudyProblemSort
+>;
+
+export type StudyProblemInfiniteScrollResponse =
+  InfiniteScrollResponse<StudyProblemListItem>;
 
 export type StudyLayoutData = {
   id: string;

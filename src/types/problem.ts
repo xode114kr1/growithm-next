@@ -2,6 +2,10 @@ import type {
   ProblemPlatform,
   ProblemSubmissionStatus,
 } from "@/generated/prisma/enums";
+import type {
+  InfiniteScrollRequest,
+  InfiniteScrollResponse,
+} from "@/types/infinite-scroll";
 
 export type ProblemSort = "newest" | "oldest" | "title" | "platform";
 
@@ -26,6 +30,26 @@ export type ProblemListItem = {
   tier: string | null;
   title: string;
 };
+
+export type ProblemInfiniteScrollFilters = Omit<
+  ProblemFiltersState,
+  "sort"
+>;
+
+export type ProblemInfiniteScrollRequest = InfiniteScrollRequest<
+  ProblemInfiniteScrollFilters,
+  ProblemSort
+>;
+
+export type ProblemInfiniteScrollItem = Omit<
+  ProblemListItem,
+  "createdAt"
+> & {
+  createdAt: string;
+};
+
+export type ProblemInfiniteScrollResponse =
+  InfiniteScrollResponse<ProblemInfiniteScrollItem>;
 
 export type ProblemPageSearchParams = {
   page?: string | string[];
