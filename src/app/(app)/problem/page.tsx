@@ -10,7 +10,11 @@ import {
   getProblems,
   PROBLEM_PAGE_SIZE,
 } from "@/services/problems/problem.query";
-import { buildQueryString, parseFilters, parsePageParam } from "./_lib/parse";
+import {
+  parseProblemFilters,
+  parseProblemPage,
+} from "@/services/problems/problem.validator";
+import { buildQueryString } from "./_lib/parse";
 import ProblemFilters from "./_components/problem-filters";
 import ProblemList from "./_components/problem-list";
 
@@ -25,8 +29,8 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
   const userId = session?.user?.id;
 
   // paese filters
-  const filters = parseFilters(params);
-  const requestedPage = parsePageParam(params.page);
+  const filters = parseProblemFilters(params);
+  const requestedPage = parseProblemPage(params.page);
   const queryString = buildQueryString(params);
 
   // fetch
