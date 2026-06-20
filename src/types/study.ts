@@ -154,6 +154,14 @@ export type StudyProblemInfiniteScrollRequest = InfiniteScrollRequest<
 export type StudyProblemInfiniteScrollResponse =
   InfiniteScrollResponse<StudyProblemListItem>;
 
+export type StudyProblemPageSearchParams = {
+  member?: string | string[];
+  page?: string | string[];
+  platform?: string | string[];
+  sort?: string | string[];
+  tier?: string | string[];
+};
+
 export type StudyLayoutData = {
   id: string;
   isOwner: boolean;

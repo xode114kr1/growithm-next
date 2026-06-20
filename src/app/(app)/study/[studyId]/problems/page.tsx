@@ -8,14 +8,14 @@ import {
   getStudyProblems,
   STUDY_PROBLEM_PAGE_SIZE,
 } from "@/services/studies/study.query";
+import {
+  parseStudyProblemFilters,
+  parseStudyProblemPage,
+} from "@/services/studies/study.validator";
 
 import StudyProblemFilters from "./_components/study-problem-filters";
 import StudyProblemList from "./_components/study-problem-list";
-import {
-  buildStudyProblemQueryString,
-  parseStudyProblemFilters,
-  parseStudyProblemPage,
-} from "./_lib/parse";
+import { buildStudyProblemQueryString } from "./_lib/parse";
 import type { StudyProblemPageSearchParams } from "./types";
 
 export default async function StudyProblemsPage({
