@@ -80,9 +80,9 @@ export default function ProblemList({
 
   return (
     <section className="app-card overflow-hidden" ref={containerRef}>
-      <div className="overflow-x-auto">
+      <div className="overflow-hidden md:overflow-x-auto">
         <table className="grid w-full border-collapse text-left">
-          <thead className="grid">
+          <thead className="hidden md:grid">
             <tr className="grid grid-cols-[minmax(360px,1.6fr)_minmax(260px,1fr)_180px] border-b border-slate-100 bg-slate-50/50">
               <TableHead>문제 정보</TableHead>
               <TableHead>태그</TableHead>
@@ -124,14 +124,6 @@ export default function ProblemList({
       {isLoading ? (
         <div className="border-t border-slate-100 bg-slate-50/30 px-6 py-4">
           <p className="text-body-sm text-slate-500">불러오는 중...</p>
-        </div>
-      ) : null}
-
-      {!hasNextPage && items.length > 0 ? (
-        <div className="border-t border-slate-100 bg-slate-50/30 px-6 py-4">
-          <p className="text-body-sm text-slate-400">
-            모든 문제를 불러왔습니다.
-          </p>
         </div>
       ) : null}
     </section>
