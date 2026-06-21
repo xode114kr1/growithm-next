@@ -12,16 +12,17 @@ import FriendContent from "./_components/friend-content";
 export default async function FriendPage() {
   const session = await auth();
   const userId = session?.user?.id;
-  const [friendUsers, receivedRequests, sentRequests, users] = await Promise.all([
-    getFriendUsers(userId),
-    getReceivedFriendRequests(userId),
-    getSentFriendRequests(userId),
-    userId ? getUsers({ excludedUserId: userId }) : [],
-  ]);
+  const [friendUsers, receivedRequests, sentRequests, users] =
+    await Promise.all([
+      getFriendUsers(userId),
+      getReceivedFriendRequests(userId),
+      getSentFriendRequests(userId),
+      userId ? getUsers({ excludedUserId: userId }) : [],
+    ]);
   const searchResults = await getFriendRelationsForUsers({ userId, users });
 
   return (
-    <main className="page-shell">
+    <main className="page-shell bg-linear-to-b from-surface to-surface-container-low">
       <div className="page-container">
         <FriendContent
           friends={friendUsers}

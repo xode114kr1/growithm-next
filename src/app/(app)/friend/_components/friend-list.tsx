@@ -32,6 +32,14 @@ export function FriendList({
   );
   const shouldShowPagination = friends.length > FRIEND_LIST_PAGE_SIZE;
 
+  if (friends.length === 0) {
+    return (
+      <div className="app-card p-10 text-center text-body-sm text-on-surface-variant">
+        아직 추가된 친구가 없습니다.
+      </div>
+    );
+  }
+
   return (
     <section className="grid grid-cols-1 gap-4">
       {visibleFriends.map((friend) => (
@@ -72,11 +80,20 @@ export function ReceivedRequestList({
   onOpenProfile: (profile: FriendProfile) => void;
   requests: FriendRequest[];
 }) {
+  if (requests.length === 0) {
+    return (
+      <div className="p-6 text-center text-body-sm text-slate-500">
+        받은 친구 요청이 없습니다.
+      </div>
+    );
+  }
+
   return (
-    <section className="grid grid-cols-1 gap-4">
+    <div className="divide-y divide-slate-50">
       {requests.map((request) => (
         <FriendItem
-          key={request.name}
+          compact
+          key={request.id}
           onOpenProfile={onOpenProfile}
           profile={request}
         >
@@ -86,7 +103,7 @@ export function ReceivedRequestList({
           </div>
         </FriendItem>
       ))}
-    </section>
+    </div>
   );
 }
 
@@ -97,11 +114,20 @@ export function SentRequestList({
   onOpenProfile: (profile: FriendProfile) => void;
   requests: FriendRequest[];
 }) {
+  if (requests.length === 0) {
+    return (
+      <div className="p-6 text-center text-body-sm text-slate-500">
+        보낸 친구 요청이 없습니다.
+      </div>
+    );
+  }
+
   return (
-    <section className="grid grid-cols-1 gap-4">
+    <div className="divide-y divide-slate-50">
       {requests.map((request) => (
         <FriendItem
-          key={request.name}
+          compact
+          key={request.id}
           onOpenProfile={onOpenProfile}
           profile={request}
         >
@@ -110,7 +136,7 @@ export function SentRequestList({
           </div>
         </FriendItem>
       ))}
-    </section>
+    </div>
   );
 }
 
