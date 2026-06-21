@@ -18,8 +18,8 @@ export function FriendItem({
     <article
       className={
         compact
-          ? "flex items-center gap-3 p-4"
-          : "app-card flex flex-col items-center gap-4 p-5 transition-all hover:border-slate-200 md:flex-row md:gap-5"
+          ? "flex items-center gap-2.5 p-3"
+          : "app-card flex flex-col items-center gap-3 p-4 transition-all hover:border-slate-200 md:flex-row md:gap-4"
       }
     >
       <button
@@ -30,14 +30,14 @@ export function FriendItem({
       >
         <Image
           alt={`${profile.name} avatar`}
-          className="size-12 rounded-full object-cover ring-2 ring-slate-50 md:size-14"
-          height={56}
+          className="size-10 rounded-full object-cover ring-2 ring-slate-50 md:size-12"
+          height={48}
           src={profile.avatar}
-          width={56}
+          width={48}
         />
       </button>
       <div className="min-w-0 flex-1 text-center md:text-left">
-        <h2 className="text-body-lg font-semibold text-on-background">
+        <h2 className="text-body-md font-semibold text-on-background">
           {profile.name}
         </h2>
       </div>

@@ -7,17 +7,17 @@ import {
 } from "@/services/friends/friend.query";
 import { getUsers } from "@/services/users/user.query";
 
-import FriendContent from "./_components/friend-content";
+import FriendFilters from "./_components/friend-filters";
+import FriendList from "./_components/friend-list";
+import FriendRequests from "./_components/friend-requests";
 
-export default async function FriendPage({
-  searchParams,
-}: {
+type FriendPageProps = {
   searchParams: Promise<{ query?: string | string[] }>;
-}) {
+};
+
+export default async function FriendPage({ searchParams }: FriendPageProps) {
   const params = await searchParams;
-  const query = Array.isArray(params.query)
-    ? (params.query[0] ?? "")
-    : (params.query ?? "");
+  const query = parseFriendQuery(params.query);
   const normalizedQuery = query.trim().toLocaleLowerCase();
   const session = await auth();
   const userId = session?.user?.id;
@@ -37,15 +37,28 @@ export default async function FriendPage({
 
   return (
     <main className="page-shell bg-linear-to-b from-surface to-surface-container-low">
-      <div className="page-container">
-        <FriendContent
-          friendQuery={query}
-          friends={filteredFriends}
+      <div className="page-container grid grid-cols-1 gap-gutter xl:grid-cols-12">
+        <FriendFilters query={query} searchResults={searchResults} />
+        <FriendRequests
           receivedRequests={receivedRequests}
-          searchResults={searchResults}
           sentRequests={sentRequests}
         />
+        <section className="xl:col-span-8 xl:col-start-1 xl:row-start-2">
+          <FriendList
+            emptyMessage={
+              query
+                ? "검색 조건에 맞는 친구가 없습니다."
+                : "아직 추가된 친구가 없습니다."
+            }
+            friends={filteredFriends}
+            key={query}
+          />
+        </section>
       </div>
     </main>
   );
+}
+
+function parseFriendQuery(query: string | string[] | undefined) {
+  return (Array.isArray(query) ? query[0] : query)?.trim() ?? "";
 }
