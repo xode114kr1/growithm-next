@@ -1,39 +1,119 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import type { StudyProblemListItem } from "@/types/study";
+import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
+import type {
+  StudyProblemFilters,
+  StudyProblemInfiniteScrollResponse,
+  StudyProblemListItem,
+} from "@/types/study";
 
 import StudyProblemItem from "./study-problem-item";
 import StudyProblemModal from "./study-problem-modal";
 
 export default function StudyProblemList({
   clearedFiltersQueryString,
-  currentPage,
-  filteredCount,
+  filters,
   hasActiveFilters,
-  pageSize,
-  problems,
-  queryString,
+  initialHasNextPage,
+  initialItems,
   studyId,
-  totalPages,
 }: {
   clearedFiltersQueryString: string;
-  currentPage: number;
-  filteredCount: number;
+  filters: StudyProblemFilters;
   hasActiveFilters: boolean;
-  pageSize: number;
-  problems: StudyProblemListItem[];
-  queryString: string;
+  initialHasNextPage: boolean;
+  initialItems: StudyProblemListItem[];
   studyId: string;
-  totalPages: number;
 }) {
+  const [items, setItems] = useState(initialItems);
+  const [nextPage, setNextPage] = useState(2);
+  const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
+  const [isLoading, setIsLoading] = useState(false);
+  const abortControllerRef = useRef<AbortController>(null);
+  const isLoadingRef = useRef(false);
+  const loadedPagesRef = useRef(new Set([1]));
+  const isMountedRef = useRef(false);
   const [selectedProblem, setSelectedProblem] =
     useState<StudyProblemListItem | null>(null);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + problems.length;
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+      abortControllerRef.current?.abort();
+    };
+  }, []);
+
+  const loadNextPage = useCallback(async () => {
+    const requestedPage = nextPage;
+
+    if (
+      !hasNextPage ||
+      isLoadingRef.current ||
+      loadedPagesRef.current.has(requestedPage)
+    ) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    abortControllerRef.current = controller;
+    isLoadingRef.current = true;
+    loadedPagesRef.current.add(requestedPage);
+    setIsLoading(true);
+
+    try {
+      const searchParams = createStudyProblemSearchParams(
+        requestedPage,
+        filters,
+      );
+      const response = await fetch(
+        `/api/studies/${studyId}/problems?${searchParams}`,
+        { signal: controller.signal },
+      );
+
+      if (!response.ok) {
+        return;
+      }
+
+      const data =
+        (await response.json()) as StudyProblemInfiniteScrollResponse;
+
+      if (controller.signal.aborted || data.currentPage !== requestedPage) {
+        return;
+      }
+
+      setItems((currentItems) => {
+        const currentItemIds = new Set(currentItems.map((item) => item.id));
+        const uniqueNextItems = data.items.filter(
+          (item) => !currentItemIds.has(item.id),
+        );
+
+        return [...currentItems, ...uniqueNextItems];
+      });
+      setNextPage(data.currentPage + 1);
+      setHasNextPage(data.hasNextPage);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+    } finally {
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+        isLoadingRef.current = false;
+
+        if (isMountedRef.current) {
+          setIsLoading(false);
+        }
+      }
+    }
+  }, [filters, hasNextPage, nextPage, studyId]);
+  const sentinelRef = useInfiniteScroll({
+    enabled: hasNextPage && !isLoading,
+    onLoadMore: loadNextPage,
+  });
 
   return (
     <section className="app-card overflow-hidden">
@@ -49,7 +129,7 @@ export default function StudyProblemList({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {problems.map((problem) => (
+              {items.map((problem) => (
                 <StudyProblemItem
                   key={problem.id}
                   onSelect={setSelectedProblem}
@@ -59,79 +139,38 @@ export default function StudyProblemList({
             </tbody>
           </table>
         </div>
-        {problems.length === 0 ? (
+        {items.length === 0 ? (
           <EmptyState
-            clearFiltersHref={getStudyProblemsHref(
-              1,
-              clearedFiltersQueryString,
-            )}
+            clearFiltersHref={getStudyProblemsHref(clearedFiltersQueryString)}
             hasActiveFilters={hasActiveFilters}
           />
         ) : null}
-        <div className="flex flex-col items-start justify-between gap-4 border-t border-slate-100 bg-slate-50/30 px-6 py-4 sm:flex-row sm:items-center">
-          <p className="text-body-sm text-slate-500">
-            Showing{" "}
-            <span className="font-semibold text-on-surface">
-              {filteredCount > 0 ? startIndex + 1 : "0"} - {endIndex}
-            </span>{" "}
-            of {filteredCount.toLocaleString()} study problems
-          </p>
-          <div className="flex items-center gap-2">
+        {hasNextPage ? (
+          <div aria-hidden="true" className="h-px" ref={sentinelRef} />
+        ) : null}
+        {hasActiveFilters || isLoading ? (
+          <div className="flex items-center justify-end gap-3 border-t border-slate-100 bg-slate-50/30 px-6 py-4">
             {hasActiveFilters ? (
               <Link
                 className="text-body-sm font-semibold text-secondary hover:underline"
-                href={getStudyProblemsHref(1, clearedFiltersQueryString)}
+                href={getStudyProblemsHref(clearedFiltersQueryString)}
               >
                 Clear filters
               </Link>
             ) : null}
-            <PaginationControls
-              currentPage={currentPage}
-              queryString={queryString}
-              totalPages={totalPages}
-            />
+            {isLoading ? (
+              <p className="text-body-sm text-slate-500">불러오는 중...</p>
+            ) : null}
           </div>
-        </div>
+        ) : null}
         <StudyProblemModal
           onClose={() => setSelectedProblem(null)}
           onSelectProblem={setSelectedProblem}
           problem={selectedProblem}
-          problems={problems}
+          problems={items}
           studyId={studyId}
         />
     </section>
-  );
-}
-
-function PaginationControls({
-  currentPage,
-  queryString,
-  totalPages,
-}: {
-  currentPage: number;
-  queryString: string;
-  totalPages: number;
-}) {
-  return (
-    <div className="flex items-center gap-1">
-      <PaginationLink
-        aria-label="이전 페이지"
-        disabled={currentPage === 1}
-        href={getStudyProblemsHref(currentPage - 1, queryString)}
-      >
-        <ChevronLeft aria-hidden="true" size={16} />
-      </PaginationLink>
-      <span className="px-2 text-body-sm font-semibold text-on-surface">
-        {currentPage} / {totalPages}
-      </span>
-      <PaginationLink
-        aria-label="다음 페이지"
-        disabled={currentPage === totalPages}
-        href={getStudyProblemsHref(currentPage + 1, queryString)}
-      >
-        <ChevronRight aria-hidden="true" size={16} />
-      </PaginationLink>
-    </div>
   );
 }
 
@@ -170,54 +209,24 @@ function EmptyState({
   );
 }
 
-function PaginationLink({
-  children,
-  disabled,
-  href,
-  ...props
-}: {
-  children: React.ReactNode;
-  disabled: boolean;
-  href: string;
-  "aria-label": string;
-}) {
-  const className =
-    "flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-100";
-
-  if (disabled) {
-    return (
-      <span
-        aria-disabled="true"
-        aria-label={props["aria-label"]}
-        className={`${className} cursor-not-allowed text-slate-300`}
-      >
-        {children}
-      </span>
-    );
-  }
-
-  return (
-    <Link
-      aria-label={props["aria-label"]}
-      className={className}
-      href={href}
-      scroll={false}
-    >
-      {children}
-    </Link>
-  );
+function getStudyProblemsHref(queryString: string) {
+  return queryString ? `?${queryString}` : "?";
 }
 
-function getStudyProblemsHref(page: number, queryString: string) {
-  const params = new URLSearchParams(queryString);
+function createStudyProblemSearchParams(
+  page: number,
+  filters: StudyProblemFilters,
+) {
+  const searchParams = new URLSearchParams({
+    page: String(page),
+    sort: filters.sort,
+  });
 
-  if (page > 1) {
-    params.set("page", String(page));
-  }
+  if (filters.member) searchParams.set("member", filters.member);
+  if (filters.platform) searchParams.set("platform", filters.platform);
+  if (filters.tier) searchParams.set("tier", filters.tier);
 
-  const nextQueryString = params.toString();
-
-  return nextQueryString ? `?${nextQueryString}` : "?";
+  return searchParams.toString();
 }
 
 function TableHead({ children }: { children: React.ReactNode }) {

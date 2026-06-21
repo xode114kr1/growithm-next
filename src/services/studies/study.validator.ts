@@ -1,6 +1,35 @@
+import { ProblemPlatform } from "@/generated/prisma/enums";
+import type {
+  StudyProblemFilters,
+  StudyProblemPageSearchParams,
+  StudyProblemSort,
+} from "@/types/study";
+
 const MAX_TITLE_LENGTH = 80;
 const MAX_DESCRIPTION_LENGTH = 500;
 const INVITE_TARGET_MAX_LENGTH = 120;
+
+export function parseStudyProblemFilters(
+  params: StudyProblemPageSearchParams,
+): StudyProblemFilters {
+  const member = parseStringParam(params.member);
+  const tier = parseStringParam(params.tier);
+
+  return {
+    member: member || null,
+    platform: parseStudyProblemPlatform(params.platform),
+    sort: parseStudyProblemSort(params.sort),
+    tier: tier || null,
+  };
+}
+
+export function parseStudyProblemPage(
+  page: string | string[] | undefined,
+) {
+  const parsedPage = Number(parseStringParam(page));
+
+  return Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+}
 
 // 새 스터디 제목과 설명 입력값을 검증한다.
 export function validateStudyInput({
@@ -59,4 +88,34 @@ export function validateStudySettingsInput({
   }
 
   return null;
+}
+
+function parseStudyProblemPlatform(
+  platform: string | string[] | undefined,
+) {
+  const value = parseStringParam(platform);
+
+  return value === ProblemPlatform.BAEKJOON ||
+    value === ProblemPlatform.PROGRAMMERS
+    ? value
+    : null;
+}
+
+function parseStudyProblemSort(
+  sort: string | string[] | undefined,
+): StudyProblemSort {
+  const value = parseStringParam(sort);
+
+  return value === "oldest" ||
+    value === "title" ||
+    value === "tier" ||
+    value === "member"
+    ? value
+    : "latest";
+}
+
+function parseStringParam(value: string | string[] | undefined) {
+  const firstValue = Array.isArray(value) ? value[0] : value;
+
+  return firstValue?.trim() ?? "";
 }

@@ -1,25 +1,114 @@
-import Link from "next/link";
+"use client";
 
-import type { ProblemEmptyStateReason, ProblemListItem } from "@/types/problem";
+import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
+import type {
+  ProblemEmptyStateReason,
+  ProblemFiltersState,
+  ProblemInfiniteScrollResponse,
+  ProblemListItem,
+} from "@/types/problem";
 import ProblemItem from "./problem-item";
 
 export default function ProblemList({
-  currentPage,
   emptyStateReason,
-  pageSize,
-  problems,
-  queryString,
-  totalCount,
-  totalPages,
+  filters,
+  initialHasNextPage,
+  initialItems,
 }: {
-  currentPage: number;
   emptyStateReason: ProblemEmptyStateReason | null;
-  pageSize: number;
-  problems: ProblemListItem[];
-  queryString: string;
-  totalCount: number;
-  totalPages: number;
+  filters: ProblemFiltersState;
+  initialHasNextPage: boolean;
+  initialItems: ProblemListItem[];
 }) {
+  const [items, setItems] = useState(initialItems);
+  const [nextPage, setNextPage] = useState(2);
+  const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
+  const [isLoading, setIsLoading] = useState(false);
+  const abortControllerRef = useRef<AbortController>(null);
+  const isLoadingRef = useRef(false);
+  const loadedPagesRef = useRef(new Set([1]));
+  const isMountedRef = useRef(false);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+      abortControllerRef.current?.abort();
+    };
+  }, []);
+
+  const loadNextPage = useCallback(async () => {
+    const requestedPage = nextPage;
+
+    if (
+      !hasNextPage ||
+      isLoadingRef.current ||
+      loadedPagesRef.current.has(requestedPage)
+    ) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    abortControllerRef.current = controller;
+    isLoadingRef.current = true;
+    loadedPagesRef.current.add(requestedPage);
+    setIsLoading(true);
+
+    try {
+      const searchParams = createProblemSearchParams(requestedPage, filters);
+      const response = await fetch(`/api/problems?${searchParams}`, {
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        return;
+      }
+
+      const data = (await response.json()) as ProblemInfiniteScrollResponse;
+
+      if (controller.signal.aborted || data.currentPage !== requestedPage) {
+        return;
+      }
+
+      const nextItems = data.items.map((item) => ({
+        ...item,
+        createdAt: new Date(item.createdAt),
+      }));
+
+      setItems((currentItems) => {
+        const currentItemIds = new Set(currentItems.map((item) => item.id));
+        const uniqueNextItems = nextItems.filter(
+          (item) => !currentItemIds.has(item.id),
+        );
+
+        return [...currentItems, ...uniqueNextItems];
+      });
+      setNextPage(data.currentPage + 1);
+      setHasNextPage(data.hasNextPage);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+    } finally {
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+        isLoadingRef.current = false;
+
+        if (isMountedRef.current) {
+          setIsLoading(false);
+        }
+      }
+    }
+  }, [filters, hasNextPage, nextPage]);
+
+  const sentinelRef = useInfiniteScroll({
+    enabled: hasNextPage && !isLoading,
+    onLoadMore: loadNextPage,
+  });
+
   return (
     <section className="app-card overflow-hidden">
       <div className="overflow-x-auto">
@@ -32,102 +121,36 @@ export default function ProblemList({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
-            {problems.map((problem) => (
+            {items.map((problem) => (
               <ProblemItem problem={problem} key={problem.id} />
             ))}
           </tbody>
         </table>
       </div>
       {emptyStateReason ? <EmptyState reason={emptyStateReason} /> : null}
-      <Pagination
-        currentPage={currentPage}
-        pageSize={pageSize}
-        queryString={queryString}
-        showingCount={problems.length}
-        totalCount={totalCount}
-        totalPages={totalPages}
-      />
+      {hasNextPage ? (
+        <div aria-hidden="true" className="h-px" ref={sentinelRef} />
+      ) : null}
+      {isLoading ? (
+        <div className="border-t border-slate-100 bg-slate-50/30 px-6 py-4">
+          <p className="text-body-sm text-slate-500">불러오는 중...</p>
+        </div>
+      ) : null}
     </section>
   );
 }
 
-// 현재 query 기준의 페이지 이동과 결과 범위 텍스트를 렌더링한다.
-function Pagination({
-  currentPage,
-  pageSize,
-  queryString,
-  showingCount,
-  totalCount,
-  totalPages,
-}: {
-  currentPage: number;
-  pageSize: number;
-  queryString: string;
-  showingCount: number;
-  totalCount: number;
-  totalPages: number;
-}) {
-  const start = showingCount > 0 ? (currentPage - 1) * pageSize + 1 : 0;
-  const end = Math.min((currentPage - 1) * pageSize + showingCount, totalCount);
-  const pages = getVisiblePages(currentPage, totalPages);
+function createProblemSearchParams(page: number, filters: ProblemFiltersState) {
+  const searchParams = new URLSearchParams({
+    page: String(page),
+    sort: filters.sort,
+  });
 
-  return (
-    <div className="flex flex-col items-start justify-between gap-4 border-t border-slate-100 bg-slate-50/30 px-6 py-4 sm:flex-row sm:items-center">
-      <p className="text-body-sm text-slate-500">
-        전체 {totalCount.toLocaleString()}개 중{" "}
-        <span className="font-semibold text-on-surface">
-          {start} - {end}
-        </span>
-      </p>
-      <div className="flex items-center gap-1">
-        <PaginationLink
-          disabled={currentPage === 1}
-          href={getPageHref(currentPage - 1, queryString)}
-          label="‹"
-        />
-        <div className="flex items-center px-2">
-          {pages[0] > 1 ? (
-            <>
-              <PaginationLink href={getPageHref(1, queryString)} label="1" />
-              {pages[0] > 2 ? (
-                <span className="px-2 text-sm text-slate-400">...</span>
-              ) : null}
-            </>
-          ) : null}
-          {pages.map((page) => (
-            <Link
-              aria-current={page === currentPage ? "page" : undefined}
-              className={
-                page === currentPage
-                  ? "flex size-9 items-center justify-center rounded-lg bg-primary text-body-sm font-semibold text-on-primary"
-                  : "flex size-9 items-center justify-center rounded-lg text-body-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
-              }
-              href={getPageHref(page, queryString)}
-              key={page}
-            >
-              {page}
-            </Link>
-          ))}
-          {pages[pages.length - 1] < totalPages ? (
-            <>
-              {pages[pages.length - 1] < totalPages - 1 ? (
-                <span className="px-2 text-sm text-slate-400">...</span>
-              ) : null}
-              <PaginationLink
-                href={getPageHref(totalPages, queryString)}
-                label={totalPages}
-              />
-            </>
-          ) : null}
-        </div>
-        <PaginationLink
-          disabled={currentPage === totalPages}
-          href={getPageHref(currentPage + 1, queryString)}
-          label="›"
-        />
-      </div>
-    </div>
-  );
+  if (filters.platform) searchParams.set("platform", filters.platform);
+  if (filters.q) searchParams.set("q", filters.q);
+  if (filters.tier) searchParams.set("tier", filters.tier);
+
+  return searchParams.toString();
 }
 
 // 현재 query에 표시할 행이 없을 때 명확한 대체 화면을 보여준다.
@@ -158,62 +181,6 @@ function EmptyState({ reason }: { reason: ProblemEmptyStateReason }) {
       </p>
     </div>
   );
-}
-
-// 활성 링크와 비활성 페이지네이션 컨트롤을 같은 크기로 렌더링한다.
-function PaginationLink({
-  disabled = false,
-  href,
-  label,
-}: {
-  disabled?: boolean;
-  href: string;
-  label: number | string;
-}) {
-  if (disabled) {
-    return (
-      <span className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-body-sm font-medium text-slate-300">
-        {label}
-      </span>
-    );
-  }
-
-  return (
-    <Link
-      className="flex size-9 items-center justify-center rounded-lg text-body-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
-      href={href}
-    >
-      {label}
-    </Link>
-  );
-}
-
-// 필터와 정렬 상태를 유지한 페이지네이션 URL을 만든다.
-function getPageHref(page: number, queryString: string) {
-  const params = new URLSearchParams(queryString);
-
-  if (page > 1) {
-    params.set("page", String(page));
-  } else {
-    params.delete("page");
-  }
-
-  const nextQueryString = params.toString();
-
-  return nextQueryString ? `/problem?${nextQueryString}` : "/problem";
-}
-
-// 현재 페이지 주변으로 보이는 페이지 범위를 작게 유지한다.
-function getVisiblePages(currentPage: number, totalPages: number) {
-  const start = Math.max(1, currentPage - 1);
-  const end = Math.min(totalPages, currentPage + 1);
-  const pages = [];
-
-  for (let page = start; page <= end; page += 1) {
-    pages.push(page);
-  }
-
-  return pages;
 }
 
 // 테이블 헤더에 일관된 스타일을 적용한다.

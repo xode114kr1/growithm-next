@@ -1,28 +1,28 @@
 import { ProblemPlatform } from "@/generated/prisma/enums";
-import {
+import type {
   ProblemFiltersState,
   ProblemPageSearchParams,
   ProblemSort,
 } from "@/types/problem";
 
-export function parseFilters(
+export function parseProblemFilters(
   params: ProblemPageSearchParams,
 ): ProblemFiltersState {
   return {
-    platform: parsePlatformParam(params.platform),
+    platform: parseProblemPlatform(params.platform),
     q: parseStringParam(params.q),
-    sort: parseSortParam(params.sort),
+    sort: parseProblemSort(params.sort),
     tier: parseStringParam(params.tier),
   };
 }
 
-export function parsePageParam(page: string | string[] | undefined) {
+export function parseProblemPage(page: string | string[] | undefined) {
   const parsedPage = Number(parseStringParam(page));
 
   return Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
 }
 
-export function parsePlatformParam(platform: string | string[] | undefined) {
+function parseProblemPlatform(platform: string | string[] | undefined) {
   const value = parseStringParam(platform);
 
   return value === ProblemPlatform.BAEKJOON ||
@@ -31,7 +31,7 @@ export function parsePlatformParam(platform: string | string[] | undefined) {
     : null;
 }
 
-export function parseSortParam(
+function parseProblemSort(
   sort: string | string[] | undefined,
 ): ProblemSort {
   const value = parseStringParam(sort);
@@ -41,22 +41,8 @@ export function parseSortParam(
     : "newest";
 }
 
-export function parseStringParam(value: string | string[] | undefined) {
+function parseStringParam(value: string | string[] | undefined) {
   const firstValue = Array.isArray(value) ? value[0] : value;
 
   return firstValue?.trim() ?? "";
-}
-
-export function buildQueryString(params: ProblemPageSearchParams) {
-  const query = new URLSearchParams();
-
-  for (const key of ["platform", "tier", "q", "sort"] as const) {
-    const value = parseStringParam(params[key]);
-
-    if (value) {
-      query.set(key, value);
-    }
-  }
-
-  return query.toString();
 }

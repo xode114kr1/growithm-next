@@ -10,7 +10,7 @@ import {
   getProblems,
   PROBLEM_PAGE_SIZE,
 } from "@/services/problems/problem.query";
-import { buildQueryString, parseFilters, parsePageParam } from "./_lib/parse";
+import { parseProblemFilters } from "@/services/problems/problem.validator";
 import ProblemFilters from "./_components/problem-filters";
 import ProblemList from "./_components/problem-list";
 
@@ -25,25 +25,20 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
   const userId = session?.user?.id;
 
   // paese filters
-  const filters = parseFilters(params);
-  const requestedPage = parsePageParam(params.page);
-  const queryString = buildQueryString(params);
+  const filters = parseProblemFilters(params);
 
   // fetch
-  const [tiers, unfilteredTotalCount, totalCount] = await Promise.all([
-    getAvailableProblemTiers(userId),
-    getProblemCount(userId),
-    getProblemCount(userId, filters),
-  ]);
-
-  const totalPages = Math.max(1, Math.ceil(totalCount / PROBLEM_PAGE_SIZE));
-  const currentPage = Math.min(requestedPage, totalPages);
-
-  const problems = await getProblems({
-    filters,
-    page: currentPage,
-    userId,
-  });
+  const [tiers, unfilteredTotalCount, totalCount, initialItems] =
+    await Promise.all([
+      getAvailableProblemTiers(userId),
+      getProblemCount(userId),
+      getProblemCount(userId, filters),
+      getProblems({
+        filters,
+        page: 1,
+        userId,
+      }),
+    ]);
 
   const emptyStateReason: ProblemEmptyStateReason | null =
     totalCount > 0
@@ -57,15 +52,27 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
       <div className="page-container">
         <ProblemFilters filters={filters} tiers={tiers} />
         <ProblemList
-          currentPage={currentPage}
           emptyStateReason={emptyStateReason}
-          pageSize={PROBLEM_PAGE_SIZE}
-          problems={problems}
-          queryString={queryString}
-          totalCount={totalCount}
-          totalPages={totalPages}
+          filters={filters}
+          initialHasNextPage={PROBLEM_PAGE_SIZE < totalCount}
+          initialItems={initialItems}
+          key={createProblemListKey(filters)}
         />
       </div>
     </main>
   );
+}
+
+function createProblemListKey(filters: {
+  platform: string | null;
+  q: string;
+  sort: string;
+  tier: string;
+}) {
+  return new URLSearchParams({
+    platform: filters.platform ?? "",
+    q: filters.q,
+    sort: filters.sort,
+    tier: filters.tier,
+  }).toString();
 }
