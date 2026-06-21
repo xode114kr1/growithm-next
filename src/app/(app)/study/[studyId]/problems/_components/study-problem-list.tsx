@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
+import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import type {
   StudyProblemFilters,
   StudyProblemInfiniteScrollResponse,
@@ -33,12 +34,14 @@ export default function StudyProblemList({
   const [nextPage, setNextPage] = useState(2);
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const [isLoading, setIsLoading] = useState(false);
+  const isLoadingRef = useRef(false);
   const [selectedProblem, setSelectedProblem] =
     useState<StudyProblemListItem | null>(null);
 
-  async function loadNextPage() {
-    if (!hasNextPage || isLoading) return;
+  const loadNextPage = useCallback(async () => {
+    if (!hasNextPage || isLoadingRef.current) return;
 
+    isLoadingRef.current = true;
     setIsLoading(true);
 
     try {
@@ -56,9 +59,14 @@ export default function StudyProblemList({
       setNextPage(data.currentPage + 1);
       setHasNextPage(data.hasNextPage);
     } finally {
+      isLoadingRef.current = false;
       setIsLoading(false);
     }
-  }
+  }, [filters, hasNextPage, nextPage, studyId]);
+  const sentinelRef = useInfiniteScroll({
+    enabled: hasNextPage && !isLoading,
+    onLoadMore: loadNextPage,
+  });
 
   return (
     <section className="app-card overflow-hidden">
@@ -90,6 +98,9 @@ export default function StudyProblemList({
             hasActiveFilters={hasActiveFilters}
           />
         ) : null}
+        {hasNextPage ? (
+          <div aria-hidden="true" className="h-px" ref={sentinelRef} />
+        ) : null}
         <div className="flex flex-col items-start justify-between gap-4 border-t border-slate-100 bg-slate-50/30 px-6 py-4 sm:flex-row sm:items-center">
           <p className="text-body-sm text-slate-500">
             Showing{" "}
@@ -107,15 +118,8 @@ export default function StudyProblemList({
                 Clear filters
               </Link>
             ) : null}
-            {hasNextPage ? (
-              <button
-                className="btn-secondary"
-                disabled={isLoading}
-                onClick={loadNextPage}
-                type="button"
-              >
-                {isLoading ? "불러오는 중..." : "더 불러오기"}
-              </button>
+            {isLoading ? (
+              <p className="text-body-sm text-slate-500">불러오는 중...</p>
             ) : null}
           </div>
         </div>

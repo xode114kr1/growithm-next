@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
+import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import type {
   ProblemEmptyStateReason,
   ProblemFiltersState,
@@ -28,10 +29,12 @@ export default function ProblemList({
   const [nextPage, setNextPage] = useState(2);
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const [isLoading, setIsLoading] = useState(false);
+  const isLoadingRef = useRef(false);
 
-  async function loadNextPage() {
-    if (!hasNextPage || isLoading) return;
+  const loadNextPage = useCallback(async () => {
+    if (!hasNextPage || isLoadingRef.current) return;
 
+    isLoadingRef.current = true;
     setIsLoading(true);
 
     try {
@@ -50,9 +53,15 @@ export default function ProblemList({
       setNextPage(data.currentPage + 1);
       setHasNextPage(data.hasNextPage);
     } finally {
+      isLoadingRef.current = false;
       setIsLoading(false);
     }
-  }
+  }, [filters, hasNextPage, nextPage]);
+
+  const sentinelRef = useInfiniteScroll({
+    enabled: hasNextPage && !isLoading,
+    onLoadMore: loadNextPage,
+  });
 
   return (
     <section className="app-card overflow-hidden">
@@ -73,10 +82,11 @@ export default function ProblemList({
         </table>
       </div>
       {emptyStateReason ? <EmptyState reason={emptyStateReason} /> : null}
+      {hasNextPage ? (
+        <div aria-hidden="true" className="h-px" ref={sentinelRef} />
+      ) : null}
       <ListSummary
-        hasNextPage={hasNextPage}
         isLoading={isLoading}
-        onLoadMore={loadNextPage}
         showingCount={items.length}
         totalCount={totalCount}
       />
@@ -85,15 +95,11 @@ export default function ProblemList({
 }
 
 function ListSummary({
-  hasNextPage,
   isLoading,
-  onLoadMore,
   showingCount,
   totalCount,
 }: {
-  hasNextPage: boolean;
   isLoading: boolean;
-  onLoadMore: () => void;
   showingCount: number;
   totalCount: number;
 }) {
@@ -104,24 +110,14 @@ function ListSummary({
         <span className="font-semibold text-on-surface">{showingCount}개</span>{" "}
         표시
       </p>
-      {hasNextPage ? (
-        <button
-          className="btn-secondary"
-          disabled={isLoading}
-          onClick={onLoadMore}
-          type="button"
-        >
-          {isLoading ? "불러오는 중..." : "더 불러오기"}
-        </button>
+      {isLoading ? (
+        <p className="text-body-sm text-slate-500">불러오는 중...</p>
       ) : null}
     </div>
   );
 }
 
-function createProblemSearchParams(
-  page: number,
-  filters: ProblemFiltersState,
-) {
+function createProblemSearchParams(page: number, filters: ProblemFiltersState) {
   const searchParams = new URLSearchParams({
     page: String(page),
     sort: filters.sort,
