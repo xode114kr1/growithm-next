@@ -21,7 +21,7 @@ export default function FriendFilters({
   }
 
   return (
-    <section className="flex items-center justify-between gap-3 xl:col-span-8 xl:col-start-1 xl:row-start-1">
+    <section className="flex h-11 items-center justify-between gap-3 xl:col-span-8 xl:col-start-1 xl:row-start-1">
       <input
         aria-label="친구 검색"
         className="input-field min-w-0 md:max-w-md"

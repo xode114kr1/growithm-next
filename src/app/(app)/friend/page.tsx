@@ -36,7 +36,7 @@ export default async function FriendPage({ searchParams }: FriendPageProps) {
 
   return (
     <main className="page-shell bg-linear-to-b from-surface to-surface-container-low">
-      <div className="page-container grid grid-cols-1 gap-gutter xl:grid-cols-12">
+      <div className="page-container grid grid-cols-1 gap-gutter xl:grid-cols-12 xl:grid-rows-[2.75rem_auto]">
         <FriendFilters query={filters.query} searchResults={searchResults} />
         <FriendRequests
           receivedRequests={receivedRequests}
