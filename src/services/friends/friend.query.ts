@@ -8,6 +8,7 @@ import {
 } from "@/services/friends/friend.persistence.server";
 import { createFriendProfile } from "@/services/friends/friend.helper";
 import type {
+  FriendFiltersState,
   FriendRelationStatus,
   FriendRequest,
   FriendSearchResult,
@@ -15,12 +16,21 @@ import type {
 import type { UserSummary } from "@/types/user";
 
 // 현재 사용자의 친구 목록을 화면용 프로필 데이터로 조회한다.
-export async function getFriendUsers(userId: string | undefined) {
+export async function getFriends({
+  filters,
+  userId,
+}: {
+  filters: FriendFiltersState;
+  userId: string | undefined;
+}) {
   if (!userId) {
     return [];
   }
 
-  const friendships = await findFriendUsers(userId);
+  const friendships = await findFriendUsers({
+    query: filters.query,
+    userId,
+  });
 
   return friendships.map((friendship) =>
     createFriendProfile(

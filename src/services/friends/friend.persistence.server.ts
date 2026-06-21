@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { FriendUserRow } from "@/services/friends/friend.helper";
 
@@ -12,7 +13,44 @@ const friendUserSelect = {
 } satisfies Record<keyof FriendUserRow, true>;
 
 // 현재 사용자와 친구 관계인 사용자 정보를 조회한다.
-export async function findFriendUsers(userId: string) {
+export async function findFriendUsers({
+  query,
+  userId,
+}: {
+  query: string;
+  userId: string;
+}) {
+  const friendUserFilter: Prisma.UserWhereInput = {
+    OR: [
+      {
+        name: {
+          contains: query,
+          mode: "insensitive",
+        },
+      },
+      {
+        email: {
+          contains: query,
+          mode: "insensitive",
+        },
+      },
+    ],
+  };
+  const friendshipFilter: Prisma.FriendshipWhereInput = {
+    OR: query
+      ? [
+          {
+            userAId: userId,
+            userB: friendUserFilter,
+          },
+          {
+            userA: friendUserFilter,
+            userBId: userId,
+          },
+        ]
+      : [{ userAId: userId }, { userBId: userId }],
+  };
+
   return prisma.friendship.findMany({
     include: {
       userA: {
@@ -25,9 +63,7 @@ export async function findFriendUsers(userId: string) {
     orderBy: {
       createdAt: "desc",
     },
-    where: {
-      OR: [{ userAId: userId }, { userBId: userId }],
-    },
+    where: friendshipFilter,
   });
 }
 
