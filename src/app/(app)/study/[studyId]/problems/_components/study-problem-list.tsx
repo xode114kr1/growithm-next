@@ -3,27 +3,62 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import type { StudyProblemListItem } from "@/types/study";
+import type {
+  StudyProblemFilters,
+  StudyProblemInfiniteScrollResponse,
+  StudyProblemListItem,
+} from "@/types/study";
 
 import StudyProblemItem from "./study-problem-item";
 import StudyProblemModal from "./study-problem-modal";
 
 export default function StudyProblemList({
   clearedFiltersQueryString,
+  filters,
   hasActiveFilters,
+  initialHasNextPage,
   initialItems,
   studyId,
   totalCount,
 }: {
   clearedFiltersQueryString: string;
+  filters: StudyProblemFilters;
   hasActiveFilters: boolean;
   initialHasNextPage: boolean;
   initialItems: StudyProblemListItem[];
   studyId: string;
   totalCount: number;
 }) {
+  const [items, setItems] = useState(initialItems);
+  const [nextPage, setNextPage] = useState(2);
+  const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedProblem, setSelectedProblem] =
     useState<StudyProblemListItem | null>(null);
+
+  async function loadNextPage() {
+    if (!hasNextPage || isLoading) return;
+
+    setIsLoading(true);
+
+    try {
+      const searchParams = createStudyProblemSearchParams(nextPage, filters);
+      const response = await fetch(
+        `/api/studies/${studyId}/problems?${searchParams}`,
+      );
+
+      if (!response.ok) return;
+
+      const data =
+        (await response.json()) as StudyProblemInfiniteScrollResponse;
+
+      setItems((currentItems) => [...currentItems, ...data.items]);
+      setNextPage(data.currentPage + 1);
+      setHasNextPage(data.hasNextPage);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
     <section className="app-card overflow-hidden">
@@ -39,7 +74,7 @@ export default function StudyProblemList({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {initialItems.map((problem) => (
+              {items.map((problem) => (
                 <StudyProblemItem
                   key={problem.id}
                   onSelect={setSelectedProblem}
@@ -49,7 +84,7 @@ export default function StudyProblemList({
             </tbody>
           </table>
         </div>
-        {initialItems.length === 0 ? (
+        {items.length === 0 ? (
           <EmptyState
             clearFiltersHref={getStudyProblemsHref(clearedFiltersQueryString)}
             hasActiveFilters={hasActiveFilters}
@@ -59,24 +94,36 @@ export default function StudyProblemList({
           <p className="text-body-sm text-slate-500">
             Showing{" "}
             <span className="font-semibold text-on-surface">
-              {initialItems.length}
+              {items.length}
             </span>{" "}
             of {totalCount.toLocaleString()} study problems
           </p>
-          {hasActiveFilters ? (
-            <Link
-              className="text-body-sm font-semibold text-secondary hover:underline"
-              href={getStudyProblemsHref(clearedFiltersQueryString)}
-            >
-              Clear filters
-            </Link>
-          ) : null}
+          <div className="flex items-center gap-3">
+            {hasActiveFilters ? (
+              <Link
+                className="text-body-sm font-semibold text-secondary hover:underline"
+                href={getStudyProblemsHref(clearedFiltersQueryString)}
+              >
+                Clear filters
+              </Link>
+            ) : null}
+            {hasNextPage ? (
+              <button
+                className="btn-secondary"
+                disabled={isLoading}
+                onClick={loadNextPage}
+                type="button"
+              >
+                {isLoading ? "불러오는 중..." : "더 불러오기"}
+              </button>
+            ) : null}
+          </div>
         </div>
         <StudyProblemModal
           onClose={() => setSelectedProblem(null)}
           onSelectProblem={setSelectedProblem}
           problem={selectedProblem}
-          problems={initialItems}
+          problems={items}
           studyId={studyId}
         />
     </section>
@@ -120,6 +167,22 @@ function EmptyState({
 
 function getStudyProblemsHref(queryString: string) {
   return queryString ? `?${queryString}` : "?";
+}
+
+function createStudyProblemSearchParams(
+  page: number,
+  filters: StudyProblemFilters,
+) {
+  const searchParams = new URLSearchParams({
+    page: String(page),
+    sort: filters.sort,
+  });
+
+  if (filters.member) searchParams.set("member", filters.member);
+  if (filters.platform) searchParams.set("platform", filters.platform);
+  if (filters.tier) searchParams.set("tier", filters.tier);
+
+  return searchParams.toString();
 }
 
 function TableHead({ children }: { children: React.ReactNode }) {

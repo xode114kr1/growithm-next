@@ -30,9 +30,9 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
   // fetch
   const [tiers, unfilteredTotalCount, totalCount, initialItems] =
     await Promise.all([
-    getAvailableProblemTiers(userId),
-    getProblemCount(userId),
-    getProblemCount(userId, filters),
+      getAvailableProblemTiers(userId),
+      getProblemCount(userId),
+      getProblemCount(userId, filters),
       getProblems({
         filters,
         page: 1,
@@ -53,8 +53,10 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
         <ProblemFilters filters={filters} tiers={tiers} />
         <ProblemList
           emptyStateReason={emptyStateReason}
+          filters={filters}
           initialHasNextPage={PROBLEM_PAGE_SIZE < totalCount}
           initialItems={initialItems}
+          key={JSON.stringify(filters)}
           totalCount={totalCount}
         />
       </div>

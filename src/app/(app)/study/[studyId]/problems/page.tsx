@@ -69,9 +69,11 @@ export default async function StudyProblemsPage({
       />
       <StudyProblemList
         clearedFiltersQueryString={clearedFiltersQueryString}
+        filters={filters}
         hasActiveFilters={hasActiveFilters}
         initialHasNextPage={STUDY_PROBLEM_PAGE_SIZE < filteredCount}
         initialItems={initialItems}
+        key={JSON.stringify(filters)}
         studyId={studyId}
         totalCount={filteredCount}
       />
