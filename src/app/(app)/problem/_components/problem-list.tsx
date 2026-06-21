@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import type {
@@ -27,82 +27,33 @@ export default function ProblemList({
   const [nextPage, setNextPage] = useState(2);
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const [isLoading, setIsLoading] = useState(false);
-  const abortControllerRef = useRef<AbortController>(null);
-  const isLoadingRef = useRef(false);
-  const loadedPagesRef = useRef(new Set([1]));
-  const isMountedRef = useRef(false);
-
-  useEffect(() => {
-    isMountedRef.current = true;
-
-    return () => {
-      isMountedRef.current = false;
-      abortControllerRef.current?.abort();
-    };
-  }, []);
 
   const loadNextPage = useCallback(async () => {
-    const requestedPage = nextPage;
+    if (!hasNextPage || isLoading) return;
 
-    if (
-      !hasNextPage ||
-      isLoadingRef.current ||
-      loadedPagesRef.current.has(requestedPage)
-    ) {
-      return;
-    }
-
-    const controller = new AbortController();
-
-    abortControllerRef.current = controller;
-    isLoadingRef.current = true;
-    loadedPagesRef.current.add(requestedPage);
     setIsLoading(true);
 
     try {
-      const searchParams = createProblemSearchParams(requestedPage, filters);
-      const response = await fetch(`/api/problems?${searchParams}`, {
-        signal: controller.signal,
-      });
+      const searchParams = createProblemSearchParams(nextPage, filters);
+      const response = await fetch(`/api/problems?${searchParams}`);
 
-      if (!response.ok) {
-        return;
-      }
+      if (!response.ok) return;
 
       const data = (await response.json()) as ProblemInfiniteScrollResponse;
-
-      if (controller.signal.aborted || data.currentPage !== requestedPage) {
-        return;
-      }
-
       const nextItems = data.items.map((item) => ({
         ...item,
         createdAt: new Date(item.createdAt),
       }));
 
-      setItems((currentItems) => {
-        const currentItemIds = new Set(currentItems.map((item) => item.id));
-        const uniqueNextItems = nextItems.filter(
-          (item) => !currentItemIds.has(item.id),
-        );
-
-        return [...currentItems, ...uniqueNextItems];
-      });
+      setItems((currentItems) => [...currentItems, ...nextItems]);
       setNextPage(data.currentPage + 1);
       setHasNextPage(data.hasNextPage);
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") return;
+    } catch {
+      return;
     } finally {
-      if (abortControllerRef.current === controller) {
-        abortControllerRef.current = null;
-        isLoadingRef.current = false;
-
-        if (isMountedRef.current) {
-          setIsLoading(false);
-        }
-      }
+      setIsLoading(false);
     }
-  }, [filters, hasNextPage, nextPage]);
+  }, [filters, hasNextPage, isLoading, nextPage]);
 
   const sentinelRef = useInfiniteScroll({
     enabled: hasNextPage && !isLoading,
