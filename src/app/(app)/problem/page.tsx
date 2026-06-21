@@ -56,10 +56,24 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
           filters={filters}
           initialHasNextPage={PROBLEM_PAGE_SIZE < totalCount}
           initialItems={initialItems}
-          key={JSON.stringify(filters)}
+          key={createProblemListKey(filters)}
           totalCount={totalCount}
         />
       </div>
     </main>
   );
+}
+
+function createProblemListKey(filters: {
+  platform: string | null;
+  q: string;
+  sort: string;
+  tier: string;
+}) {
+  return new URLSearchParams({
+    platform: filters.platform ?? "",
+    q: filters.q,
+    sort: filters.sort,
+    tier: filters.tier,
+  }).toString();
 }

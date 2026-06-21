@@ -73,10 +73,24 @@ export default async function StudyProblemsPage({
         hasActiveFilters={hasActiveFilters}
         initialHasNextPage={STUDY_PROBLEM_PAGE_SIZE < filteredCount}
         initialItems={initialItems}
-        key={JSON.stringify(filters)}
+        key={createStudyProblemListKey(filters)}
         studyId={studyId}
         totalCount={filteredCount}
       />
     </>
   );
+}
+
+function createStudyProblemListKey(filters: {
+  member: string | null;
+  platform: string | null;
+  sort: string;
+  tier: string | null;
+}) {
+  return new URLSearchParams({
+    member: filters.member ?? "",
+    platform: filters.platform ?? "",
+    sort: filters.sort,
+    tier: filters.tier ?? "",
+  }).toString();
 }
