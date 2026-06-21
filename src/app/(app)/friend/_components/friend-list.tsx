@@ -1,26 +1,25 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { usePagination } from "@/hooks/use-pagination";
-import type { FriendProfile, FriendRequest } from "@/types/friend";
-import {
-  AcceptFriendRequestButton,
-  CancelFriendRequestButton,
-  DeleteFriendButton,
-  DeleteReceivedRequestButton,
-} from "./friend-action-buttons";
+import type { FriendProfile } from "@/types/friend";
+import { DeleteFriendButton } from "./friend-action-buttons";
 import { FriendItem } from "./friend-item";
+import { FriendProfileModal } from "./friend-profile-modal";
 
 const FRIEND_LIST_PAGE_SIZE = 6;
 
-export function FriendList({
+export default function FriendList({
+  emptyMessage,
   friends,
-  onOpenProfile,
 }: {
+  emptyMessage: string;
   friends: FriendProfile[];
-  onOpenProfile: (profile: FriendProfile) => void;
 }) {
+  const [selectedProfile, setSelectedProfile] = useState<FriendProfile | null>(
+    null,
+  );
   const { currentPage, endIndex, setCurrentPage, startIndex, totalPages } =
     usePagination({
       itemCount: friends.length,
@@ -32,85 +31,52 @@ export function FriendList({
   );
   const shouldShowPagination = friends.length > FRIEND_LIST_PAGE_SIZE;
 
+  if (friends.length === 0) {
+    return (
+      <div className="app-card p-10 text-center text-body-sm text-on-surface-variant">
+        {emptyMessage}
+      </div>
+    );
+  }
+
   return (
-    <section className="grid grid-cols-1 gap-4">
-      {visibleFriends.map((friend) => (
-        <FriendItem
-          key={friend.id}
-          onOpenProfile={onOpenProfile}
-          profile={friend}
-        >
-          <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
-            <DeleteFriendButton friendUserId={friend.id} />
-            <button
-              className="rounded-lg bg-primary px-4 py-2.5 text-body-sm font-semibold text-on-primary shadow-md transition-all hover:opacity-90 active:scale-95"
-              type="button"
-            >
-              Invite to Session
-            </button>
-          </div>
-        </FriendItem>
-      ))}
-      {shouldShowPagination ? (
-        <Pagination
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
-          pageSize={FRIEND_LIST_PAGE_SIZE}
-          showingCount={visibleFriends.length}
-          totalCount={friends.length}
-          totalPages={totalPages}
+    <>
+      <section className="grid grid-cols-1 gap-4">
+        {visibleFriends.map((friend) => (
+          <FriendItem
+            key={friend.id}
+            onOpenProfile={setSelectedProfile}
+            profile={friend}
+          >
+            <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
+              <DeleteFriendButton friendUserId={friend.id} />
+              <button
+                className="rounded-lg bg-primary px-4 py-2.5 text-body-sm font-semibold text-on-primary shadow-md transition-all hover:opacity-90 active:scale-95"
+                type="button"
+              >
+                Invite to Session
+              </button>
+            </div>
+          </FriendItem>
+        ))}
+        {shouldShowPagination ? (
+          <Pagination
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+            pageSize={FRIEND_LIST_PAGE_SIZE}
+            showingCount={visibleFriends.length}
+            totalCount={friends.length}
+            totalPages={totalPages}
+          />
+        ) : null}
+      </section>
+      {selectedProfile ? (
+        <FriendProfileModal
+          onClose={() => setSelectedProfile(null)}
+          profile={selectedProfile}
         />
       ) : null}
-    </section>
-  );
-}
-
-export function ReceivedRequestList({
-  onOpenProfile,
-  requests,
-}: {
-  onOpenProfile: (profile: FriendProfile) => void;
-  requests: FriendRequest[];
-}) {
-  return (
-    <section className="grid grid-cols-1 gap-4">
-      {requests.map((request) => (
-        <FriendItem
-          key={request.name}
-          onOpenProfile={onOpenProfile}
-          profile={request}
-        >
-          <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
-            <DeleteReceivedRequestButton requestId={request.requestId} />
-            <AcceptFriendRequestButton requestId={request.requestId} />
-          </div>
-        </FriendItem>
-      ))}
-    </section>
-  );
-}
-
-export function SentRequestList({
-  onOpenProfile,
-  requests,
-}: {
-  onOpenProfile: (profile: FriendProfile) => void;
-  requests: FriendRequest[];
-}) {
-  return (
-    <section className="grid grid-cols-1 gap-4">
-      {requests.map((request) => (
-        <FriendItem
-          key={request.name}
-          onOpenProfile={onOpenProfile}
-          profile={request}
-        >
-          <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
-            <CancelFriendRequestButton requestId={request.requestId} />
-          </div>
-        </FriendItem>
-      ))}
-    </section>
+    </>
   );
 }
 

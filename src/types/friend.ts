@@ -1,6 +1,12 @@
 import type { PersonalScoreTier } from "@/types/user";
 
-export type FriendListFilter = "friends" | "received" | "sent";
+export type FriendFiltersState = {
+  query: string;
+};
+
+export type FriendPageSearchParams = {
+  query?: string | string[];
+};
 
 export type FriendRelationStatus =
   | "friend"
