@@ -17,13 +17,11 @@ export default function ProblemList({
   filters,
   initialHasNextPage,
   initialItems,
-  totalCount,
 }: {
   emptyStateReason: ProblemEmptyStateReason | null;
   filters: ProblemFiltersState;
   initialHasNextPage: boolean;
   initialItems: ProblemListItem[];
-  totalCount: number;
 }) {
   const [items, setItems] = useState(initialItems);
   const [nextPage, setNextPage] = useState(2);
@@ -133,35 +131,12 @@ export default function ProblemList({
       {hasNextPage ? (
         <div aria-hidden="true" className="h-px" ref={sentinelRef} />
       ) : null}
-      <ListSummary
-        isLoading={isLoading}
-        showingCount={items.length}
-        totalCount={totalCount}
-      />
-    </section>
-  );
-}
-
-function ListSummary({
-  isLoading,
-  showingCount,
-  totalCount,
-}: {
-  isLoading: boolean;
-  showingCount: number;
-  totalCount: number;
-}) {
-  return (
-    <div className="flex flex-col items-start justify-between gap-4 border-t border-slate-100 bg-slate-50/30 px-6 py-4 sm:flex-row sm:items-center">
-      <p className="text-body-sm text-slate-500">
-        전체 {totalCount.toLocaleString()}개 중{" "}
-        <span className="font-semibold text-on-surface">{showingCount}개</span>{" "}
-        표시
-      </p>
       {isLoading ? (
-        <p className="text-body-sm text-slate-500">불러오는 중...</p>
+        <div className="border-t border-slate-100 bg-slate-50/30 px-6 py-4">
+          <p className="text-body-sm text-slate-500">불러오는 중...</p>
+        </div>
       ) : null}
-    </div>
+    </section>
   );
 }
 

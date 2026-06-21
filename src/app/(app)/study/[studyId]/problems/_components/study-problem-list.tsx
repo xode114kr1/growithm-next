@@ -20,7 +20,6 @@ export default function StudyProblemList({
   initialHasNextPage,
   initialItems,
   studyId,
-  totalCount,
 }: {
   clearedFiltersQueryString: string;
   filters: StudyProblemFilters;
@@ -28,7 +27,6 @@ export default function StudyProblemList({
   initialHasNextPage: boolean;
   initialItems: StudyProblemListItem[];
   studyId: string;
-  totalCount: number;
 }) {
   const [items, setItems] = useState(initialItems);
   const [nextPage, setNextPage] = useState(2);
@@ -150,15 +148,8 @@ export default function StudyProblemList({
         {hasNextPage ? (
           <div aria-hidden="true" className="h-px" ref={sentinelRef} />
         ) : null}
-        <div className="flex flex-col items-start justify-between gap-4 border-t border-slate-100 bg-slate-50/30 px-6 py-4 sm:flex-row sm:items-center">
-          <p className="text-body-sm text-slate-500">
-            Showing{" "}
-            <span className="font-semibold text-on-surface">
-              {items.length}
-            </span>{" "}
-            of {totalCount.toLocaleString()} study problems
-          </p>
-          <div className="flex items-center gap-3">
+        {hasActiveFilters || isLoading ? (
+          <div className="flex items-center justify-end gap-3 border-t border-slate-100 bg-slate-50/30 px-6 py-4">
             {hasActiveFilters ? (
               <Link
                 className="text-body-sm font-semibold text-secondary hover:underline"
@@ -171,7 +162,7 @@ export default function StudyProblemList({
               <p className="text-body-sm text-slate-500">불러오는 중...</p>
             ) : null}
           </div>
-        </div>
+        ) : null}
         <StudyProblemModal
           onClose={() => setSelectedProblem(null)}
           onSelectProblem={setSelectedProblem}

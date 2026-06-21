@@ -75,7 +75,6 @@ export default async function StudyProblemsPage({
         initialItems={initialItems}
         key={createStudyProblemListKey(filters)}
         studyId={studyId}
-        totalCount={filteredCount}
       />
     </>
   );

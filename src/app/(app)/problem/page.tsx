@@ -57,7 +57,6 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
           initialHasNextPage={PROBLEM_PAGE_SIZE < totalCount}
           initialItems={initialItems}
           key={createProblemListKey(filters)}
-          totalCount={totalCount}
         />
       </div>
     </main>
