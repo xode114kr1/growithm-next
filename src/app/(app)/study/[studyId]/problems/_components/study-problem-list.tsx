@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import type {
@@ -34,33 +34,82 @@ export default function StudyProblemList({
   const [nextPage, setNextPage] = useState(2);
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const [isLoading, setIsLoading] = useState(false);
+  const abortControllerRef = useRef<AbortController>(null);
   const isLoadingRef = useRef(false);
+  const loadedPagesRef = useRef(new Set([1]));
+  const isMountedRef = useRef(false);
   const [selectedProblem, setSelectedProblem] =
     useState<StudyProblemListItem | null>(null);
 
-  const loadNextPage = useCallback(async () => {
-    if (!hasNextPage || isLoadingRef.current) return;
+  useEffect(() => {
+    isMountedRef.current = true;
 
+    return () => {
+      isMountedRef.current = false;
+      abortControllerRef.current?.abort();
+    };
+  }, []);
+
+  const loadNextPage = useCallback(async () => {
+    const requestedPage = nextPage;
+
+    if (
+      !hasNextPage ||
+      isLoadingRef.current ||
+      loadedPagesRef.current.has(requestedPage)
+    ) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    abortControllerRef.current = controller;
     isLoadingRef.current = true;
+    loadedPagesRef.current.add(requestedPage);
     setIsLoading(true);
 
     try {
-      const searchParams = createStudyProblemSearchParams(nextPage, filters);
+      const searchParams = createStudyProblemSearchParams(
+        requestedPage,
+        filters,
+      );
       const response = await fetch(
         `/api/studies/${studyId}/problems?${searchParams}`,
+        { signal: controller.signal },
       );
 
-      if (!response.ok) return;
+      if (!response.ok) {
+        return;
+      }
 
       const data =
         (await response.json()) as StudyProblemInfiniteScrollResponse;
 
-      setItems((currentItems) => [...currentItems, ...data.items]);
+      if (controller.signal.aborted || data.currentPage !== requestedPage) {
+        return;
+      }
+
+      setItems((currentItems) => {
+        const currentItemIds = new Set(currentItems.map((item) => item.id));
+        const uniqueNextItems = data.items.filter(
+          (item) => !currentItemIds.has(item.id),
+        );
+
+        return [...currentItems, ...uniqueNextItems];
+      });
       setNextPage(data.currentPage + 1);
       setHasNextPage(data.hasNextPage);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
     } finally {
-      isLoadingRef.current = false;
-      setIsLoading(false);
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+        isLoadingRef.current = false;
+
+        if (isMountedRef.current) {
+          setIsLoading(false);
+        }
+      }
     }
   }, [filters, hasNextPage, nextPage, studyId]);
   const sentinelRef = useInfiniteScroll({
