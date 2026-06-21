@@ -15,9 +15,11 @@ import { FriendItem } from "./friend-item";
 const FRIEND_LIST_PAGE_SIZE = 6;
 
 export function FriendList({
+  emptyMessage,
   friends,
   onOpenProfile,
 }: {
+  emptyMessage: string;
   friends: FriendProfile[];
   onOpenProfile: (profile: FriendProfile) => void;
 }) {
@@ -35,7 +37,7 @@ export function FriendList({
   if (friends.length === 0) {
     return (
       <div className="app-card p-10 text-center text-body-sm text-on-surface-variant">
-        아직 추가된 친구가 없습니다.
+        {emptyMessage}
       </div>
     );
   }

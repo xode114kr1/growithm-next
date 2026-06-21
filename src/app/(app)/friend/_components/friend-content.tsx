@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useMemo, useState } from "react";
+import { type ReactNode, useState } from "react";
 
 import { FriendProfileModal } from "@/components/friend-profile-modal";
 import type {
@@ -14,50 +14,43 @@ import {
   ReceivedRequestList,
   SentRequestList,
 } from "./friend-list";
-import { FriendSearchSection } from "./friend-search-section";
+import { FriendAddModal } from "./friend-add-modal";
+import { FriendListSearch } from "./friend-list-search";
 
 export default function FriendContent({
+  friendQuery,
   friends,
   receivedRequests,
   searchResults,
   sentRequests,
 }: {
+  friendQuery: string;
   friends: FriendProfile[];
   receivedRequests: FriendRequest[];
   searchResults: FriendSearchResult[];
   sentRequests: FriendRequest[];
 }) {
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedProfile, setSelectedProfile] = useState<FriendProfile | null>(
     null,
   );
-  const filteredSearchResults = useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLocaleLowerCase();
-
-    if (!normalizedQuery) {
-      return [];
-    }
-
-    return searchResults
-      .filter((profile) =>
-        profile.name.toLocaleLowerCase().includes(normalizedQuery),
-      )
-      .slice(0, 12);
-  }, [searchQuery, searchResults]);
 
   return (
     <>
       <div className="grid grid-cols-1 gap-gutter xl:grid-cols-12">
         <section className="space-y-6 xl:col-span-8">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <h1 className="section-title text-on-surface">내 친구</h1>
-            <FriendSearchSection
-              onSearchQueryChange={setSearchQuery}
-              searchQuery={searchQuery}
-              searchResults={filteredSearchResults}
-            />
+          <div className="flex items-center justify-between gap-3">
+            <FriendListSearch query={friendQuery} />
+            <FriendAddModal searchResults={searchResults} />
           </div>
-          <FriendList friends={friends} onOpenProfile={setSelectedProfile} />
+          <FriendList
+            emptyMessage={
+              friendQuery.trim()
+                ? "검색 조건에 맞는 친구가 없습니다."
+                : "아직 추가된 친구가 없습니다."
+            }
+            friends={friends}
+            onOpenProfile={setSelectedProfile}
+          />
         </section>
 
         <aside className="space-y-gutter xl:sticky xl:top-28 xl:col-span-4 xl:self-start">

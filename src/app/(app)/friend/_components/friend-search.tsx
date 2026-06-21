@@ -4,27 +4,22 @@ import { SearchResultActions } from "./friend-action-buttons";
 import type { FriendSearchResult } from "@/types/friend";
 
 export function FriendSearchInput({
-  onFocus,
   onQueryChange,
   query,
 }: {
-  onFocus: () => void;
   onQueryChange: (query: string) => void;
   query: string;
 }) {
   return (
-    <label className="relative block">
-      <span
-        aria-hidden="true"
-        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-      >
-        Search
+    <label className="block">
+      <span className="mb-2 block text-label-caps text-slate-500">
+        친구 검색
       </span>
       <input
-        className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-20 pr-4 text-body-md shadow-sm outline-none transition-all focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
-        onFocus={onFocus}
+        autoFocus
+        className="input-field"
         onChange={(event) => onQueryChange(event.target.value)}
-        placeholder="친구를 검색하세요"
+        placeholder="사용자 이름 입력"
         type="search"
         value={query}
       />
@@ -46,7 +41,7 @@ export function SearchResultList({
   results: FriendSearchResult[];
 }) {
   return (
-    <section className="absolute left-0 right-0 top-full z-20 mt-3 rounded-xl border border-slate-200 bg-white p-3 shadow-xl">
+    <section className="rounded-xl border border-slate-200 bg-white p-3">
       {results.length === 0 ? (
         <div className="px-3 py-4">
           <div className="text-body-md font-semibold text-on-background">
