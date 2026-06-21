@@ -1,18 +1,33 @@
 import ProblemTierBadge from "@/components/ui/problem-tier-badge";
-import { ProblemListItem } from "@/types/problem";
+import type { ProblemListItem } from "@/types/problem";
 import {
   getProblemStatusBadgeClass,
   getProblemStatusLabel,
 } from "@/utils/problem";
 import Link from "next/link";
+import type { CSSProperties, RefCallback } from "react";
 
-export default function ProblemItem({ problem }: { problem: ProblemListItem }) {
+type ProblemItemProps = {
+  measureElement?: RefCallback<HTMLTableRowElement>;
+  problem: ProblemListItem;
+  style?: CSSProperties;
+  virtualIndex?: number;
+};
+
+export default function ProblemItem({
+  measureElement,
+  problem,
+  style,
+  virtualIndex,
+}: ProblemItemProps) {
   return (
     <tr
-      className="group transition-colors hover:bg-slate-50/80"
-      key={problem.id}
+      className="group absolute left-0 top-0 grid w-full grid-cols-[minmax(0,1fr)_auto] border-b border-slate-50 transition-colors hover:bg-slate-50/80 md:grid-cols-[minmax(360px,1.6fr)_minmax(260px,1fr)_180px]"
+      data-index={virtualIndex}
+      ref={measureElement}
+      style={style}
     >
-      <td className="min-w-90 max-w-140 px-6 py-5">
+      <td className="col-span-2 min-w-0 px-4 pb-3 pt-4 md:col-span-1 md:min-w-90 md:max-w-140 md:px-6 md:py-5">
         <Link
           className="block rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-secondary-container"
           href={`/problem/${problem.id}`}
@@ -30,7 +45,8 @@ export default function ProblemItem({ problem }: { problem: ProblemListItem }) {
           </div>
         </Link>
       </td>
-      <td className="px-6 py-5">
+
+      <td className="min-w-0 px-4 pb-4 pt-0 md:px-6 md:py-5">
         <div className="flex flex-wrap gap-1.5">
           {problem.categories.length > 0 ? (
             problem.categories.map((tag) => (
@@ -46,7 +62,8 @@ export default function ProblemItem({ problem }: { problem: ProblemListItem }) {
           )}
         </div>
       </td>
-      <td className="px-6 py-5">
+
+      <td className="px-4 pb-4 pt-0 md:px-6 md:py-5">
         <ProblemSubmissionState problem={problem} />
       </td>
     </tr>
@@ -55,7 +72,7 @@ export default function ProblemItem({ problem }: { problem: ProblemListItem }) {
 
 function ProblemSubmissionState({ problem }: { problem: ProblemListItem }) {
   return (
-    <div className="min-w-36">
+    <div className="flex min-w-0 justify-end md:block md:min-w-36">
       <span className={getProblemStatusBadgeClass(problem.status)}>
         {getProblemStatusLabel(problem.status)}
       </span>

@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 
-import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
+import { useVirtualizedLoadMore } from "@/hooks/use-virtualized-load-more";
+import { useWindowVirtualizedList } from "@/hooks/use-window-virtualized-list";
 import type {
   ProblemEmptyStateReason,
   ProblemFiltersState,
@@ -11,6 +12,10 @@ import type {
   ProblemListItem,
 } from "@/types/problem";
 import ProblemItem from "./problem-item";
+
+const PROBLEM_ROW_ESTIMATE_HEIGHT = 112;
+const PROBLEM_LIST_OVERSCAN = 6;
+const LOAD_MORE_THRESHOLD = 5;
 
 export default function ProblemList({
   emptyStateReason,
@@ -28,6 +33,14 @@ export default function ProblemList({
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const [isLoading, setIsLoading] = useState(false);
 
+  const { containerRef, rowVirtualizer, totalSize, virtualItems } =
+    useWindowVirtualizedList<HTMLElement>({
+      count: items.length,
+      estimateSize: () => PROBLEM_ROW_ESTIMATE_HEIGHT,
+      getItemKey: (index) => items[index]?.id ?? index,
+      overscan: PROBLEM_LIST_OVERSCAN,
+    });
+
   const loadNextPage = useCallback(async () => {
     if (!hasNextPage || isLoading) return;
 
@@ -40,6 +53,7 @@ export default function ProblemList({
       if (!response.ok) return;
 
       const data = (await response.json()) as ProblemInfiniteScrollResponse;
+
       const nextItems = data.items.map((item) => ({
         ...item,
         createdAt: new Date(item.createdAt),
@@ -55,33 +69,58 @@ export default function ProblemList({
     }
   }, [filters, hasNextPage, isLoading, nextPage]);
 
-  const sentinelRef = useInfiniteScroll({
-    enabled: hasNextPage && !isLoading,
+  useVirtualizedLoadMore({
+    hasNextPage,
+    isLoading,
+    itemCount: items.length,
     onLoadMore: loadNextPage,
+    threshold: LOAD_MORE_THRESHOLD,
+    virtualItems,
   });
 
   return (
-    <section className="app-card overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-left">
-          <thead>
-            <tr className="border-b border-slate-100 bg-slate-50/50">
+    <section className="app-card overflow-hidden" ref={containerRef}>
+      <div className="overflow-hidden md:overflow-x-auto">
+        <table className="grid w-full border-collapse text-left">
+          <thead className="hidden md:grid">
+            <tr className="grid grid-cols-[minmax(360px,1.6fr)_minmax(260px,1fr)_180px] border-b border-slate-100 bg-slate-50/50">
               <TableHead>문제 정보</TableHead>
               <TableHead>태그</TableHead>
               <TableHead>상태</TableHead>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-50">
-            {items.map((problem) => (
-              <ProblemItem problem={problem} key={problem.id} />
-            ))}
+
+          <tbody
+            className="relative grid divide-y divide-slate-50"
+            style={{
+              height: `${totalSize}px`,
+            }}
+          >
+            {virtualItems.map((virtualItem) => {
+              const problem = items[virtualItem.index];
+
+              if (!problem) return null;
+
+              return (
+                <ProblemItem
+                  key={virtualItem.key}
+                  measureElement={rowVirtualizer.measureElement}
+                  problem={problem}
+                  style={{
+                    transform: `translateY(${
+                      virtualItem.start - rowVirtualizer.options.scrollMargin
+                    }px)`,
+                  }}
+                  virtualIndex={virtualItem.index}
+                />
+              );
+            })}
           </tbody>
         </table>
       </div>
+
       {emptyStateReason ? <EmptyState reason={emptyStateReason} /> : null}
-      {hasNextPage ? (
-        <div aria-hidden="true" className="h-px" ref={sentinelRef} />
-      ) : null}
+
       {isLoading ? (
         <div className="border-t border-slate-100 bg-slate-50/30 px-6 py-4">
           <p className="text-body-sm text-slate-500">불러오는 중...</p>
@@ -104,7 +143,6 @@ function createProblemSearchParams(page: number, filters: ProblemFiltersState) {
   return searchParams.toString();
 }
 
-// 현재 query에 표시할 행이 없을 때 명확한 대체 화면을 보여준다.
 function EmptyState({ reason }: { reason: ProblemEmptyStateReason }) {
   if (reason === "no-filter-results") {
     return (
@@ -134,12 +172,11 @@ function EmptyState({ reason }: { reason: ProblemEmptyStateReason }) {
   );
 }
 
-// 테이블 헤더에 일관된 스타일을 적용한다.
 function TableHead({
   children,
   className,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }) {
   return (
