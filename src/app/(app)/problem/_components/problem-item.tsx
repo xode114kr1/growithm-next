@@ -1,16 +1,31 @@
 import ProblemTierBadge from "@/components/ui/problem-tier-badge";
-import { ProblemListItem } from "@/types/problem";
+import type { ProblemListItem } from "@/types/problem";
 import {
   getProblemStatusBadgeClass,
   getProblemStatusLabel,
 } from "@/utils/problem";
 import Link from "next/link";
+import type { CSSProperties, RefCallback } from "react";
 
-export default function ProblemItem({ problem }: { problem: ProblemListItem }) {
+type ProblemItemProps = {
+  measureElement?: RefCallback<HTMLTableRowElement>;
+  problem: ProblemListItem;
+  style?: CSSProperties;
+  virtualIndex?: number;
+};
+
+export default function ProblemItem({
+  measureElement,
+  problem,
+  style,
+  virtualIndex,
+}: ProblemItemProps) {
   return (
     <tr
-      className="group transition-colors hover:bg-slate-50/80"
-      key={problem.id}
+      className="group absolute left-0 top-0 grid w-full grid-cols-[minmax(360px,1.6fr)_minmax(260px,1fr)_180px] transition-colors hover:bg-slate-50/80"
+      data-index={virtualIndex}
+      ref={measureElement}
+      style={style}
     >
       <td className="min-w-90 max-w-140 px-6 py-5">
         <Link
@@ -30,6 +45,7 @@ export default function ProblemItem({ problem }: { problem: ProblemListItem }) {
           </div>
         </Link>
       </td>
+
       <td className="px-6 py-5">
         <div className="flex flex-wrap gap-1.5">
           {problem.categories.length > 0 ? (
@@ -46,6 +62,7 @@ export default function ProblemItem({ problem }: { problem: ProblemListItem }) {
           )}
         </div>
       </td>
+
       <td className="px-6 py-5">
         <ProblemSubmissionState problem={problem} />
       </td>
