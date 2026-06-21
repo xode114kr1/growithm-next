@@ -17,6 +17,10 @@ import type {
   StudyProblemPageSearchParams,
 } from "@/types/study";
 
+type StudyProblemApiSearchParams = StudyProblemPageSearchParams & {
+  page?: string;
+};
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ studyId: string }> },
@@ -74,7 +78,7 @@ export async function GET(
 
 function createStudyProblemSearchParams(
   searchParams: URLSearchParams,
-): StudyProblemPageSearchParams {
+): StudyProblemApiSearchParams {
   return {
     member: searchParams.get("member") ?? undefined,
     page: searchParams.get("page") ?? undefined,

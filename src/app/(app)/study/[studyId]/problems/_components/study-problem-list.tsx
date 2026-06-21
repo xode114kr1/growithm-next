@@ -1,6 +1,5 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -11,29 +10,20 @@ import StudyProblemModal from "./study-problem-modal";
 
 export default function StudyProblemList({
   clearedFiltersQueryString,
-  currentPage,
-  filteredCount,
   hasActiveFilters,
-  pageSize,
-  problems,
-  queryString,
+  initialItems,
   studyId,
-  totalPages,
+  totalCount,
 }: {
   clearedFiltersQueryString: string;
-  currentPage: number;
-  filteredCount: number;
   hasActiveFilters: boolean;
-  pageSize: number;
-  problems: StudyProblemListItem[];
-  queryString: string;
+  initialHasNextPage: boolean;
+  initialItems: StudyProblemListItem[];
   studyId: string;
-  totalPages: number;
+  totalCount: number;
 }) {
   const [selectedProblem, setSelectedProblem] =
     useState<StudyProblemListItem | null>(null);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + problems.length;
 
   return (
     <section className="app-card overflow-hidden">
@@ -49,7 +39,7 @@ export default function StudyProblemList({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {problems.map((problem) => (
+              {initialItems.map((problem) => (
                 <StudyProblemItem
                   key={problem.id}
                   onSelect={setSelectedProblem}
@@ -59,12 +49,9 @@ export default function StudyProblemList({
             </tbody>
           </table>
         </div>
-        {problems.length === 0 ? (
+        {initialItems.length === 0 ? (
           <EmptyState
-            clearFiltersHref={getStudyProblemsHref(
-              1,
-              clearedFiltersQueryString,
-            )}
+            clearFiltersHref={getStudyProblemsHref(clearedFiltersQueryString)}
             hasActiveFilters={hasActiveFilters}
           />
         ) : null}
@@ -72,66 +59,27 @@ export default function StudyProblemList({
           <p className="text-body-sm text-slate-500">
             Showing{" "}
             <span className="font-semibold text-on-surface">
-              {filteredCount > 0 ? startIndex + 1 : "0"} - {endIndex}
+              {initialItems.length}
             </span>{" "}
-            of {filteredCount.toLocaleString()} study problems
+            of {totalCount.toLocaleString()} study problems
           </p>
-          <div className="flex items-center gap-2">
-            {hasActiveFilters ? (
-              <Link
-                className="text-body-sm font-semibold text-secondary hover:underline"
-                href={getStudyProblemsHref(1, clearedFiltersQueryString)}
-              >
-                Clear filters
-              </Link>
-            ) : null}
-            <PaginationControls
-              currentPage={currentPage}
-              queryString={queryString}
-              totalPages={totalPages}
-            />
-          </div>
+          {hasActiveFilters ? (
+            <Link
+              className="text-body-sm font-semibold text-secondary hover:underline"
+              href={getStudyProblemsHref(clearedFiltersQueryString)}
+            >
+              Clear filters
+            </Link>
+          ) : null}
         </div>
         <StudyProblemModal
           onClose={() => setSelectedProblem(null)}
           onSelectProblem={setSelectedProblem}
           problem={selectedProblem}
-          problems={problems}
+          problems={initialItems}
           studyId={studyId}
         />
     </section>
-  );
-}
-
-function PaginationControls({
-  currentPage,
-  queryString,
-  totalPages,
-}: {
-  currentPage: number;
-  queryString: string;
-  totalPages: number;
-}) {
-  return (
-    <div className="flex items-center gap-1">
-      <PaginationLink
-        aria-label="이전 페이지"
-        disabled={currentPage === 1}
-        href={getStudyProblemsHref(currentPage - 1, queryString)}
-      >
-        <ChevronLeft aria-hidden="true" size={16} />
-      </PaginationLink>
-      <span className="px-2 text-body-sm font-semibold text-on-surface">
-        {currentPage} / {totalPages}
-      </span>
-      <PaginationLink
-        aria-label="다음 페이지"
-        disabled={currentPage === totalPages}
-        href={getStudyProblemsHref(currentPage + 1, queryString)}
-      >
-        <ChevronRight aria-hidden="true" size={16} />
-      </PaginationLink>
-    </div>
   );
 }
 
@@ -170,54 +118,8 @@ function EmptyState({
   );
 }
 
-function PaginationLink({
-  children,
-  disabled,
-  href,
-  ...props
-}: {
-  children: React.ReactNode;
-  disabled: boolean;
-  href: string;
-  "aria-label": string;
-}) {
-  const className =
-    "flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-100";
-
-  if (disabled) {
-    return (
-      <span
-        aria-disabled="true"
-        aria-label={props["aria-label"]}
-        className={`${className} cursor-not-allowed text-slate-300`}
-      >
-        {children}
-      </span>
-    );
-  }
-
-  return (
-    <Link
-      aria-label={props["aria-label"]}
-      className={className}
-      href={href}
-      scroll={false}
-    >
-      {children}
-    </Link>
-  );
-}
-
-function getStudyProblemsHref(page: number, queryString: string) {
-  const params = new URLSearchParams(queryString);
-
-  if (page > 1) {
-    params.set("page", String(page));
-  }
-
-  const nextQueryString = params.toString();
-
-  return nextQueryString ? `?${nextQueryString}` : "?";
+function getStudyProblemsHref(queryString: string) {
+  return queryString ? `?${queryString}` : "?";
 }
 
 function TableHead({ children }: { children: React.ReactNode }) {

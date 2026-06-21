@@ -52,7 +52,6 @@ export type ProblemInfiniteScrollResponse =
   InfiniteScrollResponse<ProblemInfiniteScrollItem>;
 
 export type ProblemPageSearchParams = {
-  page?: string | string[];
   platform?: string | string[];
   q?: string | string[];
   sort?: string | string[];

@@ -16,6 +16,10 @@ import type {
   ProblemPageSearchParams,
 } from "@/types/problem";
 
+type ProblemApiSearchParams = ProblemPageSearchParams & {
+  page?: string;
+};
+
 export async function GET(request: NextRequest) {
   const session = await auth();
   const userId = session?.user?.id;
@@ -59,7 +63,7 @@ export async function GET(request: NextRequest) {
 
 function createProblemSearchParams(
   searchParams: URLSearchParams,
-): ProblemPageSearchParams {
+): ProblemApiSearchParams {
   return {
     page: searchParams.get("page") ?? undefined,
     platform: searchParams.get("platform") ?? undefined,
