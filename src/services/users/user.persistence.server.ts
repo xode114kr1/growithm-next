@@ -23,17 +23,40 @@ export async function findUserScore(userId: string) {
   });
 }
 
-// 제외할 사용자를 뺀 사용자 요약 목록을 조회한다.
-export async function findUsersExcluding(excludedUserId: string) {
+// 검색어와 일치하는 사용자를 현재 사용자 제외 후 조회한다.
+export async function findUsersByQuery({
+  excludedUserId,
+  limit,
+  query,
+}: {
+  excludedUserId: string;
+  limit: number;
+  query: string;
+}) {
   return prisma.user.findMany({
     orderBy: {
       name: "asc",
     },
     select: userSummarySelect,
+    take: limit,
     where: {
       id: {
         not: excludedUserId,
       },
+      OR: [
+        {
+          name: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+        {
+          email: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+      ],
     },
   });
 }

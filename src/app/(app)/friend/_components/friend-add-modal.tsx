@@ -2,20 +2,18 @@
 
 import { Plus } from "lucide-react";
 import Image from "next/image";
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 import type { FriendProfile, FriendSearchResult } from "@/types/friend";
 
 import { SearchResultActions } from "./friend-action-buttons";
 import { FriendProfileModal } from "./friend-profile-modal";
 
-export function FriendAddModal({
-  searchResults,
-}: {
-  searchResults: FriendSearchResult[];
-}) {
+export function FriendAddModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<FriendSearchResult[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [pendingRequestIds, setPendingRequestIds] = useState<Set<string>>(
     () => new Set(),
   );
@@ -23,19 +21,57 @@ export function FriendAddModal({
     null,
   );
   const titleId = useId();
-  const filteredSearchResults = useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLocaleLowerCase();
 
-    if (!normalizedQuery) {
-      return [];
+  useEffect(() => {
+    const query = searchQuery.trim();
+
+    if (!isOpen || !query) {
+      return;
     }
 
-    return searchResults
-      .filter((profile) =>
-        profile.name.toLocaleLowerCase().includes(normalizedQuery),
-      )
-      .slice(0, 12);
-  }, [searchQuery, searchResults]);
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      try {
+        const searchParams = new URLSearchParams({ query });
+        const response = await fetch(`/api/users?${searchParams}`, {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          setSearchResults([]);
+          return;
+        }
+
+        setSearchResults((await response.json()) as FriendSearchResult[]);
+      } catch (error) {
+        if (!(error instanceof DOMException && error.name === "AbortError")) {
+          setSearchResults([]);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [isOpen, searchQuery]);
+
+  function closeModal() {
+    setIsOpen(false);
+    setSearchQuery("");
+    setSearchResults([]);
+    setIsLoading(false);
+  }
+
+  function handleSearchQueryChange(query: string) {
+    setSearchQuery(query);
+    setSearchResults([]);
+    setIsLoading(Boolean(query.trim()));
+  }
 
   function handleAddFriend(profileId: string) {
     setPendingRequestIds((current) => {
@@ -65,7 +101,7 @@ export function FriendAddModal({
           <button
             aria-label="친구 추가 모달 닫기"
             className="absolute inset-0 cursor-default"
-            onClick={() => setIsOpen(false)}
+            onClick={closeModal}
             type="button"
           />
           <section className="relative flex max-h-[calc(100svh-4rem)] w-full max-w-xl flex-col overflow-hidden rounded-xl border border-slate-100 bg-white shadow-2xl shadow-slate-950/20">
@@ -82,7 +118,7 @@ export function FriendAddModal({
               <button
                 aria-label="친구 추가 모달 닫기"
                 className="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-50 text-xl font-semibold text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary"
-                onClick={() => setIsOpen(false)}
+                onClick={closeModal}
                 type="button"
               >
                 ×
@@ -90,19 +126,20 @@ export function FriendAddModal({
             </div>
             <div className="space-y-4 overflow-y-auto p-6">
               <FriendSearchInput
-                onQueryChange={setSearchQuery}
+                onQueryChange={handleSearchQueryChange}
                 query={searchQuery}
               />
               {searchQuery.trim() ? (
                 <SearchResultList
+                  isLoading={isLoading}
                   onAddFriend={handleAddFriend}
                   onOpenProfile={(profile) => {
-                    setIsOpen(false);
+                    closeModal();
                     setSelectedProfile(profile);
                   }}
                   pendingRequestIds={pendingRequestIds}
                   query={searchQuery}
-                  results={filteredSearchResults}
+                  results={searchResults}
                 />
               ) : (
                 <p className="py-8 text-center text-body-sm text-slate-500">
@@ -148,12 +185,14 @@ function FriendSearchInput({
 }
 
 function SearchResultList({
+  isLoading,
   onAddFriend,
   onOpenProfile,
   pendingRequestIds,
   query,
   results,
 }: {
+  isLoading: boolean;
   onAddFriend: (profileId: string) => void;
   onOpenProfile: (profile: FriendSearchResult) => void;
   pendingRequestIds: Set<string>;
@@ -162,7 +201,11 @@ function SearchResultList({
 }) {
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-3">
-      {results.length === 0 ? (
+      {isLoading ? (
+        <p className="px-3 py-4 text-body-sm text-slate-500">
+          검색 중...
+        </p>
+      ) : results.length === 0 ? (
         <div className="px-3 py-4">
           <div className="text-body-md font-semibold text-on-background">
             검색 결과가 없습니다.
