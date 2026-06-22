@@ -119,23 +119,17 @@ export function FriendAddModal() {
                 onQueryChange={handleSearchQueryChange}
                 query={searchQuery}
               />
-              {searchQuery.trim() ? (
-                <SearchResultList
-                  isLoading={isLoading}
-                  onAddFriend={handleAddFriend}
-                  onOpenProfile={(profile) => {
-                    closeModal();
-                    setSelectedProfile(profile);
-                  }}
-                  pendingRequestIds={pendingRequestIds}
-                  query={searchQuery}
-                  results={searchResults}
-                />
-              ) : (
-                <p className="py-8 text-center text-body-sm text-slate-500">
-                  추가할 친구의 이름을 입력하세요.
-                </p>
-              )}
+              <SearchResultList
+                isLoading={isLoading}
+                onAddFriend={handleAddFriend}
+                onOpenProfile={(profile) => {
+                  closeModal();
+                  setSelectedProfile(profile);
+                }}
+                pendingRequestIds={pendingRequestIds}
+                query={searchQuery}
+                results={searchResults}
+              />
             </div>
           </section>
         </div>
@@ -189,9 +183,15 @@ function SearchResultList({
   query: string;
   results: FriendSearchResult[];
 }) {
+  const hasQuery = Boolean(query.trim());
+
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-3">
-      {isLoading ? (
+    <section className="h-80 overflow-hidden rounded-xl border border-slate-200 bg-white p-3">
+      {!hasQuery ? (
+        <p className="px-3 py-4 text-body-sm text-slate-500">
+          추가할 친구의 이름을 입력하세요.
+        </p>
+      ) : isLoading ? (
         <p className="px-3 py-4 text-body-sm text-slate-500">검색 중...</p>
       ) : results.length === 0 ? (
         <div className="px-3 py-4">
@@ -203,7 +203,7 @@ function SearchResultList({
           </div>
         </div>
       ) : (
-        <div className="grid max-h-96 gap-2 overflow-y-auto">
+        <div className="grid h-full gap-2 overflow-y-auto">
           {results.map((profile) => (
             <div
               className="flex items-center gap-3 rounded-lg border border-slate-100 p-2.5"
