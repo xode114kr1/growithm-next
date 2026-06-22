@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useId, useState } from "react";
 
+import { searchUsers } from "@/services/users/user.client";
 import type { FriendProfile, FriendSearchResult } from "@/types/friend";
 
 import { SearchResultActions } from "./friend-action-buttons";
@@ -29,17 +30,9 @@ export function FriendAddModal() {
       return;
     }
 
-    async function searchUsers() {
+    async function loadSearchResults() {
       try {
-        const searchParams = new URLSearchParams({ query });
-        const response = await fetch(`/api/users?${searchParams}`);
-
-        if (!response.ok) {
-          setSearchResults([]);
-          return;
-        }
-
-        setSearchResults((await response.json()) as FriendSearchResult[]);
+        setSearchResults(await searchUsers(query));
       } catch {
         setSearchResults([]);
       } finally {
@@ -47,7 +40,7 @@ export function FriendAddModal() {
       }
     }
 
-    searchUsers();
+    loadSearchResults();
   }, [isOpen, searchQuery]);
 
   function closeModal() {

@@ -4,11 +4,16 @@ import {
   createPersonalTier,
   createUserSummary,
 } from "@/services/users/user.helper";
+import { findFriendRelationsForUserIds } from "@/services/friends/friend.persistence.server";
 import {
   findUsersByQuery,
   findUserScore,
 } from "@/services/users/user.persistence.server";
-import type { UserPersonalTier, UserSummary } from "@/types/user";
+import type {
+  FriendRelationStatus,
+  FriendSearchResult,
+} from "@/types/friend";
+import type { UserPersonalTier } from "@/types/user";
 
 // 사용자의 점수를 조회해 개인 티어 정보를 만든다.
 export async function getUserPersonalTier(
@@ -24,13 +29,13 @@ export async function getUserPersonalTier(
 }
 
 // 검색어와 일치하는 사용자 목록을 현재 사용자 제외 후 조회한다.
-export async function searchUsers({
+export async function searchUsersWithRelation({
   excludedUserId,
   query,
 }: {
   excludedUserId: string;
   query: string;
-}): Promise<UserSummary[]> {
+}): Promise<FriendSearchResult[]> {
   const normalizedQuery = query.trim();
 
   if (!normalizedQuery) {
@@ -42,6 +47,37 @@ export async function searchUsers({
     limit: 12,
     query: normalizedQuery,
   });
+  const userSummaries = users.map(createUserSummary);
+  const { friendships, receivedRequests, sentRequests } =
+    await findFriendRelationsForUserIds({
+      userId: excludedUserId,
+      userIds: userSummaries.map((user) => user.id),
+    });
+  const relationStatusByUserId = new Map<string, FriendRelationStatus>();
+  const requestIdByUserId = new Map<string, string>();
 
-  return users.map(createUserSummary);
+  for (const friendship of friendships) {
+    relationStatusByUserId.set(
+      friendship.userAId === excludedUserId
+        ? friendship.userBId
+        : friendship.userAId,
+      "friend",
+    );
+  }
+
+  for (const request of receivedRequests) {
+    relationStatusByUserId.set(request.requesterId, "received_request");
+    requestIdByUserId.set(request.requesterId, request.id);
+  }
+
+  for (const request of sentRequests) {
+    relationStatusByUserId.set(request.addresseeId, "sent_request");
+    requestIdByUserId.set(request.addresseeId, request.id);
+  }
+
+  return userSummaries.map((user) => ({
+    ...user,
+    relationStatus: relationStatusByUserId.get(user.id) ?? "none",
+    requestId: requestIdByUserId.get(user.id),
+  }));
 }

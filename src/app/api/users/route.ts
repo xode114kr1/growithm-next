@@ -1,9 +1,7 @@
 import type { NextRequest } from "next/server";
 
 import { auth } from "@/lib/auth/auth";
-import { getFriendRelationsForUsers } from "@/services/friends/friend.query";
-import { searchUsers } from "@/services/users/user.query";
-import type { FriendSearchResult } from "@/types/friend";
+import { searchUsersWithRelation } from "@/services/users/user.query";
 
 export async function GET(request: NextRequest) {
   const session = await auth();
@@ -14,13 +12,9 @@ export async function GET(request: NextRequest) {
   }
 
   const query = request.nextUrl.searchParams.get("query") ?? "";
-  const users = await searchUsers({
+  const results = await searchUsersWithRelation({
     excludedUserId: userId,
     query,
-  });
-  const results: FriendSearchResult[] = await getFriendRelationsForUsers({
-    userId,
-    users,
   });
 
   return Response.json(results);
