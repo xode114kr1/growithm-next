@@ -1,4 +1,5 @@
 import type { FriendSearchResult } from "@/types/friend";
+import type { UserProfile } from "@/types/user";
 
 export async function searchUsers(query: string) {
   const searchParams = new URLSearchParams({ query });
@@ -9,4 +10,14 @@ export async function searchUsers(query: string) {
   }
 
   return (await response.json()) as FriendSearchResult[];
+}
+
+export async function getUserProfile(userId: string) {
+  const response = await fetch(`/api/users/${userId}`);
+
+  if (!response.ok) {
+    return null;
+  }
+
+  return (await response.json()) as UserProfile;
 }

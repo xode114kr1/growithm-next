@@ -60,3 +60,20 @@ export async function findUsersByQuery({
     },
   });
 }
+
+// 프로필 화면에 필요한 사용자 정보와 문제 수를 조회한다.
+export async function findUserProfile(userId: string) {
+  return prisma.user.findUnique({
+    select: {
+      _count: {
+        select: {
+          problemSubmissions: true,
+        },
+      },
+      ...userSummarySelect,
+    },
+    where: {
+      id: userId,
+    },
+  });
+}

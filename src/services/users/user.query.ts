@@ -6,6 +6,7 @@ import {
 } from "@/services/users/user.helper";
 import { findFriendRelationsForUserIds } from "@/services/friends/friend.persistence.server";
 import {
+  findUserProfile,
   findUsersByQuery,
   findUserScore,
 } from "@/services/users/user.persistence.server";
@@ -13,7 +14,7 @@ import type {
   FriendRelationStatus,
   FriendSearchResult,
 } from "@/types/friend";
-import type { UserPersonalTier } from "@/types/user";
+import type { UserPersonalTier, UserProfile } from "@/types/user";
 
 // 사용자의 점수를 조회해 개인 티어 정보를 만든다.
 export async function getUserPersonalTier(
@@ -26,6 +27,23 @@ export async function getUserPersonalTier(
   const user = await findUserScore(userId);
 
   return createPersonalTier(user?.score ?? 0);
+}
+
+// 사용자 프로필 모달에 표시할 정보를 조회한다.
+export async function getUserProfile(
+  userId: string,
+): Promise<UserProfile | null> {
+  const user = await findUserProfile(userId);
+
+  if (!user) {
+    return null;
+  }
+
+  return {
+    ...createUserSummary(user),
+    score: user.score,
+    solvedCount: user._count.problemSubmissions,
+  };
 }
 
 // 검색어와 일치하는 사용자 목록을 현재 사용자 제외 후 조회한다.

@@ -4,19 +4,17 @@ import { Plus } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useId, useState } from "react";
 
+import { ProfileModal } from "@/components/ui/profile-modal";
 import { searchUsers } from "@/services/users/user.client";
-import type { FriendProfile, FriendSearchResult } from "@/types/friend";
+import type { FriendSearchResult } from "@/types/friend";
 
 import { SearchResultActions } from "./friend-action-buttons";
-import { FriendProfileModal } from "./friend-profile-modal";
 
 export function FriendAddModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<FriendSearchResult[]>([]);
-  const [selectedProfile, setSelectedProfile] = useState<FriendProfile | null>(
-    null,
-  );
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const titleId = useId();
 
   useEffect(() => {
@@ -69,17 +67,17 @@ export function FriendAddModal() {
               />
               <SearchResultList
                 onOpenProfile={(profile) => {
-                  setSelectedProfile(profile);
+                  setSelectedUserId(profile.id);
                 }}
                 query={searchQuery}
                 results={searchResults}
               />
             </div>
           </section>
-          {selectedProfile ? (
-            <FriendProfileModal
-              onClose={() => setSelectedProfile(null)}
-              profile={selectedProfile}
+          {selectedUserId ? (
+            <ProfileModal
+              onClose={() => setSelectedUserId(null)}
+              userId={selectedUserId}
             />
           ) : null}
         </div>

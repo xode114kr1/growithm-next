@@ -2,12 +2,12 @@
 
 import { useCallback, useState } from "react";
 
+import { ProfileModal } from "@/components/ui/profile-modal";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { getFriendsPage } from "@/services/friends/friend.client";
 import type { FriendFiltersState, FriendProfile } from "@/types/friend";
 import { DeleteFriendButton } from "./friend-action-buttons";
 import { FriendItem } from "./friend-item";
-import { FriendProfileModal } from "./friend-profile-modal";
 
 export default function FriendList({
   filters,
@@ -22,9 +22,7 @@ export default function FriendList({
   const [nextPage, setNextPage] = useState(2);
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedProfile, setSelectedProfile] = useState<FriendProfile | null>(
-    null,
-  );
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   const loadNextPage = useCallback(async () => {
     if (!hasNextPage || isLoading) {
@@ -63,7 +61,7 @@ export default function FriendList({
         {friends.map((friend) => (
           <FriendItem
             key={friend.id}
-            onOpenProfile={setSelectedProfile}
+            onOpenProfile={(profile) => setSelectedUserId(profile.id)}
             profile={friend}
           >
             <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
@@ -85,10 +83,10 @@ export default function FriendList({
           친구가 없습니다.
         </div>
       ) : null}
-      {selectedProfile ? (
-        <FriendProfileModal
-          onClose={() => setSelectedProfile(null)}
-          profile={selectedProfile}
+      {selectedUserId ? (
+        <ProfileModal
+          onClose={() => setSelectedUserId(null)}
+          userId={selectedUserId}
         />
       ) : null}
     </section>

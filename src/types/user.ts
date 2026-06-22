@@ -19,3 +19,8 @@ export type UserSummary = {
   name: string;
   tier: PersonalScoreTier;
 };
+
+export type UserProfile = UserSummary & {
+  score: number;
+  solvedCount: number;
+};
