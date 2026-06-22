@@ -1,22 +1,72 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
-import type { FriendProfile } from "@/types/friend";
+import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
+import type {
+  FriendFiltersState,
+  FriendInfiniteScrollResponse,
+  FriendProfile,
+} from "@/types/friend";
 import { DeleteFriendButton } from "./friend-action-buttons";
 import { FriendItem } from "./friend-item";
 import { FriendProfileModal } from "./friend-profile-modal";
 
 export default function FriendList({
   emptyMessage,
-  friends,
+  filters,
+  initialFriends,
+  initialHasNextPage,
 }: {
   emptyMessage: string;
-  friends: FriendProfile[];
+  filters: FriendFiltersState;
+  initialFriends: FriendProfile[];
+  initialHasNextPage: boolean;
 }) {
+  const [friends, setFriends] = useState(initialFriends);
+  const [nextPage, setNextPage] = useState(2);
+  const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<FriendProfile | null>(
     null,
   );
+
+  const loadNextPage = useCallback(async () => {
+    if (!hasNextPage || isLoading) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const searchParams = new URLSearchParams({
+        page: String(nextPage),
+      });
+      if (filters.query) {
+        searchParams.set("query", filters.query);
+      }
+
+      const response = await fetch(`/api/friends?${searchParams}`);
+
+      if (!response.ok) {
+        return;
+      }
+
+      const data = (await response.json()) as FriendInfiniteScrollResponse;
+
+      setFriends((currentFriends) => [...currentFriends, ...data.items]);
+      setNextPage(data.currentPage + 1);
+      setHasNextPage(data.hasNextPage);
+    } catch {
+      return;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filters.query, hasNextPage, isLoading, nextPage]);
+
+  const sentinelRef = useInfiniteScroll({
+    enabled: hasNextPage && !isLoading,
+    onLoadMore: loadNextPage,
+  });
 
   if (friends.length === 0) {
     return (
@@ -43,6 +93,14 @@ export default function FriendList({
           </FriendItem>
         ))}
       </div>
+      {hasNextPage ? (
+        <div aria-hidden="true" className="h-px" ref={sentinelRef} />
+      ) : null}
+      {isLoading ? (
+        <p className="py-4 text-center text-body-sm text-slate-500">
+          불러오는 중...
+        </p>
+      ) : null}
       {selectedProfile ? (
         <FriendProfileModal
           onClose={() => setSelectedProfile(null)}

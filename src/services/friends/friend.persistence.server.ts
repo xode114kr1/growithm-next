@@ -14,43 +14,16 @@ const friendUserSelect = {
 
 // 현재 사용자와 친구 관계인 사용자 정보를 조회한다.
 export async function findFriendUsers({
+  page,
+  pageSize,
   query,
   userId,
 }: {
+  page: number;
+  pageSize: number;
   query: string;
   userId: string;
 }) {
-  const friendUserFilter: Prisma.UserWhereInput = {
-    OR: [
-      {
-        name: {
-          contains: query,
-          mode: "insensitive",
-        },
-      },
-      {
-        email: {
-          contains: query,
-          mode: "insensitive",
-        },
-      },
-    ],
-  };
-  const friendshipFilter: Prisma.FriendshipWhereInput = {
-    OR: query
-      ? [
-          {
-            userAId: userId,
-            userB: friendUserFilter,
-          },
-          {
-            userA: friendUserFilter,
-            userBId: userId,
-          },
-        ]
-      : [{ userAId: userId }, { userBId: userId }],
-  };
-
   return prisma.friendship.findMany({
     include: {
       userA: {
@@ -60,10 +33,23 @@ export async function findFriendUsers({
         select: friendUserSelect,
       },
     },
-    orderBy: {
-      createdAt: "desc",
-    },
-    where: friendshipFilter,
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+    where: buildFriendshipWhere({ query, userId }),
+  });
+}
+
+// 현재 사용자의 검색 조건에 맞는 친구 수를 조회한다.
+export async function countFriendUsers({
+  query,
+  userId,
+}: {
+  query: string;
+  userId: string;
+}) {
+  return prisma.friendship.count({
+    where: buildFriendshipWhere({ query, userId }),
   });
 }
 
@@ -159,6 +145,50 @@ export async function findFriendRelationsForUserIds({
   ]);
 
   return { friendships, receivedRequests, sentRequests };
+}
+
+function buildFriendshipWhere({
+  query,
+  userId,
+}: {
+  query: string;
+  userId: string;
+}): Prisma.FriendshipWhereInput {
+  if (!query) {
+    return {
+      OR: [{ userAId: userId }, { userBId: userId }],
+    };
+  }
+
+  const friendUserFilter: Prisma.UserWhereInput = {
+    OR: [
+      {
+        name: {
+          contains: query,
+          mode: "insensitive",
+        },
+      },
+      {
+        email: {
+          contains: query,
+          mode: "insensitive",
+        },
+      },
+    ],
+  };
+
+  return {
+    OR: [
+      {
+        userAId: userId,
+        userB: friendUserFilter,
+      },
+      {
+        userA: friendUserFilter,
+        userBId: userId,
+      },
+    ],
+  };
 }
 
 // 사용자 ID에 해당하는 사용자의 존재 여부를 조회한다.

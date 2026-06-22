@@ -1,5 +1,7 @@
 import { auth } from "@/lib/auth/auth";
 import {
+  FRIEND_PAGE_SIZE,
+  getFriendCount,
   getFriends,
   getFriendRelationsForUsers,
   getReceivedFriendRequests,
@@ -24,9 +26,10 @@ export default async function FriendPage({ searchParams }: FriendPageProps) {
 
   const filters = parseFriendFilters(params);
 
-  const [friendUsers, receivedRequests, sentRequests, users] =
+  const [friendUsers, friendCount, receivedRequests, sentRequests, users] =
     await Promise.all([
-      getFriends({ filters, userId }),
+      getFriends({ filters, page: 1, userId }),
+      getFriendCount({ filters, userId }),
       getReceivedFriendRequests(userId),
       getSentFriendRequests(userId),
       userId ? getUsers({ excludedUserId: userId }) : [],
@@ -48,10 +51,19 @@ export default async function FriendPage({ searchParams }: FriendPageProps) {
               ? "검색 조건에 맞는 친구가 없습니다."
               : "아직 추가된 친구가 없습니다."
           }
-          friends={friendUsers}
-          key={filters.query}
+          filters={filters}
+          initialFriends={friendUsers}
+          initialHasNextPage={FRIEND_PAGE_SIZE < friendCount}
+          key={createFriendListKey(filters.query, friendUsers)}
         />
       </div>
     </main>
   );
+}
+
+function createFriendListKey(
+  query: string,
+  friends: { id: string }[],
+) {
+  return `${query}:${friends.map((friend) => friend.id).join(",")}`;
 }
