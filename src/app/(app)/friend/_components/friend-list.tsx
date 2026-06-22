@@ -66,16 +66,6 @@ export default function FriendList({
     onLoadMore: loadNextPage,
   });
 
-  if (friends.length === 0) {
-    return (
-      <section className="xl:col-span-8 xl:col-start-1 xl:row-start-2">
-        <div className="app-card p-10 text-center text-body-sm text-on-surface-variant">
-          친구가 없습니다.
-        </div>
-      </section>
-    );
-  }
-
   return (
     <section className="xl:col-span-8 xl:col-start-1 xl:row-start-2">
       <div className="grid grid-cols-1 gap-4">
@@ -98,6 +88,11 @@ export default function FriendList({
         <p className="py-4 text-center text-body-sm text-slate-500">
           불러오는 중...
         </p>
+      ) : null}
+      {friends.length === 0 ? (
+        <div className="app-card p-10 text-center text-body-sm text-on-surface-variant">
+          친구가 없습니다.
+        </div>
       ) : null}
       {selectedProfile ? (
         <FriendProfileModal
