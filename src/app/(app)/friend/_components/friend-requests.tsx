@@ -72,12 +72,15 @@ function RequestSection({
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <details
-      className="group app-card overflow-hidden"
-      onToggle={(event) => setIsOpen(event.currentTarget.open)}
-      open={isOpen}
-    >
-      <summary className="flex cursor-pointer list-none items-center justify-between p-6 group-open:border-b group-open:border-slate-50 xl:pointer-events-none xl:cursor-default xl:border-b xl:border-slate-50 [&::-webkit-details-marker]:hidden">
+    <section className="app-card overflow-hidden">
+      <button
+        aria-expanded={isOpen}
+        className={`flex w-full cursor-pointer items-center justify-between p-6 text-left xl:pointer-events-none xl:cursor-default xl:border-b xl:border-slate-50 ${
+          isOpen ? "border-b border-slate-50" : ""
+        }`}
+        onClick={() => setIsOpen((currentIsOpen) => !currentIsOpen)}
+        type="button"
+      >
         <h2 className="section-title">{title}</h2>
         <div className="flex items-center gap-3">
           {count > 0 ? (
@@ -87,13 +90,15 @@ function RequestSection({
           ) : null}
           <ChevronDown
             aria-hidden="true"
-            className="text-slate-400 transition-transform group-open:rotate-180 xl:hidden"
+            className={`text-slate-400 transition-transform xl:hidden ${
+              isOpen ? "rotate-180" : ""
+            }`}
             size={20}
           />
         </div>
-      </summary>
-      <div className="hidden group-open:block xl:block">{children}</div>
-    </details>
+      </button>
+      <div className={isOpen ? "block" : "hidden xl:block"}>{children}</div>
+    </section>
   );
 }
 
