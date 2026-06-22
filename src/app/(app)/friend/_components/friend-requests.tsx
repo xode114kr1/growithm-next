@@ -29,7 +29,6 @@ export default function FriendRequests({
       <aside className="space-y-gutter xl:sticky xl:top-28 xl:col-span-4 xl:col-start-9 xl:row-span-2 xl:row-start-1 xl:self-start">
         <RequestSection
           count={receivedRequests.length}
-          defaultOpen={receivedRequests.length > 0}
           title="받은 요청"
         >
           <RequestList
@@ -61,15 +60,13 @@ export default function FriendRequests({
 function RequestSection({
   children,
   count,
-  defaultOpen = false,
   title,
 }: {
   children: ReactNode;
   count: number;
-  defaultOpen?: boolean;
   title: string;
 }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <section className="app-card overflow-hidden">
