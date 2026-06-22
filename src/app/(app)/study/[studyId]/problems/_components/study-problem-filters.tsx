@@ -1,7 +1,7 @@
 "use client";
 
 import type { ProblemPlatform } from "@/generated/prisma/enums";
-import { useReplacePaginatedQueryParams } from "@/hooks/use-paginated-query-params";
+import { useReplaceQueryParams } from "@/hooks/use-query-params";
 
 import type { StudyProblemFilters, StudyProblemSort } from "../types";
 
@@ -18,7 +18,7 @@ export default function StudyProblemFilters({
   tiers: string[];
   totalCount: number;
 }) {
-  const replaceQuery = useReplacePaginatedQueryParams();
+  const replaceQuery = useReplaceQueryParams();
   const hasActiveFilters =
     filters.platform !== null ||
     filters.tier !== null ||
