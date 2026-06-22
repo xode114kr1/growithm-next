@@ -14,7 +14,6 @@ export function FriendAddModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<FriendSearchResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<FriendProfile | null>(
     null,
   );
@@ -32,8 +31,6 @@ export function FriendAddModal() {
         setSearchResults(await searchUsers(query));
       } catch {
         setSearchResults([]);
-      } finally {
-        setIsLoading(false);
       }
     }
 
@@ -44,12 +41,6 @@ export function FriendAddModal() {
     setIsOpen(false);
     setSearchQuery("");
     setSearchResults([]);
-    setIsLoading(false);
-  }
-
-  function handleSearchQueryChange(query: string) {
-    setSearchQuery(query);
-    setIsLoading(Boolean(query.trim()));
   }
 
   return (
@@ -73,11 +64,10 @@ export function FriendAddModal() {
             <FriendAddModalHeader onClose={closeModal} titleId={titleId} />
             <div className="space-y-4 overflow-y-auto p-6">
               <FriendSearchInput
-                onQueryChange={handleSearchQueryChange}
+                onQueryChange={setSearchQuery}
                 query={searchQuery}
               />
               <SearchResultList
-                isLoading={isLoading}
                 onOpenProfile={(profile) => {
                   setSelectedProfile(profile);
                 }}
@@ -153,66 +143,74 @@ function FriendSearchInput({
 }
 
 function SearchResultList({
-  isLoading,
   onOpenProfile,
   query,
   results,
 }: {
-  isLoading: boolean;
   onOpenProfile: (profile: FriendSearchResult) => void;
   query: string;
   results: FriendSearchResult[];
 }) {
-  const hasQuery = Boolean(query.trim());
+  if (!query.trim()) {
+    return (
+      <section className="h-80 rounded-xl border border-slate-200 bg-white" />
+    );
+  }
+
+  if (results.length === 0) {
+    return (
+      <section className="h-80 rounded-xl border border-slate-200 bg-white p-6">
+        <p className="text-body-md font-semibold text-on-background">
+          검색 결과가 없습니다.
+        </p>
+      </section>
+    );
+  }
 
   return (
     <section className="h-80 overflow-hidden rounded-xl border border-slate-200 bg-white p-3">
-      {!hasQuery ? (
-        <p className="px-3 py-4 text-body-sm text-slate-500">
-          추가할 친구의 이름을 입력하세요.
-        </p>
-      ) : isLoading ? (
-        <p className="px-3 py-4 text-body-sm text-slate-500">검색 중...</p>
-      ) : results.length === 0 ? (
-        <div className="px-3 py-4">
-          <div className="text-body-md font-semibold text-on-background">
-            검색 결과가 없습니다.
-          </div>
-          <div className="mt-1 text-body-sm text-on-surface-variant">
-            &quot;{query.trim()}&quot;과 일치하는 다른 이름을 검색해 보세요.
-          </div>
-        </div>
-      ) : (
-        <div className="grid h-full gap-2 overflow-y-auto">
-          {results.map((profile) => (
-            <div
-              className="flex items-center gap-3 rounded-lg border border-slate-100 p-2.5"
-              key={profile.id}
-            >
-              <button
-                aria-label={`${profile.name} 프로필`}
-                className="shrink-0 rounded-full outline-none transition-opacity hover:opacity-80 focus:ring-2 focus:ring-primary-container"
-                onClick={() => onOpenProfile(profile)}
-                type="button"
-              >
-                <Image
-                  alt={`${profile.name} 아바타`}
-                  className="size-11 rounded-full object-cover ring-2 ring-slate-50"
-                  height={44}
-                  src={profile.avatar}
-                  width={44}
-                />
-              </button>
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-body-md font-semibold text-on-background">
-                  {profile.name}
-                </div>
-              </div>
-              <SearchResultActions profile={profile} />
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="grid h-full gap-2 overflow-y-auto">
+        {results.map((profile) => (
+          <SearchResultItem
+            key={profile.id}
+            onOpenProfile={onOpenProfile}
+            profile={profile}
+          />
+        ))}
+      </div>
     </section>
+  );
+}
+
+function SearchResultItem({
+  onOpenProfile,
+  profile,
+}: {
+  onOpenProfile: (profile: FriendSearchResult) => void;
+  profile: FriendSearchResult;
+}) {
+  return (
+    <div className="flex items-center gap-3 rounded-lg border border-slate-100 p-2.5">
+      <button
+        aria-label={`${profile.name} 프로필`}
+        className="shrink-0 rounded-full outline-none transition-opacity hover:opacity-80 focus:ring-2 focus:ring-primary-container"
+        onClick={() => onOpenProfile(profile)}
+        type="button"
+      >
+        <Image
+          alt={`${profile.name} 아바타`}
+          className="size-11 rounded-full object-cover ring-2 ring-slate-50"
+          height={44}
+          src={profile.avatar}
+          width={44}
+        />
+      </button>
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-body-md font-semibold text-on-background">
+          {profile.name}
+        </div>
+      </div>
+      <SearchResultActions profile={profile} />
+    </div>
   );
 }
