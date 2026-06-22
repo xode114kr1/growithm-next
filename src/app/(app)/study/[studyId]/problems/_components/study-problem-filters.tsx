@@ -1,7 +1,7 @@
 "use client";
 
 import type { ProblemPlatform } from "@/generated/prisma/enums";
-import { usePushPaginatedQueryParams } from "@/hooks/use-paginated-query-params";
+import { useReplacePaginatedQueryParams } from "@/hooks/use-paginated-query-params";
 
 import type { StudyProblemFilters, StudyProblemSort } from "../types";
 
@@ -18,7 +18,7 @@ export default function StudyProblemFilters({
   tiers: string[];
   totalCount: number;
 }) {
-  const pushQuery = usePushPaginatedQueryParams();
+  const replaceQuery = useReplacePaginatedQueryParams();
   const hasActiveFilters =
     filters.platform !== null ||
     filters.tier !== null ||
@@ -44,7 +44,7 @@ export default function StudyProblemFilters({
                 }
                 key={platform}
                 onClick={() =>
-                  pushQuery({
+                  replaceQuery({
                     platform:
                       platform === "All"
                         ? null
@@ -63,7 +63,7 @@ export default function StudyProblemFilters({
         <select
           className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
           onChange={(event) =>
-            pushQuery({ tier: event.target.value || null })
+            replaceQuery({ tier: event.target.value || null })
           }
           value={filters.tier ?? ""}
         >
@@ -77,7 +77,7 @@ export default function StudyProblemFilters({
         <select
           className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
           onChange={(event) =>
-            pushQuery({ member: event.target.value || null })
+            replaceQuery({ member: event.target.value || null })
           }
           value={filters.member ?? ""}
         >
@@ -92,7 +92,7 @@ export default function StudyProblemFilters({
           className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
           onChange={(event) => {
             const sort = event.target.value as StudyProblemSort;
-            pushQuery({ sort: sort === "latest" ? null : sort });
+            replaceQuery({ sort: sort === "latest" ? null : sort });
           }}
           value={filters.sort}
         >
@@ -117,7 +117,7 @@ export default function StudyProblemFilters({
             <button
               className="rounded-lg border border-slate-200 px-3 py-1.5 text-body-sm font-semibold text-slate-600 transition-colors hover:border-secondary hover:text-secondary"
               onClick={() =>
-                pushQuery({
+                replaceQuery({
                   member: null,
                   platform: null,
                   tier: null,
