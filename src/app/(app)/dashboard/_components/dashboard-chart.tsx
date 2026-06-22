@@ -15,14 +15,7 @@ import { useMounted } from "@/hooks/use-mounted";
 import type { ProblemTierBucket } from "@/types/problem";
 import { chartColors, problemTierChartColors } from "@/utils/color";
 
-const masteryTooltipLabels: Record<string, string> = {
-  BRONZE: "Bronze / Level 1",
-  DIAMOND: "Diamond / Level 5",
-  GOLD: "Gold / Level 3",
-  PLATINUM: "Platinum / Level 4",
-  RUBY: "Ruby",
-  SILVER: "Silver / Level 2",
-};
+import { masteryTooltipLabels } from "../constants";
 
 export default function DashboardChart({
   mastery,
