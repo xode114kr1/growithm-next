@@ -1,23 +1,18 @@
 "use client";
 
-import type { ChangeEvent, CompositionEvent } from "react";
-
-import { useReplaceQueryParams } from "@/hooks/use-paginated-query-params";
-import type { FriendSearchResult } from "@/types/friend";
+import { useReplaceQueryParams } from "@/hooks/use-query-params";
 
 import { FriendAddModal } from "./friend-add-modal";
 
 export default function FriendFilters({
   query,
-  searchResults,
 }: {
   query: string;
-  searchResults: FriendSearchResult[];
 }) {
   const replaceQuery = useReplaceQueryParams();
 
   function handleQueryChange(nextQuery: string) {
-    replaceQuery({ query: nextQuery.trim() || null });
+    replaceQuery({ query: nextQuery });
   }
 
   return (
@@ -26,18 +21,11 @@ export default function FriendFilters({
         aria-label="친구 검색"
         className="input-field min-w-0 md:max-w-md"
         defaultValue={query}
-        onChange={(event: ChangeEvent<HTMLInputElement>) => {
-          if (!(event.nativeEvent as InputEvent).isComposing) {
-            handleQueryChange(event.target.value);
-          }
-        }}
-        onCompositionEnd={(event: CompositionEvent<HTMLInputElement>) =>
-          handleQueryChange(event.currentTarget.value)
-        }
+        onChange={(event) => handleQueryChange(event.target.value)}
         placeholder="친구 이름으로 검색"
         type="search"
       />
-      <FriendAddModal searchResults={searchResults} />
+      <FriendAddModal />
     </section>
   );
 }

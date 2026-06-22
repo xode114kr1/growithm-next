@@ -1,7 +1,9 @@
 import { BookOpenCheck } from "lucide-react";
-import PersonalTierCard from "./personal-tier-card";
 import Link from "next/link";
 import { UserPersonalTier } from "@/types/user";
+
+import { quickLinks } from "../constants";
+import PersonalTierCard from "./personal-tier-card";
 
 export default function DashboardOverviewSection({
   personalTier,
@@ -48,23 +50,6 @@ function IntegrationGuideCard() {
 }
 
 function QuickLaunchCard() {
-  const quickLinks = [
-    {
-      code: "BJ",
-      codeClass: "bg-teal-50 text-teal-800",
-      hoverClass: "group-hover:text-teal-600",
-      label: "Baekjoon",
-      url: "https://www.acmicpc.net/",
-    },
-    {
-      code: "PG",
-      codeClass: "bg-blue-50 text-blue-800",
-      hoverClass: "group-hover:text-blue-600",
-      label: "Programmers",
-      url: "https://school.programmers.co.kr/learn/challenges",
-    },
-  ];
-
   return (
     <section className="app-card-muted p-6 md:col-span-4">
       <h2 className="mb-6 text-label-caps text-on-primary-fixed-variant">

@@ -3,15 +3,11 @@
 import { ChevronDown } from "lucide-react";
 import { type ReactNode, useState } from "react";
 
+import { ProfileModal } from "@/components/ui/profile-modal";
 import type { FriendProfile, FriendRequest } from "@/types/friend";
 
-import {
-  AcceptFriendRequestButton,
-  CancelFriendRequestButton,
-  RejectFriendRequestButton,
-} from "./friend-action-buttons";
+import { FriendActionButton } from "./friend-action-buttons";
 import { FriendItem } from "./friend-item";
-import { FriendProfileModal } from "./friend-profile-modal";
 
 export default function FriendRequests({
   receivedRequests,
@@ -20,9 +16,7 @@ export default function FriendRequests({
   receivedRequests: FriendRequest[];
   sentRequests: FriendRequest[];
 }) {
-  const [selectedProfile, setSelectedProfile] = useState<FriendProfile | null>(
-    null,
-  );
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   return (
     <>
@@ -33,7 +27,7 @@ export default function FriendRequests({
         >
           <RequestList
             emptyMessage="받은 친구 요청이 없습니다."
-            onOpenProfile={setSelectedProfile}
+            onOpenProfile={(profile) => setSelectedUserId(profile.id)}
             requests={receivedRequests}
             type="received"
           />
@@ -41,16 +35,16 @@ export default function FriendRequests({
         <RequestSection count={sentRequests.length} title="보낸 요청">
           <RequestList
             emptyMessage="보낸 친구 요청이 없습니다."
-            onOpenProfile={setSelectedProfile}
+            onOpenProfile={(profile) => setSelectedUserId(profile.id)}
             requests={sentRequests}
             type="sent"
           />
         </RequestSection>
       </aside>
-      {selectedProfile ? (
-        <FriendProfileModal
-          onClose={() => setSelectedProfile(null)}
-          profile={selectedProfile}
+      {selectedUserId ? (
+        <ProfileModal
+          onClose={() => setSelectedUserId(null)}
+          userId={selectedUserId}
         />
       ) : null}
     </>
@@ -130,11 +124,20 @@ function RequestList({
           <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
             {type === "received" ? (
               <>
-                <RejectFriendRequestButton requestId={request.requestId} />
-                <AcceptFriendRequestButton requestId={request.requestId} />
+                <FriendActionButton
+                  actionType="reject"
+                  id={request.requestId}
+                />
+                <FriendActionButton
+                  actionType="accept"
+                  id={request.requestId}
+                />
               </>
             ) : (
-              <CancelFriendRequestButton requestId={request.requestId} />
+              <FriendActionButton
+                actionType="cancel"
+                id={request.requestId}
+              />
             )}
           </div>
         </FriendItem>

@@ -3,7 +3,6 @@
 import { useCallback, useRef, useState, type ReactNode } from "react";
 
 import { useClickOutside } from "@/hooks/use-click-outside";
-import { useEscapeKey } from "@/hooks/use-escape-key";
 
 type DropdownProps = {
   ariaLabel: string;
@@ -31,7 +30,6 @@ export default function Dropdown({
     onClickOutside: closeDropdown,
     ref: rootRef,
   });
-  useEscapeKey({ enabled: isOpen, onEscape: closeDropdown });
 
   return (
     <div className={className} ref={rootRef}>

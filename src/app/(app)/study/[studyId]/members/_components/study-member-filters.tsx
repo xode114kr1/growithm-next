@@ -1,6 +1,6 @@
 "use client";
 
-import { useReplacePaginatedQueryParams } from "@/hooks/use-paginated-query-params";
+import { useReplaceQueryParams } from "@/hooks/use-query-params";
 
 import type {
   StudyMemberFiltersState,
@@ -13,7 +13,7 @@ export default function StudyMemberFilters({
 }: {
   filters: StudyMemberFiltersState;
 }) {
-  const replaceQuery = useReplacePaginatedQueryParams();
+  const replaceQuery = useReplaceQueryParams();
 
   return (
     <div className="app-card grid grid-cols-1 gap-4 p-4 lg:grid-cols-[1fr_180px_180px]">

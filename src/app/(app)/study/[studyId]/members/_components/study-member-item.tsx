@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 
+import { ProfileModal } from "@/components/ui/profile-modal";
 import type { StudyMember } from "@/types/study";
 
 import { studyMemberRoleLabels } from "../constants";
-import MemberProfileModal from "./member-profile-modal";
 
 export default function StudyMemberItem({
   member,
@@ -83,9 +83,9 @@ export default function StudyMemberItem({
       </article>
 
       {isProfileOpen ? (
-        <MemberProfileModal
-          member={member}
+        <ProfileModal
           onClose={() => setIsProfileOpen(false)}
+          userId={member.userId}
         />
       ) : null}
     </>

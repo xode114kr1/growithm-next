@@ -115,9 +115,7 @@ export default function StudyProblemList({
         ) : null}
         <StudyProblemModal
           onClose={() => setSelectedProblem(null)}
-          onSelectProblem={setSelectedProblem}
           problem={selectedProblem}
-          problems={items}
           studyId={studyId}
         />
     </section>

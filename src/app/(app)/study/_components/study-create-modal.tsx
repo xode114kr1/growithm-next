@@ -1,11 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 
 import { createStudy, type CreateStudyActionState } from "../actions";
 
-const initialCreateStudyActionState: CreateStudyActionState = {
+const initialState: CreateStudyActionState = {
   description: "",
   error: null,
   status: "idle",
@@ -16,19 +16,15 @@ const initialCreateStudyActionState: CreateStudyActionState = {
 export default function StudyCreateModal() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [state, formAction, isPending] = useActionState(
-    createStudy,
-    initialCreateStudyActionState,
-  );
   const titleId = useId();
 
-  useEffect(() => {
-    if (state.status !== "success" || !state.studyId) {
-      return;
-    }
+  async function handleCreateStudy(formData: FormData) {
+    const result = await createStudy(initialState, formData);
 
-    router.push(`/study/${state.studyId}/overview`);
-  }, [router, state.status, state.studyId]);
+    if (result.studyId) {
+      router.push(`/study/${result.studyId}/overview`);
+    }
+  }
 
   return (
     <>
@@ -46,12 +42,6 @@ export default function StudyCreateModal() {
           className="fixed inset-0 z-80 flex items-center justify-center bg-primary/25 px-4 py-8 backdrop-blur-sm"
           role="dialog"
         >
-          <button
-            aria-label="스터디 생성 모달 닫기"
-            className="absolute inset-0 cursor-default"
-            onClick={() => setIsOpen(false)}
-            type="button"
-          />
           <section className="relative max-h-[calc(100svh-4rem)] w-full max-w-2xl overflow-y-auto rounded-xl border border-slate-100 bg-white shadow-2xl shadow-slate-950/20">
             <div className="border-b border-slate-100 px-6 py-5">
               <div className="flex items-start justify-between gap-4">
@@ -74,16 +64,14 @@ export default function StudyCreateModal() {
               </div>
             </div>
 
-            <form action={formAction} className="space-y-6 px-6 py-6">
+            <form action={handleCreateStudy} className="space-y-6 px-6 py-6">
               <div className="grid grid-cols-1 gap-5">
                 <label className="block md:col-span-2">
                   <span className="mb-2 block text-label-caps text-slate-500">
                     Title
                   </span>
                   <input
-                    aria-invalid={state.status === "error" ? true : undefined}
                     className="input-field"
-                    defaultValue={state.status === "error" ? state.title : ""}
                     maxLength={80}
                     name="title"
                     placeholder="예: Algorithm Sprint"
@@ -98,9 +86,6 @@ export default function StudyCreateModal() {
                   </span>
                   <textarea
                     className="min-h-28 w-full resize-y rounded-lg border border-slate-200 bg-white px-4 py-3 text-body-md text-on-surface outline-none transition-all placeholder:text-slate-300 focus:border-primary focus:ring-2 focus:ring-secondary-container/30"
-                    defaultValue={
-                      state.status === "error" ? state.description : ""
-                    }
                     maxLength={500}
                     name="description"
                     placeholder="스터디 목표, 진행 방식, 권장 풀이 주기를 적어주세요."
@@ -108,32 +93,15 @@ export default function StudyCreateModal() {
                 </label>
               </div>
 
-              {state.status === "error" ? (
-                <p className="rounded-lg bg-error/10 px-4 py-3 text-body-sm font-medium text-error">
-                  {state.error}
-                </p>
-              ) : null}
-
-              {state.status === "success" ? (
-                <p className="rounded-lg bg-secondary-container/60 px-4 py-3 text-body-sm font-medium text-primary">
-                  스터디를 생성했습니다.
-                </p>
-              ) : null}
-
               <div className="flex flex-col-reverse justify-end gap-2 border-t border-slate-100 pt-5 sm:flex-row">
                 <button
                   className="btn-secondary"
-                  disabled={isPending}
                   onClick={() => setIsOpen(false)}
                   type="button"
                 >
                   취소
                 </button>
-                <button
-                  className="btn-primary"
-                  disabled={isPending}
-                  type="submit"
-                >
+                <button className="btn-primary" type="submit">
                   스터디 생성
                 </button>
               </div>

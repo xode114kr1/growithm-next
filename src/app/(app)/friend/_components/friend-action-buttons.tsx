@@ -1,8 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-
 import { Button } from "@/components/ui/button";
 import type { FriendSearchResult } from "@/types/friend";
 
@@ -11,16 +8,47 @@ import {
   cancelFriendRequestAction,
   deleteFriendAction,
   rejectFriendRequestAction,
-  sendFriendRequestByIdAction,
+  sendFriendRequestAction,
 } from "../actions";
 
+const friendActions = {
+  accept: {
+    action: acceptFriendRequestAction,
+    fieldName: "requestId",
+    label: "Accept",
+    variant: "primary",
+  },
+  cancel: {
+    action: cancelFriendRequestAction,
+    fieldName: "requestId",
+    label: "Cancel",
+    variant: "secondary",
+  },
+  delete: {
+    action: deleteFriendAction,
+    fieldName: "friendUserId",
+    label: "Delete Friend",
+    variant: "secondary",
+  },
+  reject: {
+    action: rejectFriendRequestAction,
+    fieldName: "requestId",
+    label: "Reject",
+    variant: "secondary",
+  },
+  send: {
+    action: sendFriendRequestAction,
+    fieldName: "targetUserId",
+    label: "친구 추가",
+    variant: "primary",
+  },
+} as const;
+
+type FriendActionType = keyof typeof friendActions;
+
 export function SearchResultActions({
-  isPending,
-  onAddFriend,
   profile,
 }: {
-  isPending: boolean;
-  onAddFriend: () => void;
   profile: FriendSearchResult;
 }) {
   if (profile.relationStatus === "friend") {
@@ -34,139 +62,57 @@ export function SearchResultActions({
   }
 
   if (profile.relationStatus === "received_request") {
+    if (!profile.requestId) return null;
+
     return (
       <div className="flex shrink-0 items-center gap-2">
-        {profile.requestId ? (
-          <>
-            <RejectFriendRequestButton requestId={profile.requestId} />
-            <AcceptFriendRequestButton requestId={profile.requestId} />
-          </>
-        ) : null}
+        <FriendActionButton actionType="reject" id={profile.requestId} />
+        <FriendActionButton actionType="accept" id={profile.requestId} />
       </div>
     );
   }
 
-  if (profile.relationStatus === "sent_request" || isPending) {
-    return (
+  if (profile.relationStatus === "sent_request") {
+    return profile.requestId ? (
       <div className="flex shrink-0 items-center gap-2">
-        {profile.requestId ? (
-          <CancelFriendRequestButton requestId={profile.requestId} />
-        ) : (
-          <Button disabled variant="secondary">
-            Request Sent
-          </Button>
-        )}
+        <FriendActionButton actionType="cancel" id={profile.requestId} />
+      </div>
+    ) : (
+      <div className="flex shrink-0 items-center gap-2">
+        <Button disabled variant="secondary">
+          Request Sent
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="flex shrink-0 items-center gap-2">
-      <SendFriendRequestButton
-        onAddFriend={onAddFriend}
-        targetUserId={profile.id}
-      />
+      <FriendActionButton actionType="send" id={profile.id} />
     </div>
   );
 }
 
-export function SendFriendRequestButton({
-  onAddFriend,
-  targetUserId,
+export function FriendActionButton({
+  actionType,
+  className,
+  id,
 }: {
-  onAddFriend?: () => void;
-  targetUserId: string;
+  actionType: FriendActionType;
+  className?: string;
+  id: string;
 }) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-  const [isSent, setIsSent] = useState(false);
-  const isDisabled = isPending || isSent;
-
-  function handleSendFriendRequest() {
-    if (isDisabled) {
-      return;
-    }
-
-    startTransition(async () => {
-      const result = await sendFriendRequestByIdAction(targetUserId);
-
-      if (!result.ok) {
-        return;
-      }
-
-      setIsSent(true);
-      onAddFriend?.();
-      router.refresh();
-    });
-  }
+  const action = friendActions[actionType];
 
   return (
-    <Button
-      disabled={isDisabled}
-      onClick={handleSendFriendRequest}
-      variant="primary"
-    >
-      {isSent ? "요청 보냄" : "친구 추가"}
-    </Button>
-  );
-}
-
-export function DeleteFriendButton({ friendUserId }: { friendUserId: string }) {
-  return (
-    <form action={deleteFriendAction}>
-      <input name="friendUserId" type="hidden" value={friendUserId} />
+    <form action={action.action}>
+      <input name={action.fieldName} type="hidden" value={id} />
       <Button
-        className="w-full"
-        size="md"
+        className={className}
         type="submit"
-        variant="secondary"
+        variant={action.variant}
       >
-        Delete Friend
-      </Button>
-    </form>
-  );
-}
-
-export function RejectFriendRequestButton({
-  requestId,
-}: {
-  requestId: string;
-}) {
-  return (
-    <form action={rejectFriendRequestAction}>
-      <input name="requestId" type="hidden" value={requestId} />
-      <Button type="submit" variant="secondary">
-        Reject
-      </Button>
-    </form>
-  );
-}
-
-export function AcceptFriendRequestButton({
-  requestId,
-}: {
-  requestId: string;
-}) {
-  return (
-    <form action={acceptFriendRequestAction}>
-      <input name="requestId" type="hidden" value={requestId} />
-      <Button type="submit" variant="primary">
-        Accept
-      </Button>
-    </form>
-  );
-}
-
-export function CancelFriendRequestButton({
-  requestId,
-}: {
-  requestId: string;
-}) {
-  return (
-    <form action={cancelFriendRequestAction}>
-      <input name="requestId" type="hidden" value={requestId} />
-      <Button type="submit" variant="secondary">
-        Cancel
+        {action.label}
       </Button>
     </form>
   );
