@@ -15,9 +15,6 @@ export function FriendAddModal() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<FriendSearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [pendingRequestIds, setPendingRequestIds] = useState<Set<string>>(
-    () => new Set(),
-  );
   const [selectedProfile, setSelectedProfile] = useState<FriendProfile | null>(
     null,
   );
@@ -54,14 +51,6 @@ export function FriendAddModal() {
     setSearchQuery(query);
     setSearchResults([]);
     setIsLoading(Boolean(query.trim()));
-  }
-
-  function handleAddFriend(profileId: string) {
-    setPendingRequestIds((current) => {
-      const next = new Set(current);
-      next.add(profileId);
-      return next;
-    });
   }
 
   return (
@@ -114,24 +103,21 @@ export function FriendAddModal() {
               />
               <SearchResultList
                 isLoading={isLoading}
-                onAddFriend={handleAddFriend}
                 onOpenProfile={(profile) => {
-                  closeModal();
                   setSelectedProfile(profile);
                 }}
-                pendingRequestIds={pendingRequestIds}
                 query={searchQuery}
                 results={searchResults}
               />
             </div>
           </section>
+          {selectedProfile ? (
+            <FriendProfileModal
+              onClose={() => setSelectedProfile(null)}
+              profile={selectedProfile}
+            />
+          ) : null}
         </div>
-      ) : null}
-      {selectedProfile ? (
-        <FriendProfileModal
-          onClose={() => setSelectedProfile(null)}
-          profile={selectedProfile}
-        />
       ) : null}
     </>
   );
@@ -163,16 +149,12 @@ function FriendSearchInput({
 
 function SearchResultList({
   isLoading,
-  onAddFriend,
   onOpenProfile,
-  pendingRequestIds,
   query,
   results,
 }: {
   isLoading: boolean;
-  onAddFriend: (profileId: string) => void;
   onOpenProfile: (profile: FriendSearchResult) => void;
-  pendingRequestIds: Set<string>;
   query: string;
   results: FriendSearchResult[];
 }) {
@@ -221,11 +203,7 @@ function SearchResultList({
                   {profile.name}
                 </div>
               </div>
-              <SearchResultActions
-                isPending={pendingRequestIds.has(profile.id)}
-                onAddFriend={() => onAddFriend(profile.id)}
-                profile={profile}
-              />
+              <SearchResultActions profile={profile} />
             </div>
           ))}
         </div>

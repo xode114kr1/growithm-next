@@ -15,12 +15,8 @@ import {
 } from "../actions";
 
 export function SearchResultActions({
-  isPending,
-  onAddFriend,
   profile,
 }: {
-  isPending: boolean;
-  onAddFriend: () => void;
   profile: FriendSearchResult;
 }) {
   if (profile.relationStatus === "friend") {
@@ -46,7 +42,7 @@ export function SearchResultActions({
     );
   }
 
-  if (profile.relationStatus === "sent_request" || isPending) {
+  if (profile.relationStatus === "sent_request") {
     return (
       <div className="flex shrink-0 items-center gap-2">
         {profile.requestId ? (
@@ -62,19 +58,14 @@ export function SearchResultActions({
 
   return (
     <div className="flex shrink-0 items-center gap-2">
-      <SendFriendRequestButton
-        onAddFriend={onAddFriend}
-        targetUserId={profile.id}
-      />
+      <SendFriendRequestButton targetUserId={profile.id} />
     </div>
   );
 }
 
 export function SendFriendRequestButton({
-  onAddFriend,
   targetUserId,
 }: {
-  onAddFriend?: () => void;
   targetUserId: string;
 }) {
   const router = useRouter();
@@ -95,7 +86,6 @@ export function SendFriendRequestButton({
       }
 
       setIsSent(true);
-      onAddFriend?.();
       router.refresh();
     });
   }
