@@ -3,11 +3,8 @@
 import { useCallback, useState } from "react";
 
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
-import type {
-  FriendFiltersState,
-  FriendInfiniteScrollResponse,
-  FriendProfile,
-} from "@/types/friend";
+import { getFriendsPage } from "@/services/friends/friend.client";
+import type { FriendFiltersState, FriendProfile } from "@/types/friend";
 import { DeleteFriendButton } from "./friend-action-buttons";
 import { FriendItem } from "./friend-item";
 import { FriendProfileModal } from "./friend-profile-modal";
@@ -36,20 +33,14 @@ export default function FriendList({
 
     setIsLoading(true);
     try {
-      const searchParams = new URLSearchParams({
-        page: String(nextPage),
+      const data = await getFriendsPage({
+        page: nextPage,
+        query: filters.query,
       });
-      if (filters.query) {
-        searchParams.set("query", filters.query);
-      }
 
-      const response = await fetch(`/api/friends?${searchParams}`);
-
-      if (!response.ok) {
+      if (!data) {
         return;
       }
-
-      const data = (await response.json()) as FriendInfiniteScrollResponse;
 
       setFriends((currentFriends) => [...currentFriends, ...data.items]);
       setNextPage(data.currentPage + 1);
