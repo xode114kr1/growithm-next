@@ -13,12 +13,10 @@ import { FriendItem } from "./friend-item";
 import { FriendProfileModal } from "./friend-profile-modal";
 
 export default function FriendList({
-  emptyMessage,
   filters,
   initialFriends,
   initialHasNextPage,
 }: {
-  emptyMessage: string;
   filters: FriendFiltersState;
   initialFriends: FriendProfile[];
   initialHasNextPage: boolean;
@@ -72,7 +70,7 @@ export default function FriendList({
     return (
       <section className="xl:col-span-8 xl:col-start-1 xl:row-start-2">
         <div className="app-card p-10 text-center text-body-sm text-on-surface-variant">
-          {emptyMessage}
+          친구가 없습니다.
         </div>
       </section>
     );

@@ -46,11 +46,6 @@ export default async function FriendPage({ searchParams }: FriendPageProps) {
           sentRequests={sentRequests}
         />
         <FriendList
-          emptyMessage={
-            filters.query
-              ? "검색 조건에 맞는 친구가 없습니다."
-              : "아직 추가된 친구가 없습니다."
-          }
           filters={filters}
           initialFriends={friendUsers}
           initialHasNextPage={FRIEND_PAGE_SIZE < friendCount}
