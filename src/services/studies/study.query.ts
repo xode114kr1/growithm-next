@@ -178,6 +178,7 @@ export async function getStudyMembers({
       lastActiveTime: lastActiveAt.getTime(),
       name: getUserDisplayName(member.user.name),
       role: member.role,
+      userId: member.userId,
     };
   });
 
