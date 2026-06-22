@@ -1,7 +1,7 @@
 "use client";
 
 import type { ProblemPlatform } from "@/generated/prisma/enums";
-import { useReplacePaginatedQueryParams } from "@/hooks/use-paginated-query-params";
+import { useReplaceQueryParams } from "@/hooks/use-query-params";
 import type { ProblemFiltersState, ProblemSort } from "@/types/problem";
 
 const platforms: Array<ProblemPlatform | "All"> = [
@@ -17,7 +17,7 @@ export default function ProblemFilters({
   filters: ProblemFiltersState;
   tiers: string[];
 }) {
-  const replaceQuery = useReplacePaginatedQueryParams();
+  const replaceQuery = useReplaceQueryParams();
 
   return (
     <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
