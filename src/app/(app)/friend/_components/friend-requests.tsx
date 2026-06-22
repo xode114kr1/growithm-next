@@ -6,11 +6,7 @@ import { type ReactNode, useState } from "react";
 import { ProfileModal } from "@/components/ui/profile-modal";
 import type { FriendProfile, FriendRequest } from "@/types/friend";
 
-import {
-  AcceptFriendRequestButton,
-  CancelFriendRequestButton,
-  RejectFriendRequestButton,
-} from "./friend-action-buttons";
+import { FriendActionButton } from "./friend-action-buttons";
 import { FriendItem } from "./friend-item";
 
 export default function FriendRequests({
@@ -128,11 +124,20 @@ function RequestList({
           <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
             {type === "received" ? (
               <>
-                <RejectFriendRequestButton requestId={request.requestId} />
-                <AcceptFriendRequestButton requestId={request.requestId} />
+                <FriendActionButton
+                  actionType="reject"
+                  id={request.requestId}
+                />
+                <FriendActionButton
+                  actionType="accept"
+                  id={request.requestId}
+                />
               </>
             ) : (
-              <CancelFriendRequestButton requestId={request.requestId} />
+              <FriendActionButton
+                actionType="cancel"
+                id={request.requestId}
+              />
             )}
           </div>
         </FriendItem>

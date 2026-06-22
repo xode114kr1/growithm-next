@@ -6,7 +6,7 @@ import { ProfileModal } from "@/components/ui/profile-modal";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { getFriendsPage } from "@/services/friends/friend.client";
 import type { FriendFiltersState, FriendProfile } from "@/types/friend";
-import { DeleteFriendButton } from "./friend-action-buttons";
+import { FriendActionButton } from "./friend-action-buttons";
 import { FriendItem } from "./friend-item";
 
 export default function FriendList({
@@ -65,7 +65,11 @@ export default function FriendList({
             profile={friend}
           >
             <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
-              <DeleteFriendButton friendUserId={friend.id} />
+              <FriendActionButton
+                actionType="delete"
+                className="w-full"
+                id={friend.id}
+              />
             </div>
           </FriendItem>
         ))}
