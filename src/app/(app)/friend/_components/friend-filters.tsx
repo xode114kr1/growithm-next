@@ -2,7 +2,7 @@
 
 import type { ChangeEvent, CompositionEvent } from "react";
 
-import { useReplacePaginatedQueryParams } from "@/hooks/use-paginated-query-params";
+import { useReplaceQueryParams } from "@/hooks/use-paginated-query-params";
 import type { FriendSearchResult } from "@/types/friend";
 
 import { FriendAddModal } from "./friend-add-modal";
@@ -14,7 +14,7 @@ export default function FriendFilters({
   query: string;
   searchResults: FriendSearchResult[];
 }) {
-  const replaceQuery = useReplacePaginatedQueryParams();
+  const replaceQuery = useReplaceQueryParams();
 
   function handleQueryChange(nextQuery: string) {
     replaceQuery({ query: nextQuery.trim() || null });

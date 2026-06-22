@@ -8,7 +8,7 @@ import type { FriendProfile, FriendRequest } from "@/types/friend";
 import {
   AcceptFriendRequestButton,
   CancelFriendRequestButton,
-  DeleteReceivedRequestButton,
+  RejectFriendRequestButton,
 } from "./friend-action-buttons";
 import { FriendItem } from "./friend-item";
 import { FriendProfileModal } from "./friend-profile-modal";
@@ -29,7 +29,6 @@ export default function FriendRequests({
       <aside className="space-y-gutter xl:sticky xl:top-28 xl:col-span-4 xl:col-start-9 xl:row-span-2 xl:row-start-1 xl:self-start">
         <RequestSection
           count={receivedRequests.length}
-          defaultOpen={receivedRequests.length > 0}
           title="받은 요청"
         >
           <RequestList
@@ -61,23 +60,24 @@ export default function FriendRequests({
 function RequestSection({
   children,
   count,
-  defaultOpen = false,
   title,
 }: {
   children: ReactNode;
   count: number;
-  defaultOpen?: boolean;
   title: string;
 }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <details
-      className="group app-card overflow-hidden"
-      onToggle={(event) => setIsOpen(event.currentTarget.open)}
-      open={isOpen}
-    >
-      <summary className="flex cursor-pointer list-none items-center justify-between p-6 group-open:border-b group-open:border-slate-50 xl:pointer-events-none xl:cursor-default xl:border-b xl:border-slate-50 [&::-webkit-details-marker]:hidden">
+    <section className="app-card overflow-hidden">
+      <button
+        aria-expanded={isOpen}
+        className={`flex w-full cursor-pointer items-center justify-between p-6 text-left ${
+          isOpen ? "border-b border-slate-50" : ""
+        }`}
+        onClick={() => setIsOpen((currentIsOpen) => !currentIsOpen)}
+        type="button"
+      >
         <h2 className="section-title">{title}</h2>
         <div className="flex items-center gap-3">
           {count > 0 ? (
@@ -87,13 +87,15 @@ function RequestSection({
           ) : null}
           <ChevronDown
             aria-hidden="true"
-            className="text-slate-400 transition-transform group-open:rotate-180 xl:hidden"
+            className={`text-slate-400 transition-transform ${
+              isOpen ? "rotate-180" : ""
+            }`}
             size={20}
           />
         </div>
-      </summary>
-      <div className="hidden group-open:block xl:block">{children}</div>
-    </details>
+      </button>
+      <div className={isOpen ? "block" : "hidden"}>{children}</div>
+    </section>
   );
 }
 
@@ -128,7 +130,7 @@ function RequestList({
           <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
             {type === "received" ? (
               <>
-                <DeleteReceivedRequestButton requestId={request.requestId} />
+                <RejectFriendRequestButton requestId={request.requestId} />
                 <AcceptFriendRequestButton requestId={request.requestId} />
               </>
             ) : (

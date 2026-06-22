@@ -4,11 +4,11 @@ import { normalizeFriendshipUserIds } from "@/services/friends/friend.helper";
 import {
   acceptFriendship,
   deleteFriendship,
-  deleteReceivedFriendRequest as deleteReceivedFriendRequestRecord,
   deleteSentFriendRequest,
   findFriendshipAndReceivedRequest,
   findReceivedFriendRequest,
   findUserById,
+  rejectReceivedFriendRequest,
   upsertFriendRequest,
 } from "@/services/friends/friend.persistence.server";
 
@@ -56,15 +56,15 @@ export async function cancelFriendRequest({
   await deleteSentFriendRequest({ requesterId, requestId });
 }
 
-// 현재 사용자가 받은 친구 요청을 거절하거나 삭제한다.
-export async function deleteReceivedFriendRequest({
+// 현재 사용자가 받은 친구 요청을 거절한다.
+export async function rejectFriendRequest({
   addresseeId,
   requestId,
 }: {
   addresseeId: string;
   requestId: string;
 }) {
-  await deleteReceivedFriendRequestRecord({ addresseeId, requestId });
+  await rejectReceivedFriendRequest({ addresseeId, requestId });
 }
 
 // 받은 친구 요청을 수락하고 친구 관계를 생성한다.

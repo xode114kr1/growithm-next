@@ -4,14 +4,18 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
 export function useReplacePaginatedQueryParams() {
-  return usePaginatedQueryParams("replace");
+  return useQueryParams("replace", true);
 }
 
 export function usePushPaginatedQueryParams() {
-  return usePaginatedQueryParams("push");
+  return useQueryParams("push", true);
 }
 
-function usePaginatedQueryParams(method: "push" | "replace") {
+export function useReplaceQueryParams() {
+  return useQueryParams("replace", false);
+}
+
+function useQueryParams(method: "push" | "replace", resetPage: boolean) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -28,13 +32,15 @@ function usePaginatedQueryParams(method: "push" | "replace") {
         }
       }
 
-      params.delete("page");
+      if (resetPage) {
+        params.delete("page");
+      }
 
       const queryString = params.toString();
       router[method](queryString ? `${pathname}?${queryString}` : pathname, {
         scroll: false,
       });
     },
-    [method, pathname, router, searchParams],
+    [method, pathname, resetPage, router, searchParams],
   );
 }

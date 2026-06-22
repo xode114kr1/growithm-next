@@ -3,14 +3,16 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
+import { Button } from "@/components/ui/button";
+import type { FriendSearchResult } from "@/types/friend";
+
 import {
   acceptFriendRequestAction,
   cancelFriendRequestAction,
   deleteFriendAction,
-  deleteReceivedFriendRequestAction,
+  rejectFriendRequestAction,
   sendFriendRequestByIdAction,
 } from "../actions";
-import type { FriendSearchResult } from "@/types/friend";
 
 export function SearchResultActions({
   isPending,
@@ -24,13 +26,9 @@ export function SearchResultActions({
   if (profile.relationStatus === "friend") {
     return (
       <div className="flex shrink-0 items-center gap-2">
-        <button
-          className="rounded-lg bg-slate-100 px-3 py-2 text-body-sm font-semibold text-slate-500"
-          disabled
-          type="button"
-        >
+        <Button disabled variant="secondary">
           Friends
-        </button>
+        </Button>
       </div>
     );
   }
@@ -40,7 +38,7 @@ export function SearchResultActions({
       <div className="flex shrink-0 items-center gap-2">
         {profile.requestId ? (
           <>
-            <DeleteReceivedRequestButton requestId={profile.requestId} />
+            <RejectFriendRequestButton requestId={profile.requestId} />
             <AcceptFriendRequestButton requestId={profile.requestId} />
           </>
         ) : null}
@@ -54,13 +52,9 @@ export function SearchResultActions({
         {profile.requestId ? (
           <CancelFriendRequestButton requestId={profile.requestId} />
         ) : (
-          <button
-            className="rounded-lg bg-slate-100 px-3 py-2 text-body-sm font-semibold text-slate-500"
-            disabled
-            type="button"
-          >
+          <Button disabled variant="secondary">
             Request Sent
-          </button>
+          </Button>
         )}
       </div>
     );
@@ -107,14 +101,13 @@ export function SendFriendRequestButton({
   }
 
   return (
-    <button
-      className="rounded-lg bg-primary px-3 py-2 text-body-sm font-semibold text-on-primary shadow-md transition-all hover:opacity-90 active:scale-95 disabled:bg-slate-100 disabled:text-slate-500 disabled:shadow-none disabled:hover:opacity-100 disabled:active:scale-100"
+    <Button
       disabled={isDisabled}
       onClick={handleSendFriendRequest}
-      type="button"
+      variant="primary"
     >
       {isSent ? "요청 보냄" : "친구 추가"}
-    </button>
+    </Button>
   );
 }
 
@@ -122,44 +115,44 @@ export function DeleteFriendButton({ friendUserId }: { friendUserId: string }) {
   return (
     <form action={deleteFriendAction}>
       <input name="friendUserId" type="hidden" value={friendUserId} />
-      <button
-        className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-body-sm font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-error"
+      <Button
+        className="w-full"
+        size="md"
         type="submit"
+        variant="secondary"
       >
         Delete Friend
-      </button>
+      </Button>
     </form>
   );
 }
 
-export function DeleteReceivedRequestButton({
+export function RejectFriendRequestButton({
   requestId,
 }: {
   requestId: string;
 }) {
   return (
-    <form action={deleteReceivedFriendRequestAction}>
+    <form action={rejectFriendRequestAction}>
       <input name="requestId" type="hidden" value={requestId} />
-      <button
-        className="rounded-lg border border-slate-200 px-3 py-2 text-body-sm font-semibold text-slate-600 transition-all hover:bg-slate-50"
-        type="submit"
-      >
-        Delete
-      </button>
+      <Button type="submit" variant="secondary">
+        Reject
+      </Button>
     </form>
   );
 }
 
-export function AcceptFriendRequestButton({ requestId }: { requestId: string }) {
+export function AcceptFriendRequestButton({
+  requestId,
+}: {
+  requestId: string;
+}) {
   return (
     <form action={acceptFriendRequestAction}>
       <input name="requestId" type="hidden" value={requestId} />
-      <button
-        className="rounded-lg bg-primary px-3 py-2 text-body-sm font-semibold text-on-primary shadow-md transition-all hover:opacity-90 active:scale-95"
-        type="submit"
-      >
+      <Button type="submit" variant="primary">
         Accept
-      </button>
+      </Button>
     </form>
   );
 }
@@ -172,12 +165,9 @@ export function CancelFriendRequestButton({
   return (
     <form action={cancelFriendRequestAction}>
       <input name="requestId" type="hidden" value={requestId} />
-      <button
-        className="rounded-lg border border-slate-200 px-3 py-2 text-body-sm font-semibold text-slate-600 transition-all hover:bg-slate-50 hover:text-error"
-        type="submit"
-      >
+      <Button type="submit" variant="secondary">
         Cancel
-      </button>
+      </Button>
     </form>
   );
 }
