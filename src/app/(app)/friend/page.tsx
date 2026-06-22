@@ -42,17 +42,15 @@ export default async function FriendPage({ searchParams }: FriendPageProps) {
           receivedRequests={receivedRequests}
           sentRequests={sentRequests}
         />
-        <section className="xl:col-span-8 xl:col-start-1 xl:row-start-2">
-          <FriendList
-            emptyMessage={
-              filters.query
-                ? "검색 조건에 맞는 친구가 없습니다."
-                : "아직 추가된 친구가 없습니다."
-            }
-            friends={friendUsers}
-            key={filters.query}
-          />
-        </section>
+        <FriendList
+          emptyMessage={
+            filters.query
+              ? "검색 조건에 맞는 친구가 없습니다."
+              : "아직 추가된 친구가 없습니다."
+          }
+          friends={friendUsers}
+          key={filters.query}
+        />
       </div>
     </main>
   );

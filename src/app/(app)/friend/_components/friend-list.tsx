@@ -20,15 +20,17 @@ export default function FriendList({
 
   if (friends.length === 0) {
     return (
-      <div className="app-card p-10 text-center text-body-sm text-on-surface-variant">
-        {emptyMessage}
-      </div>
+      <section className="xl:col-span-8 xl:col-start-1 xl:row-start-2">
+        <div className="app-card p-10 text-center text-body-sm text-on-surface-variant">
+          {emptyMessage}
+        </div>
+      </section>
     );
   }
 
   return (
-    <>
-      <section className="grid grid-cols-1 gap-4">
+    <section className="xl:col-span-8 xl:col-start-1 xl:row-start-2">
+      <div className="grid grid-cols-1 gap-4">
         {friends.map((friend) => (
           <FriendItem
             key={friend.id}
@@ -46,13 +48,13 @@ export default function FriendList({
             </div>
           </FriendItem>
         ))}
-      </section>
+      </div>
       {selectedProfile ? (
         <FriendProfileModal
           onClose={() => setSelectedProfile(null)}
           profile={selectedProfile}
         />
       ) : null}
-    </>
+    </section>
   );
 }
