@@ -29,13 +29,10 @@ export function FriendAddModal() {
       return;
     }
 
-    const controller = new AbortController();
-    const timer = window.setTimeout(async () => {
+    async function searchUsers() {
       try {
         const searchParams = new URLSearchParams({ query });
-        const response = await fetch(`/api/users?${searchParams}`, {
-          signal: controller.signal,
-        });
+        const response = await fetch(`/api/users?${searchParams}`);
 
         if (!response.ok) {
           setSearchResults([]);
@@ -43,21 +40,14 @@ export function FriendAddModal() {
         }
 
         setSearchResults((await response.json()) as FriendSearchResult[]);
-      } catch (error) {
-        if (!(error instanceof DOMException && error.name === "AbortError")) {
-          setSearchResults([]);
-        }
+      } catch {
+        setSearchResults([]);
       } finally {
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
       }
-    }, 300);
+    }
 
-    return () => {
-      window.clearTimeout(timer);
-      controller.abort();
-    };
+    searchUsers();
   }, [isOpen, searchQuery]);
 
   function closeModal() {
@@ -202,9 +192,7 @@ function SearchResultList({
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-3">
       {isLoading ? (
-        <p className="px-3 py-4 text-body-sm text-slate-500">
-          검색 중...
-        </p>
+        <p className="px-3 py-4 text-body-sm text-slate-500">검색 중...</p>
       ) : results.length === 0 ? (
         <div className="px-3 py-4">
           <div className="text-body-md font-semibold text-on-background">
