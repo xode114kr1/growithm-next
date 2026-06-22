@@ -6,7 +6,7 @@ import {
   acceptFriendRequest,
   cancelFriendRequest,
   deleteFriend,
-  deleteReceivedFriendRequest,
+  rejectFriendRequest,
   sendFriendRequest,
 } from "@/services/friends/friend.command";
 import { auth } from "@/lib/auth/auth";
@@ -55,8 +55,8 @@ export async function cancelFriendRequestAction(formData: FormData) {
   revalidatePath("/friend");
 }
 
-// 인증된 사용자가 받은 친구 요청을 삭제하고 친구 페이지 캐시를 갱신한다.
-export async function deleteReceivedFriendRequestAction(formData: FormData) {
+// 인증된 사용자가 받은 친구 요청을 거절하고 친구 페이지 캐시를 갱신한다.
+export async function rejectFriendRequestAction(formData: FormData) {
   const userId = await getCurrentUserId();
   const requestId = getFormValue(formData, "requestId");
 
@@ -64,7 +64,7 @@ export async function deleteReceivedFriendRequestAction(formData: FormData) {
     return;
   }
 
-  await deleteReceivedFriendRequest({ addresseeId: userId, requestId });
+  await rejectFriendRequest({ addresseeId: userId, requestId });
   revalidatePath("/friend");
 }
 

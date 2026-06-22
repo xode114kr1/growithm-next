@@ -7,7 +7,7 @@ import {
   acceptFriendRequestAction,
   cancelFriendRequestAction,
   deleteFriendAction,
-  deleteReceivedFriendRequestAction,
+  rejectFriendRequestAction,
   sendFriendRequestByIdAction,
 } from "../actions";
 import type { FriendSearchResult } from "@/types/friend";
@@ -40,7 +40,7 @@ export function SearchResultActions({
       <div className="flex shrink-0 items-center gap-2">
         {profile.requestId ? (
           <>
-            <DeleteReceivedRequestButton requestId={profile.requestId} />
+            <RejectFriendRequestButton requestId={profile.requestId} />
             <AcceptFriendRequestButton requestId={profile.requestId} />
           </>
         ) : null}
@@ -132,25 +132,29 @@ export function DeleteFriendButton({ friendUserId }: { friendUserId: string }) {
   );
 }
 
-export function DeleteReceivedRequestButton({
+export function RejectFriendRequestButton({
   requestId,
 }: {
   requestId: string;
 }) {
   return (
-    <form action={deleteReceivedFriendRequestAction}>
+    <form action={rejectFriendRequestAction}>
       <input name="requestId" type="hidden" value={requestId} />
       <button
         className="rounded-lg border border-slate-200 px-3 py-2 text-body-sm font-semibold text-slate-600 transition-all hover:bg-slate-50"
         type="submit"
       >
-        Delete
+        Reject
       </button>
     </form>
   );
 }
 
-export function AcceptFriendRequestButton({ requestId }: { requestId: string }) {
+export function AcceptFriendRequestButton({
+  requestId,
+}: {
+  requestId: string;
+}) {
   return (
     <form action={acceptFriendRequestAction}>
       <input name="requestId" type="hidden" value={requestId} />

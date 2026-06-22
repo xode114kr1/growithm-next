@@ -247,8 +247,8 @@ export async function deleteSentFriendRequest({
   });
 }
 
-// 수신자와 요청 ID가 일치하는 받은 친구 요청을 삭제한다.
-export async function deleteReceivedFriendRequest({
+// 수신자와 요청 ID가 일치하는 받은 친구 요청을 거절 처리한다.
+export async function rejectReceivedFriendRequest({
   addresseeId,
   requestId,
 }: {

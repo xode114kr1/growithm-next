@@ -8,7 +8,7 @@ import type { FriendProfile, FriendRequest } from "@/types/friend";
 import {
   AcceptFriendRequestButton,
   CancelFriendRequestButton,
-  DeleteReceivedRequestButton,
+  RejectFriendRequestButton,
 } from "./friend-action-buttons";
 import { FriendItem } from "./friend-item";
 import { FriendProfileModal } from "./friend-profile-modal";
@@ -130,7 +130,7 @@ function RequestList({
           <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
             {type === "received" ? (
               <>
-                <DeleteReceivedRequestButton requestId={request.requestId} />
+                <RejectFriendRequestButton requestId={request.requestId} />
                 <AcceptFriendRequestButton requestId={request.requestId} />
               </>
             ) : (
