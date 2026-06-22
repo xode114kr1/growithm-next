@@ -28,9 +28,6 @@ export default function DashboardChart({
       <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <h2 className="section-title mb-1">티어별 문제 분포</h2>
-          <p className="text-body-sm text-on-surface-variant">
-            해결한 문제를 여섯 난이도 구간으로 나누어 보여줍니다.
-          </p>
         </div>
         <div className="sm:text-right">
           <p className="text-label-caps text-on-surface-variant">해결한 문제</p>
@@ -99,7 +96,7 @@ function MasteryTooltip({
         {masteryTooltipLabels[bucket.tier] ?? bucket.tier}
       </p>
       <p className="mt-1 text-mono-code text-xs text-on-surface-variant">
-        해결한 문제 {bucket.solved.toLocaleString()}개
+        {bucket.solved.toLocaleString()}개
       </p>
     </div>
   );
