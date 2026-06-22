@@ -39,12 +39,6 @@ export default function FriendList({
           >
             <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
               <DeleteFriendButton friendUserId={friend.id} />
-              <button
-                className="rounded-lg bg-primary px-4 py-2.5 text-body-sm font-semibold text-on-primary shadow-md transition-all hover:opacity-90 active:scale-95"
-                type="button"
-              >
-                Invite to Session
-              </button>
             </div>
           </FriendItem>
         ))}

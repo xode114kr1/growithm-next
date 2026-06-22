@@ -75,7 +75,7 @@ function RequestSection({
     <section className="app-card overflow-hidden">
       <button
         aria-expanded={isOpen}
-        className={`flex w-full cursor-pointer items-center justify-between p-6 text-left xl:pointer-events-none xl:cursor-default xl:border-b xl:border-slate-50 ${
+        className={`flex w-full cursor-pointer items-center justify-between p-6 text-left ${
           isOpen ? "border-b border-slate-50" : ""
         }`}
         onClick={() => setIsOpen((currentIsOpen) => !currentIsOpen)}
@@ -90,14 +90,14 @@ function RequestSection({
           ) : null}
           <ChevronDown
             aria-hidden="true"
-            className={`text-slate-400 transition-transform xl:hidden ${
+            className={`text-slate-400 transition-transform ${
               isOpen ? "rotate-180" : ""
             }`}
             size={20}
           />
         </div>
       </button>
-      <div className={isOpen ? "block" : "hidden xl:block"}>{children}</div>
+      <div className={isOpen ? "block" : "hidden"}>{children}</div>
     </section>
   );
 }
