@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Copy,
-  ExternalLink,
-  X,
-} from "lucide-react";
+import { Copy, ExternalLink, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -21,87 +14,40 @@ import { ProblemState, ProblemTags } from "./study-problem-item";
 
 export default function StudyProblemModal({
   onClose,
-  onSelectProblem,
   problem,
-  problems,
   studyId,
 }: {
   onClose: () => void;
-  onSelectProblem: (problem: StudyProblemListItem) => void;
   problem: StudyProblemListItem | null;
-  problems: StudyProblemListItem[];
   studyId: string;
 }) {
   const [detail, setDetail] = useState<StudyProblemDetail | null>(null);
-  const [loadErrorProblemId, setLoadErrorProblemId] = useState<string | null>(
-    null,
-  );
-  const [reloadKey, setReloadKey] = useState(0);
-  const selectedIndex = problem
-    ? problems.findIndex((studyProblem) => studyProblem.id === problem.id)
-    : -1;
-  const previousProblem = selectedIndex > 0 ? problems[selectedIndex - 1] : null;
-  const nextProblem =
-    selectedIndex >= 0 && selectedIndex < problems.length - 1
-      ? problems[selectedIndex + 1]
-      : null;
+  const [hasLoadError, setHasLoadError] = useState(false);
 
   useEffect(() => {
     const problemId = problem?.id;
 
-    if (!problemId) {
-      return;
-    }
-
-    const selectedProblemId = problemId;
-    const controller = new AbortController();
+    if (!problemId) return;
 
     async function loadDetail() {
+      setDetail(null);
+      setHasLoadError(false);
+
       try {
         const response = await fetch(
-          `/api/studies/${encodeURIComponent(studyId)}/problems/${encodeURIComponent(selectedProblemId)}`,
-          { cache: "no-store", signal: controller.signal },
+          `/api/studies/${studyId}/problems/${problemId}`,
         );
 
-        if (!response.ok) {
-          throw new Error("Failed to load study problem detail");
-        }
+        if (!response.ok) return setHasLoadError(true);
 
         setDetail((await response.json()) as StudyProblemDetail);
-        setLoadErrorProblemId(null);
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          return;
-        }
-
-        setLoadErrorProblemId(selectedProblemId);
+      } catch {
+        setHasLoadError(true);
       }
     }
 
-    void loadDetail();
-
-    return () => controller.abort();
-  }, [problem, reloadKey, studyId]);
-
-  useEffect(() => {
-    if (!problem) {
-      return;
-    }
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        onClose();
-      } else if (event.key === "ArrowLeft" && previousProblem) {
-        onSelectProblem(previousProblem);
-      } else if (event.key === "ArrowRight" && nextProblem) {
-        onSelectProblem(nextProblem);
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [nextProblem, onClose, onSelectProblem, previousProblem, problem]);
+    loadDetail();
+  }, [problem?.id, studyId]);
 
   if (!problem) {
     return null;
@@ -142,42 +88,19 @@ export default function StudyProblemModal({
               {problem.sharedBy} shared on {problem.sharedAtLabel}
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-1">
-            <button
-              aria-label="이전 문제"
-              className="flex size-10 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary disabled:cursor-not-allowed disabled:text-slate-300"
-              disabled={!previousProblem}
-              onClick={() => previousProblem && onSelectProblem(previousProblem)}
-              type="button"
-            >
-              <ChevronLeft aria-hidden="true" size={20} />
-            </button>
-            <button
-              aria-label="다음 문제"
-              className="flex size-10 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary disabled:cursor-not-allowed disabled:text-slate-300"
-              disabled={!nextProblem}
-              onClick={() => nextProblem && onSelectProblem(nextProblem)}
-              type="button"
-            >
-              <ChevronRight aria-hidden="true" size={20} />
-            </button>
-            <button
-              aria-label="문제 상세 창 닫기"
-              className="flex size-10 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary"
-              onClick={onClose}
-              type="button"
-            >
-              <X aria-hidden="true" size={20} />
-            </button>
-          </div>
+          <button
+            aria-label="문제 상세 창 닫기"
+            className="flex size-10 shrink-0 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary"
+            onClick={onClose}
+            type="button"
+          >
+            <X aria-hidden="true" size={20} />
+          </button>
         </header>
         {detail?.id === problem.id ? (
           <ProblemDetailContent problem={detail} />
         ) : (
-          <ProblemDetailState
-            hasLoadError={loadErrorProblemId === problem.id}
-            onRetry={() => setReloadKey((key) => key + 1)}
-          />
+          <ProblemDetailState hasLoadError={hasLoadError} />
         )}
       </div>
     </div>
@@ -222,25 +145,14 @@ function ProblemDetailContent({ problem }: { problem: StudyProblemDetail }) {
   );
 }
 
-function ProblemDetailState({
-  hasLoadError,
-  onRetry,
-}: {
-  hasLoadError: boolean;
-  onRetry: () => void;
-}) {
+function ProblemDetailState({ hasLoadError }: { hasLoadError: boolean }) {
   return (
-    <div className="flex min-h-72 flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
+    <div className="flex min-h-72 flex-1 items-center justify-center p-6 text-center">
       <p className="font-semibold text-on-surface">
         {hasLoadError
           ? "문제 상세 정보를 불러오지 못했습니다."
           : "문제 상세 정보를 불러오는 중입니다."}
       </p>
-      {hasLoadError ? (
-        <button className="btn-secondary" onClick={onRetry} type="button">
-          다시 시도
-        </button>
-      ) : null}
     </div>
   );
 }
@@ -294,16 +206,10 @@ function ProblemDescription({ description }: { description: string | null }) {
 }
 
 function ProblemSolutionCode({ code }: { code: string | null }) {
-  const [copied, setCopied] = useState(false);
-
   async function handleCopyCode() {
-    if (!code) {
-      return;
-    }
+    if (!code) return;
 
     await navigator.clipboard.writeText(code);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1600);
   }
 
   return (
@@ -316,12 +222,8 @@ function ProblemSolutionCode({ code }: { code: string | null }) {
             onClick={handleCopyCode}
             type="button"
           >
-            {copied ? (
-              <Check aria-hidden="true" size={14} />
-            ) : (
-              <Copy aria-hidden="true" size={14} />
-            )}
-            {copied ? "복사됨" : "복사"}
+            <Copy aria-hidden="true" size={14} />
+            복사
           </button>
         ) : null}
       </div>
