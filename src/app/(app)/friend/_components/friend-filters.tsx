@@ -2,7 +2,7 @@
 
 import type { ChangeEvent, CompositionEvent } from "react";
 
-import { useReplaceQueryParams } from "@/hooks/use-paginated-query-params";
+import { useReplaceQueryParams } from "@/hooks/use-query-params";
 import type { FriendSearchResult } from "@/types/friend";
 
 import { FriendAddModal } from "./friend-add-modal";
