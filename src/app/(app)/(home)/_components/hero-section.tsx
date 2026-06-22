@@ -1,6 +1,12 @@
+import Link from "next/link";
+
 import { signInWithGitHub } from "../actions";
 
-export default function HeroSection() {
+export default function HeroSection({
+  isAuthenticated,
+}: {
+  isAuthenticated: boolean;
+}) {
   return (
     <section className="relative overflow-hidden bg-surface px-4 pb-20 pt-32 sm:px-10">
       <div className="mx-auto flex max-w-container flex-col items-center gap-16 lg:flex-row">
@@ -17,14 +23,7 @@ export default function HeroSection() {
             환경을 제공합니다.
           </p>
           <div className="flex flex-wrap gap-4">
-            <form action={signInWithGitHub}>
-              <button
-                className="btn-primary min-h-14 rounded-xl px-8 text-base"
-                type="submit"
-              >
-                시작하기
-              </button>
-            </form>
+            <StartButton isAuthenticated={isAuthenticated} />
             <a
               className="btn-secondary min-h-14 rounded-xl px-8 text-base"
               href="#features"
@@ -37,6 +36,26 @@ export default function HeroSection() {
         <CodePreview />
       </div>
     </section>
+  );
+}
+
+function StartButton({ isAuthenticated }: { isAuthenticated: boolean }) {
+  const className = "btn-primary min-h-14 rounded-xl px-8 text-base";
+
+  if (isAuthenticated) {
+    return (
+      <Link className={className} href="/dashboard">
+        시작하기
+      </Link>
+    );
+  }
+
+  return (
+    <form action={signInWithGitHub}>
+      <button className={className} type="submit">
+        시작하기
+      </button>
+    </form>
   );
 }
 

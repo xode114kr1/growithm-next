@@ -8,14 +8,10 @@ import {
   getStudyProblems,
   STUDY_PROBLEM_PAGE_SIZE,
 } from "@/services/studies/study.query";
+import { parseStudyProblemFilters } from "@/services/studies/study.validator";
 
 import StudyProblemFilters from "./_components/study-problem-filters";
 import StudyProblemList from "./_components/study-problem-list";
-import {
-  buildStudyProblemQueryString,
-  parseStudyProblemFilters,
-  parseStudyProblemPage,
-} from "./_lib/parse";
 import type { StudyProblemPageSearchParams } from "./types";
 
 export default async function StudyProblemsPage({
@@ -37,38 +33,30 @@ export default async function StudyProblemsPage({
   }
 
   const filters = parseStudyProblemFilters(urlSearchParams);
-  const [filteredCount, totalCount, memberNames, tiers] = await Promise.all([
-    getStudyProblemCount({ filters, studyId, userId }),
-    getStudyProblemCount({ studyId, userId }),
-    getStudyProblemMemberNames({ studyId, userId }),
-    getStudyProblemTiers({ studyId, userId }),
-  ]);
+  const [filteredCount, totalCount, memberNames, tiers, initialItems] =
+    await Promise.all([
+      getStudyProblemCount({ filters, studyId, userId }),
+      getStudyProblemCount({ studyId, userId }),
+      getStudyProblemMemberNames({ studyId, userId }),
+      getStudyProblemTiers({ studyId, userId }),
+      getStudyProblems({
+        filters,
+        page: 1,
+        studyId,
+        userId,
+      }),
+    ]);
 
   if (!memberNames) {
     notFound();
   }
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredCount / STUDY_PROBLEM_PAGE_SIZE),
-  );
-  const currentPage = Math.min(
-    parseStudyProblemPage(urlSearchParams.page),
-    totalPages,
-  );
-  const problems = await getStudyProblems({
-    filters,
-    page: currentPage,
-    studyId,
-    userId,
-  });
   const hasActiveFilters =
     filters.platform !== null ||
     filters.tier !== null ||
     filters.member !== null;
   const clearedFiltersQueryString =
     filters.sort === "latest" ? "" : `sort=${filters.sort}`;
-  const queryString = buildStudyProblemQueryString(filters);
 
   return (
     <>
@@ -81,15 +69,27 @@ export default async function StudyProblemsPage({
       />
       <StudyProblemList
         clearedFiltersQueryString={clearedFiltersQueryString}
-        currentPage={currentPage}
-        filteredCount={filteredCount}
+        filters={filters}
         hasActiveFilters={hasActiveFilters}
-        pageSize={STUDY_PROBLEM_PAGE_SIZE}
-        problems={problems}
-        queryString={queryString}
+        initialHasNextPage={STUDY_PROBLEM_PAGE_SIZE < filteredCount}
+        initialItems={initialItems}
+        key={createStudyProblemListKey(filters)}
         studyId={studyId}
-        totalPages={totalPages}
       />
     </>
   );
+}
+
+function createStudyProblemListKey(filters: {
+  member: string | null;
+  platform: string | null;
+  sort: string;
+  tier: string | null;
+}) {
+  return new URLSearchParams({
+    member: filters.member ?? "",
+    platform: filters.platform ?? "",
+    sort: filters.sort,
+    tier: filters.tier ?? "",
+  }).toString();
 }

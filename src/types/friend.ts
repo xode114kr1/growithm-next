@@ -1,6 +1,13 @@
 import type { PersonalScoreTier } from "@/types/user";
+import type { InfiniteScrollResponse } from "@/types/infinite-scroll";
 
-export type FriendListFilter = "friends" | "received" | "sent";
+export type FriendFiltersState = {
+  query: string;
+};
+
+export type FriendPageSearchParams = {
+  query?: string | string[];
+};
 
 export type FriendRelationStatus =
   | "friend"
@@ -24,3 +31,6 @@ export type FriendRequest = FriendProfile & {
 export type FriendSearchResult = FriendProfile & {
   requestId?: string;
 };
+
+export type FriendInfiniteScrollResponse =
+  InfiniteScrollResponse<FriendProfile>;

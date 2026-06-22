@@ -1,35 +1,64 @@
 import { auth } from "@/lib/auth/auth";
 import {
-  getFriendUsers,
+  FRIEND_PAGE_SIZE,
+  getFriendCount,
+  getFriends,
   getFriendRelationsForUsers,
   getReceivedFriendRequests,
   getSentFriendRequests,
 } from "@/services/friends/friend.query";
+import { parseFriendFilters } from "@/services/friends/friend.validator";
 import { getUsers } from "@/services/users/user.query";
+import type { FriendPageSearchParams } from "@/types/friend";
 
-import FriendContent from "./_components/friend-content";
+import FriendFilters from "./_components/friend-filters";
+import FriendList from "./_components/friend-list";
+import FriendRequests from "./_components/friend-requests";
 
-export default async function FriendPage() {
+type FriendPageProps = {
+  searchParams: Promise<FriendPageSearchParams>;
+};
+
+export default async function FriendPage({ searchParams }: FriendPageProps) {
+  const params = await searchParams;
   const session = await auth();
   const userId = session?.user?.id;
-  const [friendUsers, receivedRequests, sentRequests, users] = await Promise.all([
-    getFriendUsers(userId),
-    getReceivedFriendRequests(userId),
-    getSentFriendRequests(userId),
-    userId ? getUsers({ excludedUserId: userId }) : [],
-  ]);
+
+  const filters = parseFriendFilters(params);
+
+  const [friendUsers, friendCount, receivedRequests, sentRequests, users] =
+    await Promise.all([
+      getFriends({ filters, page: 1, userId }),
+      getFriendCount({ filters, userId }),
+      getReceivedFriendRequests(userId),
+      getSentFriendRequests(userId),
+      userId ? getUsers({ excludedUserId: userId }) : [],
+    ]);
+
   const searchResults = await getFriendRelationsForUsers({ userId, users });
 
   return (
-    <main className="page-shell">
-      <div className="page-container">
-        <FriendContent
-          friends={friendUsers}
+    <main className="page-shell bg-linear-to-b from-surface to-surface-container-low">
+      <div className="page-container grid grid-cols-1 gap-gutter xl:grid-cols-12 xl:grid-rows-[2.75rem_auto]">
+        <FriendFilters query={filters.query} searchResults={searchResults} />
+        <FriendRequests
           receivedRequests={receivedRequests}
-          searchResults={searchResults}
           sentRequests={sentRequests}
+        />
+        <FriendList
+          filters={filters}
+          initialFriends={friendUsers}
+          initialHasNextPage={FRIEND_PAGE_SIZE < friendCount}
+          key={createFriendListKey(filters.query, friendUsers)}
         />
       </div>
     </main>
   );
+}
+
+function createFriendListKey(
+  query: string,
+  friends: { id: string }[],
+) {
+  return `${query}:${friends.map((friend) => friend.id).join(",")}`;
 }

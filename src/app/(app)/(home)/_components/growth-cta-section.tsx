@@ -1,8 +1,14 @@
+import Link from "next/link";
+
 import { signInWithGitHub } from "../actions";
 
 const trustBadges = ["GITHUB VERIFIED", "SECURE SYNC", "REAL-TIME REVIEW"];
 
-export default function GrowthCtaSection() {
+export default function GrowthCtaSection({
+  isAuthenticated,
+}: {
+  isAuthenticated: boolean;
+}) {
   return (
     <section className="relative bg-surface px-4 py-24 sm:px-10">
       <div className="relative mx-auto max-w-container overflow-hidden rounded-xl bg-primary-container p-8 text-center sm:p-16">
@@ -19,14 +25,7 @@ export default function GrowthCtaSection() {
             Growithm과 함께라면 알고리즘 정복은 더 이상 막막한 과제가 아닙니다.
           </p>
           <div className="flex justify-center">
-            <form action={signInWithGitHub}>
-              <button
-                className="inline-flex min-h-14 items-center justify-center rounded-xl bg-secondary-fixed px-8 text-base font-bold text-on-secondary-container shadow-lg transition-transform hover:scale-[1.03]"
-                type="submit"
-              >
-                오늘의 문제 풀기
-              </button>
-            </form>
+            <StartButton isAuthenticated={isAuthenticated} />
           </div>
           <div className="mt-8 flex flex-wrap justify-center gap-8 border-t border-on-primary-container/30 pt-8 text-label-caps text-on-primary-container sm:gap-12">
             {trustBadges.map((badge) => (
@@ -39,5 +38,26 @@ export default function GrowthCtaSection() {
         </div>
       </div>
     </section>
+  );
+}
+
+function StartButton({ isAuthenticated }: { isAuthenticated: boolean }) {
+  const className =
+    "inline-flex min-h-14 items-center justify-center rounded-xl bg-secondary-fixed px-8 text-base font-bold text-on-secondary-container shadow-lg transition-transform hover:scale-[1.03]";
+
+  if (isAuthenticated) {
+    return (
+      <Link className={className} href="/dashboard">
+        시작하기
+      </Link>
+    );
+  }
+
+  return (
+    <form action={signInWithGitHub}>
+      <button className={className} type="submit">
+        시작하기
+      </button>
+    </form>
   );
 }

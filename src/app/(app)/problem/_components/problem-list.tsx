@@ -1,136 +1,148 @@
-import Link from "next/link";
+"use client";
 
-import type { ProblemEmptyStateReason, ProblemListItem } from "@/types/problem";
+import Link from "next/link";
+import { useCallback, useState, type ReactNode } from "react";
+
+import { useVirtualizedLoadMore } from "@/hooks/use-virtualized-load-more";
+import { useWindowVirtualizedList } from "@/hooks/use-window-virtualized-list";
+import type {
+  ProblemEmptyStateReason,
+  ProblemFiltersState,
+  ProblemInfiniteScrollResponse,
+  ProblemListItem,
+} from "@/types/problem";
 import ProblemItem from "./problem-item";
 
+const PROBLEM_ROW_ESTIMATE_HEIGHT = 112;
+const PROBLEM_LIST_OVERSCAN = 6;
+const LOAD_MORE_THRESHOLD = 5;
+
 export default function ProblemList({
-  currentPage,
   emptyStateReason,
-  pageSize,
-  problems,
-  queryString,
-  totalCount,
-  totalPages,
+  filters,
+  initialHasNextPage,
+  initialItems,
 }: {
-  currentPage: number;
   emptyStateReason: ProblemEmptyStateReason | null;
-  pageSize: number;
-  problems: ProblemListItem[];
-  queryString: string;
-  totalCount: number;
-  totalPages: number;
+  filters: ProblemFiltersState;
+  initialHasNextPage: boolean;
+  initialItems: ProblemListItem[];
 }) {
+  const [items, setItems] = useState(initialItems);
+  const [nextPage, setNextPage] = useState(2);
+  const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { containerRef, rowVirtualizer, totalSize, virtualItems } =
+    useWindowVirtualizedList<HTMLElement>({
+      count: items.length,
+      estimateSize: () => PROBLEM_ROW_ESTIMATE_HEIGHT,
+      getItemKey: (index) => items[index]?.id ?? index,
+      overscan: PROBLEM_LIST_OVERSCAN,
+    });
+
+  const loadNextPage = useCallback(async () => {
+    if (!hasNextPage || isLoading) return;
+
+    setIsLoading(true);
+
+    try {
+      const searchParams = createProblemSearchParams(nextPage, filters);
+      const response = await fetch(`/api/problems?${searchParams}`);
+
+      if (!response.ok) return;
+
+      const data = (await response.json()) as ProblemInfiniteScrollResponse;
+
+      const nextItems = data.items.map((item) => ({
+        ...item,
+        createdAt: new Date(item.createdAt),
+      }));
+
+      setItems((currentItems) => [...currentItems, ...nextItems]);
+      setNextPage(data.currentPage + 1);
+      setHasNextPage(data.hasNextPage);
+    } catch {
+      return;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filters, hasNextPage, isLoading, nextPage]);
+
+  useVirtualizedLoadMore({
+    hasNextPage,
+    isLoading,
+    itemCount: items.length,
+    onLoadMore: loadNextPage,
+    threshold: LOAD_MORE_THRESHOLD,
+    virtualItems,
+  });
+
   return (
-    <section className="app-card overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-left">
-          <thead>
-            <tr className="border-b border-slate-100 bg-slate-50/50">
+    <section className="app-card overflow-hidden" ref={containerRef}>
+      <div className="overflow-hidden md:overflow-x-auto">
+        <table className="grid w-full border-collapse text-left">
+          <thead className="hidden md:grid">
+            <tr className="grid grid-cols-[minmax(360px,1.6fr)_minmax(260px,1fr)_180px] border-b border-slate-100 bg-slate-50/50">
               <TableHead>문제 정보</TableHead>
               <TableHead>태그</TableHead>
               <TableHead>상태</TableHead>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-50">
-            {problems.map((problem) => (
-              <ProblemItem problem={problem} key={problem.id} />
-            ))}
+
+          <tbody
+            className="relative grid divide-y divide-slate-50"
+            style={{
+              height: `${totalSize}px`,
+            }}
+          >
+            {virtualItems.map((virtualItem) => {
+              const problem = items[virtualItem.index];
+
+              if (!problem) return null;
+
+              return (
+                <ProblemItem
+                  key={virtualItem.key}
+                  measureElement={rowVirtualizer.measureElement}
+                  problem={problem}
+                  style={{
+                    transform: `translateY(${
+                      virtualItem.start - rowVirtualizer.options.scrollMargin
+                    }px)`,
+                  }}
+                  virtualIndex={virtualItem.index}
+                />
+              );
+            })}
           </tbody>
         </table>
       </div>
+
       {emptyStateReason ? <EmptyState reason={emptyStateReason} /> : null}
-      <Pagination
-        currentPage={currentPage}
-        pageSize={pageSize}
-        queryString={queryString}
-        showingCount={problems.length}
-        totalCount={totalCount}
-        totalPages={totalPages}
-      />
+
+      {isLoading ? (
+        <div className="border-t border-slate-100 bg-slate-50/30 px-6 py-4">
+          <p className="text-body-sm text-slate-500">불러오는 중...</p>
+        </div>
+      ) : null}
     </section>
   );
 }
 
-// 현재 query 기준의 페이지 이동과 결과 범위 텍스트를 렌더링한다.
-function Pagination({
-  currentPage,
-  pageSize,
-  queryString,
-  showingCount,
-  totalCount,
-  totalPages,
-}: {
-  currentPage: number;
-  pageSize: number;
-  queryString: string;
-  showingCount: number;
-  totalCount: number;
-  totalPages: number;
-}) {
-  const start = showingCount > 0 ? (currentPage - 1) * pageSize + 1 : 0;
-  const end = Math.min((currentPage - 1) * pageSize + showingCount, totalCount);
-  const pages = getVisiblePages(currentPage, totalPages);
+function createProblemSearchParams(page: number, filters: ProblemFiltersState) {
+  const searchParams = new URLSearchParams({
+    page: String(page),
+    sort: filters.sort,
+  });
 
-  return (
-    <div className="flex flex-col items-start justify-between gap-4 border-t border-slate-100 bg-slate-50/30 px-6 py-4 sm:flex-row sm:items-center">
-      <p className="text-body-sm text-slate-500">
-        전체 {totalCount.toLocaleString()}개 중{" "}
-        <span className="font-semibold text-on-surface">
-          {start} - {end}
-        </span>
-      </p>
-      <div className="flex items-center gap-1">
-        <PaginationLink
-          disabled={currentPage === 1}
-          href={getPageHref(currentPage - 1, queryString)}
-          label="‹"
-        />
-        <div className="flex items-center px-2">
-          {pages[0] > 1 ? (
-            <>
-              <PaginationLink href={getPageHref(1, queryString)} label="1" />
-              {pages[0] > 2 ? (
-                <span className="px-2 text-sm text-slate-400">...</span>
-              ) : null}
-            </>
-          ) : null}
-          {pages.map((page) => (
-            <Link
-              aria-current={page === currentPage ? "page" : undefined}
-              className={
-                page === currentPage
-                  ? "flex size-9 items-center justify-center rounded-lg bg-primary text-body-sm font-semibold text-on-primary"
-                  : "flex size-9 items-center justify-center rounded-lg text-body-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
-              }
-              href={getPageHref(page, queryString)}
-              key={page}
-            >
-              {page}
-            </Link>
-          ))}
-          {pages[pages.length - 1] < totalPages ? (
-            <>
-              {pages[pages.length - 1] < totalPages - 1 ? (
-                <span className="px-2 text-sm text-slate-400">...</span>
-              ) : null}
-              <PaginationLink
-                href={getPageHref(totalPages, queryString)}
-                label={totalPages}
-              />
-            </>
-          ) : null}
-        </div>
-        <PaginationLink
-          disabled={currentPage === totalPages}
-          href={getPageHref(currentPage + 1, queryString)}
-          label="›"
-        />
-      </div>
-    </div>
-  );
+  if (filters.platform) searchParams.set("platform", filters.platform);
+  if (filters.q) searchParams.set("q", filters.q);
+  if (filters.tier) searchParams.set("tier", filters.tier);
+
+  return searchParams.toString();
 }
 
-// 현재 query에 표시할 행이 없을 때 명확한 대체 화면을 보여준다.
 function EmptyState({ reason }: { reason: ProblemEmptyStateReason }) {
   if (reason === "no-filter-results") {
     return (
@@ -160,68 +172,11 @@ function EmptyState({ reason }: { reason: ProblemEmptyStateReason }) {
   );
 }
 
-// 활성 링크와 비활성 페이지네이션 컨트롤을 같은 크기로 렌더링한다.
-function PaginationLink({
-  disabled = false,
-  href,
-  label,
-}: {
-  disabled?: boolean;
-  href: string;
-  label: number | string;
-}) {
-  if (disabled) {
-    return (
-      <span className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-body-sm font-medium text-slate-300">
-        {label}
-      </span>
-    );
-  }
-
-  return (
-    <Link
-      className="flex size-9 items-center justify-center rounded-lg text-body-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
-      href={href}
-    >
-      {label}
-    </Link>
-  );
-}
-
-// 필터와 정렬 상태를 유지한 페이지네이션 URL을 만든다.
-function getPageHref(page: number, queryString: string) {
-  const params = new URLSearchParams(queryString);
-
-  if (page > 1) {
-    params.set("page", String(page));
-  } else {
-    params.delete("page");
-  }
-
-  const nextQueryString = params.toString();
-
-  return nextQueryString ? `/problem?${nextQueryString}` : "/problem";
-}
-
-// 현재 페이지 주변으로 보이는 페이지 범위를 작게 유지한다.
-function getVisiblePages(currentPage: number, totalPages: number) {
-  const start = Math.max(1, currentPage - 1);
-  const end = Math.min(totalPages, currentPage + 1);
-  const pages = [];
-
-  for (let page = start; page <= end; page += 1) {
-    pages.push(page);
-  }
-
-  return pages;
-}
-
-// 테이블 헤더에 일관된 스타일을 적용한다.
 function TableHead({
   children,
   className,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }) {
   return (

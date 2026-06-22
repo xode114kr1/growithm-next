@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { FriendUserRow } from "@/services/friends/friend.helper";
 
@@ -12,7 +13,17 @@ const friendUserSelect = {
 } satisfies Record<keyof FriendUserRow, true>;
 
 // 현재 사용자와 친구 관계인 사용자 정보를 조회한다.
-export async function findFriendUsers(userId: string) {
+export async function findFriendUsers({
+  page,
+  pageSize,
+  query,
+  userId,
+}: {
+  page: number;
+  pageSize: number;
+  query: string;
+  userId: string;
+}) {
   return prisma.friendship.findMany({
     include: {
       userA: {
@@ -22,12 +33,23 @@ export async function findFriendUsers(userId: string) {
         select: friendUserSelect,
       },
     },
-    orderBy: {
-      createdAt: "desc",
-    },
-    where: {
-      OR: [{ userAId: userId }, { userBId: userId }],
-    },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+    where: buildFriendshipWhere({ query, userId }),
+  });
+}
+
+// 현재 사용자의 검색 조건에 맞는 친구 수를 조회한다.
+export async function countFriendUsers({
+  query,
+  userId,
+}: {
+  query: string;
+  userId: string;
+}) {
+  return prisma.friendship.count({
+    where: buildFriendshipWhere({ query, userId }),
   });
 }
 
@@ -125,6 +147,50 @@ export async function findFriendRelationsForUserIds({
   return { friendships, receivedRequests, sentRequests };
 }
 
+function buildFriendshipWhere({
+  query,
+  userId,
+}: {
+  query: string;
+  userId: string;
+}): Prisma.FriendshipWhereInput {
+  if (!query) {
+    return {
+      OR: [{ userAId: userId }, { userBId: userId }],
+    };
+  }
+
+  const friendUserFilter: Prisma.UserWhereInput = {
+    OR: [
+      {
+        name: {
+          contains: query,
+          mode: "insensitive",
+        },
+      },
+      {
+        email: {
+          contains: query,
+          mode: "insensitive",
+        },
+      },
+    ],
+  };
+
+  return {
+    OR: [
+      {
+        userAId: userId,
+        userB: friendUserFilter,
+      },
+      {
+        userA: friendUserFilter,
+        userBId: userId,
+      },
+    ],
+  };
+}
+
 // 사용자 ID에 해당하는 사용자의 존재 여부를 조회한다.
 export async function findUserById(userId: string) {
   return prisma.user.findUnique({
@@ -211,8 +277,8 @@ export async function deleteSentFriendRequest({
   });
 }
 
-// 수신자와 요청 ID가 일치하는 받은 친구 요청을 삭제한다.
-export async function deleteReceivedFriendRequest({
+// 수신자와 요청 ID가 일치하는 받은 친구 요청을 거절 처리한다.
+export async function rejectReceivedFriendRequest({
   addresseeId,
   requestId,
 }: {
