@@ -78,7 +78,7 @@ app/example/
 라우트의 `actions.ts`는 Next.js 실행 경계만 담당한다.
 
 - `"use server"` 선언, `FormData` 파싱, 세션 조회를 담당한다.
-- 서비스 command에 필요한 사용자 ID와 입력값을 전달한다.
+- 서버 service에 필요한 사용자 ID와 입력값을 전달한다.
 - 처리 완료 후 `revalidatePath`, `redirect` 등 Next.js 후처리를 수행한다.
 - Prisma, 외부 API, 재사용 가능한 비즈니스 규칙을 직접 작성하지 않는다.
 
@@ -122,74 +122,80 @@ lib/
 
 ### `src/server`
 
-조회와 상태 변경 유스케이스, 외부 API 호출, 도메인 단위 비즈니스 로직을 리소스별 디렉터리에 둔다.
-서비스 구현을 보조하는 함수와 입력 검증 함수도 같은 리소스 디렉터리에서 관리한다.
+서버에서만 실행되는 비즈니스 로직과 데이터 접근 코드를 도메인별 디렉터리에 둔다.
+Next.js 진입점과 도메인 로직을 분리하며, Spring의 Controller, Service, Repository 계층과 유사한 책임 구분을 사용한다.
 
 ```text
 server/
-└─ [resource]/
-   ├─ [resource].query.ts
-   ├─ [resource].command.ts
-   ├─ [resource].client.ts
-   ├─ [resource].persistence.server.ts
-   ├─ [resource].helper.ts
-   └─ [resource].validator.ts
+├─ [domain]/
+│  ├─ [domain].service.ts
+│  ├─ [domain].repository.ts
+│  ├─ [domain].schema.ts
+│  ├─ [domain].mapper.ts
+│  ├─ [domain].types.ts
+│  ├─ [domain].errors.ts
+│  └─ [domain].gateway.ts
+└─ shared/
+   ├─ auth.ts
+   ├─ database.ts
+   └─ errors.ts
 ```
 
-서비스 파일의 역할은 다음과 같이 구분한다.
+파일 역할은 다음과 같이 구분한다.
 
-- `[resource].query.ts`
-  - 상태를 변경하지 않는 조회 유스케이스를 조합한다.
-  - validator, client, persistence, helper를 호출하고 처리 결과를 반환한다.
-  - 생성, 수정, 삭제 로직과 Prisma 쿼리, 외부 API 요청을 직접 작성하지 않는다.
-- `[resource].command.ts`
-  - 생성, 수정, 삭제 등 상태를 변경하는 명령 유스케이스를 조합한다.
-  - Next.js Server Action, Route Handler, Queue callback 등 호출 진입점과 관계없이 상태를 변경하면 이 파일에 둔다.
-  - 인증된 사용자 ID와 검증된 입력값을 받아 validator, client, persistence, helper를 호출한다.
-  - `FormData`, `revalidatePath`, `redirect` 같은 Next.js 전용 기능을 사용하지 않는다.
-  - Prisma 쿼리와 외부 API 요청을 직접 작성하지 않는다.
-- `[resource].client.ts`
-  - GitHub 등 애플리케이션 외부 시스템에 요청하는 함수만 둔다.
-  - HTTP 요청, 응답 상태 확인, 타임아웃과 외부 API 오류 변환을 담당한다.
-  - DB에 접근하거나 비즈니스 흐름을 조합하지 않는다.
-- `[resource].persistence.server.ts`
-  - Prisma를 사용하는 조회, 저장, 상태 변경, 트랜잭션을 담당한다.
-  - DB 저장 형태와 동시성 제어처럼 영속성에 종속된 로직을 둔다.
-  - 외부 API를 호출하거나 전체 서비스 흐름을 조합하지 않는다.
-- `[resource].helper.ts`
-  - 서비스 내부에서 사용하는 순수 데이터 변환과 계산 함수를 둔다.
-  - DB, 외부 API, 환경 변수 등 외부 상태에 의존하지 않는다.
-- `[resource].validator.ts`
-  - 서비스 입력값과 외부에서 전달받은 데이터의 형식을 검증한다.
-  - 검증 결과를 타입 가드 또는 파싱 결과로 반환하고 비즈니스 처리를 수행하지 않는다.
+- `[domain].service.ts`
+  - 조회와 상태 변경 유스케이스를 구현한다.
+  - 권한 확인, 비즈니스 규칙, 트랜잭션 단위의 처리 흐름을 조합한다.
+  - repository, schema, mapper, gateway를 호출할 수 있다.
+  - `Request`, `Response`, `FormData`, `redirect`, `revalidatePath` 같은 Next.js API를 사용하지 않는다.
+- `[domain].repository.ts`
+  - Prisma를 통한 조회, 저장, 수정, 삭제와 트랜잭션을 담당한다.
+  - 비즈니스 흐름, HTTP 처리, 외부 API 호출을 담당하지 않는다.
+- `[domain].schema.ts`
+  - Server Action, Route Handler, 외부 API에서 받은 입력값을 파싱하고 검증한다.
+  - 검증 결과를 반환하며 데이터 저장이나 비즈니스 처리를 수행하지 않는다.
+- `[domain].mapper.ts`
+  - Prisma 결과, 외부 API 응답, 도메인 객체, 화면 반환 모델 사이의 변환을 담당한다.
+  - DB나 외부 API에 직접 접근하지 않는다.
+- `[domain].types.ts`
+  - 해당 서버 도메인 내부에서만 사용하는 입력, 출력, 도메인 타입을 둔다.
+  - 클라이언트와 공유해야 하는 타입만 `src/types`에 둔다.
+- `[domain].errors.ts`
+  - 해당 도메인에서 사용하는 명시적인 오류 타입을 둔다.
+- `[domain].gateway.ts`
+  - GitHub 등 외부 시스템과의 HTTP 통신을 담당한다.
+  - 브라우저용 API 모듈과 혼동하지 않도록 외부 연동 파일에 `client.ts` 이름을 사용하지 않는다.
 
-HTTP 메서드 이름만으로 파일을 구분하지 않는다.
-데이터를 조회하고 상태를 변경하지 않으면 `[resource].query.ts`,
-데이터를 생성, 수정, 삭제하거나 상태를 전환하면 `[resource].command.ts`에 둔다.
+각 역할이 실제로 필요할 때만 파일을 생성한다.
+작은 도메인은 `service.ts`, `repository.ts`, `schema.ts`만으로 시작한다.
+`service.ts`가 커지면 그때 `query.service.ts`, `command.service.ts`처럼 유스케이스 성격에 따라 분리한다.
 
-서비스의 query와 command는 모두 서버에서 실행되는 일반 TypeScript 모듈이다.
-`"use server"`와 `"use client"` 지시어를 사용하지 않는다.
-`"use client"`는 브라우저에서 렌더링되는 React Client Component 경계를 선언하므로 서비스 command에 사용하지 않는다.
+서버 전용 파일에는 `import "server-only"`를 선언한다.
+`src/server` 파일에는 `"use server"`와 `"use client"` 지시어를 사용하지 않는다.
+`"use server"`는 클라이언트에서 호출할 Server Function 진입점인 `actions.ts`에만 사용한다.
 
-서비스의 `[resource].command.ts`와 라우트의 `actions.ts`는 역할이 다르다.
+### 계층과 의존 방향
 
 ```text
-app/[route]/actions.ts
-  -> 인증, FormData 파싱, Next.js 캐시 갱신
-  -> server/[resource]/[resource].command.ts 호출
-     -> server/[resource]/[resource].persistence.server.ts 호출
-        -> PostgreSQL
+Server Component
+  -> service
+     -> repository
+        -> Prisma
+
+actions.ts / route.ts
+  -> schema
+  -> service
+     -> repository / gateway
 ```
 
-- `app/[route]/actions.ts`는 클라이언트에서 호출 가능한 Next.js Server Action 진입점이다.
-- `server/[resource]/[resource].command.ts`는 프레임워크에 의존하지 않는 상태 변경 유스케이스다.
-- 라우트 action에서 service persistence를 직접 호출하지 않는다.
-- service query와 service command는 persistence, client, validator, helper를 호출할 수 있다.
-- persistence, client, validator, helper는 service query나 service command를 호출하지 않는다.
-
-각 역할의 함수가 실제로 있을 때만 해당 파일을 생성한다.
-같은 리소스의 조회 목적이 다르더라도 `invite.query.ts`, `layout.query.ts`처럼 화면이나 조회 목적별 파일로 나누지 않고 리소스의 `*.query.ts`에 통합한다.
-같은 리소스의 변경 목적이 다르더라도 `create.command.ts`, `delete.command.ts`처럼 명령별 파일로 나누지 않고 리소스의 `*.command.ts`에 통합한다.
+- `page.tsx`, `layout.tsx` 같은 Server Component는 조회 시 service를 직접 호출한다.
+- Server Component에서 같은 애플리케이션의 Route Handler를 `fetch`하지 않는다.
+- `actions.ts`는 사용자 UI에서 발생한 상태 변경의 진입점으로 사용한다.
+- `route.ts`는 외부 클라이언트, 웹훅, callback, 공개 HTTP API에 사용한다.
+- `actions.ts`와 `route.ts`는 인증, 요청 파싱, 입력 검증, 응답 변환, 캐시 갱신만 담당한다.
+- service는 repository와 gateway를 호출할 수 있다.
+- repository와 gateway는 service를 호출하지 않는다.
+- repository만 Prisma를 직접 사용한다.
 
 ### `src/types`
 
@@ -273,9 +279,11 @@ docs/
 | React 컴포넌트 파일   | PascalCase                | `UserCard.tsx`               |
 | 컴포넌트 디렉터리     | kebab-case                | `user-card/`                 |
 | 커스텀 훅             | `use` + PascalCase        | `useDebounce.ts`             |
-| 서비스 조회 파일      | `[resource].query.ts`     | `user.query.ts`              |
-| 서비스 변경 파일      | `[resource].command.ts`   | `user.command.ts`            |
-| DB 접근 파일          | `.persistence.server.ts`  | `user.persistence.server.ts` |
+| 서버 서비스 파일      | `[domain].service.ts`     | `user.service.ts`            |
+| DB 접근 파일          | `[domain].repository.ts`  | `user.repository.ts`         |
+| 입력 검증 파일        | `[domain].schema.ts`      | `user.schema.ts`             |
+| 데이터 변환 파일      | `[domain].mapper.ts`      | `user.mapper.ts`             |
+| 외부 연동 파일        | `[domain].gateway.ts`     | `github.gateway.ts`          |
 | 타입 파일             | camelCase 또는 kebab-case | `user.ts`, `api-response.ts` |
 | 유틸 함수 파일        | camelCase                 | `formatDate.ts`              |
 | 동적 라우트           | 대괄호                    | `[id]/`                      |
@@ -379,23 +387,23 @@ project-root/
 │  ├─ lib/
 │  │  ├─ auth/                        # 전역 인증 설정
 │  │  └─ prisma.ts                    # PostgreSQL용 PrismaClient 인스턴스
-│  ├─ server/                       # 리소스별 데이터 요청과 비즈니스 로직
+│  ├─ server/                         # 도메인별 서버 비즈니스 로직
 │  │  ├─ friends/
-│  │  │  ├─ friend.query.ts
-│  │  │  ├─ friend.command.ts
-│  │  │  ├─ friend.persistence.server.ts
-│  │  │  ├─ friend.helper.ts
+│  │  │  ├─ friend.service.ts
+│  │  │  ├─ friend.repository.ts
+│  │  │  ├─ friend.schema.ts
+│  │  │  └─ friend.mapper.ts
 │  │  ├─ problems/
 │  │  ├─ studies/
-│  │  │  ├─ study.query.ts
-│  │  │  ├─ study.command.ts
-│  │  │  ├─ study.persistence.server.ts
-│  │  │  ├─ study.helper.ts
-│  │  │  └─ study.validator.ts
+│  │  │  ├─ study.service.ts
+│  │  │  ├─ study.repository.ts
+│  │  │  ├─ study.schema.ts
+│  │  │  └─ study.mapper.ts
 │  │  ├─ users/
 │  │  ├─ webhook-delivery-processing/
 │  │  ├─ webhook-receiver/
-│  │  └─ webhook-registration/
+│  │  ├─ webhook-registration/
+│  │  └─ shared/
 │  ├─ types/                          # 공유 타입 및 라이브러리 타입 확장
 │  └─ utils/                          # 프론트엔드 공용 포맷 및 표시 함수
 ├─ .env.example                       # 필수 환경 변수 예시
@@ -419,12 +427,12 @@ project-root/
 
 ```text
 src/app/api/github/webhook-receiver/route.ts
-  -> src/server/webhook-receiver/webhook-receiver.command.ts
+  -> src/server/webhook-receiver/webhook-receiver.service.ts
   -> WebhookDelivery 최초 저장
   -> Queue 발행
 
 src/app/api/queue/webhook-delivery/route.ts
-  -> src/server/webhook-delivery-processing/webhook-delivery-processing.command.ts
+  -> src/server/webhook-delivery-processing/webhook-delivery-processing.service.ts
   -> GitHub 파일 조회
   -> ProblemSubmission 저장
 ```
@@ -434,9 +442,9 @@ src/app/api/queue/webhook-delivery/route.ts
 GitHub 파일 조회, 문제 정보 저장, 처리 상태 갱신을 담당한다.
 두 서비스는 서로 직접 참조하지 않고 공유 GitHub 로직과 Queue 메시지 타입만 공용 영역에서 사용한다.
 
-### 라우트 전용 UI와 서비스
+### 라우트 전용 UI와 서버 도메인
 
-페이지 전용 UI와 서비스 로직은 아래처럼 분리한다.
+페이지 전용 UI와 서버 비즈니스 로직은 아래처럼 분리한다.
 
 ```text
 src/
@@ -445,15 +453,14 @@ src/
 │  └─ page.tsx
 ├─ server/
 │  ├─ problems/
-│  │  ├─ problem.query.ts             # 문제 조회 유스케이스
-│  │  ├─ problem.command.ts           # 문제 변경 유스케이스
-│  │  ├─ problem.persistence.server.ts # 문제 DB 접근과 트랜잭션
-│  │  ├─ problem.helper.ts            # 문제 데이터 변환과 계산
-│  │  └─ problem.validator.ts         # 문제 입력 검증
+│  │  ├─ problem.service.ts            # 문제 유스케이스와 비즈니스 흐름
+│  │  ├─ problem.repository.ts         # 문제 DB 접근과 트랜잭션
+│  │  ├─ problem.schema.ts             # 문제 입력 검증
+│  │  └─ problem.mapper.ts             # 문제 데이터 변환
 │  └─ users/
-│     ├─ user.query.ts
-│     ├─ user.persistence.server.ts
-│     └─ user.helper.ts
+│     ├─ user.service.ts
+│     ├─ user.repository.ts
+│     └─ user.mapper.ts
 ├─ types/
 │  ├─ problem.ts                     # 문제 리소스 타입
 │  └─ user.ts                        # 사용자 리소스 타입
@@ -463,21 +470,19 @@ src/
 배치 기준은 다음과 같다.
 
 - 페이지 전용 컴포넌트는 해당 라우트의 `_components`에 둔다.
-- 라우트의 `actions.ts`는 Next.js Server Action 경계만 담당하고 상태 변경 유스케이스를 service command에 위임한다.
+- 라우트의 `actions.ts`는 Next.js Server Action 경계만 담당하고 상태 변경 유스케이스를 service에 위임한다.
 - Prisma 쿼리와 비즈니스 로직은 `src/app`에 작성하지 않고 `src/server/[resource]`에 둔다.
-- 서비스 디렉터리는 `dashboard`와 같은 화면 이름이 아니라 `problems`, `users`와 같은 리소스 이름으로 구분한다.
-- 상태를 변경하지 않는 조회 유스케이스는 `[resource].query.ts`에 둔다.
-- 생성, 수정, 삭제와 상태 전환 유스케이스는 `[resource].command.ts`에 둔다.
-- 외부 API 호출은 `[resource].client.ts`에 두고 `fetch`를 다른 역할 파일에 작성하지 않는다.
-- Prisma를 사용하는 DB 접근과 트랜잭션은 `[resource].persistence.server.ts`에 둔다.
-- 입력값과 외부 API 응답값 검증은 `[resource].validator.ts`에 둔다.
-- 서비스 데이터 변형은 `[resource].helper.ts`에 둔다.
-- 같은 리소스의 조회 함수는 화면이나 조회 목적별 파일로 나누지 않고 하나의 `[resource].query.ts`에 통합한다.
-- 같은 리소스의 변경 함수는 명령별 파일로 나누지 않고 하나의 `[resource].command.ts`에 통합한다.
+- 서버 디렉터리는 `dashboard`와 같은 화면 이름이 아니라 `problems`, `users`와 같은 도메인 이름으로 구분한다.
+- 조회와 상태 변경 유스케이스는 `[domain].service.ts`에 둔다.
+- Prisma를 사용하는 DB 접근과 트랜잭션은 `[domain].repository.ts`에 둔다.
+- 입력값과 외부 API 응답값 검증은 `[domain].schema.ts`에 둔다.
+- 데이터 형태 변환은 `[domain].mapper.ts`에 둔다.
+- 외부 API 호출은 `[domain].gateway.ts`에 둔다.
+- service가 커질 때만 query service와 command service로 분리한다.
 - `src/utils`에는 프론트엔드 여러 화면에서 공통으로 사용하는 포맷 및 표시 함수만 둔다.
-- 서로 독립적인 페이지 영역은 하나의 페이지 데이터 객체로 묶지 않고 각 영역에서 필요한 서비스를 호출한다.
+- 서로 독립적인 페이지 영역은 하나의 페이지 데이터 객체로 묶지 않고 각 영역에서 필요한 service를 호출한다.
 - 여러 페이지에서 재사용하는 UI만 `src/components`로 이동한다.
-- 도메인 helper는 관련 서비스 디렉터리, 프론트엔드 공용 함수는 `src/utils`, 공유 타입은 `src/types`에 둔다.
+- 도메인 로직은 관련 server 디렉터리, 프론트엔드 공용 함수는 `src/utils`, 공유 타입은 `src/types`에 둔다.
 
 ### PostgreSQL과 Prisma
 
