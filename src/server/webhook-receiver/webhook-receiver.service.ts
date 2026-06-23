@@ -1,16 +1,16 @@
 import "server-only";
 
 import { getRepositoryFullName } from "@/server/github/github-webhook.helper";
-import { enqueueWebhookDelivery } from "@/server/webhook-receiver/webhook-receiver.client";
+import { enqueueWebhookDelivery } from "@/server/webhook-receiver/webhook-receiver.gateway";
 import {
   markWebhookDeliveryFailed,
   markWebhookDeliveryQueued,
   saveWebhookDelivery,
-} from "@/server/webhook-receiver/webhook-receiver.persistence.server";
+} from "@/server/webhook-receiver/webhook-receiver.repository";
 import {
   isValidGitHubWebhookSignature,
   parseGitHubWebhookPayload,
-} from "@/server/webhook-receiver/webhook-receiver.validator";
+} from "@/server/webhook-receiver/webhook-receiver.schema";
 import type { GitHubWebhookPayload } from "@/types/github";
 
 type ReceiveGitHubWebhookInput = {
