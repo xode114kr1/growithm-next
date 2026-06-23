@@ -4,7 +4,7 @@ import ProblemTierBadge from "@/components/ui/problem-tier-badge";
 import type { ProblemDetail } from "@/types/problem";
 import type { ProblemShareTargetStudy } from "@/types/study";
 
-import ProblemShareModal from "./study-share-modal";
+import ProblemShareModal from "./problem-share/study-share-modal";
 
 export default function ProblemHeader({
   problem,
