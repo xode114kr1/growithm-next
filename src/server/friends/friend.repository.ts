@@ -2,7 +2,7 @@ import "server-only";
 
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
-import type { FriendUserRow } from "@/server/friends/friend.helper";
+import type { FriendUserRow } from "@/server/friends/friend.types";
 
 const friendUserSelect = {
   email: true,

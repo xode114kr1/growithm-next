@@ -4,7 +4,7 @@ import {
   createPersonalTier,
   createUserSummary,
 } from "@/server/users/user.helper";
-import { findFriendRelationsForUserIds } from "@/server/friends/friend.persistence.server";
+import { getFriendRelationsForUserIds } from "@/server/friends/friend.service";
 import {
   findUserProfile,
   findUsersByQuery,
@@ -67,7 +67,7 @@ export async function searchUsersWithRelation({
   });
   const userSummaries = users.map(createUserSummary);
   const { friendships, receivedRequests, sentRequests } =
-    await findFriendRelationsForUserIds({
+    await getFriendRelationsForUserIds({
       userId: excludedUserId,
       userIds: userSummaries.map((user) => user.id),
     });
