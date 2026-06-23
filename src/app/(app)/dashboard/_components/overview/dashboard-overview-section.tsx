@@ -2,7 +2,7 @@ import { BookOpenCheck } from "lucide-react";
 import Link from "next/link";
 import { UserPersonalTier } from "@/types/user";
 
-import { quickLinks } from "../constants";
+import { quickLinks } from "../../constants";
 import PersonalTierCard from "./personal-tier-card";
 
 export default function DashboardOverviewSection({
