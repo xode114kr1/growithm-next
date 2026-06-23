@@ -1,3 +1,5 @@
+import "server-only";
+
 // GitHub 웹훅 API 오류를 사용자용 메시지로 변환한다.
 export function getGitHubWebhookErrorMessage(status: number, message: unknown) {
   if (status === 401 || status === 403) {
