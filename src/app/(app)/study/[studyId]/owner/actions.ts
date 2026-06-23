@@ -11,7 +11,7 @@ import {
   removeStudyMember as removeStudyMemberCommand,
   updateStudyMemberRole as updateStudyMemberRoleCommand,
   updateStudySettings as updateStudySettingsCommand,
-} from "@/server/studies/study.service";
+} from "@/server/studies/study.command.service";
 import {
   validateStudyInviteTarget,
   validateStudySettingsInput,

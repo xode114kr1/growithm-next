@@ -7,7 +7,7 @@ import {
   getStudyMemberPreviews,
   getStudyStats,
   getStudySummary,
-} from "@/server/studies/study.service";
+} from "@/server/studies/study.query.service";
 
 import {
   RecentSolvedProblems,

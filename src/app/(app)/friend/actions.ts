@@ -8,7 +8,7 @@ import {
   deleteFriend,
   rejectFriendRequest,
   sendFriendRequest,
-} from "@/server/friends/friend.service";
+} from "@/server/friends/friend.command.service";
 import { getCurrentUserId } from "@/lib/session/session";
 
 // 폼에서 대상 사용자 ID를 읽어 친구 요청 Server Action을 실행한다.

@@ -5,7 +5,7 @@ import {
   getProblemCount,
   getProblems,
   PROBLEM_PAGE_SIZE,
-} from "@/server/problems/problem.service";
+} from "@/server/problems/problem.query.service";
 import {
   parseProblemFilters,
   parseProblemPage,

@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth/auth";
-import { getStudyProblemDetail } from "@/server/studies/study.service";
+import { getStudyProblemDetail } from "@/server/studies/study.query.service";
 
 export async function GET(
   _request: Request,

@@ -5,7 +5,7 @@ import {
   getFriends,
   getReceivedFriendRequests,
   getSentFriendRequests,
-} from "@/server/friends/friend.service";
+} from "@/server/friends/friend.query.service";
 import { parseFriendFilters } from "@/server/friends/friend.schema";
 import type { FriendPageSearchParams } from "@/types/friend";
 

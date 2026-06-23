@@ -4,7 +4,7 @@ import {
   createPersonalTier,
   createUserSummary,
 } from "@/server/users/user.mapper";
-import { getFriendRelationsForUserIds } from "@/server/friends/friend.service";
+import { getFriendRelationsForUserIds } from "@/server/friends/friend.query.service";
 import {
   findUserProfile,
   findUsersByQuery,

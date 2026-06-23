@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { auth } from "@/lib/auth/auth";
-import { getStudyLayoutData } from "@/server/studies/study.service";
+import { getStudyLayoutData } from "@/server/studies/study.query.service";
 
 import StudyLocalNav from "./_components/study-local-nav";
 

@@ -7,7 +7,7 @@ import {
   acceptStudyInvite as acceptStudyInviteCommand,
   createStudy as createStudyCommand,
   declineStudyInvite as declineStudyInviteCommand,
-} from "@/server/studies/study.service";
+} from "@/server/studies/study.command.service";
 import { validateStudyInput } from "@/server/studies/study.schema";
 
 export type CreateStudyActionState = {

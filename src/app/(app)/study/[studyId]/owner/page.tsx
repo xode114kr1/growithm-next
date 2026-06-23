@@ -5,7 +5,7 @@ import {
   getOwnedStudy,
   getOwnedStudyMembers,
   getOwnedStudyPendingInvites,
-} from "@/server/studies/study.service";
+} from "@/server/studies/study.query.service";
 
 import InviteMembersCard from "./_components/invite-members-card";
 import ManageMembersCard from "./_components/manage-members-card";

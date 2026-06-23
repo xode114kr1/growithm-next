@@ -5,7 +5,7 @@ import {
   FRIEND_PAGE_SIZE,
   getFriendCount,
   getFriends,
-} from "@/server/friends/friend.service";
+} from "@/server/friends/friend.query.service";
 import {
   parseFriendFilters,
   parseFriendPage,

@@ -6,7 +6,7 @@ import {
   getStudyProblemMemberNames,
   getStudyProblems,
   STUDY_PROBLEM_PAGE_SIZE,
-} from "@/server/studies/study.service";
+} from "@/server/studies/study.query.service";
 import {
   parseStudyProblemFilters,
   parseStudyProblemPage,

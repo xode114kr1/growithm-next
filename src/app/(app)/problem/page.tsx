@@ -9,7 +9,7 @@ import {
   getProblemCount,
   getProblems,
   PROBLEM_PAGE_SIZE,
-} from "@/server/problems/problem.service";
+} from "@/server/problems/problem.query.service";
 import { parseProblemFilters } from "@/server/problems/problem.schema";
 import ProblemFilters from "./_components/problem-filters";
 import ProblemList from "./_components/problem-list/problem-list";

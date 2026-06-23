@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import {
   shareProblemWithStudies,
   updateProblemMemo as updateProblemMemoResource,
-} from "@/server/problems/problem.service";
+} from "@/server/problems/problem.command.service";
 import { getCurrentUserId } from "@/lib/session/session";
 
 const MAX_MEMO_LENGTH = 2000;

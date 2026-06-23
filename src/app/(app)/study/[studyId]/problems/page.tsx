@@ -7,7 +7,7 @@ import {
   getStudyProblemTiers,
   getStudyProblems,
   STUDY_PROBLEM_PAGE_SIZE,
-} from "@/server/studies/study.service";
+} from "@/server/studies/study.query.service";
 import { parseStudyProblemFilters } from "@/server/studies/study.schema";
 
 import StudyProblemFilters from "./_components/study-problem-filters";
