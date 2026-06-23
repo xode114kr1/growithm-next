@@ -11,7 +11,7 @@ import type {
 } from "@/types/study";
 
 import StudyProblemItem from "./study-problem-item";
-import StudyProblemModal from "./study-problem-modal";
+import StudyProblemModal from "../study-problem-modal";
 
 export default function StudyProblemList({
   clearedFiltersQueryString,

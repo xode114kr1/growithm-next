@@ -10,7 +10,10 @@ import type {
   StudyProblemListItem,
 } from "@/types/study";
 
-import { ProblemState, ProblemTags } from "./study-problem-item";
+import {
+  ProblemState,
+  ProblemTags,
+} from "./study-problem-list/study-problem-item";
 
 export default function StudyProblemModal({
   onClose,
