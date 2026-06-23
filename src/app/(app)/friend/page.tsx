@@ -9,7 +9,7 @@ import {
 import { parseFriendFilters } from "@/services/friends/friend.validator";
 import type { FriendPageSearchParams } from "@/types/friend";
 
-import FriendFilters from "./_components/friend-filters/friend-filters";
+import FriendFilters from "./_components/friend-filters";
 import FriendList from "./_components/friend-list";
 import FriendRequests from "./_components/friend-requests/friend-requests";
 

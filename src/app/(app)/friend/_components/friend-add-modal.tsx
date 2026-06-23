@@ -8,7 +8,7 @@ import { ProfileModal } from "@/components/ui/profile-modal";
 import { searchUsers } from "@/services/users/user.client";
 import type { FriendSearchResult } from "@/types/friend";
 
-import { SearchResultActions } from "../friend-action-buttons";
+import { SearchResultActions } from "./friend-action-buttons";
 
 export function FriendAddModal() {
   const [isOpen, setIsOpen] = useState(false);
