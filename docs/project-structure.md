@@ -129,6 +129,8 @@ Next.js 진입점과 도메인 로직을 분리하며, Spring의 Controller, Ser
 server/
 ├─ [domain]/
 │  ├─ [domain].service.ts
+│  ├─ [domain].query.service.ts
+│  ├─ [domain].command.service.ts
 │  ├─ [domain].repository.ts
 │  ├─ [domain].schema.ts
 │  ├─ [domain].mapper.ts
@@ -148,6 +150,14 @@ server/
   - 권한 확인, 비즈니스 규칙, 트랜잭션 단위의 처리 흐름을 조합한다.
   - repository, schema, mapper, gateway를 호출할 수 있다.
   - `Request`, `Response`, `FormData`, `redirect`, `revalidatePath` 같은 Next.js API를 사용하지 않는다.
+- `[domain].query.service.ts`
+  - 조회 전용 유스케이스를 구현한다.
+  - `page.tsx`, `layout.tsx`, `GET route.ts`에서 필요한 데이터를 조합한다.
+  - 상태 변경, DB 저장, 외부 시스템 변경 요청을 수행하지 않는다.
+- `[domain].command.service.ts`
+  - 생성, 수정, 삭제, 처리, Queue 소비 같은 상태 변경 유스케이스를 구현한다.
+  - `actions.ts`, `POST/PATCH/DELETE route.ts`, Queue consumer에서 호출한다.
+  - 조회에 필요한 보조 repository 호출은 가능하지만 화면 조회 모델 조합을 주 책임으로 삼지 않는다.
 - `[domain].repository.ts`
   - Prisma를 통한 조회, 저장, 수정, 삭제와 트랜잭션을 담당한다.
   - 비즈니스 흐름, HTTP 처리, 외부 API 호출을 담당하지 않는다.
@@ -168,7 +178,11 @@ server/
 
 각 역할이 실제로 필요할 때만 파일을 생성한다.
 작은 도메인은 `service.ts`, `repository.ts`, `schema.ts`만으로 시작한다.
-`service.ts`가 커지면 그때 `query.service.ts`, `command.service.ts`처럼 유스케이스 성격에 따라 분리한다.
+`service.ts`가 커지거나 조회와 상태 변경 흐름이 한 파일에서 섞이면
+`[domain].query.service.ts`, `[domain].command.service.ts`처럼 유스케이스 성격에 따라 분리한다.
+서버 도메인 내부에서는 `action.service.ts`라는 이름을 사용하지 않는다.
+`action`은 Next.js Server Action 경계인 `app/**/actions.ts`와 혼동될 수 있으므로,
+상태 변경 유스케이스 파일명은 `command.service.ts`를 사용한다.
 
 서버 전용 파일에는 `import "server-only"`를 선언한다.
 `src/server` 파일에는 `"use server"`와 `"use client"` 지시어를 사용하지 않는다.
@@ -178,22 +192,22 @@ server/
 
 ```text
 Server Component
-  -> service
+  -> query.service 또는 service
      -> repository
         -> Prisma
 
 actions.ts / route.ts
   -> schema
-  -> service
+  -> command.service 또는 service
      -> repository / gateway
 ```
 
-- `page.tsx`, `layout.tsx` 같은 Server Component는 조회 시 service를 직접 호출한다.
+- `page.tsx`, `layout.tsx` 같은 Server Component는 조회 시 query service를 직접 호출한다.
 - Server Component에서 같은 애플리케이션의 Route Handler를 `fetch`하지 않는다.
 - `actions.ts`는 사용자 UI에서 발생한 상태 변경의 진입점으로 사용한다.
 - `route.ts`는 외부 클라이언트, 웹훅, callback, 공개 HTTP API에 사용한다.
 - `actions.ts`와 `route.ts`는 인증, 요청 파싱, 입력 검증, 응답 변환, 캐시 갱신만 담당한다.
-- service는 repository와 gateway를 호출할 수 있다.
+- query service와 command service는 repository와 gateway를 호출할 수 있다.
 - repository와 gateway는 service를 호출하지 않는다.
 - repository만 Prisma를 직접 사용한다.
 
@@ -453,7 +467,8 @@ src/
 │  └─ page.tsx
 ├─ server/
 │  ├─ problems/
-│  │  ├─ problem.service.ts            # 문제 유스케이스와 비즈니스 흐름
+│  │  ├─ problem.query.service.ts      # 문제 조회 유스케이스
+│  │  ├─ problem.command.service.ts    # 문제 상태 변경 유스케이스
 │  │  ├─ problem.repository.ts         # 문제 DB 접근과 트랜잭션
 │  │  ├─ problem.schema.ts             # 문제 입력 검증
 │  │  └─ problem.mapper.ts             # 문제 데이터 변환
@@ -473,7 +488,9 @@ src/
 - 라우트의 `actions.ts`는 Next.js Server Action 경계만 담당하고 상태 변경 유스케이스를 service에 위임한다.
 - Prisma 쿼리와 비즈니스 로직은 `src/app`에 작성하지 않고 `src/server/[resource]`에 둔다.
 - 서버 디렉터리는 `dashboard`와 같은 화면 이름이 아니라 `problems`, `users`와 같은 도메인 이름으로 구분한다.
-- 조회와 상태 변경 유스케이스는 `[domain].service.ts`에 둔다.
+- 작은 도메인의 조회와 상태 변경 유스케이스는 `[domain].service.ts`에 둔다.
+- 큰 도메인의 조회 유스케이스는 `[domain].query.service.ts`에 둔다.
+- 큰 도메인의 상태 변경 유스케이스는 `[domain].command.service.ts`에 둔다.
 - Prisma를 사용하는 DB 접근과 트랜잭션은 `[domain].repository.ts`에 둔다.
 - 입력값과 외부 API 응답값 검증은 `[domain].schema.ts`에 둔다.
 - 데이터 형태 변환은 `[domain].mapper.ts`에 둔다.
