@@ -6,7 +6,7 @@ import {
   getPendingProblems,
   getProblemTierDistribution,
   getSolvedProblemCount,
-} from "@/server/problems/problem.query";
+} from "@/server/problems/problem.service";
 import DashboardChart from "./_components/dashboard-chart";
 
 export default async function DashboardPage() {

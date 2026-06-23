@@ -1,7 +1,7 @@
 import "server-only";
 
 import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
-import { getProblemExperienceScore } from "@/server/problems/problem.helper";
+import { getProblemExperienceScore } from "@/server/problems/problem.service";
 import {
   fetchGitHubRawCode,
   fetchGitHubReadmeContent,

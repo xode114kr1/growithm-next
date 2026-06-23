@@ -1,12 +1,9 @@
 import "server-only";
 
+import type { Prisma } from "@/generated/prisma/client";
 import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
-import {
-  buildProblemOrderBy,
-  buildProblemWhere,
-} from "@/server/problems/problem.helper";
-import type { ProblemFiltersState } from "@/types/problem";
+import type { ProblemFiltersState, ProblemSort } from "@/types/problem";
 
 // 필터와 페이지 조건에 맞는 문제 제출 목록을 조회한다.
 export async function findProblems({
@@ -139,15 +136,6 @@ export async function findPendingProblemsByUserId({
   });
 }
 
-// 사용자의 문제 제출 수를 플랫폼별로 집계한다.
-export async function countProblemsByPlatform(userId: string) {
-  return prisma.problemSubmission.groupBy({
-    by: ["platform"],
-    _count: { _all: true },
-    where: { userId },
-  });
-}
-
 // 사용자의 전체 문제 제출 수를 조회한다.
 export async function countProblemsByUserId(userId: string) {
   return prisma.problemSubmission.count({ where: { userId } });
@@ -263,4 +251,35 @@ export async function createProblemShares({
       });
     }
   });
+}
+
+// 문제 목록 필터를 Prisma 조회 조건으로 변환한다.
+function buildProblemWhere(filters: ProblemFiltersState) {
+  const where: Prisma.ProblemSubmissionWhereInput = {};
+
+  if (filters.platform) where.platform = filters.platform;
+  if (filters.tier) where.tier = filters.tier;
+
+  if (filters.q) {
+    where.OR = [
+      { title: { contains: filters.q, mode: "insensitive" } },
+      { problemId: { contains: filters.q, mode: "insensitive" } },
+    ];
+  }
+
+  return where;
+}
+
+// 선택한 문제 정렬 기준을 Prisma 정렬 조건으로 변환한다.
+function buildProblemOrderBy(sort: ProblemSort) {
+  const orderBy: Prisma.ProblemSubmissionOrderByWithRelationInput[] = [];
+
+  if (sort === "oldest") orderBy.push({ createdAt: "asc" });
+  else if (sort === "title") orderBy.push({ title: "asc" });
+  else if (sort === "platform") orderBy.push({ platform: "asc" });
+  else orderBy.push({ createdAt: "desc" });
+
+  orderBy.push({ id: "asc" });
+
+  return orderBy;
 }

@@ -1,3 +1,5 @@
+import "server-only";
+
 import { ProblemPlatform } from "@/generated/prisma/enums";
 import type {
   ProblemFiltersState,
