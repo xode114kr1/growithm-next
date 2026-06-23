@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth/auth";
-import { getUserProfile } from "@/services/users/user.query";
+import { getUserProfile } from "@/server/users/user.query";
 
 export async function GET(
   _request: Request,

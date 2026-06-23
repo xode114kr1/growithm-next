@@ -5,8 +5,8 @@ import {
   findFriendUsers,
   findReceivedFriendRequests,
   findSentFriendRequests,
-} from "@/services/friends/friend.persistence.server";
-import { createFriendProfile } from "@/services/friends/friend.helper";
+} from "@/server/friends/friend.persistence.server";
+import { createFriendProfile } from "@/server/friends/friend.helper";
 import type {
   FriendFiltersState,
   FriendRequest,

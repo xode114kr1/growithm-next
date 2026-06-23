@@ -9,8 +9,8 @@ import {
   getProblemCount,
   getProblems,
   PROBLEM_PAGE_SIZE,
-} from "@/services/problems/problem.query";
-import { parseProblemFilters } from "@/services/problems/problem.validator";
+} from "@/server/problems/problem.query";
+import { parseProblemFilters } from "@/server/problems/problem.validator";
 import ProblemFilters from "./_components/problem-filters";
 import ProblemList from "./_components/problem-list/problem-list";
 

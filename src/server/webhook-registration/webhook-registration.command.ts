@@ -3,12 +3,12 @@ import "server-only";
 import {
   fetchGitHubWebhooks,
   postGitHubWebhook,
-} from "@/services/webhook-registration/webhook-registration.client";
+} from "@/server/webhook-registration/webhook-registration.client";
 import {
   findGitHubAccessToken,
   upsertGitHubRepositoryWebhook,
-} from "@/services/webhook-registration/webhook-registration.persistence.server";
-import { parseRepository } from "@/services/webhook-registration/webhook-registration.validator";
+} from "@/server/webhook-registration/webhook-registration.persistence.server";
+import { parseRepository } from "@/server/webhook-registration/webhook-registration.validator";
 import type { GitHubWebhookRequestBody } from "@/types/github";
 
 type RegisterGitHubWebhookResult =

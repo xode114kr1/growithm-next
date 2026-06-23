@@ -7,8 +7,8 @@ import {
   getStudyProblemTiers,
   getStudyProblems,
   STUDY_PROBLEM_PAGE_SIZE,
-} from "@/services/studies/study.query";
-import { parseStudyProblemFilters } from "@/services/studies/study.validator";
+} from "@/server/studies/study.query";
+import { parseStudyProblemFilters } from "@/server/studies/study.validator";
 
 import StudyProblemFilters from "./_components/study-problem-filters";
 import StudyProblemList from "./_components/study-problem-list/study-problem-list";

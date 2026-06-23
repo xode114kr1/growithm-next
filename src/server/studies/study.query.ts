@@ -8,7 +8,7 @@ import {
   getStudyTier,
   getUserDisplayName,
   normalizeCategories,
-} from "@/services/studies/study.helper";
+} from "@/server/studies/study.helper";
 import {
   aggregateOwnedStudyMemberActivity,
   aggregateStudyMemberActivity,
@@ -30,7 +30,7 @@ import {
   findStudySummary,
   findUserStudies,
   sumStudyProblemShareScoresByUser,
-} from "@/services/studies/study.persistence.server";
+} from "@/server/studies/study.persistence.server";
 import type {
   OwnerMember,
   OwnerInvite,

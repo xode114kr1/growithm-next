@@ -1,5 +1,5 @@
 import type { FriendProfile } from "@/types/friend";
-import { getUserAvatar, getUserDisplayName, getUserTier } from "@/services/users/user.helper";
+import { getUserAvatar, getUserDisplayName, getUserTier } from "@/server/users/user.helper";
 
 export type FriendUserRow = {
   email: string | null;

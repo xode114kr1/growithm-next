@@ -1,11 +1,11 @@
 import "server-only";
 
-import { getGitHubWebhookErrorMessage } from "@/services/webhook-registration/webhook-registration.helper";
+import { getGitHubWebhookErrorMessage } from "@/server/webhook-registration/webhook-registration.helper";
 import {
   getGitHubWebhookId,
   isGitHubWebhookList,
   type GitHubWebhookResponse,
-} from "@/services/webhook-registration/webhook-registration.validator";
+} from "@/server/webhook-registration/webhook-registration.validator";
 
 type GitHubWebhookClientError = {
   message: string;

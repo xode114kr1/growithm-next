@@ -1,4 +1,4 @@
-import { receiveGitHubWebhook } from "@/services/webhook-receiver/webhook-receiver.command";
+import { receiveGitHubWebhook } from "@/server/webhook-receiver/webhook-receiver.command";
 
 export async function POST(request: Request) {
   const result = await receiveGitHubWebhook({

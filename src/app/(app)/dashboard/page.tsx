@@ -1,12 +1,12 @@
 import { auth } from "@/lib/auth/auth";
 import PendingList from "./_components/pending-problems/pending-list";
 import DashboardOverviewSection from "./_components/overview/dashboard-overview-section";
-import { getUserPersonalTier } from "@/services/users/user.query";
+import { getUserPersonalTier } from "@/server/users/user.query";
 import {
   getPendingProblems,
   getProblemTierDistribution,
   getSolvedProblemCount,
-} from "@/services/problems/problem.query";
+} from "@/server/problems/problem.query";
 import DashboardChart from "./_components/dashboard-chart";
 
 export default async function DashboardPage() {

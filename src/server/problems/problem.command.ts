@@ -7,12 +7,12 @@ import {
   findExistingSharedStudyIds,
   findOwnedProblemForSharing,
   updateProblemMemoRecord,
-} from "@/services/problems/problem.persistence.server";
+} from "@/server/problems/problem.persistence.server";
 import {
   createProblemShareError,
   getProblemShareScore,
   isWithinShareScoreWindow,
-} from "@/services/problems/problem.helper";
+} from "@/server/problems/problem.helper";
 import type { ProblemShareResult } from "@/types/problem";
 
 // 사용자가 소유한 문제 제출의 메모와 상태를 수정한다.

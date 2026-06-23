@@ -1,16 +1,16 @@
 import "server-only";
 
 import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
-import { getProblemExperienceScore } from "@/services/problems/problem.helper";
+import { getProblemExperienceScore } from "@/server/problems/problem.helper";
 import {
   fetchGitHubRawCode,
   fetchGitHubReadmeContent,
-} from "@/services/webhook-delivery-processing/webhook-delivery-processing.client";
+} from "@/server/webhook-delivery-processing/webhook-delivery-processing.client";
 import {
   buildRawGitHubContentUrl,
   getProblemFileChangeFromPushPayload,
   parseProblemReadme,
-} from "@/services/webhook-delivery-processing/webhook-delivery-processing.helper";
+} from "@/server/webhook-delivery-processing/webhook-delivery-processing.helper";
 import {
   claimWebhookDeliveryForProcessing,
   getRepositoryOwner,
@@ -18,9 +18,9 @@ import {
   saveProblemSubmission,
   updateWebhookDeliveryStatus,
   updateWebhookDeliveryStatusById,
-} from "@/services/webhook-delivery-processing/webhook-delivery-processing.persistence.server";
-import { getRepositoryFullName } from "@/services/github/github-webhook.helper";
-import { isRetryableGitHubFileError } from "@/services/github/github-file.error";
+} from "@/server/webhook-delivery-processing/webhook-delivery-processing.persistence.server";
+import { getRepositoryFullName } from "@/server/github/github-webhook.helper";
+import { isRetryableGitHubFileError } from "@/server/github/github-file.error";
 import type { GitHubReadmeChange, GitHubWebhookPayload } from "@/types/github";
 
 type WebhookDeliveryProcessingResult = {

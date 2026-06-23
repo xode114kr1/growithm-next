@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { auth } from "@/lib/auth/auth";
-import { getStudyMembers } from "@/services/studies/study.query";
+import { getStudyMembers } from "@/server/studies/study.query";
 
 import StudyMemberFilters from "./_components/study-member-filters";
 import StudyMemberList from "./_components/study-member-list/study-member-list";

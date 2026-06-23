@@ -1,6 +1,6 @@
 import "server-only";
 
-import { normalizeFriendshipUserIds } from "@/services/friends/friend.helper";
+import { normalizeFriendshipUserIds } from "@/server/friends/friend.helper";
 import {
   acceptFriendship,
   deleteFriendship,
@@ -10,7 +10,7 @@ import {
   findUserById,
   rejectReceivedFriendRequest,
   upsertFriendRequest,
-} from "@/services/friends/friend.persistence.server";
+} from "@/server/friends/friend.persistence.server";
 
 // 대상 사용자에게 중복되지 않는 친구 요청을 전송한다.
 export async function sendFriendRequest({

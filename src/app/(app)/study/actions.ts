@@ -7,8 +7,8 @@ import {
   acceptStudyInvite as acceptStudyInviteCommand,
   createStudy as createStudyCommand,
   declineStudyInvite as declineStudyInviteCommand,
-} from "@/services/studies/study.command";
-import { validateStudyInput } from "@/services/studies/study.validator";
+} from "@/server/studies/study.command";
+import { validateStudyInput } from "@/server/studies/study.validator";
 
 export type CreateStudyActionState = {
   description: string;

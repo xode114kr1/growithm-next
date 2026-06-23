@@ -13,7 +13,7 @@ import {
   updateStudyMemberRoleRecord,
   updateStudySettingsRecord,
   upsertStudyInvite,
-} from "@/services/studies/study.persistence.server";
+} from "@/server/studies/study.persistence.server";
 
 const INVITE_EXPIRATION_DAYS = 7;
 

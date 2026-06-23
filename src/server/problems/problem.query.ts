@@ -9,13 +9,13 @@ import {
   findProblemDetail,
   findProblems,
   findProblemTiersByUserId,
-} from "@/services/problems/problem.persistence.server";
+} from "@/server/problems/problem.persistence.server";
 import {
   createPendingProblem,
   createPlatformProblemCounts,
   createProblemTierBuckets,
   normalizeProblemCategories,
-} from "@/services/problems/problem.helper";
+} from "@/server/problems/problem.helper";
 import type {
   PendingProblem,
   PlatformProblemCount,

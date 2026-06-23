@@ -3,15 +3,15 @@ import "server-only";
 import {
   isRetryableGitHubStatus,
   RetryableGitHubFileError,
-} from "@/services/github/github-file.error";
+} from "@/server/github/github-file.error";
 import {
   encodeGitHubPath,
   getGitHubContentErrorMessage,
-} from "@/services/webhook-delivery-processing/webhook-delivery-processing.helper";
+} from "@/server/webhook-delivery-processing/webhook-delivery-processing.helper";
 import {
   isGitHubFileContentResponse,
   type GitHubContentResponse,
-} from "@/services/webhook-delivery-processing/webhook-delivery-processing.validator";
+} from "@/server/webhook-delivery-processing/webhook-delivery-processing.validator";
 import type { GitHubReadmeContent } from "@/types/github";
 
 const GITHUB_REQUEST_TIMEOUT_MS = 10_000;

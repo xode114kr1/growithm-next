@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import {
   buildProblemOrderBy,
   buildProblemWhere,
-} from "@/services/problems/problem.helper";
+} from "@/server/problems/problem.helper";
 import type { ProblemFiltersState } from "@/types/problem";
 
 // 필터와 페이지 조건에 맞는 문제 제출 목록을 조회한다.

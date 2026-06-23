@@ -3,7 +3,7 @@ import {
   type GitHubContentResponse,
   type ParsedProblemReadme,
   validateParsedProblemReadme,
-} from "@/services/webhook-delivery-processing/webhook-delivery-processing.validator";
+} from "@/server/webhook-delivery-processing/webhook-delivery-processing.validator";
 import type { GitHubReadmeChange, GitHubWebhookPayload } from "@/types/github";
 
 type GitHubPushCommit = {

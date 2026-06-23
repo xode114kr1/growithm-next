@@ -5,11 +5,11 @@ import {
   FRIEND_PAGE_SIZE,
   getFriendCount,
   getFriends,
-} from "@/services/friends/friend.query";
+} from "@/server/friends/friend.query";
 import {
   parseFriendFilters,
   parseFriendPage,
-} from "@/services/friends/friend.validator";
+} from "@/server/friends/friend.validator";
 import type {
   FriendInfiniteScrollResponse,
   FriendPageSearchParams,

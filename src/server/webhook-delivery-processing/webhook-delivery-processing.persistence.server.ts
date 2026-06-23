@@ -5,7 +5,7 @@ import type {
   ProblemSubmissionStatus,
 } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
-import { getRepositoryOwnerId } from "@/services/webhook-delivery-processing/webhook-delivery-processing.helper";
+import { getRepositoryOwnerId } from "@/server/webhook-delivery-processing/webhook-delivery-processing.helper";
 import type { GitHubWebhookPayload } from "@/types/github";
 
 // 문제 처리에 필요한 저장된 웹훅 delivery를 조회한다.
