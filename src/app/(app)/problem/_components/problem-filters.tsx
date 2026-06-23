@@ -1,5 +1,6 @@
 "use client";
 
+import FilterCard from "@/components/ui/filter-card";
 import type { ProblemPlatform } from "@/generated/prisma/enums";
 import { useReplaceQueryParams } from "@/hooks/use-query-params";
 import type { ProblemFiltersState, ProblemSort } from "@/types/problem";
@@ -100,23 +101,5 @@ export default function ProblemFilters({
         </div>
       </FilterCard>
     </section>
-  );
-}
-
-// 각 필터 그룹에서 공통으로 쓰는 카드 프레임을 제공한다.
-function FilterCard({
-  children,
-  className,
-  title,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  title: string;
-}) {
-  return (
-    <div className={`app-card min-w-0 p-4 ${className ?? ""}`}>
-      <h2 className="mb-3 block text-label-caps text-slate-500">{title}</h2>
-      {children}
-    </div>
   );
 }

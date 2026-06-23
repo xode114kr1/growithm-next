@@ -11,7 +11,7 @@ import type { FriendPageSearchParams } from "@/types/friend";
 
 import FriendFilters from "./_components/friend-filters";
 import FriendList from "./_components/friend-list";
-import FriendRequests from "./_components/friend-requests";
+import FriendRequests from "./_components/friend-requests/friend-requests";
 
 type FriendPageProps = {
   searchParams: Promise<FriendPageSearchParams>;

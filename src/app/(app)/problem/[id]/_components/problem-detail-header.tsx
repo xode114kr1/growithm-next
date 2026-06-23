@@ -4,7 +4,7 @@ import ProblemTierBadge from "@/components/ui/problem-tier-badge";
 import type { ProblemDetail } from "@/types/problem";
 import type { ProblemShareTargetStudy } from "@/types/study";
 
-import ProblemShareModal from "./study-share-modal";
+import ProblemShareModal from "./problem-share/study-share-modal";
 
 export default function ProblemHeader({
   problem,
@@ -15,19 +15,6 @@ export default function ProblemHeader({
 }) {
   return (
     <header className="border-b border-outline-variant/40 pb-8">
-      <div className="mb-6 flex flex-wrap items-center gap-2 text-body-sm text-slate-500">
-        <Link
-          className="font-semibold transition-colors hover:text-primary"
-          href="/problem"
-        >
-          Problems
-        </Link>
-        <span>/</span>
-        <span>{problem.platform}</span>
-        <span>/</span>
-        <span>{problem.problemId}</span>
-      </div>
-
       <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
         <div className="min-w-0">
           <div className="mb-4 flex flex-wrap items-center gap-2">

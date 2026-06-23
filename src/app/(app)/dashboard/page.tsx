@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth/auth";
-import PendingList from "./_components/pending-list";
-import DashboardOverviewSection from "./_components/dashboard-overview-section";
+import PendingList from "./_components/pending-problems/pending-list";
+import DashboardOverviewSection from "./_components/overview/dashboard-overview-section";
 import { getUserPersonalTier } from "@/services/users/user.query";
 import {
   getPendingProblems,

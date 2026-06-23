@@ -1,5 +1,5 @@
 import { StudyInviteItem } from "@/types/study";
-import { acceptStudyInvite, declineStudyInvite } from "../actions";
+import { acceptStudyInvite, declineStudyInvite } from "../../actions";
 
 export default function InviteItem({ invite }: { invite: StudyInviteItem }) {
   return (

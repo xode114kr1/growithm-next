@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ProfileModal } from "@/components/ui/profile-modal";
 import type { StudyMember } from "@/types/study";
 
-import { studyMemberRoleLabels } from "../constants";
+import { studyMemberRoleLabels } from "../../constants";
 
 export default function StudyMemberItem({
   member,

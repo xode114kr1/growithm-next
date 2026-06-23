@@ -1,5 +1,6 @@
 "use client";
 
+import FilterCard from "@/components/ui/filter-card";
 import type { ProblemPlatform } from "@/generated/prisma/enums";
 import { useReplaceQueryParams } from "@/hooks/use-query-params";
 
@@ -131,20 +132,5 @@ export default function StudyProblemFilters({
         </div>
       </FilterCard>
     </section>
-  );
-}
-
-function FilterCard({
-  children,
-  title,
-}: {
-  children: React.ReactNode;
-  title: string;
-}) {
-  return (
-    <div className="app-card min-w-0 p-4">
-      <h2 className="mb-3 block text-label-caps text-slate-500">{title}</h2>
-      {children}
-    </div>
   );
 }

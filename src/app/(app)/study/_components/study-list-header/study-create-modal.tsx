@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 
-import { createStudy, type CreateStudyActionState } from "../actions";
+import { createStudy, type CreateStudyActionState } from "../../actions";
 
 const initialState: CreateStudyActionState = {
   description: "",

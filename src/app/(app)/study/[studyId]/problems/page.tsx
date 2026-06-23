@@ -11,7 +11,7 @@ import {
 import { parseStudyProblemFilters } from "@/services/studies/study.validator";
 
 import StudyProblemFilters from "./_components/study-problem-filters";
-import StudyProblemList from "./_components/study-problem-list";
+import StudyProblemList from "./_components/study-problem-list/study-problem-list";
 import type { StudyProblemPageSearchParams } from "./types";
 
 export default async function StudyProblemsPage({

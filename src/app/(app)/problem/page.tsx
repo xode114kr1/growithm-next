@@ -12,7 +12,7 @@ import {
 } from "@/services/problems/problem.query";
 import { parseProblemFilters } from "@/services/problems/problem.validator";
 import ProblemFilters from "./_components/problem-filters";
-import ProblemList from "./_components/problem-list";
+import ProblemList from "./_components/problem-list/problem-list";
 
 type ProblemPageProps = {
   searchParams: Promise<ProblemPageSearchParams>;
