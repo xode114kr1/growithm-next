@@ -2,11 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 
-import { auth } from "@/lib/auth/auth";
 import {
   shareProblemWithStudies,
   updateProblemMemo as updateProblemMemoResource,
 } from "@/server/problems/problem.command";
+import { getCurrentUserId } from "@/lib/session/session";
 
 const MAX_MEMO_LENGTH = 2000;
 
@@ -103,12 +103,6 @@ export async function shareProblemToStudies(
     skippedCount: result.skippedCount,
     status: "success",
   };
-}
-
-async function getCurrentUserId() {
-  const session = await auth();
-
-  return session?.user?.id ?? null;
 }
 
 function getFormValue(formData: FormData, key: string) {

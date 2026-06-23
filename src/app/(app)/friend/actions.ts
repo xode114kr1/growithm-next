@@ -9,7 +9,7 @@ import {
   rejectFriendRequest,
   sendFriendRequest,
 } from "@/server/friends/friend.service";
-import { auth } from "@/lib/auth/auth";
+import { getCurrentUserId } from "@/lib/session/session";
 
 // 폼에서 대상 사용자 ID를 읽어 친구 요청 Server Action을 실행한다.
 export async function sendFriendRequestAction(formData: FormData) {
@@ -74,13 +74,6 @@ export async function deleteFriendAction(formData: FormData) {
 
   await deleteFriend({ currentUserId: userId, friendUserId });
   revalidatePath("/friend");
-}
-
-// 현재 세션에서 인증된 사용자 ID를 조회한다.
-async function getCurrentUserId() {
-  const session = await auth();
-
-  return session?.user?.id ?? null;
 }
 
 // FormData 값을 문자열로 정규화한다.
