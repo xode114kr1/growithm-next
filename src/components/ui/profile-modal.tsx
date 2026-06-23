@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-import { getUserProfile } from "@/server/users/user.client";
+import { getUserProfile } from "@/lib/users/user-api";
 import type { UserProfile } from "@/types/user";
 
 export function ProfileModal({

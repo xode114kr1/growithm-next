@@ -3,13 +3,13 @@ import "server-only";
 import {
   createPersonalTier,
   createUserSummary,
-} from "@/server/users/user.helper";
+} from "@/server/users/user.mapper";
 import { getFriendRelationsForUserIds } from "@/server/friends/friend.service";
 import {
   findUserProfile,
   findUsersByQuery,
   findUserScore,
-} from "@/server/users/user.persistence.server";
+} from "@/server/users/user.repository";
 import type {
   FriendRelationStatus,
   FriendSearchResult,

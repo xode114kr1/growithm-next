@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useEffect, useId, useState } from "react";
 
 import { ProfileModal } from "@/components/ui/profile-modal";
-import { searchUsers } from "@/server/users/user.client";
+import { searchUsers } from "@/lib/users/user-api";
 import type { FriendSearchResult } from "@/types/friend";
 
 import { SearchResultActions } from "./friend-action-buttons";
