@@ -7,11 +7,11 @@ import {
 import {
   encodeGitHubPath,
   getGitHubContentErrorMessage,
-} from "@/server/webhook-delivery-processing/webhook-delivery-processing.helper";
+} from "@/server/webhook-delivery-processing/webhook-delivery-processing.mapper";
 import {
   isGitHubFileContentResponse,
   type GitHubContentResponse,
-} from "@/server/webhook-delivery-processing/webhook-delivery-processing.validator";
+} from "@/server/webhook-delivery-processing/webhook-delivery-processing.schema";
 import type { GitHubReadmeContent } from "@/types/github";
 
 const GITHUB_REQUEST_TIMEOUT_MS = 10_000;

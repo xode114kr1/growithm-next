@@ -5,12 +5,12 @@ import { getProblemExperienceScore } from "@/server/problems/problem.service";
 import {
   fetchGitHubRawCode,
   fetchGitHubReadmeContent,
-} from "@/server/webhook-delivery-processing/webhook-delivery-processing.client";
+} from "@/server/webhook-delivery-processing/webhook-delivery-processing.gateway";
 import {
   buildRawGitHubContentUrl,
   getProblemFileChangeFromPushPayload,
   parseProblemReadme,
-} from "@/server/webhook-delivery-processing/webhook-delivery-processing.helper";
+} from "@/server/webhook-delivery-processing/webhook-delivery-processing.mapper";
 import {
   claimWebhookDeliveryForProcessing,
   getRepositoryOwner,
@@ -18,7 +18,7 @@ import {
   saveProblemSubmission,
   updateWebhookDeliveryStatus,
   updateWebhookDeliveryStatusById,
-} from "@/server/webhook-delivery-processing/webhook-delivery-processing.persistence.server";
+} from "@/server/webhook-delivery-processing/webhook-delivery-processing.repository";
 import { getRepositoryFullName } from "@/server/github/github-webhook.helper";
 import { isRetryableGitHubFileError } from "@/server/github/github-file.error";
 import type { GitHubReadmeChange, GitHubWebhookPayload } from "@/types/github";

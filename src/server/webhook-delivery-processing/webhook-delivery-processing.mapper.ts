@@ -1,9 +1,11 @@
+import "server-only";
+
 import { ProblemPlatform } from "@/generated/prisma/client";
 import {
   type GitHubContentResponse,
   type ParsedProblemReadme,
   validateParsedProblemReadme,
-} from "@/server/webhook-delivery-processing/webhook-delivery-processing.validator";
+} from "@/server/webhook-delivery-processing/webhook-delivery-processing.schema";
 import type { GitHubReadmeChange, GitHubWebhookPayload } from "@/types/github";
 
 type GitHubPushCommit = {

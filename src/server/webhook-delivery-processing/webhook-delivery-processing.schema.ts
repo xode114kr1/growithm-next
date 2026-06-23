@@ -1,3 +1,5 @@
+import "server-only";
+
 import type { ProblemPlatform } from "@/generated/prisma/client";
 import type { WebhookDeliveryQueueMessage } from "@/types/queue";
 
