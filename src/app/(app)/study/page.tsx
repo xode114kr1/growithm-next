@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth/auth";
 import {
   getPendingInvites,
   getUserStudies,
-} from "@/services/studies/study.query";
+} from "@/server/studies/study.query.service";
 import StudyListHeader from "./_components/study-list-header/study-list-header";
 import StudyList from "./_components/study-list/study-list";
 import StudyInvites from "./_components/study-invites/study-invites";

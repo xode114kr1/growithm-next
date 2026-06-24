@@ -108,7 +108,3 @@ export type PendingProblem = {
   title: string;
 };
 
-export type PlatformProblemCount = {
-  platform: ProblemPlatform;
-  problemCount: number;
-};

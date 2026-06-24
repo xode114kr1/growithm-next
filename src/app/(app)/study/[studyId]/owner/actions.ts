@@ -11,11 +11,11 @@ import {
   removeStudyMember as removeStudyMemberCommand,
   updateStudyMemberRole as updateStudyMemberRoleCommand,
   updateStudySettings as updateStudySettingsCommand,
-} from "@/services/studies/study.command";
+} from "@/server/studies/study.command.service";
 import {
   validateStudyInviteTarget,
   validateStudySettingsInput,
-} from "@/services/studies/study.validator";
+} from "@/server/studies/study.schema";
 
 export type CreateStudyInviteActionState = {
   error: string | null;

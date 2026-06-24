@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 
 import { auth } from "@/lib/auth/auth";
-import { searchUsersWithRelation } from "@/services/users/user.query";
+import { searchUsersWithRelation } from "@/server/users/user.query.service";
 
 export async function GET(request: NextRequest) {
   const session = await auth();

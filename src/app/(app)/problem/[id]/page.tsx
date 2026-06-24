@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth/auth";
 
-import { getProblemDetail } from "@/services/problems/problem.query";
-import { getProblemShareTargetStudies } from "@/services/studies/study.query";
+import { getProblemDetail } from "@/server/problems/problem.query.service";
+import { getProblemShareTargetStudies } from "@/server/studies/study.query.service";
 import {
   ProblemDescription,
   ProblemMetadata,

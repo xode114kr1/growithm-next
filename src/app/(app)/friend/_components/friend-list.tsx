@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 
 import { ProfileModal } from "@/components/ui/profile-modal";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
-import { getFriendsPage } from "@/services/friends/friend.client";
+import { getFriendsPage } from "../_lib/friend-api";
 import type { FriendFiltersState, FriendProfile } from "@/types/friend";
 import { FriendActionButton } from "./friend-action-buttons";
 import { FriendItem } from "./friend-item";
