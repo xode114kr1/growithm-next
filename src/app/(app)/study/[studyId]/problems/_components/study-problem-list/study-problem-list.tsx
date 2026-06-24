@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useCallback, useState } from "react";
 
-import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
+import { useVirtualizedLoadMore } from "@/hooks/use-virtualized-load-more";
+import { useWindowVirtualizedList } from "@/hooks/use-window-virtualized-list";
 import type {
   StudyProblemFilters,
   StudyProblemInfiniteScrollResponse,
@@ -12,6 +13,10 @@ import type {
 
 import StudyProblemItem from "./study-problem-item";
 import StudyProblemModal from "../study-problem-modal";
+
+const STUDY_PROBLEM_ROW_ESTIMATE_HEIGHT = 112;
+const STUDY_PROBLEM_LIST_OVERSCAN = 6;
+const LOAD_MORE_THRESHOLD = 5;
 
 export default function StudyProblemList({
   clearedFiltersQueryString,
@@ -34,6 +39,14 @@ export default function StudyProblemList({
   const [isLoading, setIsLoading] = useState(false);
   const [selectedProblem, setSelectedProblem] =
     useState<StudyProblemListItem | null>(null);
+
+  const { containerRef, rowVirtualizer, totalSize, virtualItems } =
+    useWindowVirtualizedList<HTMLElement>({
+      count: items.length,
+      estimateSize: () => STUDY_PROBLEM_ROW_ESTIMATE_HEIGHT,
+      getItemKey: (index) => items[index]?.id ?? index,
+      overscan: STUDY_PROBLEM_LIST_OVERSCAN,
+    });
 
   const loadNextPage = useCallback(async () => {
     if (!hasNextPage || isLoading) return;
@@ -60,64 +73,82 @@ export default function StudyProblemList({
       setIsLoading(false);
     }
   }, [filters, hasNextPage, isLoading, nextPage, studyId]);
-  const sentinelRef = useInfiniteScroll({
-    enabled: hasNextPage && !isLoading,
+
+  useVirtualizedLoadMore({
+    hasNextPage,
+    isLoading,
+    itemCount: items.length,
     onLoadMore: loadNextPage,
+    threshold: LOAD_MORE_THRESHOLD,
+    virtualItems,
   });
 
   return (
-    <section className="app-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/50">
-                <TableHead>문제 정보</TableHead>
-                <TableHead>태그</TableHead>
-                <TableHead>공유한 멤버</TableHead>
-                <TableHead>공유일</TableHead>
-                <TableHead>상태</TableHead>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {items.map((problem) => (
+    <section className="app-card overflow-hidden" ref={containerRef}>
+      <div className="overflow-x-auto">
+        <table className="grid min-w-285 w-full border-collapse text-left">
+          <thead className="grid">
+            <tr className="grid grid-cols-[minmax(360px,1.6fr)_minmax(260px,1fr)_180px_160px_180px] border-b border-slate-100 bg-slate-50/50">
+              <TableHead>문제 정보</TableHead>
+              <TableHead>태그</TableHead>
+              <TableHead>공유한 멤버</TableHead>
+              <TableHead>공유일</TableHead>
+              <TableHead>상태</TableHead>
+            </tr>
+          </thead>
+          <tbody
+            className="relative grid divide-y divide-slate-50"
+            style={{ height: `${totalSize}px` }}
+          >
+            {virtualItems.map((virtualItem) => {
+              const problem = items[virtualItem.index];
+
+              if (!problem) return null;
+
+              return (
                 <StudyProblemItem
-                  key={problem.id}
+                  key={virtualItem.key}
+                  measureElement={rowVirtualizer.measureElement}
                   onSelect={setSelectedProblem}
                   problem={problem}
+                  style={{
+                    transform: `translateY(${
+                      virtualItem.start - rowVirtualizer.options.scrollMargin
+                    }px)`,
+                  }}
+                  virtualIndex={virtualItem.index}
                 />
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {items.length === 0 ? (
-          <EmptyState
-            clearFiltersHref={getStudyProblemsHref(clearedFiltersQueryString)}
-            hasActiveFilters={hasActiveFilters}
-          />
-        ) : null}
-        {hasNextPage ? (
-          <div aria-hidden="true" className="h-px" ref={sentinelRef} />
-        ) : null}
-        {hasActiveFilters || isLoading ? (
-          <div className="flex items-center justify-end gap-3 border-t border-slate-100 bg-slate-50/30 px-6 py-4">
-            {hasActiveFilters ? (
-              <Link
-                className="text-body-sm font-semibold text-secondary hover:underline"
-                href={getStudyProblemsHref(clearedFiltersQueryString)}
-              >
-                Clear filters
-              </Link>
-            ) : null}
-            {isLoading ? (
-              <p className="text-body-sm text-slate-500">불러오는 중...</p>
-            ) : null}
-          </div>
-        ) : null}
-        <StudyProblemModal
-          onClose={() => setSelectedProblem(null)}
-          problem={selectedProblem}
-          studyId={studyId}
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      {items.length === 0 ? (
+        <EmptyState
+          clearFiltersHref={getStudyProblemsHref(clearedFiltersQueryString)}
+          hasActiveFilters={hasActiveFilters}
         />
+      ) : null}
+      {hasActiveFilters || isLoading ? (
+        <div className="flex items-center justify-end gap-3 border-t border-slate-100 bg-slate-50/30 px-6 py-4">
+          {hasActiveFilters ? (
+            <Link
+              className="text-body-sm font-semibold text-secondary hover:underline"
+              href={getStudyProblemsHref(clearedFiltersQueryString)}
+            >
+              Clear filters
+            </Link>
+          ) : null}
+          {isLoading ? (
+            <p className="text-body-sm text-slate-500">불러오는 중...</p>
+          ) : null}
+        </div>
+      ) : null}
+      <StudyProblemModal
+        onClose={() => setSelectedProblem(null)}
+        problem={selectedProblem}
+        studyId={studyId}
+      />
     </section>
   );
 }
