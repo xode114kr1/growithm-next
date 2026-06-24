@@ -9,11 +9,15 @@ import {
   type ProblemShareActionState,
 } from "@/app/(app)/problem/[id]/actions";
 import type { ProblemShareTargetStudy } from "@/types/study";
+import { isWithinDayDifference } from "@/utils/date";
+import { PROBLEM_SHARE_SCORE_DAY_DIFFERENCE } from "@/utils/problem";
 import StudyShareItem from "./problem-share-item";
 
 type ProblemShareModalProps = {
+  currentTime: string;
   problemId: string;
   problemStatus: ProblemSubmissionStatus;
+  submittedAtText: string | null;
   studies: ProblemShareTargetStudy[];
 };
 
@@ -25,11 +29,15 @@ const initialShareState: ProblemShareActionState = {
 };
 
 export default function ProblemShareModal({
+  currentTime,
   problemId,
   problemStatus,
+  submittedAtText,
   studies,
 }: ProblemShareModalProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [eligibilityCurrentTime, setEligibilityCurrentTime] =
+    useState(currentTime);
   const [selectedStudyIds, setSelectedStudyIds] = useState<string[]>([]);
   const [state, formAction, isPending] = useActionState(
     shareProblemToStudies,
@@ -37,6 +45,14 @@ export default function ProblemShareModal({
   );
   const titleId = useId();
   const isShareDisabled = problemStatus !== ProblemSubmissionStatus.COMPLETED;
+  const canReceiveShareScore =
+    !isShareDisabled &&
+    studies.some((study) => !study.hasShared) &&
+    isWithinDayDifference({
+      currentTime: eligibilityCurrentTime,
+      dayDifference: PROBLEM_SHARE_SCORE_DAY_DIFFERENCE,
+      targetTime: submittedAtText,
+    });
   const selectedCount = selectedStudyIds.length;
   const selectedLabel = useMemo(
     () =>
@@ -54,12 +70,17 @@ export default function ProblemShareModal({
     );
   }
 
+  function openModal() {
+    setEligibilityCurrentTime(new Date().toISOString());
+    setIsOpen(true);
+  }
+
   return (
     <>
       <button
         className="btn-primary inline-flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
         disabled={isShareDisabled}
-        onClick={() => setIsOpen(true)}
+        onClick={openModal}
         title={
           isShareDisabled
             ? "문제를 공유하려면 먼저 메모를 작성하세요."
@@ -108,6 +129,11 @@ export default function ProblemShareModal({
 
             <form action={formAction} className="space-y-4 px-6 py-6">
               <input name="problemId" type="hidden" value={problemId} />
+              {canReceiveShareScore ? (
+                <p className="rounded-lg bg-secondary-container/60 px-4 py-3 text-body-sm font-semibold text-primary">
+                  스터디 XP를 받을 수 있습니다.
+                </p>
+              ) : null}
               {studies.length > 0 ? (
                 <div className="space-y-2">
                   {studies.map((study) => {

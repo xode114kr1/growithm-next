@@ -6,8 +6,10 @@ import {
 } from "@/utils/problem";
 import Link from "next/link";
 import type { CSSProperties, RefCallback } from "react";
+import ProblemShareScoreBadge from "../problem-share-score-badge";
 
 type ProblemItemProps = {
+  currentTime: string;
   measureElement?: RefCallback<HTMLTableRowElement>;
   problem: ProblemListItem;
   style?: CSSProperties;
@@ -15,6 +17,7 @@ type ProblemItemProps = {
 };
 
 export default function ProblemItem({
+  currentTime,
   measureElement,
   problem,
   style,
@@ -38,6 +41,11 @@ export default function ProblemItem({
                 {problem.code}
               </span>
               {problem.tier ? <ProblemTierBadge tier={problem.tier} /> : null}
+              <ProblemShareScoreBadge
+                currentTime={currentTime}
+                status={problem.status}
+                submittedAtText={problem.submittedAtText}
+              />
             </div>
             <h3 className="text-pretty wrap-break-word font-semibold leading-snug text-on-surface transition-colors group-hover:text-secondary">
               {problem.title}

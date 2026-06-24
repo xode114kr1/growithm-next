@@ -1,6 +1,8 @@
 import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import type { ProblemTierBucketName } from "@/types/problem";
 
+export const PROBLEM_SHARE_SCORE_DAY_DIFFERENCE = 2;
+
 const programmersLevelTiers: Partial<Record<number, ProblemTierBucketName>> = {
   1: "BRONZE",
   2: "SILVER",

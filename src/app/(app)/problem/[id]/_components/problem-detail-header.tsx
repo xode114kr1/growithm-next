@@ -4,6 +4,7 @@ import ProblemTierBadge from "@/components/ui/problem-tier-badge";
 import type { ProblemDetail } from "@/types/problem";
 import type { ProblemShareTargetStudy } from "@/types/study";
 
+import ProblemShareScoreBadge from "../../_components/problem-share-score-badge";
 import ProblemShareModal from "./problem-share/study-share-modal";
 
 export default function ProblemHeader({
@@ -13,6 +14,9 @@ export default function ProblemHeader({
   problem: ProblemDetail;
   shareTargetStudies: ProblemShareTargetStudy[];
 }) {
+  const currentTime = new Date().toISOString();
+  const hasShareTarget = shareTargetStudies.some((study) => !study.hasShared);
+
   return (
     <header className="border-b border-outline-variant/40 pb-8">
       <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
@@ -22,6 +26,12 @@ export default function ProblemHeader({
               {problem.platform}
             </span>
             {problem.tier ? <ProblemTierBadge tier={problem.tier} /> : null}
+            <ProblemShareScoreBadge
+              currentTime={currentTime}
+              hasShareTarget={hasShareTarget}
+              status={problem.status}
+              submittedAtText={problem.submittedAtText}
+            />
           </div>
 
           <p className="mb-2 text-label-caps text-slate-400">
@@ -39,8 +49,10 @@ export default function ProblemHeader({
 
         <div className="flex flex-wrap gap-2">
           <ProblemShareModal
+            currentTime={currentTime}
             problemId={problem.id}
             problemStatus={problem.status}
+            submittedAtText={problem.submittedAtText}
             studies={shareTargetStudies}
           />
 

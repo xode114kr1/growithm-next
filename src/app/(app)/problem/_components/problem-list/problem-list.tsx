@@ -18,11 +18,13 @@ const PROBLEM_LIST_OVERSCAN = 6;
 const LOAD_MORE_THRESHOLD = 5;
 
 export default function ProblemList({
+  currentTime,
   emptyStateReason,
   filters,
   initialHasNextPage,
   initialItems,
 }: {
+  currentTime: string;
   emptyStateReason: ProblemEmptyStateReason | null;
   filters: ProblemFiltersState;
   initialHasNextPage: boolean;
@@ -104,6 +106,7 @@ export default function ProblemList({
               return (
                 <ProblemItem
                   key={virtualItem.key}
+                  currentTime={currentTime}
                   measureElement={rowVirtualizer.measureElement}
                   problem={problem}
                   style={{
