@@ -91,7 +91,10 @@ export async function shareProblemWithStudies({
 
   if (newStudyIds.length > 0) {
     const shareScore = isWithinShareScoreWindow(problem.submittedAtText)
-      ? getProblemShareScore(problem.tier)
+      ? getProblemExperienceScore({
+          platform: problem.platform,
+          tier: problem.tier,
+        })
       : 0;
 
     await createProblemShares({
@@ -116,11 +119,15 @@ export function getProblemExperienceScore({
   if (!tier) return 0;
 
   if (platform === ProblemPlatform.BAEKJOON) {
-    return getBaekjoonExperienceScore(tier);
+    return (
+      getBaekjoonExperienceScore(tier) || getProgrammersExperienceScore(tier)
+    );
   }
 
   if (platform === ProblemPlatform.PROGRAMMERS) {
-    return getProgrammersExperienceScore(tier);
+    return (
+      getProgrammersExperienceScore(tier) || getBaekjoonExperienceScore(tier)
+    );
   }
 
   return 0;
@@ -129,22 +136,6 @@ export function getProblemExperienceScore({
 // 문제 공유 실패 결과를 일관된 형태로 생성한다.
 function createProblemShareError(error: string): ProblemShareResult {
   return { error, newStudyIds: [], skippedCount: 0 };
-}
-
-// 문제 티어에 해당하는 스터디 공유 점수를 계산한다.
-function getProblemShareScore(tier: string | null) {
-  const normalizedTier = tier?.toLowerCase() ?? "";
-
-  if (normalizedTier.includes("ruby")) return 60;
-  if (normalizedTier.includes("diamond")) return 50;
-  if (normalizedTier.includes("platinum")) return 40;
-  if (normalizedTier.includes("gold")) return 30;
-  if (normalizedTier.includes("silver")) return 20;
-  if (normalizedTier.includes("bronze")) return 10;
-
-  const levelMatch = normalizedTier.match(/(?:lv\.?|level)\s*(\d+)/);
-
-  return levelMatch ? Math.max(0, Number(levelMatch[1]) * 10) : 0;
 }
 
 // 문제 제출 시각이 공유 점수 인정 기간 안인지 확인한다.

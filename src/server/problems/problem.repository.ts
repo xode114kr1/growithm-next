@@ -175,6 +175,7 @@ export async function findOwnedProblemForSharing({
   return prisma.problemSubmission.findFirst({
     select: {
       id: true,
+      platform: true,
       status: true,
       submittedAtText: true,
       tier: true,
