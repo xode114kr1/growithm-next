@@ -15,7 +15,6 @@ export default function ProblemHeader({
   shareTargetStudies: ProblemShareTargetStudy[];
 }) {
   const currentTime = new Date().toISOString();
-  const hasShareTarget = shareTargetStudies.some((study) => !study.hasShared);
 
   return (
     <header className="border-b border-outline-variant/40 pb-8">
@@ -28,8 +27,6 @@ export default function ProblemHeader({
             {problem.tier ? <ProblemTierBadge tier={problem.tier} /> : null}
             <ProblemShareScoreBadge
               currentTime={currentTime}
-              hasShareTarget={hasShareTarget}
-              status={problem.status}
               submittedAtText={problem.submittedAtText}
             />
           </div>

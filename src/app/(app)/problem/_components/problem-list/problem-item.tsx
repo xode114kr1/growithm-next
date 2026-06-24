@@ -43,7 +43,6 @@ export default function ProblemItem({
               {problem.tier ? <ProblemTierBadge tier={problem.tier} /> : null}
               <ProblemShareScoreBadge
                 currentTime={currentTime}
-                status={problem.status}
                 submittedAtText={problem.submittedAtText}
               />
             </div>

@@ -45,14 +45,11 @@ export default function ProblemShareModal({
   );
   const titleId = useId();
   const isShareDisabled = problemStatus !== ProblemSubmissionStatus.COMPLETED;
-  const canReceiveShareScore =
-    !isShareDisabled &&
-    studies.some((study) => !study.hasShared) &&
-    isWithinDayDifference({
-      currentTime: eligibilityCurrentTime,
-      dayDifference: PROBLEM_SHARE_SCORE_DAY_DIFFERENCE,
-      targetTime: submittedAtText,
-    });
+  const canReceiveShareScore = isWithinDayDifference({
+    currentTime: eligibilityCurrentTime,
+    dayDifference: PROBLEM_SHARE_SCORE_DAY_DIFFERENCE,
+    targetTime: submittedAtText,
+  });
   const selectedCount = selectedStudyIds.length;
   const selectedLabel = useMemo(
     () =>

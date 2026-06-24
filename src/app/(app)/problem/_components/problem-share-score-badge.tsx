@@ -1,26 +1,18 @@
-import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import { isWithinDayDifference } from "@/utils/date";
 import { PROBLEM_SHARE_SCORE_DAY_DIFFERENCE } from "@/utils/problem";
 
 export default function ProblemShareScoreBadge({
   currentTime,
-  hasShareTarget = true,
-  status,
   submittedAtText,
 }: {
   currentTime: string;
-  hasShareTarget?: boolean;
-  status: ProblemSubmissionStatus;
   submittedAtText: string | null;
 }) {
-  const canReceiveShareScore =
-    status === ProblemSubmissionStatus.COMPLETED &&
-    hasShareTarget &&
-    isWithinDayDifference({
-      currentTime,
-      dayDifference: PROBLEM_SHARE_SCORE_DAY_DIFFERENCE,
-      targetTime: submittedAtText,
-    });
+  const canReceiveShareScore = isWithinDayDifference({
+    currentTime,
+    dayDifference: PROBLEM_SHARE_SCORE_DAY_DIFFERENCE,
+    targetTime: submittedAtText,
+  });
 
   if (!canReceiveShareScore) return null;
 
