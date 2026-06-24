@@ -6,16 +6,28 @@ import {
   getProblemStatusDescription,
   getProblemStatusLabel,
 } from "@/utils/problem";
+import type { CSSProperties, RefCallback } from "react";
 
 export default function StudyProblemItem({
+  measureElement,
   onSelect,
   problem,
+  style,
+  virtualIndex,
 }: {
+  measureElement?: RefCallback<HTMLTableRowElement>;
   onSelect: (problem: StudyProblemListItem) => void;
   problem: StudyProblemListItem;
+  style?: CSSProperties;
+  virtualIndex?: number;
 }) {
   return (
-    <tr className="group transition-colors hover:bg-slate-50/80">
+    <tr
+      className="group absolute left-0 top-0 grid w-full grid-cols-[minmax(360px,1.6fr)_minmax(260px,1fr)_180px_160px_180px] border-b border-slate-50 transition-colors hover:bg-slate-50/80"
+      data-index={virtualIndex}
+      ref={measureElement}
+      style={style}
+    >
       <td className="min-w-90 max-w-140 px-6 py-5">
         <button
           className="flex w-full items-start gap-4 rounded-lg text-left outline-none focus-visible:ring-2 focus-visible:ring-secondary-container"
