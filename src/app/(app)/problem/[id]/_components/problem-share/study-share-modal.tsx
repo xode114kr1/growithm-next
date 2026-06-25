@@ -44,6 +44,7 @@ export default function ProblemShareModal({
   );
   const titleId = useId();
   const isShareDisabled = problemStatus !== ProblemSubmissionStatus.COMPLETED;
+
   const canReceiveShareScore = isWithinDayDifference({
     currentTime: baseTime,
     dayDifference: PROBLEM_SHARE_SCORE_DAY_DIFFERENCE,
@@ -70,11 +71,7 @@ export default function ProblemShareModal({
         className="btn-primary inline-flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
         disabled={isShareDisabled}
         onClick={openModal}
-        title={
-          isShareDisabled
-            ? "문제를 공유하려면 먼저 메모를 작성하세요."
-            : "이 문제를 스터디에 공유"
-        }
+        title={isShareDisabled ? "메모를 작성하세요." : undefined}
         type="button"
       >
         <Share2 aria-hidden="true" size={16} />
@@ -141,30 +138,10 @@ export default function ProblemShareModal({
                   })}
                 </div>
               ) : (
-                <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
-                  <p className="font-semibold text-on-surface">
-                    공유할 수 있는 스터디가 없습니다
-                  </p>
-                  <p className="mt-2 text-body-sm text-slate-500">
-                    스터디에 가입하거나 새로 만든 후 문제를 공유할 수 있습니다.
-                  </p>
-                </div>
+                <ProblemShareEmptyState />
               )}
 
-              {state.status === "error" ? (
-                <p className="rounded-lg bg-error/10 px-4 py-3 text-body-sm font-medium text-error">
-                  {state.error}
-                </p>
-              ) : null}
-
-              {state.status === "success" ? (
-                <p className="rounded-lg bg-secondary-container/60 px-4 py-3 text-body-sm font-medium text-primary">
-                  {state.sharedCount.toLocaleString()}개 스터디에 공유했습니다.
-                  {state.skippedCount > 0
-                    ? ` 이미 공유된 스터디 ${state.skippedCount.toLocaleString()}개는 제외했습니다.`
-                    : ""}
-                </p>
-              ) : null}
+              <ProblemShareResultMessage state={state} />
 
               <div className="flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center">
                 <div className="flex justify-end gap-2">
@@ -190,4 +167,41 @@ export default function ProblemShareModal({
       ) : null}
     </>
   );
+}
+
+function ProblemShareEmptyState() {
+  return (
+    <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
+      <p className="font-semibold text-on-surface">
+        공유할 수 있는 스터디가 없습니다
+      </p>
+      <p className="mt-2 text-body-sm text-slate-500">
+        스터디에 가입하거나 새로 만든 후 문제를 공유할 수 있습니다.
+      </p>
+    </div>
+  );
+}
+
+function ProblemShareResultMessage({
+  state,
+}: {
+  state: ProblemShareActionState;
+}) {
+  if (state.status === "error") {
+    return (
+      <p className="rounded-lg bg-error/10 px-4 py-3 text-body-sm font-medium text-error">
+        {state.error}
+      </p>
+    );
+  }
+
+  if (state.status === "success") {
+    return (
+      <p className="rounded-lg bg-secondary-container/60 px-4 py-3 text-body-sm font-medium text-primary">
+        {state.sharedCount.toLocaleString()}개 스터디에 공유했습니다.
+      </p>
+    );
+  }
+
+  return null;
 }
