@@ -42,6 +42,7 @@ export default function ProblemShareModal({
     shareProblemToStudies,
     initialShareState,
   );
+
   const titleId = useId();
   const isShareDisabled = problemStatus !== ProblemSubmissionStatus.COMPLETED;
 
