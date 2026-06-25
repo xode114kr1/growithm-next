@@ -94,29 +94,7 @@ async function getRepositoryOwnerFromPayload(
   return { accessToken: account.access_token, userId: account.userId };
 }
 
-// 문제 제출과 사용자 점수를 반영하고 웹훅 delivery 처리를 완료한다.
-export async function saveProblemSubmissionAndCompleteDelivery({
-  accuracy,
-  categories,
-  code,
-  commitSha,
-  description,
-  link,
-  memory,
-  platform,
-  problemId,
-  readmePath,
-  repositoryFullName,
-  score,
-  scoreMax,
-  status,
-  submittedAtText,
-  tier,
-  time,
-  title,
-  userId,
-  webhookDeliveryId,
-}: {
+type ProblemSubmissionInput = {
   accuracy?: number;
   categories?: string[];
   code: string | null;
@@ -136,9 +114,25 @@ export async function saveProblemSubmissionAndCompleteDelivery({
   time?: string;
   title: string;
   userId: string;
+};
+
+// 문제 제출과 사용자 점수를 반영하고 웹훅 delivery 처리를 완료한다.
+export async function saveProblemSubmissionAndCompleteDelivery({
+  submission,
+  webhookDeliveryId,
+}: {
+  submission: ProblemSubmissionInput;
   webhookDeliveryId: string;
 }) {
   await prisma.$transaction(async (tx) => {
+    const {
+      commitSha,
+      readmePath,
+      repositoryFullName,
+      score,
+      userId,
+      ...submissionData
+    } = submission;
     const submissionKey = `${repositoryFullName}:${commitSha}:${readmePath}`;
     // 동일 제출의 upsert와 점수 계산을 직렬화해 동시 Consumer의 이중 반영을 막는다.
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${submissionKey}, 0))`;
@@ -156,43 +150,17 @@ export async function saveProblemSubmissionAndCompleteDelivery({
 
     await tx.problemSubmission.upsert({
       create: {
-        accuracy,
-        code,
-        categories,
         commitSha,
-        description,
-        link,
-        memory,
-        platform,
-        problemId,
         readmePath,
         repositoryFullName,
         score,
-        scoreMax,
-        status,
-        submittedAtText,
-        tier,
-        time,
-        title,
+        ...submissionData,
         userId,
         webhookDeliveryId,
       },
       update: {
-        accuracy,
-        code,
-        categories,
-        description,
-        link,
-        memory,
-        platform,
-        problemId,
         score,
-        scoreMax,
-        status,
-        submittedAtText,
-        tier,
-        time,
-        title,
+        ...submissionData,
         userId,
         webhookDeliveryId,
       },
