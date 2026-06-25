@@ -86,6 +86,7 @@ export async function getPendingInvites(
 
   return invites.map((invite) => ({
     id: invite.id,
+    invitedByAvatar: invite.invitedBy.image,
     invitedByName: getUserDisplayName(invite.invitedBy.name),
     studyTitle: invite.study.title,
     timeLabel: formatRelativeDate(invite.createdAt),
@@ -170,6 +171,7 @@ export async function getStudyMembers({
     const lastActiveAt = activity?._max.sharedAt ?? member.joinedAt;
 
     return {
+      avatar: member.user.image,
       contribution: activity?._sum.score ?? 0,
       id: member.id,
       joinedAt: formatShortDate(member.joinedAt),
@@ -301,6 +303,7 @@ export async function getStudyMemberPreviews({
   }
 
   return study.members.map((member) => ({
+    avatar: member.user.image,
     name: getUserDisplayName(member.user.name),
     role: member.userId === study.ownerId ? "owner" : "member",
   }));
@@ -374,6 +377,7 @@ export async function getOwnedStudyMembers({
     const activity = activityByUserId.get(member.userId);
 
     return {
+      avatar: member.user.image,
       contribution: activity?._sum.score ?? 0,
       id: member.id,
       isCurrentUser: member.userId === userId,
@@ -388,6 +392,7 @@ export async function getOwnedStudyMembers({
     const ownerActivity = activityByUserId.get(study.ownerId);
 
     members.unshift({
+      avatar: study.owner.image,
       contribution: ownerActivity?._sum.score ?? 0,
       id: study.ownerId,
       isCurrentUser: study.ownerId === userId,

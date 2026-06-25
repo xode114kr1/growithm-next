@@ -1,5 +1,6 @@
 import type { OwnerMember } from "@/types/study";
 import { Button } from "@/components/ui/button";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 import { removeStudyMember, updateStudyMemberRole } from "../actions";
 
@@ -43,15 +44,11 @@ export default function ManageMembersCard({
               >
                 <td className="min-w-55 px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <div
-                      className={
-                        member.role === "OWNER"
-                          ? "flex size-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-on-primary"
-                          : "flex size-9 items-center justify-center rounded-full bg-slate-200 text-sm font-bold text-slate-600"
-                      }
-                    >
-                      {member.name[0]?.toUpperCase()}
-                    </div>
+                    <UserAvatar
+                      image={member.avatar}
+                      name={member.name}
+                      size="sm"
+                    />
                     <div>
                       <p className="font-semibold text-on-surface">
                         {member.name}

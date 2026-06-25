@@ -1,14 +1,16 @@
 import { StudyInviteItem } from "@/types/study";
 import { Button } from "@/components/ui/button";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { acceptStudyInvite, declineStudyInvite } from "../../actions";
 
 export default function InviteItem({ invite }: { invite: StudyInviteItem }) {
   return (
     <article className="p-4 transition-all hover:bg-slate-50">
       <div className="mb-3 flex gap-3">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-fixed font-bold text-primary">
-          {invite.invitedByName[0]?.toUpperCase()}
-        </div>
+        <UserAvatar
+          image={invite.invitedByAvatar}
+          name={invite.invitedByName}
+        />
         <div className="min-w-0 flex-1">
           <p className="text-body-sm">
             <span className="font-bold text-on-surface">
