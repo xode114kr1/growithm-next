@@ -293,58 +293,46 @@ export async function rejectReceivedFriendRequest({
   });
 }
 
-// 현재 사용자가 받은 특정 친구 요청의 요청자 ID를 조회한다.
-export async function findReceivedFriendRequest({
+// 받은 요청을 삭제한 경우에만 친구 관계를 생성한다.
+export async function acceptFriendRequestRecord({
   addresseeId,
   requestId,
 }: {
   addresseeId: string;
   requestId: string;
 }) {
-  return prisma.friendRequest.findFirst({
-    select: {
-      requesterId: true,
-    },
-    where: {
-      addresseeId,
-      id: requestId,
-    },
-  });
-}
+  return prisma.$transaction(async (tx) => {
+    const request = await tx.friendRequest.findFirst({
+      select: { requesterId: true },
+      where: { addresseeId, id: requestId },
+    });
 
-// 친구 관계를 생성하고 두 사용자 사이의 대기 요청을 삭제한다.
-export async function acceptFriendship({
-  addresseeId,
-  friendPair,
-  requesterId,
-}: {
-  addresseeId: string;
-  friendPair: { userAId: string; userBId: string };
-  requesterId: string;
-}) {
-  await prisma.$transaction([
-    prisma.friendship.upsert({
-      create: friendPair,
+    if (!request || request.requesterId === addresseeId) return false;
+
+    const acceptedRequest = await tx.friendRequest.deleteMany({
+      where: { addresseeId, id: requestId, requesterId: request.requesterId },
+    });
+
+    if (acceptedRequest.count === 0) return false;
+
+    const [userAId, userBId] = [addresseeId, request.requesterId].sort();
+
+    await tx.friendship.upsert({
+      create: { userAId, userBId },
       update: {},
       where: {
-        userAId_userBId: friendPair,
+        userAId_userBId: { userAId, userBId },
       },
-    }),
-    prisma.friendRequest.deleteMany({
+    });
+    await tx.friendRequest.deleteMany({
       where: {
-        OR: [
-          {
-            addresseeId,
-            requesterId,
-          },
-          {
-            addresseeId: requesterId,
-            requesterId: addresseeId,
-          },
-        ],
+        addresseeId: request.requesterId,
+        requesterId: addresseeId,
       },
-    }),
-  ]);
+    });
+
+    return true;
+  });
 }
 
 // 정규화된 두 사용자 사이의 친구 관계를 삭제한다.
