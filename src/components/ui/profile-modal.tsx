@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import { getUserProfile } from "@/lib/users/user-api";
 import type { UserProfile } from "@/types/user";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 export function ProfileModal({
   onClose,
@@ -44,12 +44,11 @@ export function ProfileModal({
         {profile ? (
           <>
             <div className="mb-6 flex items-center gap-4">
-              <Image
-                alt={`${profile.name} avatar`}
-                className="size-14 rounded-full object-cover ring-4 ring-slate-50"
-                height={56}
-                src={profile.avatar}
-                width={56}
+              <UserAvatar
+                className="ring-4 ring-slate-50"
+                image={profile.avatar}
+                name={profile.name}
+                size="xl"
               />
               <div className="min-w-0">
                 <p className="truncate text-xl font-bold text-primary">

@@ -1,10 +1,10 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import Image from "next/image";
 import { useEffect, useId, useState } from "react";
 
 import { ProfileModal } from "@/components/ui/profile-modal";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { searchUsers } from "@/lib/users/user-api";
 import type { FriendSearchResult } from "@/types/friend";
 
@@ -195,12 +195,11 @@ function SearchResultItem({
         onClick={() => onOpenProfile(profile)}
         type="button"
       >
-        <Image
-          alt={`${profile.name} 아바타`}
-          className="size-11 rounded-full object-cover ring-2 ring-slate-50"
-          height={44}
-          src={profile.avatar}
-          width={44}
+        <UserAvatar
+          className="ring-2 ring-slate-50"
+          image={profile.avatar}
+          name={profile.name}
+          size="lg"
         />
       </button>
       <div className="min-w-0 flex-1">
