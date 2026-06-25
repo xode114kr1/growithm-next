@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { ButtonAnchor, ButtonLink } from "@/components/ui/button";
 import ProblemTierBadge from "@/components/ui/problem-tier-badge";
 import type { ProblemDetail } from "@/types/problem";
 import type { ProblemShareTargetStudy } from "@/types/study";
@@ -53,19 +52,19 @@ export default function ProblemHeader({
             studies={shareTargetStudies}
           />
 
-          <Link className="btn-secondary" href="/problem">
+          <ButtonLink href="/problem" variant="secondary">
             뒤로가기
-          </Link>
+          </ButtonLink>
 
           {problem.link ? (
-            <a
-              className="btn-primary"
+            <ButtonAnchor
               href={problem.link}
               rel="noreferrer"
               target="_blank"
+              variant="primary"
             >
               원문 보기
-            </a>
+            </ButtonAnchor>
           ) : null}
         </div>
       </div>

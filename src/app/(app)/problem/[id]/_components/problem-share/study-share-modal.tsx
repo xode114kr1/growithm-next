@@ -8,6 +8,7 @@ import {
   shareProblemToStudies,
   type ProblemShareActionState,
 } from "@/app/(app)/problem/[id]/actions";
+import { Button } from "@/components/ui/button";
 import type { ProblemShareTargetStudy } from "@/types/study";
 import { isWithinDayDifference } from "@/utils/date";
 import { PROBLEM_SHARE_SCORE_DAY_DIFFERENCE } from "@/utils/problem";
@@ -68,16 +69,15 @@ export default function ProblemShareModal({
 
   return (
     <>
-      <button
-        className="btn-primary inline-flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
+      <Button
         disabled={isShareDisabled}
         onClick={openModal}
         title={isShareDisabled ? "메모를 작성하세요." : undefined}
-        type="button"
+        variant="primary"
       >
         <Share2 aria-hidden="true" size={16} />
         Share
-      </button>
+      </Button>
 
       {isOpen ? (
         <div
@@ -146,20 +146,19 @@ export default function ProblemShareModal({
 
               <div className="flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center">
                 <div className="flex justify-end gap-2">
-                  <button
-                    className="btn-secondary"
+                  <Button
                     onClick={() => setIsOpen(false)}
-                    type="button"
+                    variant="secondary"
                   >
                     Cancel
-                  </button>
-                  <button
-                    className="btn-primary"
+                  </Button>
+                  <Button
                     disabled={selectedCount === 0 || isPending}
                     type="submit"
+                    variant="primary"
                   >
                     Share
-                  </button>
+                  </Button>
                 </div>
               </div>
             </form>

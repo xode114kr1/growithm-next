@@ -1,5 +1,8 @@
-import Link from "next/link";
-
+import {
+  Button,
+  ButtonAnchor,
+  ButtonLink,
+} from "@/components/ui/button";
 import { signInWithGitHub } from "../actions";
 
 export default function HeroSection({
@@ -24,13 +27,10 @@ export default function HeroSection({
           </p>
           <div className="flex flex-wrap gap-4">
             <StartButton isAuthenticated={isAuthenticated} />
-            <a
-              className="btn-secondary min-h-14 rounded-xl px-8 text-base"
-              href="#features"
-            >
+            <ButtonAnchor href="#features" size="lg" variant="secondary">
               <span aria-hidden="true">▶</span>
               기능 살펴보기
-            </a>
+            </ButtonAnchor>
           </div>
         </div>
         <CodePreview />
@@ -40,21 +40,19 @@ export default function HeroSection({
 }
 
 function StartButton({ isAuthenticated }: { isAuthenticated: boolean }) {
-  const className = "btn-primary min-h-14 rounded-xl px-8 text-base";
-
   if (isAuthenticated) {
     return (
-      <Link className={className} href="/dashboard">
+      <ButtonLink href="/dashboard" size="lg" variant="primary">
         시작하기
-      </Link>
+      </ButtonLink>
     );
   }
 
   return (
     <form action={signInWithGitHub}>
-      <button className={className} type="submit">
+      <Button size="lg" type="submit" variant="primary">
         시작하기
-      </button>
+      </Button>
     </form>
   );
 }

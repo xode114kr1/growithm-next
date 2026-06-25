@@ -322,54 +322,6 @@ body {
   line-height: 1.6;
 }
 
-@utility btn-primary {
-  display: inline-flex;
-  min-height: 2.75rem;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border-radius: 0.5rem;
-  background: linear-gradient(180deg, var(--primary-container), var(--primary));
-  color: var(--on-primary);
-  font-size: 0.875rem;
-  font-weight: 700;
-  padding-inline: 1rem;
-  transition:
-    box-shadow 160ms ease,
-    transform 160ms ease,
-    background 160ms ease;
-
-  &:hover {
-    box-shadow: 0 12px 24px rgb(0 38 39 / 20%);
-    transform: translateY(-1px);
-  }
-}
-
-@utility btn-secondary {
-  display: inline-flex;
-  min-height: 2.75rem;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border: 1px solid var(--outline-variant);
-  border-radius: 0.5rem;
-  background: var(--surface-container-lowest);
-  color: var(--primary);
-  font-size: 0.875rem;
-  font-weight: 700;
-  padding-inline: 1rem;
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    color 160ms ease;
-
-  &:hover {
-    border-color: var(--secondary);
-    box-shadow: 0 0 0 3px rgb(0 227 253 / 18%);
-    color: var(--secondary);
-  }
-}
-
 @utility input-field {
   min-height: 2.75rem;
   width: 100%;

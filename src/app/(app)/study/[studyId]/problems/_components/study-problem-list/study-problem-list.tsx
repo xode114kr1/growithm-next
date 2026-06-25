@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useState } from "react";
 
+import { ButtonLink } from "@/components/ui/button";
 import { useVirtualizedLoadMore } from "@/hooks/use-virtualized-load-more";
 import { useWindowVirtualizedList } from "@/hooks/use-window-virtualized-list";
 import type {
@@ -86,14 +87,13 @@ export default function StudyProblemList({
   return (
     <section className="app-card overflow-hidden" ref={containerRef}>
       <div className="overflow-x-auto">
-        <table className="grid min-w-285 w-full border-collapse text-left">
+        <table className="grid min-w-240 w-full border-collapse text-left">
           <thead className="grid">
-            <tr className="grid grid-cols-[minmax(360px,1.6fr)_minmax(260px,1fr)_180px_160px_180px] border-b border-slate-100 bg-slate-50/50">
+            <tr className="grid grid-cols-[minmax(360px,1.8fr)_minmax(260px,1fr)_180px_160px] border-b border-slate-100 bg-slate-50/50">
               <TableHead>문제 정보</TableHead>
               <TableHead>태그</TableHead>
               <TableHead>공유한 멤버</TableHead>
               <TableHead>공유일</TableHead>
-              <TableHead>상태</TableHead>
             </tr>
           </thead>
           <tbody
@@ -163,27 +163,35 @@ function EmptyState({
   if (hasActiveFilters) {
     return (
       <div className="border-t border-slate-100 px-6 py-14 text-center">
-        <p className="font-semibold text-on-surface">조건에 맞는 문제가 없습니다.</p>
+        <p className="font-semibold text-on-surface">
+          조건에 맞는 문제가 없습니다.
+        </p>
         <p className="mt-2 text-body-sm text-slate-500">
           Change or reset the filters to see more shared problems.
         </p>
-        <Link className="btn-secondary mt-5" href={clearFiltersHref}>
+        <ButtonLink
+          className="mt-5"
+          href={clearFiltersHref}
+          variant="secondary"
+        >
           Clear filters
-        </Link>
+        </ButtonLink>
       </div>
     );
   }
 
   return (
     <div className="border-t border-slate-100 px-6 py-14 text-center">
-      <p className="font-semibold text-on-surface">아직 공유된 문제가 없습니다.</p>
+      <p className="font-semibold text-on-surface">
+        아직 공유된 문제가 없습니다.
+      </p>
       <p className="mt-2 text-body-sm text-slate-500">
         Share a completed submission from your problem detail page to populate
         this study list.
       </p>
-      <Link className="btn-secondary mt-5" href="/problem">
+      <ButtonLink className="mt-5" href="/problem" variant="secondary">
         Browse Problems
-      </Link>
+      </ButtonLink>
     </div>
   );
 }

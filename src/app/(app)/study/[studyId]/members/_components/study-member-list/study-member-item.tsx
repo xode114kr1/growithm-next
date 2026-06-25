@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { ProfileModal } from "@/components/ui/profile-modal";
 import type { StudyMember } from "@/types/study";
 
@@ -50,17 +51,13 @@ export default function StudyMemberItem({
               </span>
             </div>
           </div>
-          <button
-            className={
-              isPrivileged
-                ? "btn-secondary min-h-10 px-3 ring-1 ring-secondary/20"
-                : "btn-secondary min-h-10 px-3"
-            }
+          <Button
+            className={isPrivileged ? "ring-1 ring-secondary/20" : undefined}
             onClick={() => setIsProfileOpen(true)}
-            type="button"
+            variant="secondary"
           >
             프로필
-          </button>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 gap-4 border-t border-slate-100 pt-5 sm:grid-cols-2">

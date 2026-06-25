@@ -1,4 +1,5 @@
 import { StudyInviteItem } from "@/types/study";
+import { Button } from "@/components/ui/button";
 import { acceptStudyInvite, declineStudyInvite } from "../../actions";
 
 export default function InviteItem({ invite }: { invite: StudyInviteItem }) {
@@ -27,21 +28,15 @@ export default function InviteItem({ invite }: { invite: StudyInviteItem }) {
       <div className="flex gap-2">
         <form action={acceptStudyInvite} className="flex-1">
           <input name="inviteId" type="hidden" value={invite.id} />
-          <button
-            className="w-full rounded-md bg-primary py-1.5 text-xs font-bold text-on-primary transition-all hover:opacity-90"
-            type="submit"
-          >
+          <Button className="w-full" size="xs" type="submit" variant="primary">
             수락
-          </button>
+          </Button>
         </form>
         <form action={declineStudyInvite} className="flex-1">
           <input name="inviteId" type="hidden" value={invite.id} />
-          <button
-            className="w-full rounded-md bg-surface-container py-1.5 text-xs font-bold text-on-surface-variant transition-all hover:bg-outline-variant/20"
-            type="submit"
-          >
+          <Button className="w-full" size="xs" type="submit" variant="secondary">
             거절
-          </button>
+          </Button>
         </form>
       </div>
     </article>

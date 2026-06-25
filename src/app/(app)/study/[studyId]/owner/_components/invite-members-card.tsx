@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 
+import { Button } from "@/components/ui/button";
 import type { OwnerInvite } from "@/types/study";
 
 import {
@@ -61,13 +62,14 @@ export default function InviteMembersCard({
                   required
                   type="text"
                 />
-                <button
-                  className="btn-primary shrink-0"
+                <Button
+                  className="shrink-0"
                   disabled={isPending}
                   type="submit"
+                  variant="primary"
                 >
                   초대
-                </button>
+                </Button>
               </div>
             </label>
           </form>

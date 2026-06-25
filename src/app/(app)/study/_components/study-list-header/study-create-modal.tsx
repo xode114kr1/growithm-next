@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+
 import { createStudy, type CreateStudyActionState } from "../../actions";
 
 const initialState: CreateStudyActionState = {
@@ -28,13 +30,12 @@ export default function StudyCreateModal() {
 
   return (
     <>
-      <button
-        className="rounded-lg bg-primary px-4 py-2 text-body-sm font-semibold text-on-primary transition-all hover:opacity-90"
+      <Button
         onClick={() => setIsOpen(true)}
-        type="button"
+        variant="primary"
       >
         스터디 생성
-      </button>
+      </Button>
       {isOpen ? (
         <div
           aria-labelledby={titleId}
@@ -94,16 +95,15 @@ export default function StudyCreateModal() {
               </div>
 
               <div className="flex flex-col-reverse justify-end gap-2 border-t border-slate-100 pt-5 sm:flex-row">
-                <button
-                  className="btn-secondary"
+                <Button
                   onClick={() => setIsOpen(false)}
-                  type="button"
+                  variant="secondary"
                 >
                   취소
-                </button>
-                <button className="btn-primary" type="submit">
+                </Button>
+                <Button type="submit" variant="primary">
                   스터디 생성
-                </button>
+                </Button>
               </div>
             </form>
           </section>

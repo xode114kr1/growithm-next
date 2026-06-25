@@ -1,6 +1,10 @@
 "use client";
 
-import FilterCard from "@/components/ui/filter-card";
+import {
+  FilterCard,
+  FilterOptionButton,
+  FilterSelect,
+} from "@/components/ui/filter-card";
 import type { ProblemPlatform } from "@/generated/prisma/enums";
 import { useReplaceQueryParams } from "@/hooks/use-query-params";
 import type { ProblemFiltersState, ProblemSort } from "@/types/problem";
@@ -43,22 +47,17 @@ export default function ProblemFilters({
                 : filters.platform === platform;
 
             return (
-              <button
-                className={
-                  isActive
-                    ? "rounded-lg border border-primary-container/20 bg-primary-container px-3 py-1.5 text-body-sm font-medium text-on-primary-container"
-                    : "rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-body-sm font-medium text-slate-600 transition-colors hover:border-primary-container"
-                }
+              <FilterOptionButton
+                isActive={isActive}
                 key={platform}
                 onClick={() =>
                   replaceQuery({
                     platform: platform === "All" ? null : platform,
                   })
                 }
-                type="button"
               >
                 {platform === "All" ? "전체" : platform}
-              </button>
+              </FilterOptionButton>
             );
           })}
         </div>
@@ -67,8 +66,7 @@ export default function ProblemFilters({
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2">
           <label>
             <span className="sr-only">난이도 티어</span>
-            <select
-              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
+            <FilterSelect
               onChange={(event) =>
                 replaceQuery({ tier: event.target.value || null })
               }
@@ -80,12 +78,11 @@ export default function ProblemFilters({
                   {tier}
                 </option>
               ))}
-            </select>
+            </FilterSelect>
           </label>
           <label>
             <span className="sr-only">정렬</span>
-            <select
-              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-body-sm outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
+            <FilterSelect
               onChange={(event) => {
                 const sort = event.target.value as ProblemSort;
                 replaceQuery({ sort: sort === "newest" ? null : sort });
@@ -96,7 +93,7 @@ export default function ProblemFilters({
               <option value="oldest">오래된 제출순</option>
               <option value="title">제목순</option>
               <option value="platform">플랫폼순</option>
-            </select>
+            </FilterSelect>
           </label>
         </div>
       </FilterCard>

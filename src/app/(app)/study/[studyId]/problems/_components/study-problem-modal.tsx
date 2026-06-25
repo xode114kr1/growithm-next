@@ -1,19 +1,12 @@
 "use client";
 
-import { Copy, ExternalLink, X } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { Button, ButtonAnchor } from "@/components/ui/button";
 import ProblemTierBadge from "@/components/ui/problem-tier-badge";
-import type {
-  StudyProblemDetail,
-  StudyProblemListItem,
-} from "@/types/study";
+import type { StudyProblemDetail, StudyProblemListItem } from "@/types/study";
 
-import {
-  ProblemState,
-  ProblemTags,
-} from "./study-problem-list/study-problem-item";
+import { ProblemTags } from "./study-problem-list/study-problem-item";
 
 export default function StudyProblemModal({
   onClose,
@@ -74,9 +67,7 @@ export default function StudyProblemModal({
               <span className="rounded bg-slate-100 px-1.5 py-0.5 text-mono-code text-2.75 text-slate-500">
                 {problem.code}
               </span>
-              {problem.tier ? (
-                <ProblemTierBadge tier={problem.tier} />
-              ) : null}
+              {problem.tier ? <ProblemTierBadge tier={problem.tier} /> : null}
               <span className="text-2.75 font-semibold text-slate-400">
                 {problem.platform}
               </span>
@@ -92,12 +83,11 @@ export default function StudyProblemModal({
             </p>
           </div>
           <button
-            aria-label="문제 상세 창 닫기"
-            className="flex size-10 shrink-0 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary"
+            className="shrink-0 rounded-lg px-3 py-2 text-body-sm font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary"
             onClick={onClose}
             type="button"
           >
-            <X aria-hidden="true" size={20} />
+            닫기
           </button>
         </header>
         {detail?.id === problem.id ? (
@@ -118,7 +108,6 @@ function ProblemDetailContent({ problem }: { problem: StudyProblemDetail }) {
         <ProblemSolutionCode code={problem.solutionCode} />
       </div>
       <aside className="space-y-5 border-t border-slate-100 bg-slate-50/50 p-5 md:p-6 lg:border-l lg:border-t-0">
-        <ProblemState status={problem.status} />
         <ProblemMetaList problem={problem} />
         <ProblemTags categories={problem.categories} />
         {problem.memo ? (
@@ -130,19 +119,16 @@ function ProblemDetailContent({ problem }: { problem: StudyProblemDetail }) {
           </section>
         ) : null}
         {problem.link ? (
-          <a
-            className="btn-secondary w-full"
+          <ButtonAnchor
+            className="w-full"
             href={problem.link}
             rel="noreferrer"
             target="_blank"
+            variant="secondary"
           >
-            <ExternalLink aria-hidden="true" size={16} />
             Open Original
-          </a>
+          </ButtonAnchor>
         ) : null}
-        <Link className="btn-primary w-full" href={`/problem/${problem.id}`}>
-          Open Detail Page
-        </Link>
       </aside>
     </div>
   );
@@ -180,7 +166,9 @@ function MetaItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-slate-100 bg-white p-3">
       <dt className="text-label-caps text-slate-400">{label}</dt>
-      <dd className="mt-1 text-body-sm font-semibold text-on-surface">{value}</dd>
+      <dd className="mt-1 text-body-sm font-semibold text-on-surface">
+        {value}
+      </dd>
     </div>
   );
 }
@@ -220,14 +208,9 @@ function ProblemSolutionCode({ code }: { code: string | null }) {
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <h3 className="section-title">풀이 코드</h3>
         {code ? (
-          <button
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-body-sm font-semibold text-slate-600 transition-colors hover:border-secondary hover:text-secondary"
-            onClick={handleCopyCode}
-            type="button"
-          >
-            <Copy aria-hidden="true" size={14} />
+          <Button onClick={handleCopyCode} size="xs" variant="secondary">
             복사
-          </button>
+          </Button>
         ) : null}
       </div>
       {code ? (
