@@ -36,8 +36,7 @@ export default function ProblemShareModal({
   studies,
 }: ProblemShareModalProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [eligibilityCurrentTime, setEligibilityCurrentTime] =
-    useState(currentTime);
+  const [baseTime, setBaseTime] = useState(currentTime);
   const [selectedStudyIds, setSelectedStudyIds] = useState<string[]>([]);
   const [state, formAction, isPending] = useActionState(
     shareProblemToStudies,
@@ -46,7 +45,7 @@ export default function ProblemShareModal({
   const titleId = useId();
   const isShareDisabled = problemStatus !== ProblemSubmissionStatus.COMPLETED;
   const canReceiveShareScore = isWithinDayDifference({
-    currentTime: eligibilityCurrentTime,
+    currentTime: baseTime,
     dayDifference: PROBLEM_SHARE_SCORE_DAY_DIFFERENCE,
     targetTime: submittedAtText,
   });
@@ -61,7 +60,7 @@ export default function ProblemShareModal({
   }
 
   function openModal() {
-    setEligibilityCurrentTime(new Date().toISOString());
+    setBaseTime(new Date().toISOString());
     setIsOpen(true);
   }
 
