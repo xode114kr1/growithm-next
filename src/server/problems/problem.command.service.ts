@@ -7,7 +7,6 @@ import {
 import {
   createProblemShares,
   findAuthorizedStudyIds,
-  findExistingSharedStudyIds,
   findOwnedProblemForSharing,
   updateProblemMemoRecord,
 } from "@/server/problems/problem.repository";
@@ -80,36 +79,24 @@ export async function shareProblemWithStudies({
     return createProblemShareError("공유할 수 있는 스터디를 찾을 수 없습니다.");
   }
 
-  const existingStudyIds = new Set(
-    await findExistingSharedStudyIds({
-      problemId: problem.id,
-      studyIds: authorizedStudyIds,
-    }),
-  );
-  const newStudyIds = authorizedStudyIds.filter(
-    (studyId) => !existingStudyIds.has(studyId),
-  );
+  const shareScore = isWithinDayDifference({
+    currentTime: new Date(),
+    dayDifference: PROBLEM_SHARE_SCORE_DAY_DIFFERENCE,
+    targetTime: problem.submittedAtText,
+  })
+    ? getProblemExperienceScore({
+        platform: problem.platform,
+        tier: problem.tier,
+      })
+    : 0;
+
+  const newStudyIds = await createProblemShares({
+    problemId: problem.id,
+    shareScore,
+    studyIds: authorizedStudyIds,
+    userId,
+  });
   const skippedCount = studyIds.length - newStudyIds.length;
-
-  if (newStudyIds.length > 0) {
-    const shareScore = isWithinDayDifference({
-      currentTime: new Date(),
-      dayDifference: PROBLEM_SHARE_SCORE_DAY_DIFFERENCE,
-      targetTime: problem.submittedAtText,
-    })
-      ? getProblemExperienceScore({
-          platform: problem.platform,
-          tier: problem.tier,
-        })
-      : 0;
-
-    await createProblemShares({
-      problemId: problem.id,
-      shareScore,
-      studyIds: newStudyIds,
-      userId,
-    });
-  }
 
   return { error: null, newStudyIds, skippedCount };
 }

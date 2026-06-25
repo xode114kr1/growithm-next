@@ -15,7 +15,7 @@ import {
   claimWebhookDeliveryForProcessing,
   getRepositoryOwner,
   getWebhookDeliveryForProcessing,
-  saveProblemSubmission,
+  saveProblemSubmissionAndCompleteDelivery,
   updateWebhookDeliveryStatus,
   updateWebhookDeliveryStatusById,
 } from "@/server/webhook-delivery-processing/webhook-delivery-processing.repository";
@@ -232,32 +232,29 @@ async function processChangedProblemFile({
     tier: parsedReadme.tier,
   });
 
-  await saveProblemSubmission({
-    accuracy: parsedReadme.accuracy,
-    categories: parsedReadme.categories,
-    code: codeResult.code,
-    commitSha: readmeResult.readme.commitSha,
-    description: parsedReadme.description,
-    link: parsedReadme.link,
-    memory: parsedReadme.memory,
-    platform: parsedReadme.platform,
-    problemId: parsedReadme.problemId,
-    readmePath: readmeResult.readme.path,
-    repositoryFullName,
-    score: experienceScore,
-    scoreMax: parsedReadme.scoreMax,
-    status: ProblemSubmissionStatus.PENDING,
-    submittedAtText: parsedReadme.submittedAtText,
-    tier: parsedReadme.tier,
-    time: parsedReadme.time,
-    title: parsedReadme.title,
-    userId,
+  await saveProblemSubmissionAndCompleteDelivery({
+    submission: {
+      accuracy: parsedReadme.accuracy,
+      categories: parsedReadme.categories,
+      code: codeResult.code,
+      commitSha: readmeResult.readme.commitSha,
+      description: parsedReadme.description,
+      link: parsedReadme.link,
+      memory: parsedReadme.memory,
+      platform: parsedReadme.platform,
+      problemId: parsedReadme.problemId,
+      readmePath: readmeResult.readme.path,
+      repositoryFullName,
+      score: experienceScore,
+      scoreMax: parsedReadme.scoreMax,
+      status: ProblemSubmissionStatus.PENDING,
+      submittedAtText: parsedReadme.submittedAtText,
+      tier: parsedReadme.tier,
+      time: parsedReadme.time,
+      title: parsedReadme.title,
+      userId,
+    },
     webhookDeliveryId,
-  });
-
-  await updateWebhookDeliveryStatus({
-    deliveryId,
-    status: "PROCESSED",
   });
 
   return {

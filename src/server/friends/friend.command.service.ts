@@ -1,11 +1,10 @@
 import "server-only";
 
 import {
-  acceptFriendship,
+  acceptFriendRequestRecord,
   deleteFriendship,
   deleteSentFriendRequest,
   findFriendshipAndReceivedRequest,
-  findReceivedFriendRequest,
   findUserById,
   rejectReceivedFriendRequest,
   upsertFriendRequest,
@@ -74,17 +73,7 @@ export async function acceptFriendRequest({
   addresseeId: string;
   requestId: string;
 }) {
-  const request = await findReceivedFriendRequest({ addresseeId, requestId });
-
-  if (!request || request.requesterId === addresseeId) {
-    return;
-  }
-
-  await acceptFriendship({
-    addresseeId,
-    friendPair: normalizeFriendshipUserIds(addresseeId, request.requesterId),
-    requesterId: request.requesterId,
-  });
+  await acceptFriendRequestRecord({ addresseeId, requestId });
 }
 
 // 현재 사용자와 대상 사용자의 친구 관계를 삭제한다.
