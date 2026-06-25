@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Prisma } from "@/generated/prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
 // Queue 발행 후 아직 대기 중인 delivery만 QUEUED 상태로 전환한다.
@@ -46,41 +46,55 @@ export async function saveWebhookDelivery({
   repositoryFullName: string | null;
   status: WebhookDeliveryStatus;
 }) {
-  const existingDelivery = await prisma.webhookDelivery.findUnique({
+  try {
+    const delivery = await prisma.webhookDelivery.create({
+      data: { deliveryId, event, payload, repositoryFullName, status },
+      select: { id: true, status: true },
+    });
+
+    return { created: true, id: delivery.id, status: delivery.status };
+  } catch (error) {
+    if (
+      !(error instanceof Prisma.PrismaClientKnownRequestError) ||
+      error.code !== "P2002"
+    ) {
+      throw error;
+    }
+  }
+
+  const existingDelivery = await prisma.webhookDelivery.findUniqueOrThrow({
     select: { id: true, status: true },
     where: { deliveryId },
   });
 
-  if (existingDelivery) {
-    if (isRetryableDeliveryStatus(existingDelivery.status)) {
-      await prisma.webhookDelivery.update({
-        data: {
-          errorMessage: null,
-          event,
-          payload,
-          processedAt: null,
-          repositoryFullName,
-          status,
-        },
-        where: { deliveryId },
-      });
+  if (isRetryableDeliveryStatus(existingDelivery.status)) {
+    const retriedDelivery = await prisma.webhookDelivery.updateMany({
+      data: {
+        errorMessage: null,
+        event,
+        payload,
+        processedAt: null,
+        repositoryFullName,
+        status,
+      },
+      where: { deliveryId, status: "FAILED" },
+    });
 
+    if (retriedDelivery.count === 1) {
       return { created: true, id: existingDelivery.id, status };
     }
-
-    return {
-      created: false,
-      id: existingDelivery.id,
-      status: existingDelivery.status,
-    };
   }
 
-  const delivery = await prisma.webhookDelivery.create({
-    data: { deliveryId, event, payload, repositoryFullName, status },
+  const currentDelivery = await prisma.webhookDelivery.findUniqueOrThrow({
     select: { id: true, status: true },
+    where: { deliveryId },
   });
 
-  return { created: true, id: delivery.id, status: delivery.status };
+  return {
+    created: false,
+    id: currentDelivery.id,
+    status: currentDelivery.status,
+  };
 }
 
 type WebhookDeliveryStatus =
