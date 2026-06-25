@@ -9,10 +9,10 @@ import {
   getProblemCount,
   getProblems,
   PROBLEM_PAGE_SIZE,
-} from "@/services/problems/problem.query";
-import { parseProblemFilters } from "@/services/problems/problem.validator";
+} from "@/server/problems/problem.query.service";
+import { parseProblemFilters } from "@/server/problems/problem.schema";
 import ProblemFilters from "./_components/problem-filters";
-import ProblemList from "./_components/problem-list";
+import ProblemList from "./_components/problem-list/problem-list";
 
 type ProblemPageProps = {
   searchParams: Promise<ProblemPageSearchParams>;
@@ -52,6 +52,7 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
       <div className="page-container">
         <ProblemFilters filters={filters} tiers={tiers} />
         <ProblemList
+          currentTime={new Date().toISOString()}
           emptyStateReason={emptyStateReason}
           filters={filters}
           initialHasNextPage={PROBLEM_PAGE_SIZE < totalCount}

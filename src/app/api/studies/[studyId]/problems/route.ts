@@ -6,11 +6,11 @@ import {
   getStudyProblemMemberNames,
   getStudyProblems,
   STUDY_PROBLEM_PAGE_SIZE,
-} from "@/services/studies/study.query";
+} from "@/server/studies/study.query.service";
 import {
   parseStudyProblemFilters,
   parseStudyProblemPage,
-} from "@/services/studies/study.validator";
+} from "@/server/studies/study.schema";
 import type {
   StudyProblemInfiniteScrollRequest,
   StudyProblemInfiniteScrollResponse,

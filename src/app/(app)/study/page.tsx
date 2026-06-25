@@ -3,10 +3,10 @@ import { auth } from "@/lib/auth/auth";
 import {
   getPendingInvites,
   getUserStudies,
-} from "@/services/studies/study.query";
-import StudyListHeader from "./_components/study-list-header";
-import StudyList from "./_components/study-list";
-import StudyInvites from "./_components/study-invites";
+} from "@/server/studies/study.query.service";
+import StudyListHeader from "./_components/study-list-header/study-list-header";
+import StudyList from "./_components/study-list/study-list";
+import StudyInvites from "./_components/study-invites/study-invites";
 
 export default async function StudyPage() {
   const session = await auth();

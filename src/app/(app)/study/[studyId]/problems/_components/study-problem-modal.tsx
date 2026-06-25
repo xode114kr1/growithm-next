@@ -1,107 +1,49 @@
 "use client";
 
-import {
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Copy,
-  ExternalLink,
-  X,
-} from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { Button, ButtonAnchor } from "@/components/ui/button";
 import ProblemTierBadge from "@/components/ui/problem-tier-badge";
-import type {
-  StudyProblemDetail,
-  StudyProblemListItem,
-} from "@/types/study";
+import type { StudyProblemDetail, StudyProblemListItem } from "@/types/study";
 
-import { ProblemState, ProblemTags } from "./study-problem-item";
+import { ProblemTags } from "./study-problem-list/study-problem-item";
 
 export default function StudyProblemModal({
   onClose,
-  onSelectProblem,
   problem,
-  problems,
   studyId,
 }: {
   onClose: () => void;
-  onSelectProblem: (problem: StudyProblemListItem) => void;
   problem: StudyProblemListItem | null;
-  problems: StudyProblemListItem[];
   studyId: string;
 }) {
   const [detail, setDetail] = useState<StudyProblemDetail | null>(null);
-  const [loadErrorProblemId, setLoadErrorProblemId] = useState<string | null>(
-    null,
-  );
-  const [reloadKey, setReloadKey] = useState(0);
-  const selectedIndex = problem
-    ? problems.findIndex((studyProblem) => studyProblem.id === problem.id)
-    : -1;
-  const previousProblem = selectedIndex > 0 ? problems[selectedIndex - 1] : null;
-  const nextProblem =
-    selectedIndex >= 0 && selectedIndex < problems.length - 1
-      ? problems[selectedIndex + 1]
-      : null;
+  const [hasLoadError, setHasLoadError] = useState(false);
 
   useEffect(() => {
     const problemId = problem?.id;
 
-    if (!problemId) {
-      return;
-    }
-
-    const selectedProblemId = problemId;
-    const controller = new AbortController();
+    if (!problemId) return;
 
     async function loadDetail() {
+      setDetail(null);
+      setHasLoadError(false);
+
       try {
         const response = await fetch(
-          `/api/studies/${encodeURIComponent(studyId)}/problems/${encodeURIComponent(selectedProblemId)}`,
-          { cache: "no-store", signal: controller.signal },
+          `/api/studies/${studyId}/problems/${problemId}`,
         );
 
-        if (!response.ok) {
-          throw new Error("Failed to load study problem detail");
-        }
+        if (!response.ok) return setHasLoadError(true);
 
         setDetail((await response.json()) as StudyProblemDetail);
-        setLoadErrorProblemId(null);
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          return;
-        }
-
-        setLoadErrorProblemId(selectedProblemId);
+      } catch {
+        setHasLoadError(true);
       }
     }
 
-    void loadDetail();
-
-    return () => controller.abort();
-  }, [problem, reloadKey, studyId]);
-
-  useEffect(() => {
-    if (!problem) {
-      return;
-    }
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        onClose();
-      } else if (event.key === "ArrowLeft" && previousProblem) {
-        onSelectProblem(previousProblem);
-      } else if (event.key === "ArrowRight" && nextProblem) {
-        onSelectProblem(nextProblem);
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [nextProblem, onClose, onSelectProblem, previousProblem, problem]);
+    loadDetail();
+  }, [problem?.id, studyId]);
 
   if (!problem) {
     return null;
@@ -125,9 +67,7 @@ export default function StudyProblemModal({
               <span className="rounded bg-slate-100 px-1.5 py-0.5 text-mono-code text-2.75 text-slate-500">
                 {problem.code}
               </span>
-              {problem.tier ? (
-                <ProblemTierBadge tier={problem.tier} />
-              ) : null}
+              {problem.tier ? <ProblemTierBadge tier={problem.tier} /> : null}
               <span className="text-2.75 font-semibold text-slate-400">
                 {problem.platform}
               </span>
@@ -142,42 +82,18 @@ export default function StudyProblemModal({
               {problem.sharedBy} shared on {problem.sharedAtLabel}
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-1">
-            <button
-              aria-label="이전 문제"
-              className="flex size-10 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary disabled:cursor-not-allowed disabled:text-slate-300"
-              disabled={!previousProblem}
-              onClick={() => previousProblem && onSelectProblem(previousProblem)}
-              type="button"
-            >
-              <ChevronLeft aria-hidden="true" size={20} />
-            </button>
-            <button
-              aria-label="다음 문제"
-              className="flex size-10 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary disabled:cursor-not-allowed disabled:text-slate-300"
-              disabled={!nextProblem}
-              onClick={() => nextProblem && onSelectProblem(nextProblem)}
-              type="button"
-            >
-              <ChevronRight aria-hidden="true" size={20} />
-            </button>
-            <button
-              aria-label="문제 상세 창 닫기"
-              className="flex size-10 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary"
-              onClick={onClose}
-              type="button"
-            >
-              <X aria-hidden="true" size={20} />
-            </button>
-          </div>
+          <button
+            className="shrink-0 rounded-lg px-3 py-2 text-body-sm font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary"
+            onClick={onClose}
+            type="button"
+          >
+            닫기
+          </button>
         </header>
         {detail?.id === problem.id ? (
           <ProblemDetailContent problem={detail} />
         ) : (
-          <ProblemDetailState
-            hasLoadError={loadErrorProblemId === problem.id}
-            onRetry={() => setReloadKey((key) => key + 1)}
-          />
+          <ProblemDetailState hasLoadError={hasLoadError} />
         )}
       </div>
     </div>
@@ -192,7 +108,6 @@ function ProblemDetailContent({ problem }: { problem: StudyProblemDetail }) {
         <ProblemSolutionCode code={problem.solutionCode} />
       </div>
       <aside className="space-y-5 border-t border-slate-100 bg-slate-50/50 p-5 md:p-6 lg:border-l lg:border-t-0">
-        <ProblemState status={problem.status} />
         <ProblemMetaList problem={problem} />
         <ProblemTags categories={problem.categories} />
         {problem.memo ? (
@@ -204,43 +119,29 @@ function ProblemDetailContent({ problem }: { problem: StudyProblemDetail }) {
           </section>
         ) : null}
         {problem.link ? (
-          <a
-            className="btn-secondary w-full"
+          <ButtonAnchor
+            className="w-full"
             href={problem.link}
             rel="noreferrer"
             target="_blank"
+            variant="secondary"
           >
-            <ExternalLink aria-hidden="true" size={16} />
             Open Original
-          </a>
+          </ButtonAnchor>
         ) : null}
-        <Link className="btn-primary w-full" href={`/problem/${problem.id}`}>
-          Open Detail Page
-        </Link>
       </aside>
     </div>
   );
 }
 
-function ProblemDetailState({
-  hasLoadError,
-  onRetry,
-}: {
-  hasLoadError: boolean;
-  onRetry: () => void;
-}) {
+function ProblemDetailState({ hasLoadError }: { hasLoadError: boolean }) {
   return (
-    <div className="flex min-h-72 flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
+    <div className="flex min-h-72 flex-1 items-center justify-center p-6 text-center">
       <p className="font-semibold text-on-surface">
         {hasLoadError
           ? "문제 상세 정보를 불러오지 못했습니다."
           : "문제 상세 정보를 불러오는 중입니다."}
       </p>
-      {hasLoadError ? (
-        <button className="btn-secondary" onClick={onRetry} type="button">
-          다시 시도
-        </button>
-      ) : null}
     </div>
   );
 }
@@ -265,7 +166,9 @@ function MetaItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-slate-100 bg-white p-3">
       <dt className="text-label-caps text-slate-400">{label}</dt>
-      <dd className="mt-1 text-body-sm font-semibold text-on-surface">{value}</dd>
+      <dd className="mt-1 text-body-sm font-semibold text-on-surface">
+        {value}
+      </dd>
     </div>
   );
 }
@@ -294,16 +197,10 @@ function ProblemDescription({ description }: { description: string | null }) {
 }
 
 function ProblemSolutionCode({ code }: { code: string | null }) {
-  const [copied, setCopied] = useState(false);
-
   async function handleCopyCode() {
-    if (!code) {
-      return;
-    }
+    if (!code) return;
 
     await navigator.clipboard.writeText(code);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1600);
   }
 
   return (
@@ -311,18 +208,9 @@ function ProblemSolutionCode({ code }: { code: string | null }) {
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <h3 className="section-title">풀이 코드</h3>
         {code ? (
-          <button
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-body-sm font-semibold text-slate-600 transition-colors hover:border-secondary hover:text-secondary"
-            onClick={handleCopyCode}
-            type="button"
-          >
-            {copied ? (
-              <Check aria-hidden="true" size={14} />
-            ) : (
-              <Copy aria-hidden="true" size={14} />
-            )}
-            {copied ? "복사됨" : "복사"}
-          </button>
+          <Button onClick={handleCopyCode} size="xs" variant="secondary">
+            복사
+          </Button>
         ) : null}
       </div>
       {code ? (

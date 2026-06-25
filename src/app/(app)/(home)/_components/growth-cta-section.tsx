@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { Button, ButtonLink } from "@/components/ui/button";
 import { signInWithGitHub } from "../actions";
 
 const trustBadges = ["GITHUB VERIFIED", "SECURE SYNC", "REAL-TIME REVIEW"];
@@ -42,22 +41,19 @@ export default function GrowthCtaSection({
 }
 
 function StartButton({ isAuthenticated }: { isAuthenticated: boolean }) {
-  const className =
-    "inline-flex min-h-14 items-center justify-center rounded-xl bg-secondary-fixed px-8 text-base font-bold text-on-secondary-container shadow-lg transition-transform hover:scale-[1.03]";
-
   if (isAuthenticated) {
     return (
-      <Link className={className} href="/dashboard">
+      <ButtonLink href="/dashboard" size="lg" variant="primary">
         시작하기
-      </Link>
+      </ButtonLink>
     );
   }
 
   return (
     <form action={signInWithGitHub}>
-      <button className={className} type="submit">
+      <Button size="lg" type="submit" variant="primary">
         시작하기
-      </button>
+      </Button>
     </form>
   );
 }

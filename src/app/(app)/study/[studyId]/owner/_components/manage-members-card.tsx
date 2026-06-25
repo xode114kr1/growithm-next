@@ -1,4 +1,5 @@
 import type { OwnerMember } from "@/types/study";
+import { Button } from "@/components/ui/button";
 
 import { removeStudyMember, updateStudyMemberRole } from "../actions";
 
@@ -81,12 +82,9 @@ export default function ManageMembersCard({
                         <option value="LEADER">리더</option>
                         <option value="MEMBER">멤버</option>
                       </select>
-                      <button
-                        className="btn-secondary min-h-10 px-3"
-                        type="submit"
-                      >
+                      <Button type="submit" variant="secondary">
                         저장
-                      </button>
+                      </Button>
                     </form>
                   )}
                 </td>

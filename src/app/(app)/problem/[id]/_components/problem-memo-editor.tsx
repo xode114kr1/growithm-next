@@ -6,6 +6,7 @@ import {
   type ProblemMemoActionState,
   updateProblemMemo,
 } from "@/app/(app)/problem/[id]/actions";
+import { Button } from "@/components/ui/button";
 
 type ProblemMemoEditorProps = {
   initialMemo: string | null;
@@ -38,13 +39,12 @@ export default function ProblemMemoEditor({
           <h2 className="section-title">메모</h2>
         </div>
         {!isEditing ? (
-          <button
-            className="btn-secondary"
+          <Button
             onClick={() => setIsEditing(true)}
-            type="button"
+            variant="secondary"
           >
             수정
-          </button>
+          </Button>
         ) : null}
       </div>
 
@@ -77,17 +77,16 @@ export default function ProblemMemoEditor({
             </p>
           ) : null}
           <div className="flex flex-wrap gap-2">
-            <button className="btn-primary" disabled={isPending} type="submit">
+            <Button disabled={isPending} type="submit" variant="primary">
               저장
-            </button>
-            <button
-              className="btn-secondary"
+            </Button>
+            <Button
               disabled={isPending}
               onClick={() => setIsEditing(false)}
-              type="button"
+              variant="secondary"
             >
               취소
-            </button>
+            </Button>
           </div>
         </form>
       ) : memo ? (

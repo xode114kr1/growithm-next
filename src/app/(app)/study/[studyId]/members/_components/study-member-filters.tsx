@@ -1,6 +1,10 @@
 "use client";
 
-import { useReplacePaginatedQueryParams } from "@/hooks/use-paginated-query-params";
+import {
+  FilterCard,
+  FilterSelect,
+} from "@/components/ui/filter-card";
+import { useReplaceQueryParams } from "@/hooks/use-query-params";
 
 import type {
   StudyMemberFiltersState,
@@ -13,16 +17,14 @@ export default function StudyMemberFilters({
 }: {
   filters: StudyMemberFiltersState;
 }) {
-  const replaceQuery = useReplacePaginatedQueryParams();
+  const replaceQuery = useReplaceQueryParams();
 
   return (
-    <div className="app-card grid grid-cols-1 gap-4 p-4 lg:grid-cols-[1fr_180px_180px]">
-      <label className="block min-w-0">
-        <span className="mb-2 block text-label-caps text-slate-500">
-          Search Members
-        </span>
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <FilterCard title="Search Members">
         <input
-          className="input-field"
+          aria-label="멤버 검색"
+          className="input-field min-h-10"
           defaultValue={filters.q}
           onChange={(event) =>
             replaceQuery({ q: event.target.value.trim() || null })
@@ -30,11 +32,10 @@ export default function StudyMemberFilters({
           placeholder="이름 검색"
           type="search"
         />
-      </label>
-      <label className="block">
-        <span className="mb-2 block text-label-caps text-slate-500">Role</span>
-        <select
-          className="input-field"
+      </FilterCard>
+      <FilterCard title="Role">
+        <FilterSelect
+          aria-label="멤버 역할"
           onChange={(event) => {
             const role = event.target.value as StudyMemberRoleFilter;
             replaceQuery({ role: role === "ALL" ? null : role });
@@ -45,12 +46,11 @@ export default function StudyMemberFilters({
           <option value="OWNER">owner</option>
           <option value="LEADER">리더</option>
           <option value="MEMBER">멤버</option>
-        </select>
-      </label>
-      <label className="block">
-        <span className="mb-2 block text-label-caps text-slate-500">Sort</span>
-        <select
-          className="input-field"
+        </FilterSelect>
+      </FilterCard>
+      <FilterCard title="Sort">
+        <FilterSelect
+          aria-label="멤버 정렬"
           onChange={(event) => {
             const sort = event.target.value as StudyMemberSort;
             replaceQuery({
@@ -63,8 +63,8 @@ export default function StudyMemberFilters({
           <option value="lastActive">최근 활동순</option>
           <option value="joinedAt">가입일순</option>
           <option value="name">이름순</option>
-        </select>
-      </label>
+        </FilterSelect>
+      </FilterCard>
     </div>
   );
 }

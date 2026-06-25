@@ -1,12 +1,12 @@
 import { auth } from "@/lib/auth/auth";
-import PendingList from "./_components/pending-list";
-import DashboardOverviewSection from "./_components/dashboard-overview-section";
-import { getUserPersonalTier } from "@/services/users/user.query";
+import PendingList from "./_components/pending-problems/pending-list";
+import DashboardOverviewSection from "./_components/overview/dashboard-overview-section";
+import { getUserPersonalTier } from "@/server/users/user.query.service";
 import {
   getPendingProblems,
   getProblemTierDistribution,
   getSolvedProblemCount,
-} from "@/services/problems/problem.query";
+} from "@/server/problems/problem.query.service";
 import DashboardChart from "./_components/dashboard-chart";
 
 export default async function DashboardPage() {

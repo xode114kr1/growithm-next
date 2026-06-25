@@ -1,5 +1,6 @@
 import { ExternalLink } from "lucide-react";
 
+import { ButtonAnchor } from "@/components/ui/button";
 import type { WebhookGuideStep } from "../constants";
 
 type GuideStepCardProps = {
@@ -21,15 +22,15 @@ export function GuideStepCard({ step }: GuideStepCardProps) {
         ))}
       </ul>
       <div className="mt-auto pt-6">
-        <a
-          className="btn-primary"
+        <ButtonAnchor
           href={step.href}
           rel="noreferrer"
           target="_blank"
+          variant="primary"
         >
           {step.linkLabel}
           <ExternalLink aria-hidden="true" size={16} strokeWidth={2.2} />
-        </a>
+        </ButtonAnchor>
       </div>
     </article>
   );

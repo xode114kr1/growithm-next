@@ -8,38 +8,20 @@ import {
   deleteFriend,
   rejectFriendRequest,
   sendFriendRequest,
-} from "@/services/friends/friend.command";
-import { auth } from "@/lib/auth/auth";
-
-type FriendActionResult =
-  | { ok: true }
-  | { message: string; ok: false };
+} from "@/server/friends/friend.command.service";
+import { getCurrentUserId } from "@/lib/session/session";
 
 // 폼에서 대상 사용자 ID를 읽어 친구 요청 Server Action을 실행한다.
 export async function sendFriendRequestAction(formData: FormData) {
   const targetUserId = getFormValue(formData, "targetUserId");
-
-  return sendFriendRequestByIdAction(targetUserId);
-}
-
-// 인증된 사용자의 친구 요청을 처리하고 친구 페이지 캐시를 갱신한다.
-export async function sendFriendRequestByIdAction(
-  targetUserId: string,
-): Promise<FriendActionResult> {
   const userId = await getCurrentUserId();
 
-  if (!userId) {
-    return { message: "Login is required.", ok: false };
-  }
-
-  if (!targetUserId) {
-    return { message: "Friend target is required.", ok: false };
+  if (!userId || !targetUserId) {
+    return;
   }
 
   await sendFriendRequest({ requesterId: userId, targetUserId });
   revalidatePath("/friend");
-
-  return { ok: true };
 }
 
 // 인증된 사용자가 보낸 친구 요청을 취소하고 친구 페이지 캐시를 갱신한다.
@@ -92,13 +74,6 @@ export async function deleteFriendAction(formData: FormData) {
 
   await deleteFriend({ currentUserId: userId, friendUserId });
   revalidatePath("/friend");
-}
-
-// 현재 세션에서 인증된 사용자 ID를 조회한다.
-async function getCurrentUserId() {
-  const session = await auth();
-
-  return session?.user?.id ?? null;
 }
 
 // FormData 값을 문자열로 정규화한다.

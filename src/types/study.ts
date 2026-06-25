@@ -36,6 +36,7 @@ export type StudyMember = {
   lastActiveTime: number;
   name: string;
   role: "OWNER" | "LEADER" | "MEMBER";
+  userId: string;
 };
 
 export type StudyMemberRoleFilter = "ALL" | StudyMember["role"];

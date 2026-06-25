@@ -5,11 +5,11 @@ import {
   getProblemCount,
   getProblems,
   PROBLEM_PAGE_SIZE,
-} from "@/services/problems/problem.query";
+} from "@/server/problems/problem.query.service";
 import {
   parseProblemFilters,
   parseProblemPage,
-} from "@/services/problems/problem.validator";
+} from "@/server/problems/problem.schema";
 import type {
   ProblemInfiniteScrollRequest,
   ProblemInfiniteScrollResponse,

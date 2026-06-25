@@ -1,10 +1,10 @@
-import Link from "next/link";
-
+import { ButtonAnchor, ButtonLink } from "@/components/ui/button";
 import ProblemTierBadge from "@/components/ui/problem-tier-badge";
 import type { ProblemDetail } from "@/types/problem";
 import type { ProblemShareTargetStudy } from "@/types/study";
 
-import ProblemShareModal from "./study-share-modal";
+import ProblemShareScoreBadge from "../../_components/problem-share-score-badge";
+import ProblemShareModal from "./problem-share/study-share-modal";
 
 export default function ProblemHeader({
   problem,
@@ -13,21 +13,10 @@ export default function ProblemHeader({
   problem: ProblemDetail;
   shareTargetStudies: ProblemShareTargetStudy[];
 }) {
+  const currentTime = new Date().toISOString();
+
   return (
     <header className="border-b border-outline-variant/40 pb-8">
-      <div className="mb-6 flex flex-wrap items-center gap-2 text-body-sm text-slate-500">
-        <Link
-          className="font-semibold transition-colors hover:text-primary"
-          href="/problem"
-        >
-          Problems
-        </Link>
-        <span>/</span>
-        <span>{problem.platform}</span>
-        <span>/</span>
-        <span>{problem.problemId}</span>
-      </div>
-
       <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
         <div className="min-w-0">
           <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -35,6 +24,10 @@ export default function ProblemHeader({
               {problem.platform}
             </span>
             {problem.tier ? <ProblemTierBadge tier={problem.tier} /> : null}
+            <ProblemShareScoreBadge
+              currentTime={currentTime}
+              submittedAtText={problem.submittedAtText}
+            />
           </div>
 
           <p className="mb-2 text-label-caps text-slate-400">
@@ -52,24 +45,26 @@ export default function ProblemHeader({
 
         <div className="flex flex-wrap gap-2">
           <ProblemShareModal
+            currentTime={currentTime}
             problemId={problem.id}
             problemStatus={problem.status}
+            submittedAtText={problem.submittedAtText}
             studies={shareTargetStudies}
           />
 
-          <Link className="btn-secondary" href="/problem">
+          <ButtonLink href="/problem" variant="secondary">
             뒤로가기
-          </Link>
+          </ButtonLink>
 
           {problem.link ? (
-            <a
-              className="btn-primary"
+            <ButtonAnchor
               href={problem.link}
               rel="noreferrer"
               target="_blank"
+              variant="primary"
             >
               원문 보기
-            </a>
+            </ButtonAnchor>
           ) : null}
         </div>
       </div>
