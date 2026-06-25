@@ -34,11 +34,6 @@ export default function StudyProblemItem({
           onClick={() => onSelect(problem)}
           type="button"
         >
-          <span
-            className={`mt-1 flex size-10 shrink-0 items-center justify-center rounded-full border text-xs font-black shadow-sm ${getTierBadgeClass(problem.tier)}`}
-          >
-            {problem.platform.charAt(0)}
-          </span>
           <span className="min-w-0 space-y-1">
             <span className="flex flex-wrap items-center gap-2">
               <span className="rounded bg-slate-100 px-1.5 py-0.5 text-mono-code text-2.75 text-slate-500">
@@ -87,11 +82,7 @@ export function ProblemTags({ categories }: { categories: string[] }) {
   );
 }
 
-export function ProblemState({
-  status,
-}: {
-  status: ProblemSubmissionStatus;
-}) {
+export function ProblemState({ status }: { status: ProblemSubmissionStatus }) {
   return (
     <div className="flex min-w-36 flex-col items-start gap-1.5">
       <span className={getProblemStatusBadgeClass(status)}>
@@ -102,28 +93,4 @@ export function ProblemState({
       </span>
     </div>
   );
-}
-
-function getTierBadgeClass(tier: string | null) {
-  if (tier?.toLowerCase().includes("ruby")) {
-    return "border-rose-300 bg-rose-600 text-white";
-  }
-
-  if (tier?.toLowerCase().includes("diamond")) {
-    return "border-sky-300 bg-sky-100 text-sky-800";
-  }
-
-  if (tier?.toLowerCase().includes("platinum")) {
-    return "badge-tier-platinum";
-  }
-
-  if (tier?.toLowerCase().includes("gold")) {
-    return "badge-tier-gold";
-  }
-
-  if (tier?.toLowerCase().includes("bronze")) {
-    return "border-amber-700/20 bg-amber-700 text-white";
-  }
-
-  return "badge-tier-silver";
 }

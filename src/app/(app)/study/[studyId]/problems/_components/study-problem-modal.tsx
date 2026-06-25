@@ -1,6 +1,5 @@
 "use client";
 
-import { Copy, ExternalLink, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button, ButtonAnchor, ButtonLink } from "@/components/ui/button";
@@ -92,12 +91,11 @@ export default function StudyProblemModal({
             </p>
           </div>
           <button
-            aria-label="문제 상세 창 닫기"
-            className="flex size-10 shrink-0 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary"
+            className="shrink-0 rounded-lg px-3 py-2 text-body-sm font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary"
             onClick={onClose}
             type="button"
           >
-            <X aria-hidden="true" size={20} />
+            닫기
           </button>
         </header>
         {detail?.id === problem.id ? (
@@ -137,7 +135,6 @@ function ProblemDetailContent({ problem }: { problem: StudyProblemDetail }) {
             target="_blank"
             variant="secondary"
           >
-            <ExternalLink aria-hidden="true" size={16} />
             Open Original
           </ButtonAnchor>
         ) : null}
@@ -225,12 +222,7 @@ function ProblemSolutionCode({ code }: { code: string | null }) {
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <h3 className="section-title">풀이 코드</h3>
         {code ? (
-          <Button
-            onClick={handleCopyCode}
-            size="xs"
-            variant="secondary"
-          >
-            <Copy aria-hidden="true" size={14} />
+          <Button onClick={handleCopyCode} size="xs" variant="secondary">
             복사
           </Button>
         ) : null}
