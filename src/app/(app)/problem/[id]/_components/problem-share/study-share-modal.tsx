@@ -1,7 +1,7 @@
 "use client";
 
 import { Share2, X } from "lucide-react";
-import { useActionState, useId, useMemo, useState } from "react";
+import { useActionState, useId, useState } from "react";
 
 import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import {
@@ -9,11 +9,15 @@ import {
   type ProblemShareActionState,
 } from "@/app/(app)/problem/[id]/actions";
 import type { ProblemShareTargetStudy } from "@/types/study";
+import { isWithinDayDifference } from "@/utils/date";
+import { PROBLEM_SHARE_SCORE_DAY_DIFFERENCE } from "@/utils/problem";
 import StudyShareItem from "./problem-share-item";
 
 type ProblemShareModalProps = {
+  currentTime: string;
   problemId: string;
   problemStatus: ProblemSubmissionStatus;
+  submittedAtText: string | null;
   studies: ProblemShareTargetStudy[];
 };
 
@@ -25,26 +29,29 @@ const initialShareState: ProblemShareActionState = {
 };
 
 export default function ProblemShareModal({
+  currentTime,
   problemId,
   problemStatus,
+  submittedAtText,
   studies,
 }: ProblemShareModalProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [baseTime, setBaseTime] = useState(currentTime);
   const [selectedStudyIds, setSelectedStudyIds] = useState<string[]>([]);
   const [state, formAction, isPending] = useActionState(
     shareProblemToStudies,
     initialShareState,
   );
+
   const titleId = useId();
   const isShareDisabled = problemStatus !== ProblemSubmissionStatus.COMPLETED;
+
+  const canReceiveShareScore = isWithinDayDifference({
+    currentTime: baseTime,
+    dayDifference: PROBLEM_SHARE_SCORE_DAY_DIFFERENCE,
+    targetTime: submittedAtText,
+  });
   const selectedCount = selectedStudyIds.length;
-  const selectedLabel = useMemo(
-    () =>
-      selectedCount === 0
-        ? "공유할 스터디 선택"
-        : `${selectedCount.toLocaleString()} selected`,
-    [selectedCount],
-  );
 
   function toggleStudy(studyId: string) {
     setSelectedStudyIds((current) =>
@@ -54,17 +61,18 @@ export default function ProblemShareModal({
     );
   }
 
+  function openModal() {
+    setBaseTime(new Date().toISOString());
+    setIsOpen(true);
+  }
+
   return (
     <>
       <button
         className="btn-primary inline-flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
         disabled={isShareDisabled}
-        onClick={() => setIsOpen(true)}
-        title={
-          isShareDisabled
-            ? "문제를 공유하려면 먼저 메모를 작성하세요."
-            : "이 문제를 스터디에 공유"
-        }
+        onClick={openModal}
+        title={isShareDisabled ? "메모를 작성하세요." : undefined}
         type="button"
       >
         <Share2 aria-hidden="true" size={16} />
@@ -92,7 +100,7 @@ export default function ProblemShareModal({
                     Share Problem
                   </p>
                   <h2 className="text-h3-ui text-primary" id={titleId}>
-                    Select studies
+                    공유할 스터디를 선택하세요
                   </h2>
                 </div>
                 <button
@@ -108,6 +116,11 @@ export default function ProblemShareModal({
 
             <form action={formAction} className="space-y-4 px-6 py-6">
               <input name="problemId" type="hidden" value={problemId} />
+              {canReceiveShareScore ? (
+                <p className="rounded-lg bg-secondary-container/60 px-4 py-3 text-body-sm font-semibold text-primary">
+                  스터디 XP를 받을 수 있습니다.
+                </p>
+              ) : null}
               {studies.length > 0 ? (
                 <div className="space-y-2">
                   {studies.map((study) => {
@@ -126,33 +139,12 @@ export default function ProblemShareModal({
                   })}
                 </div>
               ) : (
-                <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
-                  <p className="font-semibold text-on-surface">
-                    No studies available
-                  </p>
-                  <p className="mt-2 text-body-sm text-slate-500">
-                    Join or create a study before sharing problems.
-                  </p>
-                </div>
+                <ProblemShareEmptyState />
               )}
 
-              {state.status === "error" ? (
-                <p className="rounded-lg bg-error/10 px-4 py-3 text-body-sm font-medium text-error">
-                  {state.error}
-                </p>
-              ) : null}
+              <ProblemShareResultMessage state={state} />
 
-              {state.status === "success" ? (
-                <p className="rounded-lg bg-secondary-container/60 px-4 py-3 text-body-sm font-medium text-primary">
-                  Shared to {state.sharedCount.toLocaleString()} studies.
-                  {state.skippedCount > 0
-                    ? ` ${state.skippedCount.toLocaleString()} were already shared.`
-                    : ""}
-                </p>
-              ) : null}
-
-              <div className="flex flex-col-reverse justify-between gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center">
-                <p className="text-body-sm text-slate-500">{selectedLabel}</p>
+              <div className="flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center">
                 <div className="flex justify-end gap-2">
                   <button
                     className="btn-secondary"
@@ -176,4 +168,41 @@ export default function ProblemShareModal({
       ) : null}
     </>
   );
+}
+
+function ProblemShareEmptyState() {
+  return (
+    <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
+      <p className="font-semibold text-on-surface">
+        공유할 수 있는 스터디가 없습니다
+      </p>
+      <p className="mt-2 text-body-sm text-slate-500">
+        스터디에 가입하거나 새로 만든 후 문제를 공유할 수 있습니다.
+      </p>
+    </div>
+  );
+}
+
+function ProblemShareResultMessage({
+  state,
+}: {
+  state: ProblemShareActionState;
+}) {
+  if (state.status === "error") {
+    return (
+      <p className="rounded-lg bg-error/10 px-4 py-3 text-body-sm font-medium text-error">
+        {state.error}
+      </p>
+    );
+  }
+
+  if (state.status === "success") {
+    return (
+      <p className="rounded-lg bg-secondary-container/60 px-4 py-3 text-body-sm font-medium text-primary">
+        {state.sharedCount.toLocaleString()}개 스터디에 공유했습니다.
+      </p>
+    );
+  }
+
+  return null;
 }

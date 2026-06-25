@@ -30,6 +30,7 @@ export default function StudyShareItem({
         checked={isSelected}
         disabled={isDisabled}
         className="size-4 accent-primary"
+        name="studyIds"
         value={study.id}
         onChange={() => onToggle(study.id)}
       />

@@ -52,6 +52,7 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
       <div className="page-container">
         <ProblemFilters filters={filters} tiers={tiers} />
         <ProblemList
+          currentTime={new Date().toISOString()}
           emptyStateReason={emptyStateReason}
           filters={filters}
           initialHasNextPage={PROBLEM_PAGE_SIZE < totalCount}
