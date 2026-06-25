@@ -203,26 +203,7 @@ export async function findAuthorizedStudyIds({
   return studies.map((study) => study.id);
 }
 
-// 문제를 이미 공유한 스터디 ID를 조회한다.
-export async function findExistingSharedStudyIds({
-  problemId,
-  studyIds,
-}: {
-  problemId: string;
-  studyIds: string[];
-}) {
-  const shares = await prisma.studyProblemShare.findMany({
-    select: { studyId: true },
-    where: {
-      problemSubmissionId: problemId,
-      studyId: { in: studyIds },
-    },
-  });
-
-  return shares.map((share) => share.studyId);
-}
-
-// 문제를 스터디에 공유하고 공유 점수를 반영한다.
+// 새로 생성된 문제 공유에 대해서만 스터디 점수를 반영한다.
 export async function createProblemShares({
   problemId,
   shareScore,
@@ -234,23 +215,43 @@ export async function createProblemShares({
   studyIds: string[];
   userId: string;
 }) {
-  await prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx) => {
+    const shareLockKey = `problem-share:${problemId}`;
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${shareLockKey}, 0))`;
+
+    const existingShares = await tx.studyProblemShare.findMany({
+      select: { studyId: true },
+      where: {
+        problemSubmissionId: problemId,
+        studyId: { in: studyIds },
+      },
+    });
+    const existingStudyIds = new Set(
+      existingShares.map((share) => share.studyId),
+    );
+    const newStudyIds = studyIds.filter(
+      (studyId) => !existingStudyIds.has(studyId),
+    );
+
+    if (newStudyIds.length === 0) return [];
+
     await tx.studyProblemShare.createMany({
-      data: studyIds.map((studyId) => ({
+      data: newStudyIds.map((studyId) => ({
         problemSubmissionId: problemId,
         score: shareScore,
         studyId,
         userId,
       })),
-      skipDuplicates: true,
     });
 
     if (shareScore > 0) {
       await tx.study.updateMany({
         data: { score: { increment: shareScore } },
-        where: { id: { in: studyIds } },
+        where: { id: { in: newStudyIds } },
       });
     }
+
+    return newStudyIds;
   });
 }
 
