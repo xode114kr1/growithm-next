@@ -2,17 +2,11 @@
 
 import { useEffect, useState } from "react";
 
-import { Button, ButtonAnchor, ButtonLink } from "@/components/ui/button";
+import { Button, ButtonAnchor } from "@/components/ui/button";
 import ProblemTierBadge from "@/components/ui/problem-tier-badge";
-import type {
-  StudyProblemDetail,
-  StudyProblemListItem,
-} from "@/types/study";
+import type { StudyProblemDetail, StudyProblemListItem } from "@/types/study";
 
-import {
-  ProblemState,
-  ProblemTags,
-} from "./study-problem-list/study-problem-item";
+import { ProblemTags } from "./study-problem-list/study-problem-item";
 
 export default function StudyProblemModal({
   onClose,
@@ -73,9 +67,7 @@ export default function StudyProblemModal({
               <span className="rounded bg-slate-100 px-1.5 py-0.5 text-mono-code text-2.75 text-slate-500">
                 {problem.code}
               </span>
-              {problem.tier ? (
-                <ProblemTierBadge tier={problem.tier} />
-              ) : null}
+              {problem.tier ? <ProblemTierBadge tier={problem.tier} /> : null}
               <span className="text-2.75 font-semibold text-slate-400">
                 {problem.platform}
               </span>
@@ -116,7 +108,6 @@ function ProblemDetailContent({ problem }: { problem: StudyProblemDetail }) {
         <ProblemSolutionCode code={problem.solutionCode} />
       </div>
       <aside className="space-y-5 border-t border-slate-100 bg-slate-50/50 p-5 md:p-6 lg:border-l lg:border-t-0">
-        <ProblemState status={problem.status} />
         <ProblemMetaList problem={problem} />
         <ProblemTags categories={problem.categories} />
         {problem.memo ? (
@@ -138,13 +129,6 @@ function ProblemDetailContent({ problem }: { problem: StudyProblemDetail }) {
             Open Original
           </ButtonAnchor>
         ) : null}
-        <ButtonLink
-          className="w-full"
-          href={`/problem/${problem.id}`}
-          variant="primary"
-        >
-          Open Detail Page
-        </ButtonLink>
       </aside>
     </div>
   );
@@ -182,7 +166,9 @@ function MetaItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-slate-100 bg-white p-3">
       <dt className="text-label-caps text-slate-400">{label}</dt>
-      <dd className="mt-1 text-body-sm font-semibold text-on-surface">{value}</dd>
+      <dd className="mt-1 text-body-sm font-semibold text-on-surface">
+        {value}
+      </dd>
     </div>
   );
 }

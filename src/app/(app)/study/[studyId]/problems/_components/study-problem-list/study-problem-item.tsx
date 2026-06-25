@@ -1,11 +1,5 @@
 import ProblemTierBadge from "@/components/ui/problem-tier-badge";
-import type { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import type { StudyProblemListItem } from "@/types/study";
-import {
-  getProblemStatusBadgeClass,
-  getProblemStatusDescription,
-  getProblemStatusLabel,
-} from "@/utils/problem";
 import type { CSSProperties, RefCallback } from "react";
 
 export default function StudyProblemItem({
@@ -23,7 +17,7 @@ export default function StudyProblemItem({
 }) {
   return (
     <tr
-      className="group absolute left-0 top-0 grid w-full grid-cols-[minmax(360px,1.6fr)_minmax(260px,1fr)_180px_160px_180px] border-b border-slate-50 transition-colors hover:bg-slate-50/80"
+      className="group absolute left-0 top-0 grid w-full grid-cols-[minmax(360px,1.8fr)_minmax(260px,1fr)_180px_160px] border-b border-slate-50 transition-colors hover:bg-slate-50/80"
       data-index={virtualIndex}
       ref={measureElement}
       style={style}
@@ -56,9 +50,6 @@ export default function StudyProblemItem({
       <td className="px-6 py-5 text-body-sm text-slate-500">
         {problem.sharedAtLabel}
       </td>
-      <td className="px-6 py-5">
-        <ProblemState status={problem.status} />
-      </td>
     </tr>
   );
 }
@@ -78,19 +69,6 @@ export function ProblemTags({ categories }: { categories: string[] }) {
       ) : (
         <span className="text-body-sm text-slate-400">태그 없음</span>
       )}
-    </div>
-  );
-}
-
-export function ProblemState({ status }: { status: ProblemSubmissionStatus }) {
-  return (
-    <div className="flex min-w-36 flex-col items-start gap-1.5">
-      <span className={getProblemStatusBadgeClass(status)}>
-        {getProblemStatusLabel(status)}
-      </span>
-      <span className="text-body-sm text-slate-500">
-        {getProblemStatusDescription(status)}
-      </span>
     </div>
   );
 }
