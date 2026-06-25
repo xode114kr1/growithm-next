@@ -32,7 +32,7 @@ export default function StudyProblemFilters({
 
   return (
     <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
-      <FilterCard title="플랫폼">
+      <FilterCard className="xl:col-span-2" title="플랫폼">
         <div className="flex flex-wrap gap-2">
           {["All", "BAEKJOON", "PROGRAMMERS"].map((platform) => {
             const isActive =
@@ -59,31 +59,37 @@ export default function StudyProblemFilters({
           })}
         </div>
       </FilterCard>
-      <FilterCard title="티어">
-        <FilterSelect
-          onChange={(event) =>
-            replaceQuery({ tier: event.target.value || null })
-          }
-          value={filters.tier ?? ""}
-        >
-          <option value="">전체</option>
-          {tiers.map((tier) => (
-            <option key={tier}>{tier}</option>
-          ))}
-        </FilterSelect>
-      </FilterCard>
-      <FilterCard title="공유한 멤버">
-        <FilterSelect
-          onChange={(event) =>
-            replaceQuery({ member: event.target.value || null })
-          }
-          value={filters.member ?? ""}
-        >
-          <option value="">전체</option>
-          {memberNames.map((memberName) => (
-            <option key={memberName}>{memberName}</option>
-          ))}
-        </FilterSelect>
+      <FilterCard title="필터">
+        <div className="grid gap-3">
+          <label>
+            <span className="sr-only">티어</span>
+            <FilterSelect
+              onChange={(event) =>
+                replaceQuery({ tier: event.target.value || null })
+              }
+              value={filters.tier ?? ""}
+            >
+              <option value="">전체 티어</option>
+              {tiers.map((tier) => (
+                <option key={tier}>{tier}</option>
+              ))}
+            </FilterSelect>
+          </label>
+          <label>
+            <span className="sr-only">공유한 멤버</span>
+            <FilterSelect
+              onChange={(event) =>
+                replaceQuery({ member: event.target.value || null })
+              }
+              value={filters.member ?? ""}
+            >
+              <option value="">전체 멤버</option>
+              {memberNames.map((memberName) => (
+                <option key={memberName}>{memberName}</option>
+              ))}
+            </FilterSelect>
+          </label>
+        </div>
       </FilterCard>
       <FilterCard title="정렬">
         <FilterSelect
