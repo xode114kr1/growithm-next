@@ -1,9 +1,9 @@
 "use client";
 
 import { Copy, ExternalLink, X } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { Button, ButtonAnchor, ButtonLink } from "@/components/ui/button";
 import ProblemTierBadge from "@/components/ui/problem-tier-badge";
 import type {
   StudyProblemDetail,
@@ -130,19 +130,24 @@ function ProblemDetailContent({ problem }: { problem: StudyProblemDetail }) {
           </section>
         ) : null}
         {problem.link ? (
-          <a
-            className="btn-secondary w-full"
+          <ButtonAnchor
+            className="w-full"
             href={problem.link}
             rel="noreferrer"
             target="_blank"
+            variant="secondary"
           >
             <ExternalLink aria-hidden="true" size={16} />
             Open Original
-          </a>
+          </ButtonAnchor>
         ) : null}
-        <Link className="btn-primary w-full" href={`/problem/${problem.id}`}>
+        <ButtonLink
+          className="w-full"
+          href={`/problem/${problem.id}`}
+          variant="primary"
+        >
           Open Detail Page
-        </Link>
+        </ButtonLink>
       </aside>
     </div>
   );
@@ -220,14 +225,14 @@ function ProblemSolutionCode({ code }: { code: string | null }) {
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <h3 className="section-title">풀이 코드</h3>
         {code ? (
-          <button
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-body-sm font-semibold text-slate-600 transition-colors hover:border-secondary hover:text-secondary"
+          <Button
             onClick={handleCopyCode}
-            type="button"
+            size="xs"
+            variant="secondary"
           >
             <Copy aria-hidden="true" size={14} />
             복사
-          </button>
+          </Button>
         ) : null}
       </div>
       {code ? (

@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 
+import { Button } from "@/components/ui/button";
 import type { OwnerStudy } from "@/types/study";
 
 import {
@@ -32,13 +33,14 @@ export default function StudySettingsCard({ study }: { study: OwnerStudy }) {
             스터디 이름과 설명을 관리합니다.
           </p>
         </div>
-        <button
-          className="btn-secondary w-fit"
+        <Button
+          className="w-fit"
           disabled={isPending}
           type="submit"
+          variant="secondary"
         >
           저장하기
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

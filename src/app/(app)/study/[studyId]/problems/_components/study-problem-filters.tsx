@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import FilterCard from "@/components/ui/filter-card";
 import type { ProblemPlatform } from "@/generated/prisma/enums";
 import { useReplaceQueryParams } from "@/hooks/use-query-params";
@@ -115,8 +116,7 @@ export default function StudyProblemFilters({
             </p>
           </div>
           {hasActiveFilters ? (
-            <button
-              className="rounded-lg border border-slate-200 px-3 py-1.5 text-body-sm font-semibold text-slate-600 transition-colors hover:border-secondary hover:text-secondary"
+            <Button
               onClick={() =>
                 replaceQuery({
                   member: null,
@@ -124,10 +124,11 @@ export default function StudyProblemFilters({
                   tier: null,
                 })
               }
-              type="button"
+              size="xs"
+              variant="secondary"
             >
               Reset
-            </button>
+            </Button>
           ) : null}
         </div>
       </FilterCard>

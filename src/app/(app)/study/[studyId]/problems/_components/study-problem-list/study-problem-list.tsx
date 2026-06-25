@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useState } from "react";
 
+import { ButtonLink } from "@/components/ui/button";
 import { useVirtualizedLoadMore } from "@/hooks/use-virtualized-load-more";
 import { useWindowVirtualizedList } from "@/hooks/use-window-virtualized-list";
 import type {
@@ -167,9 +168,13 @@ function EmptyState({
         <p className="mt-2 text-body-sm text-slate-500">
           Change or reset the filters to see more shared problems.
         </p>
-        <Link className="btn-secondary mt-5" href={clearFiltersHref}>
+        <ButtonLink
+          className="mt-5"
+          href={clearFiltersHref}
+          variant="secondary"
+        >
           Clear filters
-        </Link>
+        </ButtonLink>
       </div>
     );
   }
@@ -181,9 +186,9 @@ function EmptyState({
         Share a completed submission from your problem detail page to populate
         this study list.
       </p>
-      <Link className="btn-secondary mt-5" href="/problem">
+      <ButtonLink className="mt-5" href="/problem" variant="secondary">
         Browse Problems
-      </Link>
+      </ButtonLink>
     </div>
   );
 }

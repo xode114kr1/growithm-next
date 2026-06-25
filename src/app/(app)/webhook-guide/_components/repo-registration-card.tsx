@@ -2,6 +2,8 @@
 
 import { FormEvent, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+
 type SubmitStatus =
   | {
       message: string;
@@ -136,13 +138,14 @@ export function RepoRegistrationCard() {
           </p>
         ) : null}
 
-        <button
-          className="btn-primary w-full"
+        <Button
+          className="w-full"
           disabled={isSubmitting}
           type="submit"
+          variant="primary"
         >
           웹훅 연결하기
-        </button>
+        </Button>
       </form>
     </section>
   );

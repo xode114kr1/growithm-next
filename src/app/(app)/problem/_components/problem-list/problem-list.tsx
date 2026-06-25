@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useState, type ReactNode } from "react";
 
+import { ButtonLink } from "@/components/ui/button";
 import { useVirtualizedLoadMore } from "@/hooks/use-virtualized-load-more";
 import { useWindowVirtualizedList } from "@/hooks/use-window-virtualized-list";
 import type {
@@ -156,9 +156,9 @@ function EmptyState({ reason }: { reason: ProblemEmptyStateReason }) {
         <p className="mt-2 text-body-sm text-slate-500">
           플랫폼, 티어 또는 검색어를 변경해 보세요.
         </p>
-        <Link className="btn-secondary mt-5" href="/problem">
+        <ButtonLink className="mt-5" href="/problem" variant="secondary">
           필터 초기화
-        </Link>
+        </ButtonLink>
       </div>
     );
   }
