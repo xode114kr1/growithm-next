@@ -1,7 +1,7 @@
 "use client";
 
 import { Share2, X } from "lucide-react";
-import { useActionState, useId, useMemo, useState } from "react";
+import { useActionState, useId, useState } from "react";
 
 import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import {
@@ -51,13 +51,6 @@ export default function ProblemShareModal({
     targetTime: submittedAtText,
   });
   const selectedCount = selectedStudyIds.length;
-  const selectedLabel = useMemo(
-    () =>
-      selectedCount === 0
-        ? "공유할 스터디 선택"
-        : `${selectedCount.toLocaleString()} selected`,
-    [selectedCount],
-  );
 
   function toggleStudy(studyId: string) {
     setSelectedStudyIds((current) =>
@@ -110,7 +103,7 @@ export default function ProblemShareModal({
                     Share Problem
                   </p>
                   <h2 className="text-h3-ui text-primary" id={titleId}>
-                    Select studies
+                    공유할 스터디를 선택하세요
                   </h2>
                 </div>
                 <button
@@ -151,10 +144,10 @@ export default function ProblemShareModal({
               ) : (
                 <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
                   <p className="font-semibold text-on-surface">
-                    No studies available
+                    공유할 수 있는 스터디가 없습니다
                   </p>
                   <p className="mt-2 text-body-sm text-slate-500">
-                    Join or create a study before sharing problems.
+                    스터디에 가입하거나 새로 만든 후 문제를 공유할 수 있습니다.
                   </p>
                 </div>
               )}
@@ -167,15 +160,14 @@ export default function ProblemShareModal({
 
               {state.status === "success" ? (
                 <p className="rounded-lg bg-secondary-container/60 px-4 py-3 text-body-sm font-medium text-primary">
-                  Shared to {state.sharedCount.toLocaleString()} studies.
+                  {state.sharedCount.toLocaleString()}개 스터디에 공유했습니다.
                   {state.skippedCount > 0
-                    ? ` ${state.skippedCount.toLocaleString()} were already shared.`
+                    ? ` 이미 공유된 스터디 ${state.skippedCount.toLocaleString()}개는 제외했습니다.`
                     : ""}
                 </p>
               ) : null}
 
-              <div className="flex flex-col-reverse justify-between gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center">
-                <p className="text-body-sm text-slate-500">{selectedLabel}</p>
+              <div className="flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center">
                 <div className="flex justify-end gap-2">
                   <button
                     className="btn-secondary"
