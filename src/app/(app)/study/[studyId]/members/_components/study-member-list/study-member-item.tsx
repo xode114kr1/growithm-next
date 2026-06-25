@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ProfileModal } from "@/components/ui/profile-modal";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import type { StudyMember } from "@/types/study";
 
 import { studyMemberRoleLabels } from "../../constants";
@@ -23,17 +24,7 @@ export default function StudyMemberItem({
       <article className="app-card p-6 transition-all hover:shadow-lg hover:shadow-teal-900/5">
         <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
           <div className="flex min-w-0 items-center gap-4">
-            <div
-              className={
-                isOwner
-                  ? "flex size-12 shrink-0 items-center justify-center rounded-full bg-primary text-base font-black text-on-primary"
-                  : isLeader
-                    ? "flex size-12 shrink-0 items-center justify-center rounded-full bg-secondary text-base font-black text-on-secondary"
-                    : "flex size-12 shrink-0 items-center justify-center rounded-full bg-slate-200 text-base font-black text-slate-600"
-              }
-            >
-              {member.name[0]?.toUpperCase()}
-            </div>
+            <UserAvatar image={member.avatar} name={member.name} size="lg" />
             <div className="min-w-0">
               <h2 className="truncate text-base font-bold text-primary">
                 {member.name}

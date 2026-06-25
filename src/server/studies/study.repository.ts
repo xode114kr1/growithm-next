@@ -47,7 +47,7 @@ export async function findProblemShareTargetStudies({
 export async function findPendingInvites(userId: string) {
   return prisma.studyInvite.findMany({
     include: {
-      invitedBy: { select: { name: true } },
+      invitedBy: { select: { image: true, name: true } },
       study: { select: { title: true } },
     },
     orderBy: { createdAt: "desc" },
@@ -106,7 +106,7 @@ export async function findStudyMemberDetails({
           id: true,
           joinedAt: true,
           role: true,
-          user: { select: { name: true } },
+          user: { select: { image: true, name: true } },
           userId: true,
         },
         where: {
@@ -176,7 +176,7 @@ export async function findStudyMembers({
       members: {
         orderBy: { joinedAt: "asc" },
         select: {
-          user: { select: { name: true } },
+          user: { select: { image: true, name: true } },
           userId: true,
         },
       },
@@ -295,11 +295,11 @@ export async function findOwnedStudyMembers({
           id: true,
           joinedAt: true,
           role: true,
-          user: { select: { name: true } },
+          user: { select: { image: true, name: true } },
           userId: true,
         },
       },
-      owner: { select: { name: true } },
+      owner: { select: { image: true, name: true } },
       ownerId: true,
     },
     where: { id: studyId, ownerId: userId },

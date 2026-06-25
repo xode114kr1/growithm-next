@@ -4,6 +4,7 @@ import type {
   StudyRecentProblem,
   StudyTier,
 } from "@/types/study";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { studyTierBadgeColors, studyTierProgressColors } from "@/utils/color";
 import { getTierProgress } from "@/utils/study";
 import Link from "next/link";
@@ -135,15 +136,7 @@ export function StudyMembersCard({
             key={`${member.role}-${member.name}`}
           >
             <div className="flex min-w-0 items-center gap-3">
-              <div
-                className={
-                  member.role === "owner"
-                    ? "flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-on-primary"
-                    : "flex size-10 shrink-0 items-center justify-center rounded-full bg-slate-200 text-sm font-bold text-slate-600"
-                }
-              >
-                {member.name[0]?.toUpperCase()}
-              </div>
+              <UserAvatar image={member.avatar} name={member.name} />
               <div className="min-w-0">
                 <p className="truncate text-body-sm font-bold text-on-surface">
                   {member.name}
