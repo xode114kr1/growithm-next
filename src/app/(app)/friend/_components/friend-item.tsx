@@ -1,6 +1,6 @@
-import Image from "next/image";
 import type { ReactNode } from "react";
 
+import { UserAvatar } from "@/components/ui/user-avatar";
 import type { FriendProfile } from "@/types/friend";
 
 export function FriendItem({
@@ -28,12 +28,11 @@ export function FriendItem({
         onClick={() => onOpenProfile(profile)}
         type="button"
       >
-        <Image
-          alt={`${profile.name} avatar`}
-          className="size-10 rounded-full object-cover ring-2 ring-slate-50 md:size-12"
-          height={48}
-          src={profile.avatar}
-          width={48}
+        <UserAvatar
+          className="ring-2 ring-slate-50"
+          image={profile.avatar}
+          name={profile.name}
+          size={compact ? "md" : "lg"}
         />
       </button>
       <div className="min-w-0 flex-1 text-center md:text-left">

@@ -22,12 +22,14 @@ export type StudyListItem = {
 
 export type StudyInviteItem = {
   id: string;
+  invitedByAvatar: string | null;
   invitedByName: string;
   studyTitle: string;
   timeLabel: string;
 };
 
 export type StudyMember = {
+  avatar: string | null;
   contribution: number;
   id: string;
   joinedAt: string;
@@ -73,6 +75,7 @@ export type StudyContributionItem = {
 };
 
 export type StudyOverviewMember = {
+  avatar: string | null;
   name: string;
   role: "owner" | "member";
 };
@@ -91,6 +94,7 @@ export type OwnerStudy = {
 };
 
 export type OwnerMember = {
+  avatar: string | null;
   contribution: number;
   id: string;
   isCurrentUser: boolean;

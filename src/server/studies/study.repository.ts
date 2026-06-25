@@ -47,7 +47,7 @@ export async function findProblemShareTargetStudies({
 export async function findPendingInvites(userId: string) {
   return prisma.studyInvite.findMany({
     include: {
-      invitedBy: { select: { name: true } },
+      invitedBy: { select: { image: true, name: true } },
       study: { select: { title: true } },
     },
     orderBy: { createdAt: "desc" },
@@ -106,7 +106,7 @@ export async function findStudyMemberDetails({
           id: true,
           joinedAt: true,
           role: true,
-          user: { select: { name: true } },
+          user: { select: { image: true, name: true } },
           userId: true,
         },
         where: {
@@ -176,7 +176,7 @@ export async function findStudyMembers({
       members: {
         orderBy: { joinedAt: "asc" },
         select: {
-          user: { select: { name: true } },
+          user: { select: { image: true, name: true } },
           userId: true,
         },
       },
@@ -295,11 +295,11 @@ export async function findOwnedStudyMembers({
           id: true,
           joinedAt: true,
           role: true,
-          user: { select: { name: true } },
+          user: { select: { image: true, name: true } },
           userId: true,
         },
       },
-      owner: { select: { name: true } },
+      owner: { select: { image: true, name: true } },
       ownerId: true,
     },
     where: { id: studyId, ownerId: userId },
@@ -551,46 +551,42 @@ export async function createStudyRecord({
   });
 }
 
-// 사용자가 받은 유효한 대기 초대를 조회한다.
-export async function findPendingInviteForUser({
-  inviteId,
-  userId,
-}: {
-  inviteId: string;
-  userId: string;
-}) {
-  return prisma.studyInvite.findFirst({
-    select: { id: true, studyId: true },
-    where: {
-      expiresAt: { gt: new Date() },
-      id: inviteId,
-      status: "PENDING",
-      targetUserId: userId,
-    },
-  });
-}
-
-// 초대를 수락하고 사용자를 스터디 멤버로 추가한다.
+// 유효한 초대를 수락한 경우에만 사용자를 스터디 멤버로 추가한다.
 export async function acceptStudyInviteRecord({
   inviteId,
-  studyId,
   userId,
 }: {
   inviteId: string;
-  studyId: string;
   userId: string;
 }) {
-  await prisma.$transaction([
-    prisma.studyMember.upsert({
-      create: { studyId, userId },
-      update: {},
-      where: { studyId_userId: { studyId, userId } },
-    }),
-    prisma.studyInvite.update({
-      data: { status: "ACCEPTED" },
+  return prisma.$transaction(async (tx) => {
+    const invite = await tx.studyInvite.findUnique({
+      select: { studyId: true },
       where: { id: inviteId },
-    }),
-  ]);
+    });
+
+    if (!invite) return null;
+
+    const acceptedInvite = await tx.studyInvite.updateMany({
+      data: { status: "ACCEPTED" },
+      where: {
+        expiresAt: { gt: new Date() },
+        id: inviteId,
+        status: "PENDING",
+        targetUserId: userId,
+      },
+    });
+
+    if (acceptedInvite.count === 0) return null;
+
+    await tx.studyMember.upsert({
+      create: { studyId: invite.studyId, userId },
+      update: {},
+      where: { studyId_userId: { studyId: invite.studyId, userId } },
+    });
+
+    return invite.studyId;
+  });
 }
 
 // 사용자가 받은 대기 초대를 취소 상태로 변경한다.

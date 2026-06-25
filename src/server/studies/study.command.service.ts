@@ -7,7 +7,6 @@ import {
   createStudyRecord,
   declineStudyInviteRecord,
   deleteOwnedStudy,
-  findPendingInviteForUser,
   findStudyInviteContext,
   removeStudyMemberRecord,
   updateStudyMemberRoleRecord,
@@ -34,15 +33,7 @@ export async function acceptStudyInvite({
   inviteId: string;
   userId: string;
 }) {
-  const invite = await findPendingInviteForUser({ inviteId, userId });
-  if (!invite) return null;
-
-  await acceptStudyInviteRecord({
-    inviteId: invite.id,
-    studyId: invite.studyId,
-    userId,
-  });
-  return invite.studyId;
+  return acceptStudyInviteRecord({ inviteId, userId });
 }
 
 // 사용자가 받은 스터디 초대를 거절한다.
