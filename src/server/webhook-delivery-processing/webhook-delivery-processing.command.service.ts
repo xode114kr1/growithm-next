@@ -15,7 +15,7 @@ import {
   claimWebhookDeliveryForProcessing,
   getRepositoryOwner,
   getWebhookDeliveryForProcessing,
-  saveProblemSubmission,
+  saveProblemSubmissionAndCompleteDelivery,
   updateWebhookDeliveryStatus,
   updateWebhookDeliveryStatusById,
 } from "@/server/webhook-delivery-processing/webhook-delivery-processing.repository";
@@ -232,7 +232,7 @@ async function processChangedProblemFile({
     tier: parsedReadme.tier,
   });
 
-  await saveProblemSubmission({
+  await saveProblemSubmissionAndCompleteDelivery({
     accuracy: parsedReadme.accuracy,
     categories: parsedReadme.categories,
     code: codeResult.code,
@@ -253,11 +253,6 @@ async function processChangedProblemFile({
     title: parsedReadme.title,
     userId,
     webhookDeliveryId,
-  });
-
-  await updateWebhookDeliveryStatus({
-    deliveryId,
-    status: "PROCESSED",
   });
 
   return {

@@ -94,8 +94,8 @@ async function getRepositoryOwnerFromPayload(
   return { accessToken: account.access_token, userId: account.userId };
 }
 
-// 준비된 문제 제출 데이터를 저장하고 사용자 점수 차이를 반영한다.
-export async function saveProblemSubmission({
+// 문제 제출과 사용자 점수를 반영하고 웹훅 delivery 처리를 완료한다.
+export async function saveProblemSubmissionAndCompleteDelivery({
   accuracy,
   categories,
   code,
@@ -226,6 +226,15 @@ export async function saveProblemSubmission({
         where: { id: existingSubmission.userId },
       });
     }
+
+    await tx.webhookDelivery.update({
+      data: {
+        errorMessage: null,
+        processedAt: new Date(),
+        status: "PROCESSED",
+      },
+      where: { id: webhookDeliveryId },
+    });
   });
 }
 
