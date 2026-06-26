@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useId, useState } from "react";
+import { useActionState, useEffect, useId, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -19,14 +19,16 @@ export default function StudyCreateModal() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const titleId = useId();
+  const [state, formAction, isPending] = useActionState(
+    createStudy,
+    initialState,
+  );
 
-  async function handleCreateStudy(formData: FormData) {
-    const result = await createStudy(initialState, formData);
-
-    if (result.studyId) {
-      router.push(`/study/${result.studyId}/overview`);
+  useEffect(() => {
+    if (state.studyId) {
+      router.push(`/study/${state.studyId}/overview`);
     }
-  }
+  }, [router, state.studyId]);
 
   return (
     <>
@@ -65,14 +67,16 @@ export default function StudyCreateModal() {
               </div>
             </div>
 
-            <form action={handleCreateStudy} className="space-y-6 px-6 py-6">
+            <form action={formAction} className="space-y-6 px-6 py-6">
               <div className="grid grid-cols-1 gap-5">
                 <label className="block md:col-span-2">
                   <span className="mb-2 block text-label-caps text-slate-500">
                     Title
                   </span>
                   <input
+                    aria-invalid={state.status === "error" ? true : undefined}
                     className="input-field"
+                    defaultValue={state.status === "error" ? state.title : ""}
                     maxLength={80}
                     name="title"
                     placeholder="예: Algorithm Sprint"
@@ -86,7 +90,11 @@ export default function StudyCreateModal() {
                     Description
                   </span>
                   <textarea
+                    aria-invalid={state.status === "error" ? true : undefined}
                     className="min-h-28 w-full resize-y rounded-lg border border-slate-200 bg-white px-4 py-3 text-body-md text-on-surface outline-none transition-all placeholder:text-slate-300 focus:border-primary focus:ring-2 focus:ring-secondary-container/30"
+                    defaultValue={
+                      state.status === "error" ? state.description : ""
+                    }
                     maxLength={500}
                     name="description"
                     placeholder="스터디 목표, 진행 방식, 권장 풀이 주기를 적어주세요."
@@ -94,14 +102,21 @@ export default function StudyCreateModal() {
                 </label>
               </div>
 
+              {state.status === "error" ? (
+                <p className="rounded-lg bg-error/10 px-4 py-3 text-body-sm font-medium text-error">
+                  {state.error}
+                </p>
+              ) : null}
+
               <div className="flex flex-col-reverse justify-end gap-2 border-t border-slate-100 pt-5 sm:flex-row">
                 <Button
+                  disabled={isPending}
                   onClick={() => setIsOpen(false)}
                   variant="secondary"
                 >
                   취소
                 </Button>
-                <Button type="submit" variant="primary">
+                <Button disabled={isPending} type="submit" variant="primary">
                   스터디 생성
                 </Button>
               </div>
