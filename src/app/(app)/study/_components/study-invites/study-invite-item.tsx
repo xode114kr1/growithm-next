@@ -5,25 +5,17 @@ import { useActionState } from "react";
 import { StudyInviteItem } from "@/types/study";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/ui/user-avatar";
-import {
-  acceptStudyInvite,
-  rejectStudyInvite,
-  type StudyInviteActionState,
-} from "../../actions";
-
-const initialActionState: StudyInviteActionState = {
-  error: null,
-  status: "idle",
-};
+import { INITIAL_ACTION_STATE } from "@/utils/action-state";
+import { acceptStudyInvite, rejectStudyInvite } from "../../actions";
 
 export default function InviteItem({ invite }: { invite: StudyInviteItem }) {
   const [acceptState, acceptFormAction, isAcceptPending] = useActionState(
     acceptStudyInvite,
-    initialActionState,
+    INITIAL_ACTION_STATE,
   );
   const [rejectState, rejectFormAction, isRejectPending] = useActionState(
     rejectStudyInvite,
-    initialActionState,
+    INITIAL_ACTION_STATE,
   );
   const isPending = isAcceptPending || isRejectPending;
   const errorMessage = acceptState.error ?? rejectState.error;

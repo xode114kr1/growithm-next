@@ -5,17 +5,9 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import type { OwnerMember } from "@/types/study";
+import { INITIAL_ACTION_STATE } from "@/utils/action-state";
 
-import {
-  removeStudyMember,
-  type StudyMemberActionState,
-  updateStudyMemberRole,
-} from "../actions";
-
-const initialActionState: StudyMemberActionState = {
-  error: null,
-  status: "idle",
-};
+import { removeStudyMember, updateStudyMemberRole } from "../actions";
 
 export default function ManageMemberRow({
   member,
@@ -26,11 +18,11 @@ export default function ManageMemberRow({
 }) {
   const [roleState, roleFormAction, isRolePending] = useActionState(
     updateStudyMemberRole,
-    initialActionState,
+    INITIAL_ACTION_STATE,
   );
   const [removeState, removeFormAction, isRemovePending] = useActionState(
     removeStudyMember,
-    initialActionState,
+    INITIAL_ACTION_STATE,
   );
   const isPending = isRolePending || isRemovePending;
   const errorMessage = roleState.error ?? removeState.error;

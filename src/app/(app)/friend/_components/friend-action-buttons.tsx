@@ -4,20 +4,15 @@ import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
 import type { FriendSearchResult } from "@/types/friend";
+import { INITIAL_ACTION_STATE } from "@/utils/action-state";
 
 import {
   acceptFriendRequestAction,
   cancelFriendRequestAction,
   deleteFriendAction,
-  type FriendActionState,
   rejectFriendRequestAction,
   sendFriendRequestAction,
 } from "../actions";
-
-const initialActionState: FriendActionState = {
-  error: null,
-  status: "idle",
-};
 
 const friendActions = {
   accept: {
@@ -113,7 +108,7 @@ export function FriendActionButton({
   const action = friendActions[actionType];
   const [state, formAction, isPending] = useActionState(
     action.action,
-    initialActionState,
+    INITIAL_ACTION_STATE,
   );
 
   return (

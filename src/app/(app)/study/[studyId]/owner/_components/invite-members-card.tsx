@@ -5,10 +5,10 @@ import { useActionState } from "react";
 import { ActionStateMessage } from "@/components/ui/action-state-message";
 import { Button } from "@/components/ui/button";
 import type { OwnerInvite } from "@/types/study";
+import { INITIAL_ACTION_STATE } from "@/utils/action-state";
 
 import {
   cancelStudyInvite,
-  type CancelStudyInviteActionState,
   createStudyInvite,
   type CreateStudyInviteActionState,
 } from "../actions";
@@ -17,11 +17,6 @@ const initialActionState: CreateStudyInviteActionState = {
   error: null,
   status: "idle",
   target: "",
-};
-
-const initialCancelActionState: CancelStudyInviteActionState = {
-  error: null,
-  status: "idle",
 };
 
 export default function InviteMembersCard({
@@ -127,7 +122,7 @@ function PendingInviteItem({
 }) {
   const [state, formAction, isPending] = useActionState(
     cancelStudyInvite,
-    initialCancelActionState,
+    INITIAL_ACTION_STATE,
   );
 
   return (
