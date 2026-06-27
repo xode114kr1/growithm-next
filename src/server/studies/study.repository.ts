@@ -672,7 +672,7 @@ export async function cancelStudyInviteRecord({
   studyId: string;
   userId: string;
 }) {
-  await prisma.studyInvite.updateMany({
+  const result = await prisma.studyInvite.updateMany({
     data: { status: "CANCELED" },
     where: {
       id: inviteId,
@@ -680,6 +680,8 @@ export async function cancelStudyInviteRecord({
       study: { id: studyId, ownerId: userId },
     },
   });
+
+  return result.count > 0;
 }
 
 // 소유한 스터디의 일반 멤버 역할을 변경한다.

@@ -83,7 +83,7 @@ export async function cancelStudyInvite(input: {
   studyId: string;
   userId: string;
 }) {
-  await cancelStudyInviteRecord(input);
+  return cancelStudyInviteRecord(input);
 }
 
 // 소유한 스터디의 일반 멤버 역할을 변경한다.

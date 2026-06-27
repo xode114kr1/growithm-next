@@ -7,6 +7,7 @@ import type { OwnerInvite } from "@/types/study";
 
 import {
   cancelStudyInvite,
+  type CancelStudyInviteActionState,
   createStudyInvite,
   type CreateStudyInviteActionState,
 } from "../actions";
@@ -15,6 +16,11 @@ const initialActionState: CreateStudyInviteActionState = {
   error: null,
   status: "idle",
   target: "",
+};
+
+const initialCancelActionState: CancelStudyInviteActionState = {
+  error: null,
+  status: "idle",
 };
 
 export default function InviteMembersCard({
@@ -93,27 +99,11 @@ export default function InviteMembersCard({
           </h3>
           <div className="divide-y divide-slate-50 rounded-lg border border-slate-100">
             {initialInvites.map((invite) => (
-              <div
-                className="flex items-center justify-between gap-4 px-4 py-3"
+              <PendingInviteItem
+                invite={invite}
                 key={invite.id}
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-body-sm font-semibold text-on-surface">
-                    {invite.target}
-                  </p>
-                  <p className="text-xs text-slate-400">{invite.status}</p>
-                </div>
-                <form action={cancelStudyInvite}>
-                  <input name="studyId" type="hidden" value={studyId} />
-                  <input name="inviteId" type="hidden" value={invite.id} />
-                  <button
-                    className="text-body-sm font-semibold text-error hover:underline"
-                    type="submit"
-                  >
-                    취소
-                  </button>
-                </form>
-              </div>
+                studyId={studyId}
+              />
             ))}
             {initialInvites.length === 0 ? (
               <div className="px-4 py-6 text-center text-body-sm text-slate-400">
@@ -124,5 +114,43 @@ export default function InviteMembersCard({
         </div>
       </div>
     </section>
+  );
+}
+
+function PendingInviteItem({
+  invite,
+  studyId,
+}: {
+  invite: OwnerInvite;
+  studyId: string;
+}) {
+  const [state, formAction, isPending] = useActionState(
+    cancelStudyInvite,
+    initialCancelActionState,
+  );
+
+  return (
+    <div className="flex items-start justify-between gap-4 px-4 py-3">
+      <div className="min-w-0">
+        <p className="truncate text-body-sm font-semibold text-on-surface">
+          {invite.target}
+        </p>
+        <p className="text-xs text-slate-400">{invite.status}</p>
+        {state.status === "error" ? (
+          <p className="mt-1 text-xs font-medium text-error">{state.error}</p>
+        ) : null}
+      </div>
+      <form action={formAction}>
+        <input name="studyId" type="hidden" value={studyId} />
+        <input name="inviteId" type="hidden" value={invite.id} />
+        <button
+          className="text-body-sm font-semibold text-error hover:underline disabled:cursor-not-allowed disabled:opacity-40"
+          disabled={isPending}
+          type="submit"
+        >
+          취소
+        </button>
+      </form>
+    </div>
   );
 }

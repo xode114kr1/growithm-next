@@ -35,6 +35,11 @@ export type StudyMemberActionState = {
   status: "idle" | "error" | "success";
 };
 
+export type CancelStudyInviteActionState = {
+  error: string | null;
+  status: "idle" | "error" | "success";
+};
+
 export async function createStudyInvite(
   _prevState: CreateStudyInviteActionState,
   formData: FormData,
@@ -73,19 +78,40 @@ export async function createStudyInvite(
   };
 }
 
-export async function cancelStudyInvite(formData: FormData) {
+export async function cancelStudyInvite(
+  _prevState: CancelStudyInviteActionState,
+  formData: FormData,
+): Promise<CancelStudyInviteActionState> {
   const session = await auth();
   const userId = session?.user?.id;
   const inviteId = getFormValue(formData, "inviteId");
   const studyId = getFormValue(formData, "studyId");
 
-  if (!userId || !inviteId || !studyId) {
-    return;
+  if (!userId) {
+    return createCancelInviteErrorState("로그인이 필요합니다.");
   }
 
-  await cancelStudyInviteCommand({ inviteId, studyId, userId });
+  if (!inviteId || !studyId) {
+    return createCancelInviteErrorState("초대 정보를 찾을 수 없습니다.");
+  }
 
-  revalidatePath(`/study/${studyId}/owner`);
+  try {
+    const canceled = await cancelStudyInviteCommand({ inviteId, studyId, userId });
+
+    if (!canceled) {
+      return createCancelInviteErrorState("취소할 수 있는 초대를 찾을 수 없습니다.");
+    }
+
+    revalidatePath(`/study/${studyId}/owner`);
+
+    return createCancelInviteSuccessState();
+  } catch (error) {
+    console.error("Failed to cancel study invite", error);
+
+    return createCancelInviteErrorState(
+      "초대를 취소하지 못했습니다. 잠시 후 다시 시도해주세요.",
+    );
+  }
 }
 
 export async function updateStudyMemberRole(
@@ -259,6 +285,20 @@ function createInviteErrorState(target: string, error: string): CreateStudyInvit
     error,
     status: "error",
     target,
+  };
+}
+
+function createCancelInviteSuccessState(): CancelStudyInviteActionState {
+  return {
+    error: null,
+    status: "success",
+  };
+}
+
+function createCancelInviteErrorState(error: string): CancelStudyInviteActionState {
+  return {
+    error,
+    status: "error",
   };
 }
 
