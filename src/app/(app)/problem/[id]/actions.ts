@@ -7,20 +7,17 @@ import {
   updateProblemMemo as updateProblemMemoResource,
 } from "@/server/problems/problem.command.service";
 import { getCurrentUserId } from "@/lib/session/session";
+import type { ActionState } from "@/types/action-state";
 
 const MAX_MEMO_LENGTH = 2000;
 
-export type ProblemMemoActionState = {
-  error: string | null;
+export type ProblemMemoActionState = ActionState & {
   memo: string;
-  status: "idle" | "error" | "success";
 };
 
-export type ProblemShareActionState = {
-  error: string | null;
+export type ProblemShareActionState = ActionState & {
   sharedCount: number;
   skippedCount: number;
-  status: "idle" | "error" | "success";
 };
 
 export async function updateProblemMemo(

@@ -8,6 +8,7 @@ import {
   shareProblemToStudies,
   type ProblemShareActionState,
 } from "@/app/(app)/problem/[id]/actions";
+import { ActionStateMessage } from "@/components/ui/action-state-message";
 import { Button } from "@/components/ui/button";
 import type { ProblemShareTargetStudy } from "@/types/study";
 import { isWithinDayDifference } from "@/utils/date";
@@ -189,17 +190,17 @@ function ProblemShareResultMessage({
 }) {
   if (state.status === "error") {
     return (
-      <p className="rounded-lg bg-error/10 px-4 py-3 text-body-sm font-medium text-error">
+      <ActionStateMessage variant="error">
         {state.error}
-      </p>
+      </ActionStateMessage>
     );
   }
 
   if (state.status === "success") {
     return (
-      <p className="rounded-lg bg-secondary-container/60 px-4 py-3 text-body-sm font-medium text-primary">
+      <ActionStateMessage variant="success">
         {state.sharedCount.toLocaleString()}개 스터디에 공유했습니다.
-      </p>
+      </ActionStateMessage>
     );
   }
 

@@ -1,72 +1,27 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
 
-type SubmitStatus =
-  | {
-      message: string;
-      type: "error" | "success";
-    }
-  | null;
+import {
+  registerGitHubWebhookAction,
+  type RegisterGitHubWebhookActionState,
+} from "../actions";
+
+const initialActionState: RegisterGitHubWebhookActionState = {
+  error: null,
+  githubId: "",
+  message: null,
+  repositoryName: "",
+  status: "idle",
+};
 
 export function RepoRegistrationCard() {
-  const [githubId, setGithubId] = useState("");
-  const [repositoryName, setRepositoryName] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [status, setStatus] = useState<SubmitStatus>(null);
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    const owner = githubId.trim();
-    const repo = repositoryName.trim();
-
-    if (!owner || !repo) {
-      setStatus({
-        message: "깃허브 ID와 Repository 이름을 모두 입력해주세요.",
-        type: "error",
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-    setStatus(null);
-
-    try {
-      const response = await fetch("/api/github/webhook", {
-        body: JSON.stringify({ owner, repo }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-      });
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        setStatus({
-          message:
-            data?.message ??
-            "웹훅 연결 요청에 실패했습니다. 잠시 후 다시 시도해주세요.",
-          type: "error",
-        });
-        return;
-      }
-
-      setStatus({
-        message: data?.message ?? "웹훅 연결 요청이 완료되었습니다.",
-        type: "success",
-      });
-    } catch {
-      setStatus({
-        message: "네트워크 오류로 웹훅 연결 요청에 실패했습니다.",
-        type: "error",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
+  const [state, formAction, isPending] = useActionState(
+    registerGitHubWebhookAction,
+    initialActionState,
+  );
 
   return (
     <section className="app-card grid grid-cols-1 gap-8 p-6 lg:grid-cols-[1fr_420px] lg:p-8">
@@ -86,8 +41,8 @@ export function RepoRegistrationCard() {
       </div>
 
       <form
+        action={formAction}
         className="grid gap-5 rounded-xl border border-slate-100 bg-slate-50/60 p-5"
-        onSubmit={handleSubmit}
       >
         <label className="block">
           <span className="mb-2 block text-label-caps text-slate-500">
@@ -95,12 +50,12 @@ export function RepoRegistrationCard() {
           </span>
           <input
             autoComplete="username"
+            aria-invalid={state.status === "error" ? true : undefined}
             className="input-field"
+            defaultValue={state.status === "error" ? state.githubId : ""}
             name="githubId"
-            onChange={(event) => setGithubId(event.target.value)}
             placeholder="예: octocat"
             type="text"
-            value={githubId}
           />
           <span className="mt-2 block text-body-sm text-slate-500">
             깃허브 프로필 상단에 표시되는 닉네임(아이디)을 입력해주세요.
@@ -113,34 +68,33 @@ export function RepoRegistrationCard() {
           </span>
           <input
             autoComplete="off"
+            aria-invalid={state.status === "error" ? true : undefined}
             className="input-field"
+            defaultValue={state.status === "error" ? state.repositoryName : ""}
             name="repositoryName"
-            onChange={(event) => setRepositoryName(event.target.value)}
             placeholder="예: algorithm-solutions"
             type="text"
-            value={repositoryName}
           />
           <span className="mt-2 block text-body-sm text-slate-500">
             백준 허브가 연동되어 있는 Repository 이름만 입력합니다.
           </span>
         </label>
 
-        {status ? (
-          <p
-            className={
-              status.type === "success"
-                ? "text-body-sm font-semibold text-secondary"
-                : "text-body-sm font-semibold text-error"
-            }
-            role="status"
-          >
-            {status.message}
+        {state.status === "error" ? (
+          <p className="text-body-sm font-semibold text-error" role="status">
+            {state.error}
+          </p>
+        ) : null}
+
+        {state.status === "success" ? (
+          <p className="text-body-sm font-semibold text-secondary" role="status">
+            {state.message}
           </p>
         ) : null}
 
         <Button
           className="w-full"
-          disabled={isSubmitting}
+          disabled={isPending}
           type="submit"
           variant="primary"
         >
