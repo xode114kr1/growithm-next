@@ -30,6 +30,11 @@ export type UpdateStudySettingsActionState = {
   title: string;
 };
 
+export type StudyMemberActionState = {
+  error: string | null;
+  status: "idle" | "error" | "success";
+};
+
 export async function createStudyInvite(
   _prevState: CreateStudyInviteActionState,
   formData: FormData,
@@ -83,39 +88,90 @@ export async function cancelStudyInvite(formData: FormData) {
   revalidatePath(`/study/${studyId}/owner`);
 }
 
-export async function updateStudyMemberRole(formData: FormData) {
+export async function updateStudyMemberRole(
+  _prevState: StudyMemberActionState,
+  formData: FormData,
+): Promise<StudyMemberActionState> {
   const session = await auth();
   const userId = session?.user?.id;
   const studyId = getFormValue(formData, "studyId");
   const memberId = getFormValue(formData, "memberId");
   const role = getFormValue(formData, "role");
 
-  if (!userId || !studyId || !memberId || !isEditableMemberRole(role)) {
-    return;
+  if (!userId) {
+    return createStudyMemberErrorState("로그인이 필요합니다.");
   }
 
-  await updateStudyMemberRoleCommand({ memberId, role, studyId, userId });
+  if (!studyId || !memberId) {
+    return createStudyMemberErrorState("멤버 정보를 찾을 수 없습니다.");
+  }
 
-  revalidatePath(`/study/${studyId}/owner`);
-  revalidatePath(`/study/${studyId}/members`);
-  revalidatePath(`/study/${studyId}/overview`);
+  if (!isEditableMemberRole(role)) {
+    return createStudyMemberErrorState("변경할 수 없는 역할입니다.");
+  }
+
+  try {
+    const updated = await updateStudyMemberRoleCommand({
+      memberId,
+      role,
+      studyId,
+      userId,
+    });
+
+    if (!updated) {
+      return createStudyMemberErrorState("역할을 변경할 수 있는 멤버를 찾을 수 없습니다.");
+    }
+
+    revalidatePath(`/study/${studyId}/owner`);
+    revalidatePath(`/study/${studyId}/members`);
+    revalidatePath(`/study/${studyId}/overview`);
+
+    return createStudyMemberSuccessState();
+  } catch (error) {
+    console.error("Failed to update study member role", error);
+
+    return createStudyMemberErrorState(
+      "멤버 역할을 변경하지 못했습니다. 잠시 후 다시 시도해주세요.",
+    );
+  }
 }
 
-export async function removeStudyMember(formData: FormData) {
+export async function removeStudyMember(
+  _prevState: StudyMemberActionState,
+  formData: FormData,
+): Promise<StudyMemberActionState> {
   const session = await auth();
   const userId = session?.user?.id;
   const studyId = getFormValue(formData, "studyId");
   const memberId = getFormValue(formData, "memberId");
 
-  if (!userId || !studyId || !memberId) {
-    return;
+  if (!userId) {
+    return createStudyMemberErrorState("로그인이 필요합니다.");
   }
 
-  await removeStudyMemberCommand({ memberId, studyId, userId });
+  if (!studyId || !memberId) {
+    return createStudyMemberErrorState("멤버 정보를 찾을 수 없습니다.");
+  }
 
-  revalidatePath(`/study/${studyId}/owner`);
-  revalidatePath(`/study/${studyId}/members`);
-  revalidatePath(`/study/${studyId}/overview`);
+  try {
+    const removed = await removeStudyMemberCommand({ memberId, studyId, userId });
+
+    if (!removed) {
+      return createStudyMemberErrorState("내보낼 수 있는 멤버를 찾을 수 없습니다.");
+    }
+
+    revalidatePath(`/study/${studyId}/owner`);
+    revalidatePath(`/study/${studyId}/members`);
+    revalidatePath(`/study/${studyId}/overview`);
+
+    return createStudyMemberSuccessState();
+  } catch (error) {
+    console.error("Failed to remove study member", error);
+
+    return createStudyMemberErrorState(
+      "멤버를 내보내지 못했습니다. 잠시 후 다시 시도해주세요.",
+    );
+  }
 }
 
 export async function updateStudySettings(
@@ -220,6 +276,20 @@ function createStudySettingsErrorState({
     error,
     status: "error",
     title,
+  };
+}
+
+function createStudyMemberSuccessState(): StudyMemberActionState {
+  return {
+    error: null,
+    status: "success",
+  };
+}
+
+function createStudyMemberErrorState(error: string): StudyMemberActionState {
+  return {
+    error,
+    status: "error",
   };
 }
 
