@@ -40,6 +40,12 @@ export type CancelStudyInviteActionState = {
   status: "idle" | "error" | "success";
 };
 
+export type DeleteStudyActionState = {
+  confirmText: string;
+  error: string | null;
+  status: "idle" | "error";
+};
+
 export async function createStudyInvite(
   _prevState: CreateStudyInviteActionState,
   formData: FormData,
@@ -260,23 +266,56 @@ export async function updateStudySettings(
   };
 }
 
-export async function deleteStudy(formData: FormData) {
+export async function deleteStudy(
+  _prevState: DeleteStudyActionState,
+  formData: FormData,
+): Promise<DeleteStudyActionState> {
   const session = await auth();
   const userId = session?.user?.id;
   const studyId = getFormValue(formData, "studyId");
-  const confirmText = getFormValue(formData, "confirmText");
+  const confirmText = getFormValue(formData, "confirmText").trim();
 
-  if (!userId || !studyId || !confirmText) {
-    return;
+  if (!userId) {
+    return createDeleteStudyErrorState({
+      confirmText,
+      error: "로그인이 필요합니다.",
+    });
   }
 
-  const deleted = await deleteStudyCommand({ confirmText, studyId, userId });
-
-  if (!deleted) {
-    return;
+  if (!studyId) {
+    return createDeleteStudyErrorState({
+      confirmText,
+      error: "스터디 정보를 찾을 수 없습니다.",
+    });
   }
 
-  revalidatePath("/study");
+  if (!confirmText) {
+    return createDeleteStudyErrorState({
+      confirmText,
+      error: "확인 문구를 입력해주세요.",
+    });
+  }
+
+  try {
+    const deleted = await deleteStudyCommand({ confirmText, studyId, userId });
+
+    if (!deleted) {
+      return createDeleteStudyErrorState({
+        confirmText,
+        error: "스터디 이름이 일치하지 않거나 삭제 권한이 없습니다.",
+      });
+    }
+
+    revalidatePath("/study");
+  } catch (error) {
+    console.error("Failed to delete study", error);
+
+    return createDeleteStudyErrorState({
+      confirmText,
+      error: "스터디를 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.",
+    });
+  }
+
   redirect("/study");
 }
 
@@ -328,6 +367,20 @@ function createStudyMemberSuccessState(): StudyMemberActionState {
 
 function createStudyMemberErrorState(error: string): StudyMemberActionState {
   return {
+    error,
+    status: "error",
+  };
+}
+
+function createDeleteStudyErrorState({
+  confirmText,
+  error,
+}: {
+  confirmText: string;
+  error: string;
+}): DeleteStudyActionState {
+  return {
+    confirmText,
     error,
     status: "error",
   };
