@@ -9,19 +9,15 @@ import {
   rejectStudyInvite as rejectStudyInviteCommand,
 } from "@/server/studies/study.command.service";
 import { validateStudyInput } from "@/server/studies/study.schema";
+import type { ActionState } from "@/types/action-state";
 
-export type CreateStudyActionState = {
+export type CreateStudyActionState = ActionState & {
   description: string;
-  error: string | null;
-  status: "idle" | "error" | "success";
   studyId: string | null;
   title: string;
 };
 
-export type StudyInviteActionState = {
-  error: string | null;
-  status: "idle" | "error" | "success";
-};
+export type StudyInviteActionState = ActionState;
 
 export async function createStudy(
   _prevState: CreateStudyActionState,

@@ -10,11 +10,9 @@ import {
   sendFriendRequest,
 } from "@/server/friends/friend.command.service";
 import { getCurrentUserId } from "@/lib/session/session";
+import type { ActionState } from "@/types/action-state";
 
-export type FriendActionState = {
-  error: string | null;
-  status: "idle" | "error" | "success";
-};
+export type FriendActionState = ActionState;
 
 // 폼에서 대상 사용자 ID를 읽어 친구 요청 Server Action을 실행한다.
 export async function sendFriendRequestAction(

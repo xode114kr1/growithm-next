@@ -16,34 +16,23 @@ import {
   validateStudyInviteTarget,
   validateStudySettingsInput,
 } from "@/server/studies/study.schema";
+import type { ActionState } from "@/types/action-state";
 
-export type CreateStudyInviteActionState = {
-  error: string | null;
-  status: "idle" | "error" | "success";
+export type CreateStudyInviteActionState = ActionState & {
   target: string;
 };
 
-export type UpdateStudySettingsActionState = {
+export type UpdateStudySettingsActionState = ActionState & {
   description: string;
-  error: string | null;
-  status: "idle" | "error" | "success";
   title: string;
 };
 
-export type StudyMemberActionState = {
-  error: string | null;
-  status: "idle" | "error" | "success";
-};
+export type StudyMemberActionState = ActionState;
 
-export type CancelStudyInviteActionState = {
-  error: string | null;
-  status: "idle" | "error" | "success";
-};
+export type CancelStudyInviteActionState = ActionState;
 
-export type DeleteStudyActionState = {
+export type DeleteStudyActionState = ActionState<"idle" | "error"> & {
   confirmText: string;
-  error: string | null;
-  status: "idle" | "error";
 };
 
 export async function createStudyInvite(
