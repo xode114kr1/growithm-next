@@ -589,8 +589,8 @@ export async function acceptStudyInviteRecord({
   });
 }
 
-// 사용자가 받은 대기 초대를 취소 상태로 변경한다.
-export async function declineStudyInviteRecord({
+// 사용자가 받은 대기 초대를 거절 상태로 변경한다.
+export async function rejectStudyInviteRecord({
   inviteId,
   userId,
 }: {

@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth/auth";
 import {
   acceptStudyInvite as acceptStudyInviteCommand,
   createStudy as createStudyCommand,
-  declineStudyInvite as declineStudyInviteCommand,
+  rejectStudyInvite as rejectStudyInviteCommand,
 } from "@/server/studies/study.command.service";
 import { validateStudyInput } from "@/server/studies/study.schema";
 
@@ -16,6 +16,11 @@ export type CreateStudyActionState = {
   status: "idle" | "error" | "success";
   studyId: string | null;
   title: string;
+};
+
+export type StudyInviteActionState = {
+  error: string | null;
+  status: "idle" | "error" | "success";
 };
 
 export async function createStudy(
@@ -68,37 +73,70 @@ export async function createStudy(
   }
 }
 
-export async function acceptStudyInvite(formData: FormData) {
+export async function acceptStudyInvite(
+  _prevState: StudyInviteActionState,
+  formData: FormData,
+): Promise<StudyInviteActionState> {
   const session = await auth();
   const userId = session?.user?.id;
   const inviteId = getFormValue(formData, "inviteId");
 
-  if (!userId || !inviteId) {
-    return;
+  if (!userId) {
+    return createStudyInviteErrorState("로그인이 필요합니다.");
   }
 
-  const studyId = await acceptStudyInviteCommand({ inviteId, userId });
-
-  if (!studyId) {
-    return;
+  if (!inviteId) {
+    return createStudyInviteErrorState("초대 정보를 찾을 수 없습니다.");
   }
 
-  revalidatePath("/study");
-  revalidatePath(`/study/${studyId}/overview`);
+  try {
+    const studyId = await acceptStudyInviteCommand({ inviteId, userId });
+
+    if (!studyId) {
+      return createStudyInviteErrorState("수락할 수 있는 초대를 찾을 수 없습니다.");
+    }
+
+    revalidatePath("/study");
+    revalidatePath(`/study/${studyId}/overview`);
+
+    return createStudyInviteSuccessState();
+  } catch (error) {
+    console.error("Failed to accept study invite", error);
+
+    return createStudyInviteErrorState(
+      "스터디 초대를 수락하지 못했습니다. 잠시 후 다시 시도해주세요.",
+    );
+  }
 }
 
-export async function declineStudyInvite(formData: FormData) {
+export async function rejectStudyInvite(
+  _prevState: StudyInviteActionState,
+  formData: FormData,
+): Promise<StudyInviteActionState> {
   const session = await auth();
   const userId = session?.user?.id;
   const inviteId = getFormValue(formData, "inviteId");
 
-  if (!userId || !inviteId) {
-    return;
+  if (!userId) {
+    return createStudyInviteErrorState("로그인이 필요합니다.");
   }
 
-  await declineStudyInviteCommand({ inviteId, userId });
+  if (!inviteId) {
+    return createStudyInviteErrorState("초대 정보를 찾을 수 없습니다.");
+  }
 
-  revalidatePath("/study");
+  try {
+    await rejectStudyInviteCommand({ inviteId, userId });
+    revalidatePath("/study");
+
+    return createStudyInviteSuccessState();
+  } catch (error) {
+    console.error("Failed to reject study invite", error);
+
+    return createStudyInviteErrorState(
+      "스터디 초대를 거절하지 못했습니다. 잠시 후 다시 시도해주세요.",
+    );
+  }
 }
 
 function createErrorState({
@@ -116,6 +154,20 @@ function createErrorState({
     status: "error",
     studyId: null,
     title,
+  };
+}
+
+function createStudyInviteSuccessState(): StudyInviteActionState {
+  return {
+    error: null,
+    status: "success",
+  };
+}
+
+function createStudyInviteErrorState(error: string): StudyInviteActionState {
+  return {
+    error,
+    status: "error",
   };
 }
 

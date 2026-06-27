@@ -1,9 +1,33 @@
+"use client";
+
+import { useActionState } from "react";
+
 import { StudyInviteItem } from "@/types/study";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/ui/user-avatar";
-import { acceptStudyInvite, declineStudyInvite } from "../../actions";
+import {
+  acceptStudyInvite,
+  rejectStudyInvite,
+  type StudyInviteActionState,
+} from "../../actions";
+
+const initialActionState: StudyInviteActionState = {
+  error: null,
+  status: "idle",
+};
 
 export default function InviteItem({ invite }: { invite: StudyInviteItem }) {
+  const [acceptState, acceptFormAction, isAcceptPending] = useActionState(
+    acceptStudyInvite,
+    initialActionState,
+  );
+  const [rejectState, rejectFormAction, isRejectPending] = useActionState(
+    rejectStudyInvite,
+    initialActionState,
+  );
+  const isPending = isAcceptPending || isRejectPending;
+  const errorMessage = acceptState.error ?? rejectState.error;
+
   return (
     <article className="p-4 transition-all hover:bg-slate-50">
       <div className="mb-3 flex gap-3">
@@ -28,19 +52,34 @@ export default function InviteItem({ invite }: { invite: StudyInviteItem }) {
         </div>
       </div>
       <div className="flex gap-2">
-        <form action={acceptStudyInvite} className="flex-1">
+        <form action={acceptFormAction} className="flex-1">
           <input name="inviteId" type="hidden" value={invite.id} />
-          <Button className="w-full" size="xs" type="submit" variant="primary">
+          <Button
+            className="w-full"
+            disabled={isPending}
+            size="xs"
+            type="submit"
+            variant="primary"
+          >
             수락
           </Button>
         </form>
-        <form action={declineStudyInvite} className="flex-1">
+        <form action={rejectFormAction} className="flex-1">
           <input name="inviteId" type="hidden" value={invite.id} />
-          <Button className="w-full" size="xs" type="submit" variant="secondary">
+          <Button
+            className="w-full"
+            disabled={isPending}
+            size="xs"
+            type="submit"
+            variant="secondary"
+          >
             거절
           </Button>
         </form>
       </div>
+      {errorMessage ? (
+        <p className="mt-2 text-xs font-medium text-error">{errorMessage}</p>
+      ) : null}
     </article>
   );
 }

@@ -5,10 +5,10 @@ import {
   acceptStudyInviteRecord,
   cancelStudyInviteRecord,
   createStudyRecord,
-  declineStudyInviteRecord,
   deleteOwnedStudy,
   findStudyInviteContext,
   removeStudyMemberRecord,
+  rejectStudyInviteRecord,
   updateStudyMemberRoleRecord,
   updateStudySettingsRecord,
   upsertStudyInvite,
@@ -37,11 +37,11 @@ export async function acceptStudyInvite({
 }
 
 // 사용자가 받은 스터디 초대를 거절한다.
-export async function declineStudyInvite(input: {
+export async function rejectStudyInvite(input: {
   inviteId: string;
   userId: string;
 }) {
-  await declineStudyInviteRecord(input);
+  await rejectStudyInviteRecord(input);
 }
 
 // 소유한 스터디에 대상 사용자를 초대한다.
