@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useId, useState } from "react";
 
+import { ActionStateMessage } from "@/components/ui/action-state-message";
 import { Button } from "@/components/ui/button";
 
 import { createStudy, type CreateStudyActionState } from "../../actions";
@@ -103,9 +104,9 @@ export default function StudyCreateModal() {
               </div>
 
               {state.status === "error" ? (
-                <p className="rounded-lg bg-error/10 px-4 py-3 text-body-sm font-medium text-error">
+                <ActionStateMessage variant="error">
                   {state.error}
-                </p>
+                </ActionStateMessage>
               ) : null}
 
               <div className="flex flex-col-reverse justify-end gap-2 border-t border-slate-100 pt-5 sm:flex-row">

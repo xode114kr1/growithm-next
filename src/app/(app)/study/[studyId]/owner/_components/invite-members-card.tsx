@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 
+import { ActionStateMessage } from "@/components/ui/action-state-message";
 import { Button } from "@/components/ui/button";
 import type { OwnerInvite } from "@/types/study";
 
@@ -81,15 +82,15 @@ export default function InviteMembersCard({
           </form>
 
           {state.status === "error" ? (
-            <p className="mt-3 rounded-lg bg-error/10 px-4 py-3 text-body-sm font-medium text-error">
+            <ActionStateMessage className="mt-3" variant="error">
               {state.error}
-            </p>
+            </ActionStateMessage>
           ) : null}
 
           {state.status === "success" ? (
-            <p className="mt-3 rounded-lg bg-secondary-container/60 px-4 py-3 text-body-sm font-medium text-primary">
+            <ActionStateMessage className="mt-3" variant="success">
               초대를 보냈습니다.
-            </p>
+            </ActionStateMessage>
           ) : null}
         </div>
 

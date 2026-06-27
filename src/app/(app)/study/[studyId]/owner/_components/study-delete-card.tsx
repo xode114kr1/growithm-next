@@ -2,6 +2,8 @@
 
 import { useActionState, useState } from "react";
 
+import { ActionStateMessage } from "@/components/ui/action-state-message";
+
 import { deleteStudy, type DeleteStudyActionState } from "../actions";
 
 const initialActionState: DeleteStudyActionState = {
@@ -67,9 +69,9 @@ export default function StudyDeleteCard({
       </div>
 
       {state.status === "error" ? (
-        <p className="mt-4 rounded-lg bg-error/10 px-4 py-3 text-body-sm font-medium text-error">
+        <ActionStateMessage className="mt-4" variant="error">
           {state.error}
-        </p>
+        </ActionStateMessage>
       ) : null}
     </form>
   );
