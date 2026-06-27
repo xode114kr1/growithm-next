@@ -43,7 +43,7 @@ export default function StudyDeleteCard({
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_320px] lg:items-end">
         <label className="block rounded-lg border border-error-container bg-white p-4">
-          <span className="mb-2 block text-label-caps text-slate-500">
+          <span className="mb-2 block  text-slate-500">
             확인을 위해 &apos;{studyName}&apos; 입력
           </span>
           <input
