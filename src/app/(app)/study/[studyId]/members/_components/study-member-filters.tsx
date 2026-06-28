@@ -5,6 +5,7 @@ import {
   FilterSelect,
 } from "@/components/ui/filter-card";
 import { useReplaceQueryParams } from "@/hooks/use-query-params";
+import { studyMemberRoleLabels } from "@/utils/study-role";
 
 import type {
   StudyMemberFiltersState,
@@ -42,10 +43,10 @@ export default function StudyMemberFilters({
           }}
           value={filters.role}
         >
-          <option value="ALL">전체</option>
-          <option value="OWNER">owner</option>
-          <option value="LEADER">리더</option>
-          <option value="MEMBER">멤버</option>
+          <option value="ALL">All</option>
+          <option value="OWNER">{studyMemberRoleLabels.OWNER}</option>
+          <option value="LEADER">{studyMemberRoleLabels.LEADER}</option>
+          <option value="MEMBER">{studyMemberRoleLabels.MEMBER}</option>
         </FilterSelect>
       </FilterCard>
       <FilterCard title="정렬">

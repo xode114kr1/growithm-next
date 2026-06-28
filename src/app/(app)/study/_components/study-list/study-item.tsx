@@ -3,6 +3,7 @@ import {
   studyTierProgressColors,
   studyTierThumbnailColors,
 } from "@/utils/color";
+import { studyMemberRoleLabels } from "@/utils/study-role";
 import Link from "next/link";
 
 export default function StudyItem({ study }: { study: StudyListItem }) {
@@ -11,7 +12,7 @@ export default function StudyItem({ study }: { study: StudyListItem }) {
       {study.isOwner ? (
         <div className="absolute right-0 top-0 p-4">
           <span className="rounded-full bg-secondary-container px-1.5 py-0.5 text-xs font-medium leading-none text-on-secondary-container">
-            owner
+            {studyMemberRoleLabels.OWNER}
           </span>
         </div>
       ) : null}

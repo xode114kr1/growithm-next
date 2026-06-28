@@ -7,6 +7,7 @@ import type {
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { studyTierBadgeColors, studyTierProgressColors } from "@/utils/color";
 import { getTierProgress } from "@/utils/study";
+import { studyOverviewMemberRoleLabels } from "@/utils/study-role";
 import Link from "next/link";
 
 export function StudyOverviewHeader({
@@ -139,14 +140,14 @@ export function StudyMembersCard({
                 <p className="truncate text-body-sm font-bold text-on-surface">
                   {member.name}
                 </p>
-                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-                  {member.role}
+                <p className="text-[10px] font-bold tracking-wide text-slate-400">
+                  {studyOverviewMemberRoleLabels[member.role]}
                 </p>
               </div>
             </div>
             {member.role === "owner" ? (
-              <span className="rounded-full bg-secondary-fixed px-2 py-1 text-[10px] font-bold uppercase text-on-secondary-fixed">
-                owner
+              <span className="rounded-full bg-secondary-fixed px-2 py-1 text-[10px] font-bold text-on-secondary-fixed">
+                {studyOverviewMemberRoleLabels.owner}
               </span>
             ) : null}
           </div>
