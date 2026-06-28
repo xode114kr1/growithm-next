@@ -63,9 +63,6 @@ export default function StudyMemberItem({
             <p className="mt-1 text-body-md font-semibold text-on-surface">
               {member.lastActive}
             </p>
-            <p className="mt-1 text-xs font-medium text-slate-400">
-              joined {member.joinedAt}
-            </p>
           </div>
         </div>
       </article>
