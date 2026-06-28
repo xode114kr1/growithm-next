@@ -4,6 +4,7 @@ import type {
   StudyRecentProblem,
   StudyTier,
 } from "@/types/study";
+import ProblemTierBadge from "@/components/ui/problem-tier-badge";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { studyTierBadgeColors, studyTierProgressColors } from "@/utils/color";
 import { getTierProgress } from "@/utils/study";
@@ -205,9 +206,7 @@ export function RecentSolvedProblems({
                       {problem.platform}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="rounded border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold uppercase text-slate-600">
-                        {problem.tier}
-                      </span>
+                      <ProblemTierBadge tier={problem.tier} />
                     </td>
                     <td className="px-6 py-4 text-body-sm font-semibold text-secondary">
                       {problem.solvedBy}
