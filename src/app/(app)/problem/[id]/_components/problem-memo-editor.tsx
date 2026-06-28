@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useActionState, useState } from "react";
 
 import {
   type ProblemMemoActionState,
@@ -24,12 +24,24 @@ export default function ProblemMemoEditor({
   problemId,
 }: ProblemMemoEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [isPending, startMemoTransition] = useTransition();
-  const [state, setState] = useState<ProblemMemoActionState>({
+  const [state, formAction, isPending] = useActionState(handleUpdateMemo, {
     ...initialState,
     memo: initialMemo ?? "",
   });
   const memo = state.memo;
+
+  async function handleUpdateMemo(
+    prevState: ProblemMemoActionState,
+    formData: FormData,
+  ) {
+    const nextState = await updateProblemMemo(prevState, formData);
+
+    if (nextState.status === "success") {
+      setIsEditing(false);
+    }
+
+    return nextState;
+  }
 
   return (
     <section className="app-card p-6 md:p-8">
@@ -49,20 +61,7 @@ export default function ProblemMemoEditor({
       </div>
 
       {isEditing ? (
-        <form
-          action={(formData) => {
-            startMemoTransition(async () => {
-              const nextState = await updateProblemMemo(state, formData);
-
-              setState(nextState);
-
-              if (nextState.status === "success") {
-                setIsEditing(false);
-              }
-            });
-          }}
-          className="space-y-4"
-        >
+        <form action={formAction} className="space-y-4">
           <input name="problemId" type="hidden" value={problemId} />
           <textarea
             className="input-field min-h-40 resize-y py-3"

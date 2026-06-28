@@ -1,0 +1,33 @@
+export const heatmapColors = [
+  "bg-slate-100",
+  "bg-emerald-100",
+  "bg-emerald-300",
+  "bg-emerald-500",
+  "bg-slate-100",
+  "bg-emerald-200",
+  "bg-emerald-400",
+  "bg-emerald-200",
+  "bg-slate-100",
+  "bg-emerald-600",
+  "bg-emerald-400",
+  "bg-emerald-200",
+  "bg-slate-100",
+  "bg-emerald-100",
+  "bg-emerald-500",
+  "bg-emerald-300",
+  "bg-slate-100",
+  "bg-emerald-100",
+  "bg-emerald-500",
+  "bg-emerald-200",
+  "bg-emerald-300",
+];
+
+export const growthBars = [
+  "h-2/5",
+  "h-3/5",
+  "h-11/20",
+  "h-4/5",
+  "h-full",
+  "h-7/10",
+  "h-9/10",
+];

@@ -16,18 +16,23 @@ import {
   validateStudyInviteTarget,
   validateStudySettingsInput,
 } from "@/server/studies/study.schema";
+import type { ActionState } from "@/types/action-state";
 
-export type CreateStudyInviteActionState = {
-  error: string | null;
-  status: "idle" | "error" | "success";
+export type CreateStudyInviteActionState = ActionState & {
   target: string;
 };
 
-export type UpdateStudySettingsActionState = {
+export type UpdateStudySettingsActionState = ActionState & {
   description: string;
-  error: string | null;
-  status: "idle" | "error" | "success";
   title: string;
+};
+
+export type StudyMemberActionState = ActionState;
+
+export type CancelStudyInviteActionState = ActionState;
+
+export type DeleteStudyActionState = ActionState<"idle" | "error"> & {
+  confirmText: string;
 };
 
 export async function createStudyInvite(
@@ -68,54 +73,126 @@ export async function createStudyInvite(
   };
 }
 
-export async function cancelStudyInvite(formData: FormData) {
+export async function cancelStudyInvite(
+  _prevState: CancelStudyInviteActionState,
+  formData: FormData,
+): Promise<CancelStudyInviteActionState> {
   const session = await auth();
   const userId = session?.user?.id;
   const inviteId = getFormValue(formData, "inviteId");
   const studyId = getFormValue(formData, "studyId");
 
-  if (!userId || !inviteId || !studyId) {
-    return;
+  if (!userId) {
+    return createCancelInviteErrorState("로그인이 필요합니다.");
   }
 
-  await cancelStudyInviteCommand({ inviteId, studyId, userId });
+  if (!inviteId || !studyId) {
+    return createCancelInviteErrorState("초대 정보를 찾을 수 없습니다.");
+  }
 
-  revalidatePath(`/study/${studyId}/owner`);
+  try {
+    const canceled = await cancelStudyInviteCommand({ inviteId, studyId, userId });
+
+    if (!canceled) {
+      return createCancelInviteErrorState("취소할 수 있는 초대를 찾을 수 없습니다.");
+    }
+
+    revalidatePath(`/study/${studyId}/owner`);
+
+    return createCancelInviteSuccessState();
+  } catch (error) {
+    console.error("Failed to cancel study invite", error);
+
+    return createCancelInviteErrorState(
+      "초대를 취소하지 못했습니다. 잠시 후 다시 시도해주세요.",
+    );
+  }
 }
 
-export async function updateStudyMemberRole(formData: FormData) {
+export async function updateStudyMemberRole(
+  _prevState: StudyMemberActionState,
+  formData: FormData,
+): Promise<StudyMemberActionState> {
   const session = await auth();
   const userId = session?.user?.id;
   const studyId = getFormValue(formData, "studyId");
   const memberId = getFormValue(formData, "memberId");
   const role = getFormValue(formData, "role");
 
-  if (!userId || !studyId || !memberId || !isEditableMemberRole(role)) {
-    return;
+  if (!userId) {
+    return createStudyMemberErrorState("로그인이 필요합니다.");
   }
 
-  await updateStudyMemberRoleCommand({ memberId, role, studyId, userId });
+  if (!studyId || !memberId) {
+    return createStudyMemberErrorState("멤버 정보를 찾을 수 없습니다.");
+  }
 
-  revalidatePath(`/study/${studyId}/owner`);
-  revalidatePath(`/study/${studyId}/members`);
-  revalidatePath(`/study/${studyId}/overview`);
+  if (!isEditableMemberRole(role)) {
+    return createStudyMemberErrorState("변경할 수 없는 역할입니다.");
+  }
+
+  try {
+    const updated = await updateStudyMemberRoleCommand({
+      memberId,
+      role,
+      studyId,
+      userId,
+    });
+
+    if (!updated) {
+      return createStudyMemberErrorState("역할을 변경할 수 있는 멤버를 찾을 수 없습니다.");
+    }
+
+    revalidatePath(`/study/${studyId}/owner`);
+    revalidatePath(`/study/${studyId}/members`);
+    revalidatePath(`/study/${studyId}/overview`);
+
+    return createStudyMemberSuccessState();
+  } catch (error) {
+    console.error("Failed to update study member role", error);
+
+    return createStudyMemberErrorState(
+      "멤버 역할을 변경하지 못했습니다. 잠시 후 다시 시도해주세요.",
+    );
+  }
 }
 
-export async function removeStudyMember(formData: FormData) {
+export async function removeStudyMember(
+  _prevState: StudyMemberActionState,
+  formData: FormData,
+): Promise<StudyMemberActionState> {
   const session = await auth();
   const userId = session?.user?.id;
   const studyId = getFormValue(formData, "studyId");
   const memberId = getFormValue(formData, "memberId");
 
-  if (!userId || !studyId || !memberId) {
-    return;
+  if (!userId) {
+    return createStudyMemberErrorState("로그인이 필요합니다.");
   }
 
-  await removeStudyMemberCommand({ memberId, studyId, userId });
+  if (!studyId || !memberId) {
+    return createStudyMemberErrorState("멤버 정보를 찾을 수 없습니다.");
+  }
 
-  revalidatePath(`/study/${studyId}/owner`);
-  revalidatePath(`/study/${studyId}/members`);
-  revalidatePath(`/study/${studyId}/overview`);
+  try {
+    const removed = await removeStudyMemberCommand({ memberId, studyId, userId });
+
+    if (!removed) {
+      return createStudyMemberErrorState("내보낼 수 있는 멤버를 찾을 수 없습니다.");
+    }
+
+    revalidatePath(`/study/${studyId}/owner`);
+    revalidatePath(`/study/${studyId}/members`);
+    revalidatePath(`/study/${studyId}/overview`);
+
+    return createStudyMemberSuccessState();
+  } catch (error) {
+    console.error("Failed to remove study member", error);
+
+    return createStudyMemberErrorState(
+      "멤버를 내보내지 못했습니다. 잠시 후 다시 시도해주세요.",
+    );
+  }
 }
 
 export async function updateStudySettings(
@@ -178,23 +255,56 @@ export async function updateStudySettings(
   };
 }
 
-export async function deleteStudy(formData: FormData) {
+export async function deleteStudy(
+  _prevState: DeleteStudyActionState,
+  formData: FormData,
+): Promise<DeleteStudyActionState> {
   const session = await auth();
   const userId = session?.user?.id;
   const studyId = getFormValue(formData, "studyId");
-  const confirmText = getFormValue(formData, "confirmText");
+  const confirmText = getFormValue(formData, "confirmText").trim();
 
-  if (!userId || !studyId || !confirmText) {
-    return;
+  if (!userId) {
+    return createDeleteStudyErrorState({
+      confirmText,
+      error: "로그인이 필요합니다.",
+    });
   }
 
-  const deleted = await deleteStudyCommand({ confirmText, studyId, userId });
-
-  if (!deleted) {
-    return;
+  if (!studyId) {
+    return createDeleteStudyErrorState({
+      confirmText,
+      error: "스터디 정보를 찾을 수 없습니다.",
+    });
   }
 
-  revalidatePath("/study");
+  if (!confirmText) {
+    return createDeleteStudyErrorState({
+      confirmText,
+      error: "확인 문구를 입력해주세요.",
+    });
+  }
+
+  try {
+    const deleted = await deleteStudyCommand({ confirmText, studyId, userId });
+
+    if (!deleted) {
+      return createDeleteStudyErrorState({
+        confirmText,
+        error: "스터디 이름이 일치하지 않거나 삭제 권한이 없습니다.",
+      });
+    }
+
+    revalidatePath("/study");
+  } catch (error) {
+    console.error("Failed to delete study", error);
+
+    return createDeleteStudyErrorState({
+      confirmText,
+      error: "스터디를 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.",
+    });
+  }
+
   redirect("/study");
 }
 
@@ -203,6 +313,20 @@ function createInviteErrorState(target: string, error: string): CreateStudyInvit
     error,
     status: "error",
     target,
+  };
+}
+
+function createCancelInviteSuccessState(): CancelStudyInviteActionState {
+  return {
+    error: null,
+    status: "success",
+  };
+}
+
+function createCancelInviteErrorState(error: string): CancelStudyInviteActionState {
+  return {
+    error,
+    status: "error",
   };
 }
 
@@ -220,6 +344,34 @@ function createStudySettingsErrorState({
     error,
     status: "error",
     title,
+  };
+}
+
+function createStudyMemberSuccessState(): StudyMemberActionState {
+  return {
+    error: null,
+    status: "success",
+  };
+}
+
+function createStudyMemberErrorState(error: string): StudyMemberActionState {
+  return {
+    error,
+    status: "error",
+  };
+}
+
+function createDeleteStudyErrorState({
+  confirmText,
+  error,
+}: {
+  confirmText: string;
+  error: string;
+}): DeleteStudyActionState {
+  return {
+    confirmText,
+    error,
+    status: "error",
   };
 }
 

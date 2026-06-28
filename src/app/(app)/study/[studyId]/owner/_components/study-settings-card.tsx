@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 
+import { ActionStateMessage } from "@/components/ui/action-state-message";
 import { Button } from "@/components/ui/button";
 import type { OwnerStudy } from "@/types/study";
 
@@ -71,15 +72,15 @@ export default function StudySettingsCard({ study }: { study: OwnerStudy }) {
       </div>
 
       {state.status === "error" ? (
-        <p className="mt-4 rounded-lg bg-error/10 px-4 py-3 text-body-sm font-medium text-error">
+        <ActionStateMessage className="mt-4" variant="error">
           {state.error}
-        </p>
+        </ActionStateMessage>
       ) : null}
 
       {state.status === "success" ? (
-        <p className="mt-4 rounded-lg bg-secondary-container/60 px-4 py-3 text-body-sm font-medium text-primary">
+        <ActionStateMessage className="mt-4" variant="success">
           스터디 설정을 저장했습니다.
-        </p>
+        </ActionStateMessage>
       ) : null}
     </form>
   );

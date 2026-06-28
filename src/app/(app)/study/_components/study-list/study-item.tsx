@@ -3,6 +3,7 @@ import {
   studyTierProgressColors,
   studyTierThumbnailColors,
 } from "@/utils/color";
+import { studyMemberRoleLabels } from "@/utils/study-role";
 import Link from "next/link";
 
 export default function StudyItem({ study }: { study: StudyListItem }) {
@@ -11,7 +12,7 @@ export default function StudyItem({ study }: { study: StudyListItem }) {
       {study.isOwner ? (
         <div className="absolute right-0 top-0 p-4">
           <span className="rounded-full bg-secondary-container px-1.5 py-0.5 text-xs font-medium leading-none text-on-secondary-container">
-            owner
+            {studyMemberRoleLabels.OWNER}
           </span>
         </div>
       ) : null}
@@ -39,7 +40,6 @@ export default function StudyItem({ study }: { study: StudyListItem }) {
         <div>
           <div className="mb-1.5 flex justify-between text-xs">
             <span className="font-semibold text-on-surface">스터디 점수</span>
-            <span className="text-secondary">{study.progressLabel}</span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-container">
             <div
@@ -53,7 +53,7 @@ export default function StudyItem({ study }: { study: StudyListItem }) {
             멤버 {study.memberCount.toLocaleString()}명
           </span>
           <span className="text-xs font-medium text-secondary">
-            {study.score.toLocaleString()} XP
+            {study.progressLabel}
           </span>
         </div>
       </Link>

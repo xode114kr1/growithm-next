@@ -1,8 +1,6 @@
 import { Button, ButtonLink } from "@/components/ui/button";
 import { signInWithGitHub } from "../actions";
 
-const trustBadges = ["GITHUB VERIFIED", "SECURE SYNC", "REAL-TIME REVIEW"];
-
 export default function GrowthCtaSection({
   isAuthenticated,
 }: {
@@ -25,14 +23,6 @@ export default function GrowthCtaSection({
           </p>
           <div className="flex justify-center">
             <StartButton isAuthenticated={isAuthenticated} />
-          </div>
-          <div className="mt-8 flex flex-wrap justify-center gap-8 border-t border-on-primary-container/30 pt-8 text-label-caps text-on-primary-container sm:gap-12">
-            {trustBadges.map((badge) => (
-              <span className="flex items-center gap-2" key={badge}>
-                <span className="size-2 rounded-full bg-secondary-fixed" />
-                {badge}
-              </span>
-            ))}
           </div>
         </div>
       </div>

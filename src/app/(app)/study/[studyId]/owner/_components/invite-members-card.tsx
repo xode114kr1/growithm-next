@@ -2,8 +2,10 @@
 
 import { useActionState } from "react";
 
+import { ActionStateMessage } from "@/components/ui/action-state-message";
 import { Button } from "@/components/ui/button";
 import type { OwnerInvite } from "@/types/study";
+import { INITIAL_ACTION_STATE } from "@/utils/action-state";
 
 import {
   cancelStudyInvite,
@@ -38,9 +40,6 @@ export default function InviteMembersCard({
             사용자 이름 또는 이메일로 스터디에 초대합니다.
           </p>
         </div>
-        <span className="text-body-sm italic text-slate-400">
-          Invitations are valid for 7 days
-        </span>
       </div>
 
       <div className="grid grid-cols-1 gap-gutter lg:grid-cols-2">
@@ -75,15 +74,15 @@ export default function InviteMembersCard({
           </form>
 
           {state.status === "error" ? (
-            <p className="mt-3 rounded-lg bg-error/10 px-4 py-3 text-body-sm font-medium text-error">
+            <ActionStateMessage className="mt-3" variant="error">
               {state.error}
-            </p>
+            </ActionStateMessage>
           ) : null}
 
           {state.status === "success" ? (
-            <p className="mt-3 rounded-lg bg-secondary-container/60 px-4 py-3 text-body-sm font-medium text-primary">
+            <ActionStateMessage className="mt-3" variant="success">
               초대를 보냈습니다.
-            </p>
+            </ActionStateMessage>
           ) : null}
         </div>
 
@@ -93,27 +92,11 @@ export default function InviteMembersCard({
           </h3>
           <div className="divide-y divide-slate-50 rounded-lg border border-slate-100">
             {initialInvites.map((invite) => (
-              <div
-                className="flex items-center justify-between gap-4 px-4 py-3"
+              <PendingInviteItem
+                invite={invite}
                 key={invite.id}
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-body-sm font-semibold text-on-surface">
-                    {invite.target}
-                  </p>
-                  <p className="text-xs text-slate-400">{invite.status}</p>
-                </div>
-                <form action={cancelStudyInvite}>
-                  <input name="studyId" type="hidden" value={studyId} />
-                  <input name="inviteId" type="hidden" value={invite.id} />
-                  <button
-                    className="text-body-sm font-semibold text-error hover:underline"
-                    type="submit"
-                  >
-                    취소
-                  </button>
-                </form>
-              </div>
+                studyId={studyId}
+              />
             ))}
             {initialInvites.length === 0 ? (
               <div className="px-4 py-6 text-center text-body-sm text-slate-400">
@@ -124,5 +107,42 @@ export default function InviteMembersCard({
         </div>
       </div>
     </section>
+  );
+}
+
+function PendingInviteItem({
+  invite,
+  studyId,
+}: {
+  invite: OwnerInvite;
+  studyId: string;
+}) {
+  const [state, formAction, isPending] = useActionState(
+    cancelStudyInvite,
+    INITIAL_ACTION_STATE,
+  );
+
+  return (
+    <div className="flex items-start justify-between gap-4 px-4 py-3">
+      <div className="min-w-0">
+        <p className="truncate text-body-sm font-semibold text-on-surface">
+          {invite.target}
+        </p>
+        {state.status === "error" ? (
+          <p className="mt-1 text-xs font-medium text-error">{state.error}</p>
+        ) : null}
+      </div>
+      <form action={formAction}>
+        <input name="studyId" type="hidden" value={studyId} />
+        <input name="inviteId" type="hidden" value={invite.id} />
+        <button
+          className="text-body-sm font-semibold text-error transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
+          disabled={isPending}
+          type="submit"
+        >
+          취소
+        </button>
+      </form>
+    </div>
   );
 }

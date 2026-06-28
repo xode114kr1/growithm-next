@@ -4,9 +4,11 @@ import type {
   StudyRecentProblem,
   StudyTier,
 } from "@/types/study";
+import ProblemTierBadge from "@/components/ui/problem-tier-badge";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { studyTierBadgeColors, studyTierProgressColors } from "@/utils/color";
 import { getTierProgress } from "@/utils/study";
+import { studyOverviewMemberRoleLabels } from "@/utils/study-role";
 import Link from "next/link";
 
 export function StudyOverviewHeader({
@@ -17,14 +19,12 @@ export function StudyOverviewHeader({
   name: string;
 }) {
   return (
-    <header className="border-b border-outline-variant/40 pb-8">
-      <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
-        <div>
-          <h1 className="page-title text-primary">{name}</h1>
-          <p className="mt-2 max-w-2xl text-body-md text-on-surface-variant">
-            {description}
-          </p>
-        </div>
+    <header className="app-card p-6 md:p-8">
+      <div className="max-w-3xl">
+        <h1 className="page-title text-primary">{name}</h1>
+        <p className="mt-3 text-body-md leading-relaxed text-on-surface-variant">
+          {description}
+        </p>
       </div>
     </header>
   );
@@ -141,14 +141,14 @@ export function StudyMembersCard({
                 <p className="truncate text-body-sm font-bold text-on-surface">
                   {member.name}
                 </p>
-                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-                  {member.role}
+                <p className="text-[10px] font-bold tracking-wide text-slate-400">
+                  {studyOverviewMemberRoleLabels[member.role]}
                 </p>
               </div>
             </div>
             {member.role === "owner" ? (
-              <span className="rounded-full bg-secondary-fixed px-2 py-1 text-[10px] font-bold uppercase text-on-secondary-fixed">
-                owner
+              <span className="rounded-full bg-secondary-fixed px-2 py-1 text-[10px] font-bold text-on-secondary-fixed">
+                {studyOverviewMemberRoleLabels.owner}
               </span>
             ) : null}
           </div>
@@ -175,7 +175,7 @@ export function RecentSolvedProblems({
           </p>
         </div>
         <Link
-          className="text-body-sm font-semibold text-secondary hover:underline"
+          className="text-body-sm font-semibold text-secondary transition-opacity hover:opacity-80"
           href={`/study/${studyId}/problems`}
         >
           전체 보기
@@ -206,9 +206,7 @@ export function RecentSolvedProblems({
                       {problem.platform}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="rounded border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold uppercase text-slate-600">
-                        {problem.tier}
-                      </span>
+                      <ProblemTierBadge tier={problem.tier} />
                     </td>
                     <td className="px-6 py-4 text-body-sm font-semibold text-secondary">
                       {problem.solvedBy}

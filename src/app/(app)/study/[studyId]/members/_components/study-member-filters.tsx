@@ -5,6 +5,7 @@ import {
   FilterSelect,
 } from "@/components/ui/filter-card";
 import { useReplaceQueryParams } from "@/hooks/use-query-params";
+import { studyMemberRoleLabels } from "@/utils/study-role";
 
 import type {
   StudyMemberFiltersState,
@@ -21,7 +22,7 @@ export default function StudyMemberFilters({
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-      <FilterCard title="Search Members">
+      <FilterCard title="검색">
         <input
           aria-label="멤버 검색"
           className="input-field min-h-10"
@@ -33,7 +34,7 @@ export default function StudyMemberFilters({
           type="search"
         />
       </FilterCard>
-      <FilterCard title="Role">
+      <FilterCard title="역할">
         <FilterSelect
           aria-label="멤버 역할"
           onChange={(event) => {
@@ -42,13 +43,13 @@ export default function StudyMemberFilters({
           }}
           value={filters.role}
         >
-          <option value="ALL">전체</option>
-          <option value="OWNER">owner</option>
-          <option value="LEADER">리더</option>
-          <option value="MEMBER">멤버</option>
+          <option value="ALL">All</option>
+          <option value="OWNER">{studyMemberRoleLabels.OWNER}</option>
+          <option value="LEADER">{studyMemberRoleLabels.LEADER}</option>
+          <option value="MEMBER">{studyMemberRoleLabels.MEMBER}</option>
         </FilterSelect>
       </FilterCard>
-      <FilterCard title="Sort">
+      <FilterCard title="정렬">
         <FilterSelect
           aria-label="멤버 정렬"
           onChange={(event) => {

@@ -589,8 +589,8 @@ export async function acceptStudyInviteRecord({
   });
 }
 
-// 사용자가 받은 대기 초대를 취소 상태로 변경한다.
-export async function declineStudyInviteRecord({
+// 사용자가 받은 대기 초대를 거절 상태로 변경한다.
+export async function rejectStudyInviteRecord({
   inviteId,
   userId,
 }: {
@@ -672,7 +672,7 @@ export async function cancelStudyInviteRecord({
   studyId: string;
   userId: string;
 }) {
-  await prisma.studyInvite.updateMany({
+  const result = await prisma.studyInvite.updateMany({
     data: { status: "CANCELED" },
     where: {
       id: inviteId,
@@ -680,6 +680,8 @@ export async function cancelStudyInviteRecord({
       study: { id: studyId, ownerId: userId },
     },
   });
+
+  return result.count > 0;
 }
 
 // 소유한 스터디의 일반 멤버 역할을 변경한다.

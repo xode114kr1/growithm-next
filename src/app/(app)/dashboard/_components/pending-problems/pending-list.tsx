@@ -13,7 +13,7 @@ export default function PendingList({
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-50 p-6 lg:p-8">
         <h2 className="section-title">최근 푼 문제</h2>
         <Link
-          className="text-body-sm font-semibold whitespace-nowrap text-secondary hover:underline"
+          className="text-body-sm font-semibold whitespace-nowrap text-secondary transition-opacity hover:opacity-80"
           href="/problem"
         >
           전체 문제 보기

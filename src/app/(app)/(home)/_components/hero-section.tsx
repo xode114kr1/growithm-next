@@ -14,9 +14,6 @@ export default function HeroSection({
     <section className="relative overflow-hidden bg-surface px-4 pb-20 pt-32 sm:px-10">
       <div className="mx-auto flex max-w-container flex-col items-center gap-16 lg:flex-row">
         <div className="z-10 flex-1 space-y-8">
-          <div className="inline-flex rounded-full bg-primary-fixed px-4 py-1.5 text-label-caps text-on-primary-fixed">
-            Algorithm Study Reinvented
-          </div>
           <h1 className="max-w-2xl text-h1-editorial text-primary">
             알고리즘으로 함께 성장하세요
           </h1>

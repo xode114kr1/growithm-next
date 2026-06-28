@@ -1,7 +1,10 @@
 "use client";
 
+import { useActionState } from "react";
+
 import { Button } from "@/components/ui/button";
 import type { FriendSearchResult } from "@/types/friend";
+import { INITIAL_ACTION_STATE } from "@/utils/action-state";
 
 import {
   acceptFriendRequestAction,
@@ -103,17 +106,29 @@ export function FriendActionButton({
   id: string;
 }) {
   const action = friendActions[actionType];
+  const [state, formAction, isPending] = useActionState(
+    action.action,
+    INITIAL_ACTION_STATE,
+  );
 
   return (
-    <form action={action.action}>
-      <input name={action.fieldName} type="hidden" value={id} />
-      <Button
-        className={className}
-        type="submit"
-        variant={action.variant}
-      >
-        {action.label}
-      </Button>
-    </form>
+    <div className="min-w-0">
+      <form action={formAction}>
+        <input name={action.fieldName} type="hidden" value={id} />
+        <Button
+          className={className}
+          disabled={isPending}
+          type="submit"
+          variant={action.variant}
+        >
+          {action.label}
+        </Button>
+      </form>
+      {state.status === "error" ? (
+        <p className="mt-1 max-w-40 text-xs font-medium text-error">
+          {state.error}
+        </p>
+      ) : null}
+    </div>
   );
 }
