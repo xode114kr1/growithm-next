@@ -17,14 +17,12 @@ export function StudyOverviewHeader({
   name: string;
 }) {
   return (
-    <header className="border-b border-outline-variant/40 pb-8">
-      <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
-        <div>
-          <h1 className="page-title text-primary">{name}</h1>
-          <p className="mt-2 max-w-2xl text-body-md text-on-surface-variant">
-            {description}
-          </p>
-        </div>
+    <header className="app-card p-6 md:p-8">
+      <div className="max-w-3xl">
+        <h1 className="page-title text-primary">{name}</h1>
+        <p className="mt-3 text-body-md leading-relaxed text-on-surface-variant">
+          {description}
+        </p>
       </div>
     </header>
   );
