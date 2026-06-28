@@ -21,7 +21,7 @@ export default function StudyMemberFilters({
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-      <FilterCard title="Search Members">
+      <FilterCard title="검색">
         <input
           aria-label="멤버 검색"
           className="input-field min-h-10"
@@ -33,7 +33,7 @@ export default function StudyMemberFilters({
           type="search"
         />
       </FilterCard>
-      <FilterCard title="Role">
+      <FilterCard title="역할">
         <FilterSelect
           aria-label="멤버 역할"
           onChange={(event) => {
@@ -48,7 +48,7 @@ export default function StudyMemberFilters({
           <option value="MEMBER">멤버</option>
         </FilterSelect>
       </FilterCard>
-      <FilterCard title="Sort">
+      <FilterCard title="정렬">
         <FilterSelect
           aria-label="멤버 정렬"
           onChange={(event) => {
