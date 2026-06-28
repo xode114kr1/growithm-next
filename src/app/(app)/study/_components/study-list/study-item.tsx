@@ -39,7 +39,6 @@ export default function StudyItem({ study }: { study: StudyListItem }) {
         <div>
           <div className="mb-1.5 flex justify-between text-xs">
             <span className="font-semibold text-on-surface">스터디 점수</span>
-            <span className="text-secondary">{study.progressLabel}</span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-container">
             <div
@@ -53,7 +52,7 @@ export default function StudyItem({ study }: { study: StudyListItem }) {
             멤버 {study.memberCount.toLocaleString()}명
           </span>
           <span className="text-xs font-medium text-secondary">
-            {study.score.toLocaleString()} XP
+            {study.progressLabel}
           </span>
         </div>
       </Link>
