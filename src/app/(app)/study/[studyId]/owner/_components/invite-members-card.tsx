@@ -40,9 +40,6 @@ export default function InviteMembersCard({
             사용자 이름 또는 이메일로 스터디에 초대합니다.
           </p>
         </div>
-        <span className="text-body-sm italic text-slate-400">
-          Invitations are valid for 7 days
-        </span>
       </div>
 
       <div className="grid grid-cols-1 gap-gutter lg:grid-cols-2">
