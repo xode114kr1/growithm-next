@@ -174,7 +174,7 @@ export function RecentSolvedProblems({
           </p>
         </div>
         <Link
-          className="text-body-sm font-semibold text-secondary hover:underline"
+          className="text-body-sm font-semibold text-secondary transition-opacity hover:opacity-80"
           href={`/study/${studyId}/problems`}
         >
           전체 보기
