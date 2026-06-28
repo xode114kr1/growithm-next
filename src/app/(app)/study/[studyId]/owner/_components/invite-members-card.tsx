@@ -40,9 +40,6 @@ export default function InviteMembersCard({
             사용자 이름 또는 이메일로 스터디에 초대합니다.
           </p>
         </div>
-        <span className="text-body-sm italic text-slate-400">
-          Invitations are valid for 7 days
-        </span>
       </div>
 
       <div className="grid grid-cols-1 gap-gutter lg:grid-cols-2">
@@ -131,7 +128,6 @@ function PendingInviteItem({
         <p className="truncate text-body-sm font-semibold text-on-surface">
           {invite.target}
         </p>
-        <p className="text-xs text-slate-400">{invite.status}</p>
         {state.status === "error" ? (
           <p className="mt-1 text-xs font-medium text-error">{state.error}</p>
         ) : null}
@@ -140,7 +136,7 @@ function PendingInviteItem({
         <input name="studyId" type="hidden" value={studyId} />
         <input name="inviteId" type="hidden" value={invite.id} />
         <button
-          className="text-body-sm font-semibold text-error hover:underline disabled:cursor-not-allowed disabled:opacity-40"
+          className="text-body-sm font-semibold text-error transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
           disabled={isPending}
           type="submit"
         >

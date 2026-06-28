@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import type { OwnerMember } from "@/types/study";
 import { INITIAL_ACTION_STATE } from "@/utils/action-state";
+import { studyMemberRoleLabels } from "@/utils/study-role";
 
 import { removeStudyMember, updateStudyMemberRole } from "../actions";
 
@@ -46,7 +47,7 @@ export default function ManageMemberRow({
       <td className="px-6 py-4">
         {member.role === "OWNER" ? (
           <span className="rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-body-sm font-semibold text-slate-400">
-            OWNER
+            {studyMemberRoleLabels.OWNER}
           </span>
         ) : (
           <form action={roleFormAction} className="flex gap-2">
@@ -58,8 +59,8 @@ export default function ManageMemberRow({
               disabled={isPending}
               name="role"
             >
-              <option value="LEADER">리더</option>
-              <option value="MEMBER">멤버</option>
+              <option value="LEADER">{studyMemberRoleLabels.LEADER}</option>
+              <option value="MEMBER">{studyMemberRoleLabels.MEMBER}</option>
             </select>
             <Button disabled={isPending} type="submit" variant="secondary">
               저장

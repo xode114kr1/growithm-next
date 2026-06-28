@@ -1,3 +1,4 @@
+import { formatSubmittedDateText } from "@/utils/date";
 import { ProblemDetail } from "@/types/problem";
 import { ReactNode } from "react";
 
@@ -23,9 +24,12 @@ export function ProblemSolutionCode({ code }: { code: string | null }) {
 
 export function ProblemMetadata({ problem }: { problem: ProblemDetail }) {
   const metadata = [
-    { label: "메모리", value: problem.memory ?? "기록 없음" },
-    { label: "실행 시간", value: problem.time ?? "기록 없음" },
-    { label: "제출일", value: problem.submittedAtText ?? "제출 완료" },
+    { label: "Memory", value: problem.memory ?? "기록 없음" },
+    { label: "Runtime", value: problem.time ?? "기록 없음" },
+    {
+      label: "제출일",
+      value: formatSubmittedDateText(problem.submittedAtText) ?? "제출 완료",
+    },
   ].filter((item): item is { label: string; value: string } =>
     Boolean(item.value),
   );

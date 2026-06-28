@@ -37,10 +37,6 @@ export default function ProblemHeader({
           <h1 className="page-title text-pretty wrap-break-word text-primary">
             {problem.title}
           </h1>
-
-          <p className="mt-3 max-w-2xl text-body-md text-on-surface-variant">
-            제출 기록에서 수집한 문제 정보와 풀이 메타데이터를 확인합니다.
-          </p>
         </div>
 
         <div className="flex flex-wrap gap-2">

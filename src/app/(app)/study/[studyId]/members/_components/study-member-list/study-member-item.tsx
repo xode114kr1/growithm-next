@@ -6,8 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ProfileModal } from "@/components/ui/profile-modal";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import type { StudyMember } from "@/types/study";
-
-import { studyMemberRoleLabels } from "../../constants";
+import { studyMemberRoleLabels } from "@/utils/study-role";
 
 export default function StudyMemberItem({
   member,
@@ -32,10 +31,10 @@ export default function StudyMemberItem({
               <span
                 className={
                   isOwner
-                    ? "mt-1 inline-flex rounded-full bg-primary px-2.5 py-1 text-2.5 font-bold uppercase tracking-wide text-on-primary"
+                    ? "mt-1 inline-flex rounded-full bg-primary px-2.5 py-1 text-2.5 font-bold tracking-wide text-on-primary"
                     : isLeader
-                      ? "mt-1 inline-flex rounded-full bg-secondary-fixed px-2.5 py-1 text-2.5 font-bold uppercase tracking-wide text-on-secondary-fixed"
-                      : "mt-1 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-2.5 font-bold uppercase tracking-wide text-slate-500"
+                      ? "mt-1 inline-flex rounded-full bg-secondary-fixed px-2.5 py-1 text-2.5 font-bold tracking-wide text-on-secondary-fixed"
+                      : "mt-1 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-2.5 font-bold tracking-wide text-slate-500"
                 }
               >
                 {studyMemberRoleLabels[member.role]}
@@ -62,9 +61,6 @@ export default function StudyMemberItem({
             <p className="text-label-caps text-slate-400">최근 활동</p>
             <p className="mt-1 text-body-md font-semibold text-on-surface">
               {member.lastActive}
-            </p>
-            <p className="mt-1 text-xs font-medium text-slate-400">
-              joined {member.joinedAt}
             </p>
           </div>
         </div>

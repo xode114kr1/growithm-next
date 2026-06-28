@@ -7,6 +7,23 @@ export function formatShortDate(date: Date) {
   }).format(date);
 }
 
+// 제출 시각 문자열을 날짜만 표시하는 ISO 형식으로 변환한다.
+export function formatSubmittedDateText(
+  submittedAtText: string | null | undefined,
+) {
+  if (!submittedAtText) return null;
+
+  const dateParts = submittedAtText.match(/\d+/g);
+
+  if (!dateParts || dateParts.length < 3) {
+    return submittedAtText;
+  }
+
+  const [year, month, day] = dateParts;
+
+  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+}
+
 // 날짜를 현재 시점 기준의 상대 시간 문자열로 변환한다.
 export function formatRelativeDate(date: Date) {
   const diffMs = Date.now() - date.getTime();

@@ -12,7 +12,7 @@ export default function ProblemTierBadge({
 
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-1.5 text-xs font-bold leading-none ${problemTierBadgeColors[growithmTier]} ${className ?? ""}`}
+      className={`inline-flex items-center rounded border border-slate-200 px-2 py-1 text-xs font-bold uppercase ${problemTierBadgeColors[growithmTier]} ${className ?? ""}`}
     >
       {tier}
     </span>

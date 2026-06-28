@@ -3,13 +3,21 @@
 import { Button } from "@/components/ui/button";
 import {
   FilterCard,
-  FilterOptionButton,
   FilterSelect,
 } from "@/components/ui/filter-card";
 import type { ProblemPlatform } from "@/generated/prisma/enums";
 import { useReplaceQueryParams } from "@/hooks/use-query-params";
 
 import type { StudyProblemFilters, StudyProblemSort } from "../types";
+
+const platformOptions: Array<{
+  label: string;
+  value: ProblemPlatform | "";
+}> = [
+  { label: "전체 플랫폼", value: "" },
+  { label: "BAEKJOON", value: "BAEKJOON" },
+  { label: "PROGRAMMERS", value: "PROGRAMMERS" },
+];
 
 export default function StudyProblemFilters({
   filters,
@@ -31,36 +39,24 @@ export default function StudyProblemFilters({
     filters.member !== null;
 
   return (
-    <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
-      <FilterCard className="xl:col-span-2" title="플랫폼">
-        <div className="flex flex-wrap gap-2">
-          {["All", "BAEKJOON", "PROGRAMMERS"].map((platform) => {
-            const isActive =
-                platform === "All"
-                  ? filters.platform === null
-                  : filters.platform === platform;
-
-            return (
-              <FilterOptionButton
-                isActive={isActive}
-                key={platform}
-                onClick={() =>
-                  replaceQuery({
-                    platform:
-                      platform === "All"
-                        ? null
-                        : (platform as ProblemPlatform),
-                  })
-                }
-              >
-                {platform === "All" ? "전체" : platform}
-              </FilterOptionButton>
-            );
-          })}
-        </div>
-      </FilterCard>
-      <FilterCard title="필터">
-        <div className="grid gap-3">
+    <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <FilterCard className="xl:col-span-2" title="필터">
+        <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-3">
+          <label>
+            <span className="sr-only">플랫폼</span>
+            <FilterSelect
+              onChange={(event) =>
+                replaceQuery({ platform: event.target.value || null })
+              }
+              value={filters.platform ?? ""}
+            >
+              {platformOptions.map((platform) => (
+                <option key={platform.value || "All"} value={platform.value}>
+                  {platform.label}
+                </option>
+              ))}
+            </FilterSelect>
+          </label>
           <label>
             <span className="sr-only">티어</span>
             <FilterSelect

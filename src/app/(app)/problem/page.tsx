@@ -50,7 +50,11 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
   return (
     <main className="page-shell">
       <div className="page-container">
-        <ProblemFilters filters={filters} tiers={tiers} />
+        <ProblemFilters
+          filters={filters}
+          tiers={tiers}
+          totalCount={totalCount}
+        />
         <ProblemList
           currentTime={new Date().toISOString()}
           emptyStateReason={emptyStateReason}

@@ -20,6 +20,7 @@ export default function ContributionChart({
   data: StudyContributionItem[];
 }) {
   const chartData = useMemo(() => data.slice(0, 4), [data]);
+  const topContributorCount = chartData.length;
 
   return (
     <section className="app-card p-6 xl:col-span-2">
@@ -28,7 +29,9 @@ export default function ContributionChart({
           <h2 className="section-title">기여도 분석</h2>
           <p className="text-body-sm text-slate-500">스터디원별 풀이 기여도</p>
         </div>
-        <span className="text-label-caps text-slate-400">최대 4명</span>
+        <span className="text-label-caps text-slate-400">
+          상위 {topContributorCount}명
+        </span>
       </div>
       <div className="h-72 min-w-0">
         <ResponsiveContainer height="100%" width="100%">
