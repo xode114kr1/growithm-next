@@ -128,7 +128,6 @@ function PendingInviteItem({
         <p className="truncate text-body-sm font-semibold text-on-surface">
           {invite.target}
         </p>
-        <p className="text-xs text-slate-400">{invite.status}</p>
         {state.status === "error" ? (
           <p className="mt-1 text-xs font-medium text-error">{state.error}</p>
         ) : null}
@@ -137,7 +136,7 @@ function PendingInviteItem({
         <input name="studyId" type="hidden" value={studyId} />
         <input name="inviteId" type="hidden" value={invite.id} />
         <button
-          className="text-body-sm font-semibold text-error hover:underline disabled:cursor-not-allowed disabled:opacity-40"
+          className="text-body-sm font-semibold text-error transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
           disabled={isPending}
           type="submit"
         >
