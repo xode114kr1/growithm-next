@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 import { auth } from "@/lib/auth/auth";
 import AccountMenu from "@/components/layout/account-menu";
@@ -25,10 +26,19 @@ export default async function Header() {
 function Brand() {
   return (
     <Link
-      className="rounded font-serif text-2xl font-semibold italic text-primary outline-none focus-visible:ring-2 focus-visible:ring-secondary-container"
+      className="flex items-center gap-2 rounded outline-none focus-visible:ring-2 focus-visible:ring-secondary-container"
       href="/"
     >
-      Growithm
+      <Image
+        src="/images/logo.png"
+        alt=""
+        width={36}
+        height={36}
+        className="size-9 object-contain"
+      />
+      <span className="font-serif text-2xl font-semibold italic text-primary">
+        Growithm
+      </span>
     </Link>
   );
 }

@@ -25,6 +25,10 @@ export const metadata: Metadata = {
     template: "%s | Growithm",
   },
   description: "알고리즘 문제 풀이와 스터디 성장을 기록하는 플랫폼입니다.",
+  icons: {
+    icon: "/images/logo.png",
+    apple: "/images/logo.png",
+  },
   alternates: {
     canonical: "/",
   },
