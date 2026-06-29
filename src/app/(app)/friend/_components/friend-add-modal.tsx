@@ -1,6 +1,5 @@
 "use client";
 
-import { Plus } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 
 import { ProfileModal } from "@/components/ui/profile-modal";
@@ -45,11 +44,11 @@ export function FriendAddModal() {
     <>
       <button
         aria-label="친구 추가"
-        className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary text-on-primary transition-opacity hover:opacity-90"
+        className="flex h-11 shrink-0 items-center justify-center rounded-lg bg-primary px-4 text-body-sm font-semibold text-on-primary transition-opacity hover:opacity-90"
         onClick={() => setIsOpen(true)}
         type="button"
       >
-        <Plus aria-hidden="true" size={20} />
+        친구 추가
       </button>
       {isOpen ? (
         <div
