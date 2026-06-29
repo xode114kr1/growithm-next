@@ -22,7 +22,7 @@ export default async function StudyPage() {
       <div className="page-container grid grid-cols-1 gap-gutter xl:grid-cols-12">
         <section className="space-y-gutter xl:col-span-8">
           <StudyListHeader />
-          <StudyList studies={studies} userId={userId} />
+          <StudyList studies={studies} />
         </section>
         <aside className="space-y-gutter xl:sticky xl:top-28 xl:col-span-4 xl:self-start">
           <StudyInvites invites={invites} />
