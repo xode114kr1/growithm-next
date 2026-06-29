@@ -26,7 +26,7 @@ export default async function Header() {
 function Brand() {
   return (
     <Link
-      className="flex items-center gap-2 rounded outline-none focus-visible:ring-2 focus-visible:ring-secondary-container"
+      className="flex items-center rounded outline-none focus-visible:ring-2 focus-visible:ring-secondary-container sm:gap-2"
       href="/"
     >
       <Image
@@ -36,7 +36,7 @@ function Brand() {
         height={36}
         className="size-9 object-contain"
       />
-      <span className="font-serif text-2xl font-semibold italic text-primary">
+      <span className="hidden font-serif text-2xl font-semibold italic text-primary sm:inline">
         Growithm
       </span>
     </Link>
