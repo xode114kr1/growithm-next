@@ -7,10 +7,21 @@ import {
 import StudyListHeader from "./_components/study-list-header/study-list-header";
 import StudyList from "./_components/study-list/study-list";
 import StudyInvites from "./_components/study-invites/study-invites";
+import AuthRequiredCard from "@/components/ui/auth-required-card";
 
 export default async function StudyPage() {
   const session = await auth();
   const userId = session?.user?.id;
+
+  if (!userId) {
+    return (
+      <main className="page-shell bg-linear-to-b from-surface to-surface-container-low">
+        <div className="page-container">
+          <AuthRequiredCard redirectTo="/study" />
+        </div>
+      </main>
+    );
+  }
 
   const [studies, invites] = await Promise.all([
     getUserStudies(userId),

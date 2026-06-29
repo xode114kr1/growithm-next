@@ -10,6 +10,7 @@ import {
 import ProblemMemoEditor from "./_components/problem-memo-editor";
 import { notFound } from "next/navigation";
 import ProblemHeader from "./_components/problem-detail-header";
+import AuthRequiredCard from "@/components/ui/auth-required-card";
 
 export default async function ProblemDetailPage({
   params,
@@ -19,6 +20,16 @@ export default async function ProblemDetailPage({
   const { id: problemId } = await params;
   const session = await auth();
   const userId = session?.user?.id;
+
+  if (!userId) {
+    return (
+      <main className="page-shell">
+        <div className="page-container max-w-280">
+          <AuthRequiredCard redirectTo={`/problem/${problemId}`} />
+        </div>
+      </main>
+    );
+  }
 
   const [problem, shareTargetStudies] = await Promise.all([
     getProblemDetail({ id: problemId, userId }),
