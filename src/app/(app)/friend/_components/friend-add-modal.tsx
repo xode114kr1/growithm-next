@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { ProfileModal } from "@/components/ui/profile-modal";
 import { UserAvatar } from "@/components/ui/user-avatar";
+import { useClickOutside } from "@/hooks/use-click-outside";
 import { searchUsers } from "@/lib/users/user-api";
 import type { FriendSearchResult } from "@/types/friend";
 
@@ -14,6 +15,7 @@ export function FriendAddModal() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<FriendSearchResult[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const modalRef = useRef<HTMLElement>(null);
   const titleId = useId();
 
   useEffect(() => {
@@ -34,11 +36,17 @@ export function FriendAddModal() {
     loadSearchResults();
   }, [isOpen, searchQuery]);
 
-  function closeModal() {
+  const closeModal = useCallback(() => {
     setIsOpen(false);
     setSearchQuery("");
     setSearchResults([]);
-  }
+  }, []);
+
+  useClickOutside({
+    enabled: isOpen && !selectedUserId,
+    onClickOutside: closeModal,
+    ref: modalRef,
+  });
 
   return (
     <>
@@ -57,7 +65,10 @@ export function FriendAddModal() {
           className="fixed inset-0 z-80 flex items-center justify-center bg-primary/25 px-4 py-8 backdrop-blur-sm"
           role="dialog"
         >
-          <section className="relative flex max-h-[calc(100svh-4rem)] w-full max-w-xl flex-col overflow-hidden rounded-xl border border-slate-100 bg-white shadow-2xl shadow-slate-950/20">
+          <section
+            className="relative flex max-h-[calc(100svh-4rem)] w-full max-w-xl flex-col overflow-hidden rounded-xl border border-slate-100 bg-white shadow-2xl shadow-slate-950/20"
+            ref={modalRef}
+          >
             <FriendAddModalHeader onClose={closeModal} titleId={titleId} />
             <div className="space-y-4 overflow-y-auto p-6">
               <FriendSearchInput

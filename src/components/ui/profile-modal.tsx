@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { getUserProfile } from "@/lib/users/user-api";
 import type { UserProfile } from "@/types/user";
 import { UserAvatar } from "@/components/ui/user-avatar";
+import { useClickOutside } from "@/hooks/use-click-outside";
 
 export function ProfileModal({
   onClose,
@@ -14,6 +15,13 @@ export function ProfileModal({
   userId: string;
 }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const closeModal = useCallback(() => onClose(), [onClose]);
+
+  useClickOutside({
+    onClickOutside: closeModal,
+    ref: modalRef,
+  });
 
   useEffect(() => {
     async function loadProfile() {
@@ -29,7 +37,10 @@ export function ProfileModal({
       className="fixed inset-0 z-90 flex items-center justify-center bg-slate-950/40 px-4 py-8"
       role="dialog"
     >
-      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl shadow-slate-950/20">
+      <div
+        className="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl shadow-slate-950/20"
+        ref={modalRef}
+      >
         <div className="mb-6 flex items-start justify-between gap-4">
           <h2 className="text-xl font-bold text-primary">프로필</h2>
           <button
