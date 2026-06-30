@@ -4,12 +4,14 @@ import { SearchResultItem } from "./search-result-item";
 
 type SearchResultListProps = {
   onOpenProfile: (profile: FriendSearchResult) => void;
+  onRefreshResults: () => Promise<void>;
   query: string;
   results: FriendSearchResult[];
 };
 
 export function SearchResultList({
   onOpenProfile,
+  onRefreshResults,
   query,
   results,
 }: SearchResultListProps) {
@@ -36,6 +38,7 @@ export function SearchResultList({
           <SearchResultItem
             key={profile.id}
             onOpenProfile={onOpenProfile}
+            onRefreshResults={onRefreshResults}
             profile={profile}
           />
         ))}

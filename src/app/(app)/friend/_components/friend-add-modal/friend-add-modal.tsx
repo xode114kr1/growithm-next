@@ -35,6 +35,20 @@ export function FriendAddModal() {
     loadSearchResults();
   }, [isOpen, searchQuery]);
 
+  const refreshSearchResults = useCallback(async () => {
+    const query = searchQuery.trim();
+
+    if (!query) {
+      return;
+    }
+
+    try {
+      setSearchResults(await searchUsers(query));
+    } catch {
+      setSearchResults([]);
+    }
+  }, [searchQuery]);
+
   const closeModal = useCallback(() => {
     setIsOpen(false);
     setSearchQuery("");
@@ -78,6 +92,7 @@ export function FriendAddModal() {
                 onOpenProfile={(profile) => {
                   setSelectedUserId(profile.id);
                 }}
+                onRefreshResults={refreshSearchResults}
                 query={searchQuery}
                 results={searchResults}
               />

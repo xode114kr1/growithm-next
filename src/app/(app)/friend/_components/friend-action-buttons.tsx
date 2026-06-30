@@ -3,13 +3,13 @@
 import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
-import type { FriendSearchResult } from "@/types/friend";
 import { INITIAL_ACTION_STATE } from "@/utils/action-state";
 
 import {
   acceptFriendRequestAction,
   cancelFriendRequestAction,
   deleteFriendAction,
+  type FriendActionState,
   rejectFriendRequestAction,
   sendFriendRequestAction,
 } from "../actions";
@@ -49,65 +49,32 @@ const friendActions = {
 
 type FriendActionType = keyof typeof friendActions;
 
-export function SearchResultActions({
-  profile,
-}: {
-  profile: FriendSearchResult;
-}) {
-  if (profile.relationStatus === "friend") {
-    return (
-      <div className="flex shrink-0 items-center gap-2">
-        <Button disabled variant="secondary">
-          Friends
-        </Button>
-      </div>
-    );
-  }
-
-  if (profile.relationStatus === "received_request") {
-    if (!profile.requestId) return null;
-
-    return (
-      <div className="flex shrink-0 items-center gap-2">
-        <FriendActionButton actionType="reject" id={profile.requestId} />
-        <FriendActionButton actionType="accept" id={profile.requestId} />
-      </div>
-    );
-  }
-
-  if (profile.relationStatus === "sent_request") {
-    return profile.requestId ? (
-      <div className="flex shrink-0 items-center gap-2">
-        <FriendActionButton actionType="cancel" id={profile.requestId} />
-      </div>
-    ) : (
-      <div className="flex shrink-0 items-center gap-2">
-        <Button disabled variant="secondary">
-          Request Sent
-        </Button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex shrink-0 items-center gap-2">
-      <FriendActionButton actionType="send" id={profile.id} />
-    </div>
-  );
-}
-
 export function FriendActionButton({
   actionType,
   className,
   id,
+  onSuccess,
 }: {
   actionType: FriendActionType;
   className?: string;
   id: string;
+  onSuccess?: () => void | Promise<void>;
 }) {
   const action = friendActions[actionType];
+  const handleAction = async (
+    prevState: FriendActionState,
+    formData: FormData,
+  ): Promise<FriendActionState> => {
+    const nextState = await action.action(prevState, formData);
+
+    if (nextState.status === "success") {
+      await onSuccess?.();
+    }
+
+    return nextState;
+  };
   const [state, formAction, isPending] = useActionState(
-    action.action,
+    handleAction,
     INITIAL_ACTION_STATE,
   );
 
