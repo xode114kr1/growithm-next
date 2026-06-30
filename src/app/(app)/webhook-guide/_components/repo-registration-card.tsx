@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
+import type { GitHubRepositoryWebhookSummary } from "@/types/github";
 
 import {
   registerGitHubWebhookAction,
@@ -17,11 +18,20 @@ const initialActionState: RegisterGitHubWebhookActionState = {
   status: "idle",
 };
 
-export function RepoRegistrationCard() {
+type RepoRegistrationCardProps = {
+  currentWebhook: GitHubRepositoryWebhookSummary | null;
+};
+
+export function RepoRegistrationCard({
+  currentWebhook,
+}: RepoRegistrationCardProps) {
   const [state, formAction, isPending] = useActionState(
     registerGitHubWebhookAction,
     initialActionState,
   );
+  const currentRepository = currentWebhook
+    ? parseRepositoryFullName(currentWebhook.repositoryFullName)
+    : null;
 
   return (
     <section className="app-card grid grid-cols-1 gap-8 p-6 lg:grid-cols-[1fr_420px] lg:p-8">
@@ -52,7 +62,9 @@ export function RepoRegistrationCard() {
             autoComplete="username"
             aria-invalid={state.status === "error" ? true : undefined}
             className="input-field"
-            defaultValue={state.status === "error" ? state.githubId : ""}
+            defaultValue={
+              state.status === "error" ? state.githubId : currentRepository?.owner
+            }
             name="githubId"
             placeholder="예: octocat"
             type="text"
@@ -70,7 +82,11 @@ export function RepoRegistrationCard() {
             autoComplete="off"
             aria-invalid={state.status === "error" ? true : undefined}
             className="input-field"
-            defaultValue={state.status === "error" ? state.repositoryName : ""}
+            defaultValue={
+              state.status === "error"
+                ? state.repositoryName
+                : currentRepository?.repo
+            }
             name="repositoryName"
             placeholder="예: algorithm-solutions"
             type="text"
@@ -103,4 +119,13 @@ export function RepoRegistrationCard() {
       </form>
     </section>
   );
+}
+
+function parseRepositoryFullName(repositoryFullName: string) {
+  const [owner, ...repoParts] = repositoryFullName.split("/");
+
+  return {
+    owner,
+    repo: repoParts.join("/"),
+  };
 }
