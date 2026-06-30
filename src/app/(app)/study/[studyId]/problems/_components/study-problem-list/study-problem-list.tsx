@@ -86,9 +86,9 @@ export default function StudyProblemList({
 
   return (
     <section className="app-card overflow-hidden" ref={containerRef}>
-      <div className="overflow-x-auto">
-        <table className="grid min-w-240 w-full border-collapse text-left">
-          <thead className="grid">
+      <div className="overflow-hidden 2xl:overflow-x-auto">
+        <table className="grid w-full border-collapse text-left 2xl:min-w-240">
+          <thead className="hidden 2xl:grid">
             <tr className="grid grid-cols-[minmax(360px,1.8fr)_minmax(260px,1fr)_180px_160px] border-b border-slate-100 bg-slate-50/50">
               <TableHead>문제 정보</TableHead>
               <TableHead>태그</TableHead>
