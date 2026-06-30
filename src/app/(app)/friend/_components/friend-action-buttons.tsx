@@ -1,127 +1,61 @@
 "use client";
 
 import { useActionState } from "react";
+import type { ComponentProps, ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
-import type { FriendSearchResult } from "@/types/friend";
 import { INITIAL_ACTION_STATE } from "@/utils/action-state";
 
-import {
-  acceptFriendRequestAction,
-  cancelFriendRequestAction,
-  deleteFriendAction,
-  rejectFriendRequestAction,
-  sendFriendRequestAction,
-} from "../actions";
-
-const friendActions = {
-  accept: {
-    action: acceptFriendRequestAction,
-    fieldName: "requestId",
-    label: "Accept",
-    variant: "primary",
-  },
-  cancel: {
-    action: cancelFriendRequestAction,
-    fieldName: "requestId",
-    label: "Cancel",
-    variant: "secondary",
-  },
-  delete: {
-    action: deleteFriendAction,
-    fieldName: "friendUserId",
-    label: "Delete Friend",
-    variant: "secondary",
-  },
-  reject: {
-    action: rejectFriendRequestAction,
-    fieldName: "requestId",
-    label: "Reject",
-    variant: "secondary",
-  },
-  send: {
-    action: sendFriendRequestAction,
-    fieldName: "targetUserId",
-    label: "친구 추가",
-    variant: "primary",
-  },
-} as const;
-
-type FriendActionType = keyof typeof friendActions;
-
-export function SearchResultActions({
-  profile,
-}: {
-  profile: FriendSearchResult;
-}) {
-  if (profile.relationStatus === "friend") {
-    return (
-      <div className="flex shrink-0 items-center gap-2">
-        <Button disabled variant="secondary">
-          Friends
-        </Button>
-      </div>
-    );
-  }
-
-  if (profile.relationStatus === "received_request") {
-    if (!profile.requestId) return null;
-
-    return (
-      <div className="flex shrink-0 items-center gap-2">
-        <FriendActionButton actionType="reject" id={profile.requestId} />
-        <FriendActionButton actionType="accept" id={profile.requestId} />
-      </div>
-    );
-  }
-
-  if (profile.relationStatus === "sent_request") {
-    return profile.requestId ? (
-      <div className="flex shrink-0 items-center gap-2">
-        <FriendActionButton actionType="cancel" id={profile.requestId} />
-      </div>
-    ) : (
-      <div className="flex shrink-0 items-center gap-2">
-        <Button disabled variant="secondary">
-          Request Sent
-        </Button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex shrink-0 items-center gap-2">
-      <FriendActionButton actionType="send" id={profile.id} />
-    </div>
-  );
-}
+import type { FriendActionState } from "../actions";
 
 export function FriendActionButton({
-  actionType,
+  action,
+  children,
   className,
-  id,
+  fieldName,
+  fieldValue,
+  onSuccess,
+  variant,
 }: {
-  actionType: FriendActionType;
+  action: (
+    prevState: FriendActionState,
+    formData: FormData,
+  ) => Promise<FriendActionState>;
+  children: ReactNode;
   className?: string;
-  id: string;
+  fieldName: string;
+  fieldValue: string;
+  onSuccess?: () => void | Promise<void>;
+  variant: ComponentProps<typeof Button>["variant"];
 }) {
-  const action = friendActions[actionType];
+  const handleAction = async (
+    prevState: FriendActionState,
+    formData: FormData,
+  ): Promise<FriendActionState> => {
+    const nextState = await action(prevState, formData);
+
+    if (nextState.status === "success") {
+      await onSuccess?.();
+    }
+
+    return nextState;
+  };
   const [state, formAction, isPending] = useActionState(
-    action.action,
+    handleAction,
     INITIAL_ACTION_STATE,
   );
 
   return (
     <div className="min-w-0">
       <form action={formAction}>
-        <input name={action.fieldName} type="hidden" value={id} />
+        <input name={fieldName} type="hidden" value={fieldValue} />
         <Button
           className={className}
           disabled={isPending}
           type="submit"
-          variant={action.variant}
+          variant={variant}
         >
-          {action.label}
+          {children}
         </Button>
       </form>
       {state.status === "error" ? (

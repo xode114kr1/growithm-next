@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { getUserProfile } from "@/lib/users/user-api";
 import type { UserProfile } from "@/types/user";
+import UserTierBadge from "@/components/ui/user-tier-badge";
 import { UserAvatar } from "@/components/ui/user-avatar";
+import { useClickOutside } from "@/hooks/use-click-outside";
 
 export function ProfileModal({
   onClose,
@@ -14,6 +16,13 @@ export function ProfileModal({
   userId: string;
 }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const closeModal = useCallback(() => onClose(), [onClose]);
+
+  useClickOutside({
+    onClickOutside: closeModal,
+    ref: modalRef,
+  });
 
   useEffect(() => {
     async function loadProfile() {
@@ -29,7 +38,10 @@ export function ProfileModal({
       className="fixed inset-0 z-90 flex items-center justify-center bg-slate-950/40 px-4 py-8"
       role="dialog"
     >
-      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl shadow-slate-950/20">
+      <div
+        className="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl shadow-slate-950/20"
+        ref={modalRef}
+      >
         <div className="mb-6 flex items-start justify-between gap-4">
           <h2 className="text-xl font-bold text-primary">프로필</h2>
           <button
@@ -43,31 +55,43 @@ export function ProfileModal({
         </div>
         {profile ? (
           <>
-            <div className="mb-6 flex items-center gap-4">
+            <div className="mb-6 flex items-start gap-4">
               <UserAvatar
                 className="ring-4 ring-slate-50"
                 image={profile.avatar}
                 name={profile.name}
                 size="xl"
               />
-              <div className="min-w-0">
-                <p className="truncate text-xl font-bold text-primary">
-                  {profile.name}
-                </p>
-                <p className="text-body-sm font-semibold text-slate-500">
-                  {profile.tier}
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="truncate text-xl font-bold text-primary">
+                    {profile.name}
+                  </p>
+                  <UserTierBadge tier={profile.tier} />
+                </div>
+                <p className="mt-1 text-body-sm font-semibold text-slate-500">
+                  {profile.githubId
+                    ? `GitHub ID ${profile.githubId}`
+                    : "GitHub ID 없음"}
                 </p>
               </div>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <ProfileStat label="티어" value={profile.tier} />
+              <ProfileStat
+                label="XP"
+                value={profile.score.toLocaleString()}
+              />
               <ProfileStat
                 label="푼 문제"
                 value={`${profile.solvedCount.toLocaleString()}개`}
               />
               <ProfileStat
-                label="점수"
-                value={`${profile.score.toLocaleString()} XP`}
+                label="오늘 푼 문제"
+                value={`${profile.todaySolvedCount.toLocaleString()}개`}
+              />
+              <ProfileStat
+                label="최근 풀이일"
+                value={profile.latestSolvedAt ?? "기록 없음"}
               />
             </div>
           </>
