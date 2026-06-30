@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth/auth";
 import { getStudyLayoutData } from "@/server/studies/study.query.service";
 
 import StudyLocalNav from "./_components/study-local-nav";
+import AuthRequiredCard from "@/components/ui/auth-required-card";
 
 type StudyDetailLayoutProps = {
   children: React.ReactNode;
@@ -17,6 +18,17 @@ export default async function StudyDetailLayout({
   const { studyId } = await params;
   const session = await auth();
   const userId = session?.user?.id;
+
+  if (!userId) {
+    return (
+      <main className="page-shell">
+        <div className="page-container">
+          <AuthRequiredCard redirectTo={`/study/${studyId}`} />
+        </div>
+      </main>
+    );
+  }
+
   const study = await getStudyLayoutData({ studyId, userId });
 
   if (!study) {

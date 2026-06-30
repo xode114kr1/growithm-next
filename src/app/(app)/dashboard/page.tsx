@@ -8,10 +8,21 @@ import {
   getSolvedProblemCount,
 } from "@/server/problems/problem.query.service";
 import DashboardChart from "./_components/dashboard-chart";
+import AuthRequiredCard from "@/components/ui/auth-required-card";
 
 export default async function DashboardPage() {
   const session = await auth();
   const userId = session?.user?.id;
+
+  if (!userId) {
+    return (
+      <main className="page-shell">
+        <div className="page-container">
+          <AuthRequiredCard />
+        </div>
+      </main>
+    );
+  }
 
   const [personalTier, mastery, solvedCount, pendingProblems] =
     await Promise.all([
