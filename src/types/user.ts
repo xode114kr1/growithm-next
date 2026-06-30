@@ -21,6 +21,9 @@ export type UserSummary = {
 };
 
 export type UserProfile = UserSummary & {
+  githubId: string | null;
+  latestSolvedAt: string | null;
   score: number;
   solvedCount: number;
+  todaySolvedCount: number;
 };
