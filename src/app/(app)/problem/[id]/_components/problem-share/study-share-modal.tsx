@@ -1,7 +1,7 @@
 "use client";
 
 import { Share2, X } from "lucide-react";
-import { useActionState, useId, useState } from "react";
+import { useActionState, useCallback, useId, useRef, useState } from "react";
 
 import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import {
@@ -10,6 +10,7 @@ import {
 } from "@/app/(app)/problem/[id]/actions";
 import { ActionStateMessage } from "@/components/ui/action-state-message";
 import { Button } from "@/components/ui/button";
+import { useClickOutside } from "@/hooks/use-click-outside";
 import type { ProblemShareTargetStudy } from "@/types/study";
 import { isWithinDayDifference } from "@/utils/date";
 import { PROBLEM_SHARE_SCORE_DAY_DIFFERENCE } from "@/utils/problem";
@@ -40,6 +41,7 @@ export default function ProblemShareModal({
   const [isOpen, setIsOpen] = useState(false);
   const [baseTime, setBaseTime] = useState(currentTime);
   const [selectedStudyIds, setSelectedStudyIds] = useState<string[]>([]);
+  const modalRef = useRef<HTMLElement>(null);
   const [state, formAction, isPending] = useActionState(
     shareProblemToStudies,
     initialShareState,
@@ -68,6 +70,14 @@ export default function ProblemShareModal({
     setIsOpen(true);
   }
 
+  const closeModal = useCallback(() => setIsOpen(false), []);
+
+  useClickOutside({
+    enabled: isOpen,
+    onClickOutside: closeModal,
+    ref: modalRef,
+  });
+
   return (
     <>
       <Button
@@ -87,13 +97,10 @@ export default function ProblemShareModal({
           className="fixed inset-0 z-80 flex items-center justify-center bg-primary/25 px-4 py-8 backdrop-blur-sm"
           role="dialog"
         >
-          <button
-            aria-label="공유 창 닫기"
-            className="absolute inset-0 cursor-default"
-            onClick={() => setIsOpen(false)}
-            type="button"
-          />
-          <section className="relative max-h-[calc(100svh-4rem)] w-full max-w-2xl overflow-y-auto rounded-xl border border-slate-100 bg-white shadow-2xl shadow-slate-950/20">
+          <section
+            className="relative max-h-[calc(100svh-4rem)] w-full max-w-2xl overflow-y-auto rounded-xl border border-slate-100 bg-white shadow-2xl shadow-slate-950/20"
+            ref={modalRef}
+          >
             <div className="border-b border-slate-100 px-6 py-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -107,7 +114,7 @@ export default function ProblemShareModal({
                 <button
                   aria-label="닫기"
                   className="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary"
-                  onClick={() => setIsOpen(false)}
+                  onClick={closeModal}
                   type="button"
                 >
                   <X aria-hidden="true" size={18} />
@@ -148,7 +155,7 @@ export default function ProblemShareModal({
               <div className="flex flex-col-reverse justify-end gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center">
                 <div className="flex justify-end gap-2">
                   <Button
-                    onClick={() => setIsOpen(false)}
+                    onClick={closeModal}
                     variant="secondary"
                   >
                     Cancel

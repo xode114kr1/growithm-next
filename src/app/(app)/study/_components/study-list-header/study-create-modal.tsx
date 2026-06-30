@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useId, useState } from "react";
+import { useActionState, useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { ActionStateMessage } from "@/components/ui/action-state-message";
 import { Button } from "@/components/ui/button";
+import { useClickOutside } from "@/hooks/use-click-outside";
 
 import { createStudy, type CreateStudyActionState } from "../../actions";
 
@@ -19,6 +20,7 @@ const initialState: CreateStudyActionState = {
 export default function StudyCreateModal() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const modalRef = useRef<HTMLElement>(null);
   const titleId = useId();
   const [state, formAction, isPending] = useActionState(
     createStudy,
@@ -30,6 +32,14 @@ export default function StudyCreateModal() {
       router.push(`/study/${state.studyId}/overview`);
     }
   }, [router, state.studyId]);
+
+  const closeModal = useCallback(() => setIsOpen(false), []);
+
+  useClickOutside({
+    enabled: isOpen,
+    onClickOutside: closeModal,
+    ref: modalRef,
+  });
 
   return (
     <>
@@ -46,7 +56,10 @@ export default function StudyCreateModal() {
           className="fixed inset-0 z-80 flex items-center justify-center bg-primary/25 px-4 py-8 backdrop-blur-sm"
           role="dialog"
         >
-          <section className="relative max-h-[calc(100svh-4rem)] w-full max-w-2xl overflow-y-auto rounded-xl border border-slate-100 bg-white shadow-2xl shadow-slate-950/20">
+          <section
+            className="relative max-h-[calc(100svh-4rem)] w-full max-w-2xl overflow-y-auto rounded-xl border border-slate-100 bg-white shadow-2xl shadow-slate-950/20"
+            ref={modalRef}
+          >
             <div className="border-b border-slate-100 px-6 py-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -60,7 +73,7 @@ export default function StudyCreateModal() {
                 </div>
                 <button
                   className="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-50 text-xl font-semibold text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary"
-                  onClick={() => setIsOpen(false)}
+                  onClick={closeModal}
                   type="button"
                 >
                   ×
@@ -112,7 +125,7 @@ export default function StudyCreateModal() {
               <div className="flex flex-col-reverse justify-end gap-2 border-t border-slate-100 pt-5 sm:flex-row">
                 <Button
                   disabled={isPending}
-                  onClick={() => setIsOpen(false)}
+                  onClick={closeModal}
                   variant="secondary"
                 >
                   취소

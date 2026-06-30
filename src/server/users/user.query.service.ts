@@ -15,6 +15,7 @@ import type {
   FriendSearchResult,
 } from "@/types/friend";
 import type { UserPersonalTier, UserProfile } from "@/types/user";
+import { formatShortDate, formatSubmittedDateText } from "@/utils/date";
 
 // 사용자의 점수를 조회해 개인 티어 정보를 만든다.
 export async function getUserPersonalTier(
@@ -39,10 +40,18 @@ export async function getUserProfile(
     return null;
   }
 
+  const latestSubmission = user.problemSubmissions[0];
+
   return {
     ...createUserSummary(user),
+    githubId: user.accounts[0]?.providerAccountId ?? null,
+    latestSolvedAt: latestSubmission
+      ? formatSubmittedDateText(latestSubmission.submittedAtText) ??
+        formatShortDate(latestSubmission.createdAt)
+      : null,
     score: user.score,
     solvedCount: user._count.problemSubmissions,
+    todaySolvedCount: user.todaySolvedCount,
   };
 }
 

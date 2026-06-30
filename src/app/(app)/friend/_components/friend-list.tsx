@@ -6,6 +6,7 @@ import { ProfileModal } from "@/components/ui/profile-modal";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { getFriendsPage } from "../_lib/friend-api";
 import type { FriendFiltersState, FriendProfile } from "@/types/friend";
+import { deleteFriendAction } from "../actions";
 import { FriendActionButton } from "./friend-action-buttons";
 import { FriendItem } from "./friend-item";
 
@@ -66,10 +67,14 @@ export default function FriendList({
           >
             <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
               <FriendActionButton
-                actionType="delete"
+                action={deleteFriendAction}
                 className="w-full"
-                id={friend.id}
-              />
+                fieldName="friendUserId"
+                fieldValue={friend.id}
+                variant="secondary"
+              >
+                삭제
+              </FriendActionButton>
             </div>
           </FriendItem>
         ))}
