@@ -12,6 +12,7 @@ import type { FriendPageSearchParams } from "@/types/friend";
 import FriendFilters from "./_components/friend-filters";
 import FriendList from "./_components/friend-list";
 import FriendRequests from "./_components/friend-requests/friend-requests";
+import AuthRequiredCard from "@/components/ui/auth-required-card";
 
 type FriendPageProps = {
   searchParams: Promise<FriendPageSearchParams>;
@@ -21,6 +22,16 @@ export default async function FriendPage({ searchParams }: FriendPageProps) {
   const params = await searchParams;
   const session = await auth();
   const userId = session?.user?.id;
+
+  if (!userId) {
+    return (
+      <main className="page-shell bg-linear-to-b from-surface to-surface-container-low">
+        <div className="page-container">
+          <AuthRequiredCard redirectTo="/friend" />
+        </div>
+      </main>
+    );
+  }
 
   const filters = parseFriendFilters(params);
 

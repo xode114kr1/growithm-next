@@ -13,6 +13,7 @@ import {
 import { parseProblemFilters } from "@/server/problems/problem.schema";
 import ProblemFilters from "./_components/problem-filters";
 import ProblemList from "./_components/problem-list/problem-list";
+import AuthRequiredCard from "@/components/ui/auth-required-card";
 
 type ProblemPageProps = {
   searchParams: Promise<ProblemPageSearchParams>;
@@ -23,6 +24,16 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
   const params = await searchParams;
   const session = await auth();
   const userId = session?.user?.id;
+
+  if (!userId) {
+    return (
+      <main className="page-shell">
+        <div className="page-container">
+          <AuthRequiredCard redirectTo="/problem" />
+        </div>
+      </main>
+    );
+  }
 
   // paese filters
   const filters = parseProblemFilters(params);
