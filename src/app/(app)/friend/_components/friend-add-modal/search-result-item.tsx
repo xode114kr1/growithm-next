@@ -54,7 +54,7 @@ function SearchResultItemActions({
     return (
       <div className="flex shrink-0 items-center gap-2">
         <Button disabled variant="secondary">
-          Friends
+          친구
         </Button>
       </div>
     );
@@ -91,7 +91,7 @@ function SearchResultItemActions({
     ) : (
       <div className="flex shrink-0 items-center gap-2">
         <Button disabled variant="secondary">
-          Request Sent
+          요청 보냄
         </Button>
       </div>
     );

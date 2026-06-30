@@ -18,25 +18,25 @@ const friendActions = {
   accept: {
     action: acceptFriendRequestAction,
     fieldName: "requestId",
-    label: "Accept",
+    label: "수락",
     variant: "primary",
   },
   cancel: {
     action: cancelFriendRequestAction,
     fieldName: "requestId",
-    label: "Cancel",
+    label: "취소",
     variant: "secondary",
   },
   delete: {
     action: deleteFriendAction,
     fieldName: "friendUserId",
-    label: "Delete Friend",
+    label: "삭제",
     variant: "secondary",
   },
   reject: {
     action: rejectFriendRequestAction,
     fieldName: "requestId",
-    label: "Reject",
+    label: "거절",
     variant: "secondary",
   },
   send: {
