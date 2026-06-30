@@ -3,12 +3,11 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { ProfileModal } from "@/components/ui/profile-modal";
-import { UserAvatar } from "@/components/ui/user-avatar";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { searchUsers } from "@/lib/users/user-api";
 import type { FriendSearchResult } from "@/types/friend";
 
-import { SearchResultActions } from "./friend-action-buttons";
+import { SearchResultList } from "./search-result-list";
 
 export function FriendAddModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -150,74 +149,3 @@ function FriendSearchInput({
   );
 }
 
-function SearchResultList({
-  onOpenProfile,
-  query,
-  results,
-}: {
-  onOpenProfile: (profile: FriendSearchResult) => void;
-  query: string;
-  results: FriendSearchResult[];
-}) {
-  if (!query.trim()) {
-    return (
-      <section className="h-80 rounded-xl border border-slate-200 bg-white" />
-    );
-  }
-
-  if (results.length === 0) {
-    return (
-      <section className="h-80 rounded-xl border border-slate-200 bg-white p-6">
-        <p className="text-body-md font-semibold text-on-background">
-          검색 결과가 없습니다.
-        </p>
-      </section>
-    );
-  }
-
-  return (
-    <section className="h-80 overflow-hidden rounded-xl border border-slate-200 bg-white p-3">
-      <div className="grid h-full gap-2 overflow-y-auto">
-        {results.map((profile) => (
-          <SearchResultItem
-            key={profile.id}
-            onOpenProfile={onOpenProfile}
-            profile={profile}
-          />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function SearchResultItem({
-  onOpenProfile,
-  profile,
-}: {
-  onOpenProfile: (profile: FriendSearchResult) => void;
-  profile: FriendSearchResult;
-}) {
-  return (
-    <div className="flex items-center gap-3 rounded-lg border border-slate-100 p-2.5">
-      <button
-        aria-label={`${profile.name} 프로필`}
-        className="shrink-0 rounded-full outline-none transition-opacity hover:opacity-80 focus:ring-2 focus:ring-primary-container"
-        onClick={() => onOpenProfile(profile)}
-        type="button"
-      >
-        <UserAvatar
-          className="ring-2 ring-slate-50"
-          image={profile.avatar}
-          name={profile.name}
-          size="lg"
-        />
-      </button>
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-body-md font-semibold text-on-background">
-          {profile.name}
-        </div>
-      </div>
-      <SearchResultActions profile={profile} />
-    </div>
-  );
-}

@@ -2,7 +2,7 @@
 
 import { useReplaceQueryParams } from "@/hooks/use-query-params";
 
-import { FriendAddModal } from "./friend-add-modal";
+import { FriendAddModal } from "./friend-add-modal/friend-add-modal";
 
 export default function FriendFilters({
   query,
