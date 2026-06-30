@@ -1,5 +1,10 @@
 import type { FriendProfile, FriendRequest } from "@/types/friend";
 
+import {
+  acceptFriendRequestAction,
+  cancelFriendRequestAction,
+  rejectFriendRequestAction,
+} from "../../actions";
 import { FriendActionButton } from "../friend-action-buttons";
 import { FriendItem } from "../friend-item";
 
@@ -35,19 +40,31 @@ export default function FriendRequestList({
             {type === "received" ? (
               <>
                 <FriendActionButton
-                  actionType="reject"
-                  id={request.requestId}
-                />
+                  action={rejectFriendRequestAction}
+                  fieldName="requestId"
+                  fieldValue={request.requestId}
+                  variant="secondary"
+                >
+                  거절
+                </FriendActionButton>
                 <FriendActionButton
-                  actionType="accept"
-                  id={request.requestId}
-                />
+                  action={acceptFriendRequestAction}
+                  fieldName="requestId"
+                  fieldValue={request.requestId}
+                  variant="primary"
+                >
+                  수락
+                </FriendActionButton>
               </>
             ) : (
               <FriendActionButton
-                actionType="cancel"
-                id={request.requestId}
-              />
+                action={cancelFriendRequestAction}
+                fieldName="requestId"
+                fieldValue={request.requestId}
+                variant="secondary"
+              >
+                취소
+              </FriendActionButton>
             )}
           </div>
         </FriendItem>

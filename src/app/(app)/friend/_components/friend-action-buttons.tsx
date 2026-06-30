@@ -1,71 +1,38 @@
 "use client";
 
 import { useActionState } from "react";
+import type { ComponentProps, ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { INITIAL_ACTION_STATE } from "@/utils/action-state";
 
-import {
-  acceptFriendRequestAction,
-  cancelFriendRequestAction,
-  deleteFriendAction,
-  type FriendActionState,
-  rejectFriendRequestAction,
-  sendFriendRequestAction,
-} from "../actions";
-
-const friendActions = {
-  accept: {
-    action: acceptFriendRequestAction,
-    fieldName: "requestId",
-    label: "수락",
-    variant: "primary",
-  },
-  cancel: {
-    action: cancelFriendRequestAction,
-    fieldName: "requestId",
-    label: "취소",
-    variant: "secondary",
-  },
-  delete: {
-    action: deleteFriendAction,
-    fieldName: "friendUserId",
-    label: "삭제",
-    variant: "secondary",
-  },
-  reject: {
-    action: rejectFriendRequestAction,
-    fieldName: "requestId",
-    label: "거절",
-    variant: "secondary",
-  },
-  send: {
-    action: sendFriendRequestAction,
-    fieldName: "targetUserId",
-    label: "친구 추가",
-    variant: "primary",
-  },
-} as const;
-
-type FriendActionType = keyof typeof friendActions;
+import type { FriendActionState } from "../actions";
 
 export function FriendActionButton({
-  actionType,
+  action,
+  children,
   className,
-  id,
+  fieldName,
+  fieldValue,
   onSuccess,
+  variant,
 }: {
-  actionType: FriendActionType;
+  action: (
+    prevState: FriendActionState,
+    formData: FormData,
+  ) => Promise<FriendActionState>;
+  children: ReactNode;
   className?: string;
-  id: string;
+  fieldName: string;
+  fieldValue: string;
   onSuccess?: () => void | Promise<void>;
+  variant: ComponentProps<typeof Button>["variant"];
 }) {
-  const action = friendActions[actionType];
   const handleAction = async (
     prevState: FriendActionState,
     formData: FormData,
   ): Promise<FriendActionState> => {
-    const nextState = await action.action(prevState, formData);
+    const nextState = await action(prevState, formData);
 
     if (nextState.status === "success") {
       await onSuccess?.();
@@ -81,14 +48,14 @@ export function FriendActionButton({
   return (
     <div className="min-w-0">
       <form action={formAction}>
-        <input name={action.fieldName} type="hidden" value={id} />
+        <input name={fieldName} type="hidden" value={fieldValue} />
         <Button
           className={className}
           disabled={isPending}
           type="submit"
-          variant={action.variant}
+          variant={variant}
         >
-          {action.label}
+          {children}
         </Button>
       </form>
       {state.status === "error" ? (

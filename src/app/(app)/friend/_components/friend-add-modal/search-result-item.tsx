@@ -1,18 +1,17 @@
-import { Button } from "@/components/ui/button";
+import type { ReactNode } from "react";
+
 import { UserAvatar } from "@/components/ui/user-avatar";
 import type { FriendSearchResult } from "@/types/friend";
 
-import { FriendActionButton } from "../friend-action-buttons";
-
 type SearchResultItemProps = {
+  children: ReactNode;
   onOpenProfile: (profile: FriendSearchResult) => void;
-  onRefreshResults: () => Promise<void>;
   profile: FriendSearchResult;
 };
 
 export function SearchResultItem({
+  children,
   onOpenProfile,
-  onRefreshResults,
   profile,
 }: SearchResultItemProps) {
   return (
@@ -35,75 +34,9 @@ export function SearchResultItem({
           {profile.name}
         </div>
       </div>
-      <SearchResultItemActions
-        onRefreshResults={onRefreshResults}
-        profile={profile}
-      />
-    </div>
-  );
-}
-
-function SearchResultItemActions({
-  onRefreshResults,
-  profile,
-}: {
-  onRefreshResults: () => Promise<void>;
-  profile: FriendSearchResult;
-}) {
-  if (profile.relationStatus === "friend") {
-    return (
       <div className="flex shrink-0 items-center gap-2">
-        <Button disabled variant="secondary">
-          친구
-        </Button>
+        {children}
       </div>
-    );
-  }
-
-  if (profile.relationStatus === "received_request") {
-    if (!profile.requestId) return null;
-
-    return (
-      <div className="flex shrink-0 items-center gap-2">
-        <FriendActionButton
-          actionType="reject"
-          id={profile.requestId}
-          onSuccess={onRefreshResults}
-        />
-        <FriendActionButton
-          actionType="accept"
-          id={profile.requestId}
-          onSuccess={onRefreshResults}
-        />
-      </div>
-    );
-  }
-
-  if (profile.relationStatus === "sent_request") {
-    return profile.requestId ? (
-      <div className="flex shrink-0 items-center gap-2">
-        <FriendActionButton
-          actionType="cancel"
-          id={profile.requestId}
-          onSuccess={onRefreshResults}
-        />
-      </div>
-    ) : (
-      <div className="flex shrink-0 items-center gap-2">
-        <Button disabled variant="secondary">
-          요청 보냄
-        </Button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex shrink-0 items-center gap-2">
-      <FriendActionButton
-        actionType="send"
-        id={profile.id}
-        onSuccess={onRefreshResults}
-      />
     </div>
   );
 }
