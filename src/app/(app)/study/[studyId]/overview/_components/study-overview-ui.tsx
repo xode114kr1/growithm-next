@@ -183,39 +183,36 @@ export function RecentSolvedProblems({
       </div>
       <div className="app-card overflow-hidden">
         {problems.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left">
-              <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/50">
-                  <TableHead>문제 제목</TableHead>
-                  <TableHead>플랫폼</TableHead>
-                  <TableHead>티어</TableHead>
-                  <TableHead>풀이한 멤버</TableHead>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {problems.map((problem) => (
-                  <tr
-                    className="transition-colors hover:bg-slate-50/80"
-                    key={`${problem.title}-${problem.solvedBy}`}
-                  >
-                    <td className="min-w-60 px-6 py-4 text-body-sm font-semibold text-on-surface">
-                      {problem.title}
-                    </td>
-                    <td className="px-6 py-4 text-body-sm text-slate-500">
-                      {problem.platform}
-                    </td>
-                    <td className="px-6 py-4">
-                      <ProblemTierBadge tier={problem.tier} />
-                    </td>
-                    <td className="px-6 py-4 text-body-sm font-semibold text-secondary">
-                      {problem.solvedBy}
-                    </td>
+          <>
+            <div className="hidden lg:block">
+              <table className="w-full border-collapse text-left">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-slate-50/50">
+                    <TableHead>문제 제목</TableHead>
+                    <TableHead>플랫폼</TableHead>
+                    <TableHead>티어</TableHead>
+                    <TableHead>풀이한 멤버</TableHead>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {problems.map((problem) => (
+                    <RecentSolvedProblemRow
+                      key={`${problem.title}-${problem.solvedBy}`}
+                      problem={problem}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="divide-y divide-slate-100 lg:hidden">
+              {problems.map((problem) => (
+                <RecentSolvedProblemCard
+                  key={`${problem.title}-${problem.solvedBy}`}
+                  problem={problem}
+                />
+              ))}
+            </div>
+          </>
         ) : (
           <div className="p-8 text-center text-body-sm text-slate-500">
             아직 공유된 문제가 없습니다.
@@ -223,6 +220,57 @@ export function RecentSolvedProblems({
         )}
       </div>
     </section>
+  );
+}
+
+function RecentSolvedProblemRow({
+  problem,
+}: {
+  problem: StudyRecentProblem;
+}) {
+  return (
+    <tr className="transition-colors hover:bg-slate-50/80">
+      <td className="min-w-60 px-6 py-4 text-body-sm font-semibold text-on-surface">
+        {problem.title}
+      </td>
+      <td className="px-6 py-4 text-body-sm text-slate-500">
+        {problem.platform}
+      </td>
+      <td className="px-6 py-4">
+        <ProblemTierBadge tier={problem.tier} />
+      </td>
+      <td className="px-6 py-4 text-body-sm font-semibold text-secondary">
+        {problem.solvedBy}
+      </td>
+    </tr>
+  );
+}
+
+function RecentSolvedProblemCard({
+  problem,
+}: {
+  problem: StudyRecentProblem;
+}) {
+  return (
+    <article className="p-5 transition-colors hover:bg-slate-50/80">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="rounded bg-slate-100 px-2 py-1 text-mono-code text-xs text-slate-600">
+          {problem.platform}
+        </span>
+        <ProblemTierBadge tier={problem.tier} />
+      </div>
+      <h3 className="mt-3 wrap-break-word font-semibold leading-snug text-on-surface">
+        {problem.title}
+      </h3>
+      <dl className="mt-4 text-body-sm">
+        <div>
+          <dt className="text-label-caps text-slate-400">풀이한 멤버</dt>
+          <dd className="mt-1 font-semibold text-secondary">
+            {problem.solvedBy}
+          </dd>
+        </div>
+      </dl>
+    </article>
   );
 }
 

@@ -1,8 +1,17 @@
+import { auth } from "@/lib/auth/auth";
+import { getLatestGitHubRepositoryWebhook } from "@/server/webhook-registration/webhook-registration.query.service";
+
 import { GuideStepCard } from "./_components/guide-step-card";
 import { RepoRegistrationCard } from "./_components/repo-registration-card";
 import { webhookGuideSteps } from "./constants";
 
-export default function WebhookGuidePage() {
+export default async function WebhookGuidePage() {
+  const session = await auth();
+  const userId = session?.user?.id;
+  const currentWebhook = userId
+    ? await getLatestGitHubRepositoryWebhook(userId)
+    : null;
+
   return (
     <main className="page-shell">
       <div className="page-container space-y-8">
@@ -12,7 +21,7 @@ export default function WebhookGuidePage() {
           ))}
         </section>
 
-        <RepoRegistrationCard />
+        <RepoRegistrationCard currentWebhook={currentWebhook} />
       </div>
     </main>
   );

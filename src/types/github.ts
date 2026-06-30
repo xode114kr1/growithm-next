@@ -9,6 +9,10 @@ export type GitHubRepositoryInput = {
   repo: string;
 };
 
+export type GitHubRepositoryWebhookSummary = {
+  repositoryFullName: string;
+};
+
 export type GitHubReadmeContent = {
   commitSha: string;
   path: string;
