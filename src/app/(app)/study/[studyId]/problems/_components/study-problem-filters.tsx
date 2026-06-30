@@ -1,10 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  FilterCard,
-  FilterSelect,
-} from "@/components/ui/filter-card";
+import { FilterCard, FilterSelect } from "@/components/ui/filter-card";
 import type { ProblemPlatform } from "@/generated/prisma/enums";
 import { useReplaceQueryParams } from "@/hooks/use-query-params";
 
@@ -39,9 +36,9 @@ export default function StudyProblemFilters({
     filters.member !== null;
 
   return (
-    <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <FilterCard className="xl:col-span-2" title="필터">
-        <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-3">
+    <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-4">
+      <FilterCard title="필터">
+        <div className="grid gap-3 md:grid-cols-2">
           <label>
             <span className="sr-only">플랫폼</span>
             <FilterSelect
@@ -71,21 +68,20 @@ export default function StudyProblemFilters({
               ))}
             </FilterSelect>
           </label>
-          <label>
-            <span className="sr-only">공유한 멤버</span>
-            <FilterSelect
-              onChange={(event) =>
-                replaceQuery({ member: event.target.value || null })
-              }
-              value={filters.member ?? ""}
-            >
-              <option value="">전체 멤버</option>
-              {memberNames.map((memberName) => (
-                <option key={memberName}>{memberName}</option>
-              ))}
-            </FilterSelect>
-          </label>
         </div>
+      </FilterCard>
+      <FilterCard title="멤버">
+        <FilterSelect
+          onChange={(event) =>
+            replaceQuery({ member: event.target.value || null })
+          }
+          value={filters.member ?? ""}
+        >
+          <option value="">전체 멤버</option>
+          {memberNames.map((memberName) => (
+            <option key={memberName}>{memberName}</option>
+          ))}
+        </FilterSelect>
       </FilterCard>
       <FilterCard title="정렬">
         <FilterSelect
