@@ -1,8 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { Pencil } from "lucide-react";
+import { useActionState, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import type { GitHubRepositoryWebhookSummary } from "@/types/github";
 
 import {
   registerGitHubWebhookAction,
@@ -17,11 +19,31 @@ const initialActionState: RegisterGitHubWebhookActionState = {
   status: "idle",
 };
 
-export function RepoRegistrationCard() {
+type RepoRegistrationCardProps = {
+  currentWebhook: GitHubRepositoryWebhookSummary | null;
+};
+
+export function RepoRegistrationCard({
+  currentWebhook,
+}: RepoRegistrationCardProps) {
+  const hasCurrentWebhook = currentWebhook !== null;
+  const [isEditing, setIsEditing] = useState(!hasCurrentWebhook);
   const [state, formAction, isPending] = useActionState(
     registerGitHubWebhookAction,
     initialActionState,
   );
+  const registeredRepository = getRegisteredRepository({
+    currentWebhook,
+    state,
+  });
+  const hasRegisteredWebhook = registeredRepository !== null;
+  const isInputDisabled =
+    hasRegisteredWebhook && !isEditing && state.status !== "error";
+
+  function handleFormAction(formData: FormData) {
+    formAction(formData);
+    setIsEditing(false);
+  }
 
   return (
     <section className="app-card grid grid-cols-1 gap-8 p-6 lg:grid-cols-[1fr_420px] lg:p-8">
@@ -41,9 +63,22 @@ export function RepoRegistrationCard() {
       </div>
 
       <form
-        action={formAction}
-        className="grid gap-5 rounded-xl border border-slate-100 bg-slate-50/60 p-5"
+        action={handleFormAction}
+        className="relative grid gap-5 rounded-xl border border-slate-100 bg-slate-50/60 p-5 pt-14"
       >
+        {hasRegisteredWebhook ? (
+          <button
+            aria-label="웹훅 정보 수정하기"
+            className="absolute right-5 top-5 inline-flex size-9 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-primary transition-all hover:border-secondary hover:text-secondary hover:ring-3 hover:ring-secondary-container/30 disabled:cursor-not-allowed disabled:border-transparent disabled:bg-slate-100 disabled:text-slate-500 disabled:ring-0"
+            disabled={isPending || isEditing}
+            onClick={() => setIsEditing(true)}
+            title="수정하기"
+            type="button"
+          >
+            <Pencil aria-hidden="true" size={16} />
+          </button>
+        ) : null}
+
         <label className="block">
           <span className="mb-2 block text-label-caps text-slate-500">
             깃허브 ID
@@ -52,7 +87,12 @@ export function RepoRegistrationCard() {
             autoComplete="username"
             aria-invalid={state.status === "error" ? true : undefined}
             className="input-field"
-            defaultValue={state.status === "error" ? state.githubId : ""}
+            defaultValue={
+              state.status === "error"
+                ? state.githubId
+                : registeredRepository?.owner
+            }
+            disabled={isInputDisabled}
             name="githubId"
             placeholder="예: octocat"
             type="text"
@@ -70,7 +110,12 @@ export function RepoRegistrationCard() {
             autoComplete="off"
             aria-invalid={state.status === "error" ? true : undefined}
             className="input-field"
-            defaultValue={state.status === "error" ? state.repositoryName : ""}
+            defaultValue={
+              state.status === "error"
+                ? state.repositoryName
+                : registeredRepository?.repo
+            }
+            disabled={isInputDisabled}
             name="repositoryName"
             placeholder="예: algorithm-solutions"
             type="text"
@@ -94,13 +139,41 @@ export function RepoRegistrationCard() {
 
         <Button
           className="w-full"
-          disabled={isPending}
+          disabled={isPending || isInputDisabled}
           type="submit"
           variant="primary"
         >
-          웹훅 연결하기
+          {hasRegisteredWebhook ? "웹훅 저장하기" : "웹훅 연결하기"}
         </Button>
       </form>
     </section>
   );
+}
+
+function getRegisteredRepository({
+  currentWebhook,
+  state,
+}: {
+  currentWebhook: GitHubRepositoryWebhookSummary | null;
+  state: RegisterGitHubWebhookActionState;
+}) {
+  if (state.status === "success") {
+    return {
+      owner: state.githubId,
+      repo: state.repositoryName,
+    };
+  }
+
+  return currentWebhook
+    ? parseRepositoryFullName(currentWebhook.repositoryFullName)
+    : null;
+}
+
+function parseRepositoryFullName(repositoryFullName: string) {
+  const [owner, ...repoParts] = repositoryFullName.split("/");
+
+  return {
+    owner,
+    repo: repoParts.join("/"),
+  };
 }

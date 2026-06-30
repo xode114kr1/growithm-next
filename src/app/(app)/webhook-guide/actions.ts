@@ -1,5 +1,7 @@
 "use server";
 
+import { redirect } from "next/navigation";
+
 import { auth } from "@/lib/auth/auth";
 import { registerGitHubWebhook } from "@/server/webhook-registration/webhook-registration.command.service";
 import type { ActionState } from "@/types/action-state";
@@ -49,13 +51,7 @@ export async function registerGitHubWebhookAction(
     });
   }
 
-  return {
-    error: null,
-    githubId,
-    message: result.body.message,
-    repositoryName,
-    status: "success",
-  };
+  redirect("/dashboard");
 }
 
 function createErrorState({
