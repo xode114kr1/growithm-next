@@ -29,6 +29,7 @@ export default function ProblemList({
   filters: ProblemFiltersState;
   initialHasNextPage: boolean;
   initialItems: ProblemListItem[];
+  initialNextCursor: string | null;
 }) {
   const [items, setItems] = useState(initialItems);
   const [nextPage, setNextPage] = useState(2);
