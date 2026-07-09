@@ -49,7 +49,6 @@ export type ProblemInfiniteScrollResponse = {
   hasNextPage: boolean;
   items: ProblemInfiniteScrollItem[];
   nextCursor: string | null;
-  totalCount: number;
 };
 
 export type ProblemPageSearchParams = {
