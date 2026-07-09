@@ -5,19 +5,20 @@ import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import type { ProblemFiltersState, ProblemSort } from "@/types/problem";
 
-// 필터와 페이지 조건에 맞는 문제 제출 목록을 조회한다.
+// 필터와 커서 조건에 맞는 문제 제출 목록을 조회한다.
 export async function findProblems({
+  cursor,
   filters,
-  page,
   pageSize,
   userId,
 }: {
+  cursor: string | null;
   filters: ProblemFiltersState;
-  page: number;
   pageSize: number;
   userId: string;
 }) {
   return prisma.problemSubmission.findMany({
+    cursor: cursor ? { id: cursor } : undefined,
     orderBy: buildProblemOrderBy(filters.sort),
     select: {
       categories: true,
@@ -30,8 +31,7 @@ export async function findProblems({
       tier: true,
       title: true,
     },
-    skip: (page - 1) * pageSize,
-    take: pageSize,
+    take: pageSize + 1,
     where: {
       ...buildProblemWhere(filters),
       userId,
