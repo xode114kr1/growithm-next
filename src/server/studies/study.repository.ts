@@ -385,21 +385,22 @@ function buildStudyProblemShareOrderBy(
   return orderBy;
 }
 
-// 사용자가 접근 가능한 스터디에 공유된 문제를 필터와 페이지 조건으로 조회한다.
+// 사용자가 접근 가능한 스터디에 공유된 문제를 필터와 커서 조건으로 조회한다.
 export async function findStudyProblems({
+  cursor,
   filters,
-  page,
   pageSize,
   studyId,
   userId,
 }: {
+  cursor: string | null;
   filters: StudyProblemFilters;
-  page: number;
   pageSize: number;
   studyId: string;
   userId: string;
 }) {
   return prisma.studyProblemShare.findMany({
+    cursor: cursor ? { id: cursor } : undefined,
     select: {
       problemSubmission: {
         select: {
@@ -416,8 +417,8 @@ export async function findStudyProblems({
       user: { select: { name: true } },
     },
     orderBy: buildStudyProblemShareOrderBy(filters.sort),
-    skip: (page - 1) * pageSize,
-    take: pageSize,
+    skip: cursor ? 1 : 0,
+    take: pageSize + 1,
     where: buildStudyProblemShareWhere({ filters, studyId, userId }),
   });
 }
