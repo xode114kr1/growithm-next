@@ -31,6 +31,7 @@ export async function findProblems({
       tier: true,
       title: true,
     },
+    skip: cursor ? 1 : 0,
     take: pageSize + 1,
     where: {
       ...buildProblemWhere(filters),

@@ -23,6 +23,7 @@ export default function ProblemList({
   filters,
   initialHasNextPage,
   initialItems,
+  initialNextCursor,
 }: {
   currentTime: string;
   emptyStateReason: ProblemEmptyStateReason | null;
@@ -32,7 +33,7 @@ export default function ProblemList({
   initialNextCursor: string | null;
 }) {
   const [items, setItems] = useState(initialItems);
-  const [nextPage, setNextPage] = useState(2);
+  const [nextCursor, setNextCursor] = useState(initialNextCursor);
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -50,7 +51,7 @@ export default function ProblemList({
     setIsLoading(true);
 
     try {
-      const searchParams = createProblemSearchParams(nextPage, filters);
+      const searchParams = createProblemSearchParams(nextCursor, filters);
       const response = await fetch(`/api/problems?${searchParams}`);
 
       if (!response.ok) return;
@@ -63,14 +64,14 @@ export default function ProblemList({
       }));
 
       setItems((currentItems) => [...currentItems, ...nextItems]);
-      setNextPage(data.currentPage + 1);
+      setNextCursor(data.nextCursor);
       setHasNextPage(data.hasNextPage);
     } catch {
       return;
     } finally {
       setIsLoading(false);
     }
-  }, [filters, hasNextPage, isLoading, nextPage]);
+  }, [filters, hasNextPage, isLoading, nextCursor]);
 
   useVirtualizedLoadMore({
     hasNextPage,
@@ -134,12 +135,15 @@ export default function ProblemList({
   );
 }
 
-function createProblemSearchParams(page: number, filters: ProblemFiltersState) {
+function createProblemSearchParams(
+  cursor: string | null,
+  filters: ProblemFiltersState,
+) {
   const searchParams = new URLSearchParams({
-    page: String(page),
     sort: filters.sort,
   });
 
+  if (cursor) searchParams.set("cursor", cursor);
   if (filters.platform) searchParams.set("platform", filters.platform);
   if (filters.q) searchParams.set("q", filters.q);
   if (filters.tier) searchParams.set("tier", filters.tier);
