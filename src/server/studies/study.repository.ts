@@ -402,6 +402,7 @@ export async function findStudyProblems({
   return prisma.studyProblemShare.findMany({
     cursor: cursor ? { id: cursor } : undefined,
     select: {
+      id: true,
       problemSubmission: {
         select: {
           categories: true,

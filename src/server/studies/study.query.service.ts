@@ -427,37 +427,50 @@ export async function getOwnedStudyPendingInvites({
 
 export const STUDY_PROBLEM_PAGE_SIZE = 10;
 
+type StudyProblemPage = {
+  hasNextPage: boolean;
+  items: StudyProblemListItem[];
+  nextCursor: string | null;
+};
+
 // 스터디에 공유된 문제 목록을 조회한다.
 export async function getStudyProblems({
+  cursor = null,
   filters,
-  page,
   studyId,
   userId,
 }: {
+  cursor?: string | null;
   filters: StudyProblemFilters;
-  page: number;
   studyId: string;
   userId: string;
-}): Promise<StudyProblemListItem[]> {
+}): Promise<StudyProblemPage> {
   const shares = await findStudyProblems({
+    cursor,
     filters,
-    page,
     pageSize: STUDY_PROBLEM_PAGE_SIZE,
     studyId,
     userId,
   });
+  const hasNextPage = shares.length > STUDY_PROBLEM_PAGE_SIZE;
+  const pageShares = shares.slice(0, STUDY_PROBLEM_PAGE_SIZE);
+  const lastShare = pageShares.at(-1);
 
-  return shares.map((share) => ({
-    categories: normalizeCategories(share.problemSubmission.categories),
-    code: `${share.problemSubmission.platform}-${share.problemSubmission.problemId}`,
-    id: share.problemSubmission.id,
-    platform: share.problemSubmission.platform,
-    sharedAtLabel: formatShortDate(share.sharedAt),
-    sharedBy: getUserDisplayName(share.user.name),
-    status: share.problemSubmission.status,
-    tier: share.problemSubmission.tier,
-    title: share.problemSubmission.title,
-  }));
+  return {
+    hasNextPage,
+    items: pageShares.map((share) => ({
+      categories: normalizeCategories(share.problemSubmission.categories),
+      code: `${share.problemSubmission.platform}-${share.problemSubmission.problemId}`,
+      id: share.problemSubmission.id,
+      platform: share.problemSubmission.platform,
+      sharedAtLabel: formatShortDate(share.sharedAt),
+      sharedBy: getUserDisplayName(share.user.name),
+      status: share.problemSubmission.status,
+      tier: share.problemSubmission.tier,
+      title: share.problemSubmission.title,
+    })),
+    nextCursor: hasNextPage && lastShare ? lastShare.id : null,
+  };
 }
 
 // 스터디에 공유된 문제의 모달 상세 정보를 조회한다.
