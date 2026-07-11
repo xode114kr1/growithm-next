@@ -25,6 +25,7 @@ export default function StudyProblemList({
   hasActiveFilters,
   initialHasNextPage,
   initialItems,
+  initialNextCursor,
   studyId,
 }: {
   clearedFiltersQueryString: string;
@@ -36,7 +37,7 @@ export default function StudyProblemList({
   studyId: string;
 }) {
   const [items, setItems] = useState(initialItems);
-  const [nextPage, setNextPage] = useState(2);
+  const [nextCursor, setNextCursor] = useState(initialNextCursor);
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedProblem, setSelectedProblem] =
@@ -56,7 +57,7 @@ export default function StudyProblemList({
     setIsLoading(true);
 
     try {
-      const searchParams = createStudyProblemSearchParams(nextPage, filters);
+      const searchParams = createStudyProblemSearchParams(nextCursor, filters);
       const response = await fetch(
         `/api/studies/${studyId}/problems?${searchParams}`,
       );
@@ -67,14 +68,14 @@ export default function StudyProblemList({
         (await response.json()) as StudyProblemInfiniteScrollResponse;
 
       setItems((currentItems) => [...currentItems, ...data.items]);
-      setNextPage(data.currentPage + 1);
+      setNextCursor(data.nextCursor);
       setHasNextPage(data.hasNextPage);
     } catch {
       return;
     } finally {
       setIsLoading(false);
     }
-  }, [filters, hasNextPage, isLoading, nextPage, studyId]);
+  }, [filters, hasNextPage, isLoading, nextCursor, studyId]);
 
   useVirtualizedLoadMore({
     hasNextPage,
@@ -202,14 +203,14 @@ function getStudyProblemsHref(queryString: string) {
 }
 
 function createStudyProblemSearchParams(
-  page: number,
+  cursor: string | null,
   filters: StudyProblemFilters,
 ) {
   const searchParams = new URLSearchParams({
-    page: String(page),
     sort: filters.sort,
   });
 
+  if (cursor) searchParams.set("cursor", cursor);
   if (filters.member) searchParams.set("member", filters.member);
   if (filters.platform) searchParams.set("platform", filters.platform);
   if (filters.tier) searchParams.set("tier", filters.tier);
