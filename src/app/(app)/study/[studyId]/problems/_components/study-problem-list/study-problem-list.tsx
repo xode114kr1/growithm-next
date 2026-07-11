@@ -32,6 +32,7 @@ export default function StudyProblemList({
   hasActiveFilters: boolean;
   initialHasNextPage: boolean;
   initialItems: StudyProblemListItem[];
+  initialNextCursor: string | null;
   studyId: string;
 }) {
   const [items, setItems] = useState(initialItems);
