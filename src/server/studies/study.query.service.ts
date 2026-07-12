@@ -5,7 +5,6 @@ import { cache } from "react";
 import {
   getNextTierScore,
   getProgressLabel,
-  getStudyTier,
   getUserDisplayName,
   normalizeCategories,
 } from "@/server/studies/study.mapper";
@@ -51,6 +50,7 @@ import type {
   StudyRecentProblem,
 } from "@/types/study";
 import { formatRelativeDate, formatShortDate } from "@/utils/date";
+import { getStudyTier } from "@/utils/score";
 import { getTierProgress } from "@/utils/study";
 
 // 문제를 공유할 수 있는 사용자의 스터디 목록을 조회한다.

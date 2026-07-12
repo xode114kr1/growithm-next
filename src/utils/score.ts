@@ -18,7 +18,7 @@ export const studyScoreTierThresholds = [
 ] satisfies Array<ScoreTierThreshold>;
 
 // 개인 점수에 해당하는 티어를 계산한다.
-export function getPersonalScoreTier(score: number): PersonalScoreTier {
+export function getPersonalTier(score: number): PersonalScoreTier {
   return (
     personalScoreTierThresholds.find(
       (threshold) => score >= threshold.minScore,
@@ -27,7 +27,7 @@ export function getPersonalScoreTier(score: number): PersonalScoreTier {
 }
 
 // 스터디 점수에 해당하는 티어를 계산한다.
-export function getStudyScoreTier(score: number) {
+export function getStudyTier(score: number) {
   return (
     studyScoreTierThresholds.find((threshold) => score >= threshold.minScore)
       ?.tier ?? "Bronze"

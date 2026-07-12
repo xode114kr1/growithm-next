@@ -8,28 +8,11 @@ import type {
 
 import {
   getNextScoreTierScore,
+  getPersonalTier,
   getScoreProgressLabel,
-  getScoreTier,
   getScoreTierProgress,
+  personalScoreTierThresholds,
 } from "@/utils/score";
-
-const personalScoreTierThresholds = [
-  { minScore: 1_000_000, tier: "Diamond" },
-  { minScore: 100_000, tier: "Platinum" },
-  { minScore: 10_000, tier: "Gold" },
-  { minScore: 1_000, tier: "Silver" },
-  { minScore: 0, tier: "Bronze" },
-] satisfies Array<{ minScore: number; tier: PersonalScoreTier }>;
-
-// 사용자 점수에 맞는 티어를 반환한다.
-export function getUserTier(score: number) {
-  return getPersonalScoreTier(score);
-}
-
-// 개인 점수에 해당하는 티어를 계산한다.
-function getPersonalScoreTier(score: number): PersonalScoreTier {
-  return getScoreTier(score, personalScoreTierThresholds, "Bronze");
-}
 
 // 개인 점수의 현재 티어 내 진행률을 계산한다.
 function getPersonalTierProgress(
@@ -72,7 +55,7 @@ export type UserSummaryRow = {
 
 // 점수를 기반으로 개인 티어 표시 데이터를 구성한다.
 export function createPersonalTier(score: number): UserPersonalTier {
-  const tier = getPersonalScoreTier(score);
+  const tier = getPersonalTier(score);
 
   return {
     nextTierScore: getNextPersonalTierScore(tier),
@@ -89,6 +72,6 @@ export function createUserSummary(user: UserSummaryRow): UserSummary {
     avatar: getUserAvatar(user.image),
     id: user.id,
     name: getUserDisplayName(user.name, user.email),
-    tier: getUserTier(user.score),
+    tier: getPersonalTier(user.score),
   };
 }
