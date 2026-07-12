@@ -2,15 +2,10 @@ import type { NextRequest } from "next/server";
 
 import { auth } from "@/lib/auth/auth";
 import {
-  getStudyProblemCount,
   getStudyProblemMemberNames,
   getStudyProblems,
-  STUDY_PROBLEM_PAGE_SIZE,
 } from "@/server/studies/study.query.service";
-import {
-  parseStudyProblemFilters,
-  parseStudyProblemPage,
-} from "@/server/studies/study.schema";
+import { parseStudyProblemFilters } from "@/server/studies/study.schema";
 import type {
   StudyProblemInfiniteScrollRequest,
   StudyProblemInfiniteScrollResponse,
@@ -18,7 +13,7 @@ import type {
 } from "@/types/study";
 
 type StudyProblemApiSearchParams = StudyProblemPageSearchParams & {
-  page?: string;
+  cursor?: string;
 };
 
 export async function GET(
@@ -49,28 +44,20 @@ export async function GET(
       platform: filters.platform,
       tier: filters.tier,
     },
-    page: parseStudyProblemPage(searchParams.page),
+    cursor: searchParams.cursor ?? null,
     sort: filters.sort,
   };
   const studyProblemFilters = { ...query.filters, sort: query.sort };
-  const [problems, totalCount] = await Promise.all([
-    getStudyProblems({
-      filters: studyProblemFilters,
-      page: query.page,
-      studyId,
-      userId,
-    }),
-    getStudyProblemCount({
-      filters: studyProblemFilters,
-      studyId,
-      userId,
-    }),
-  ]);
+  const studyProblemPage = await getStudyProblems({
+    cursor: query.cursor,
+    filters: studyProblemFilters,
+    studyId,
+    userId,
+  });
   const response: StudyProblemInfiniteScrollResponse = {
-    currentPage: query.page,
-    hasNextPage: query.page * STUDY_PROBLEM_PAGE_SIZE < totalCount,
-    items: problems,
-    totalCount,
+    hasNextPage: studyProblemPage.hasNextPage,
+    items: studyProblemPage.items,
+    nextCursor: studyProblemPage.nextCursor,
   };
 
   return Response.json(response);
@@ -80,8 +67,8 @@ function createStudyProblemSearchParams(
   searchParams: URLSearchParams,
 ): StudyProblemApiSearchParams {
   return {
+    cursor: searchParams.get("cursor") ?? undefined,
     member: searchParams.get("member") ?? undefined,
-    page: searchParams.get("page") ?? undefined,
     platform: searchParams.get("platform") ?? undefined,
     sort: searchParams.get("sort") ?? undefined,
     tier: searchParams.get("tier") ?? undefined,

@@ -6,7 +6,6 @@ import {
   getStudyProblemMemberNames,
   getStudyProblemTiers,
   getStudyProblems,
-  STUDY_PROBLEM_PAGE_SIZE,
 } from "@/server/studies/study.query.service";
 import { parseStudyProblemFilters } from "@/server/studies/study.schema";
 
@@ -33,7 +32,7 @@ export default async function StudyProblemsPage({
   }
 
   const filters = parseStudyProblemFilters(urlSearchParams);
-  const [filteredCount, totalCount, memberNames, tiers, initialItems] =
+  const [filteredCount, totalCount, memberNames, tiers, studyProblemPage] =
     await Promise.all([
       getStudyProblemCount({ filters, studyId, userId }),
       getStudyProblemCount({ studyId, userId }),
@@ -41,7 +40,6 @@ export default async function StudyProblemsPage({
       getStudyProblemTiers({ studyId, userId }),
       getStudyProblems({
         filters,
-        page: 1,
         studyId,
         userId,
       }),
@@ -71,8 +69,9 @@ export default async function StudyProblemsPage({
         clearedFiltersQueryString={clearedFiltersQueryString}
         filters={filters}
         hasActiveFilters={hasActiveFilters}
-        initialHasNextPage={STUDY_PROBLEM_PAGE_SIZE < filteredCount}
-        initialItems={initialItems}
+        initialHasNextPage={studyProblemPage.hasNextPage}
+        initialItems={studyProblemPage.items}
+        initialNextCursor={studyProblemPage.nextCursor}
         key={createStudyProblemListKey(filters)}
         studyId={studyId}
       />

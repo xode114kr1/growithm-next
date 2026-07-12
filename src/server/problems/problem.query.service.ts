@@ -26,26 +26,45 @@ import type {
 export const PROBLEM_PAGE_SIZE = 25;
 const PENDING_PROBLEM_LIMIT = 3;
 
-// 필터와 페이지 조건에 맞는 문제 목록을 화면용 데이터로 조회한다.
+type ProblemListPage = {
+  hasNextPage: boolean;
+  items: ProblemListItem[];
+  nextCursor: string | null;
+};
+
+// 필터와 커서 조건에 맞는 문제 목록을 화면용 데이터로 조회한다.
 export async function getProblems({
+  cursor = null,
   filters,
-  page,
   userId,
 }: {
+  cursor?: string | null;
   filters: ProblemFiltersState;
-  page: number;
   userId: string | undefined;
-}): Promise<ProblemListItem[]> {
-  if (!userId) return [];
+}): Promise<ProblemListPage> {
+  if (!userId) {
+    return {
+      hasNextPage: false,
+      items: [],
+      nextCursor: null,
+    };
+  }
 
   const rows = await findProblems({
+    cursor,
     filters,
-    page,
     pageSize: PROBLEM_PAGE_SIZE,
     userId,
   });
+  const hasNextPage = rows.length > PROBLEM_PAGE_SIZE;
+  const items = rows.slice(0, PROBLEM_PAGE_SIZE).map(createProblemListItem);
+  const lastItem = items.at(-1);
 
-  return rows.map(createProblemListItem);
+  return {
+    hasNextPage,
+    items,
+    nextCursor: hasNextPage && lastItem ? lastItem.id : null,
+  };
 }
 
 // 사용자의 필터 조건에 해당하는 문제 수를 조회한다.

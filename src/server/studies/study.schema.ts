@@ -25,14 +25,6 @@ export function parseStudyProblemFilters(
   };
 }
 
-export function parseStudyProblemPage(
-  page: string | string[] | undefined,
-) {
-  const parsedPage = Number(parseStringParam(page));
-
-  return Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
-}
-
 // 새 스터디 제목과 설명 입력값을 검증한다.
 export function validateStudyInput({
   description,
