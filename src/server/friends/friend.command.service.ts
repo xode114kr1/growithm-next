@@ -2,12 +2,12 @@ import "server-only";
 
 import {
   acceptFriendRequestRecord,
+  createFriendRequest,
   deleteFriendship,
   deleteSentFriendRequest,
   findFriendRequest,
   findFriendship,
   rejectReceivedFriendRequest,
-  upsertFriendRequest,
 } from "@/server/friends/friend.repository";
 import { findUserById } from "@/server/users/user.repository";
 
@@ -45,7 +45,7 @@ export async function sendFriendRequest({
     return;
   }
 
-  await upsertFriendRequest({ requesterId, targetUserId });
+  await createFriendRequest({ requesterId, targetUserId });
 }
 
 // 현재 사용자가 보낸 친구 요청을 취소한다.

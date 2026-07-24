@@ -228,7 +228,7 @@ export async function findFriendRequest({
 }
 
 // 동일 방향 친구 요청을 중복 없이 저장한다.
-export async function upsertFriendRequest({
+export async function createFriendRequest({
   requesterId,
   targetUserId,
 }: {
