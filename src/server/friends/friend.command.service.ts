@@ -5,10 +5,10 @@ import {
   deleteFriendship,
   deleteSentFriendRequest,
   findFriendshipAndReceivedRequest,
-  findUserById,
   rejectReceivedFriendRequest,
   upsertFriendRequest,
 } from "@/server/friends/friend.repository";
+import { findUserById } from "@/server/users/user.repository";
 
 // 대상 사용자에게 중복되지 않는 친구 요청을 전송한다.
 export async function sendFriendRequest({

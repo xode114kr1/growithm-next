@@ -191,18 +191,6 @@ function buildFriendshipWhere({
   };
 }
 
-// 사용자 ID에 해당하는 사용자의 존재 여부를 조회한다.
-export async function findUserById(userId: string) {
-  return prisma.user.findUnique({
-    select: {
-      id: true,
-    },
-    where: {
-      id: userId,
-    },
-  });
-}
-
 // 정규화된 친구 관계와 반대 방향 친구 요청을 함께 조회한다.
 export async function findFriendshipAndReceivedRequest({
   friendPair,

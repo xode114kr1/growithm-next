@@ -11,6 +11,18 @@ const userSummarySelect = {
   score: true,
 } satisfies Record<keyof UserSummaryRow, true>;
 
+// 사용자 ID에 해당하는 사용자의 존재 여부를 조회한다.
+export async function findUserById(userId: string) {
+  return prisma.user.findUnique({
+    select: {
+      id: true,
+    },
+    where: {
+      id: userId,
+    },
+  });
+}
+
 // 사용자의 개인 티어 계산에 필요한 점수를 조회한다.
 export async function findUserScore(userId: string) {
   return prisma.user.findUnique({
