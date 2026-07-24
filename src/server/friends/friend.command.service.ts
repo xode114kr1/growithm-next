@@ -28,7 +28,7 @@ export async function sendFriendRequest({
     return;
   }
 
-  const friendPair = normalizeFriendshipUserIds(requesterId, targetUserId);
+  const friendPair = createSortedFriendPair(requesterId, targetUserId);
   const { existingFriendship, receivedRequest } =
     await findFriendshipAndReceivedRequest({
       friendPair,
@@ -85,11 +85,11 @@ export async function deleteFriend({
   friendUserId: string;
 }) {
   await deleteFriendship(
-    normalizeFriendshipUserIds(currentUserId, friendUserId),
+    createSortedFriendPair(currentUserId, friendUserId),
   );
 }
 
-function normalizeFriendshipUserIds(
+function createSortedFriendPair(
   firstUserId: string,
   secondUserId: string,
 ) {
