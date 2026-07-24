@@ -93,9 +93,9 @@ export async function deleteFriend({
   currentUserId: string;
   friendUserId: string;
 }) {
-  await deleteFriendship(
-    createSortedFriendPair(currentUserId, friendUserId),
-  );
+  const friendPair = createSortedFriendPair(currentUserId, friendUserId);
+
+  await deleteFriendship(friendPair);
 }
 
 function createSortedFriendPair(
