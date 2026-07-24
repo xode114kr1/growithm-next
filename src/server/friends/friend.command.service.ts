@@ -4,7 +4,8 @@ import {
   acceptFriendRequestRecord,
   deleteFriendship,
   deleteSentFriendRequest,
-  findFriendshipAndReceivedRequest,
+  findFriendRequest,
+  findFriendship,
   rejectReceivedFriendRequest,
   upsertFriendRequest,
 } from "@/server/friends/friend.repository";
@@ -29,14 +30,18 @@ export async function sendFriendRequest({
   }
 
   const friendPair = createSortedFriendPair(requesterId, targetUserId);
-  const { existingFriendship, receivedRequest } =
-    await findFriendshipAndReceivedRequest({
-      friendPair,
-      requesterId,
-      targetUserId,
-    });
+  const existingFriendship = await findFriendship(friendPair);
 
-  if (existingFriendship || receivedRequest) {
+  if (existingFriendship) {
+    return;
+  }
+
+  const receivedRequest = await findFriendRequest({
+    addresseeId: requesterId,
+    requesterId: targetUserId,
+  });
+
+  if (receivedRequest) {
     return;
   }
 

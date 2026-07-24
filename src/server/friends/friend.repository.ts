@@ -191,39 +191,40 @@ function buildFriendshipWhere({
   };
 }
 
-// 정규화된 친구 관계와 반대 방향 친구 요청을 함께 조회한다.
-export async function findFriendshipAndReceivedRequest({
-  friendPair,
-  requesterId,
-  targetUserId,
-}: {
-  friendPair: { userAId: string; userBId: string };
-  requesterId: string;
-  targetUserId: string;
+// 정렬된 사용자 ID에 해당하는 친구 관계를 조회한다.
+export async function findFriendship(friendPair: {
+  userAId: string;
+  userBId: string;
 }) {
-  const [existingFriendship, receivedRequest] = await Promise.all([
-    prisma.friendship.findUnique({
-      select: {
-        id: true,
-      },
-      where: {
-        userAId_userBId: friendPair,
-      },
-    }),
-    prisma.friendRequest.findUnique({
-      select: {
-        id: true,
-      },
-      where: {
-        requesterId_addresseeId: {
-          addresseeId: requesterId,
-          requesterId: targetUserId,
-        },
-      },
-    }),
-  ]);
+  return prisma.friendship.findUnique({
+    select: {
+      id: true,
+    },
+    where: {
+      userAId_userBId: friendPair,
+    },
+  });
+}
 
-  return { existingFriendship, receivedRequest };
+// 요청자와 수신자가 일치하는 친구 요청을 조회한다.
+export async function findFriendRequest({
+  addresseeId,
+  requesterId,
+}: {
+  addresseeId: string;
+  requesterId: string;
+}) {
+  return prisma.friendRequest.findUnique({
+    select: {
+      id: true,
+    },
+    where: {
+      requesterId_addresseeId: {
+        addresseeId,
+        requesterId,
+      },
+    },
+  });
 }
 
 // 동일 방향 친구 요청을 중복 없이 저장한다.
