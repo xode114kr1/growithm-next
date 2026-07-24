@@ -147,6 +147,7 @@ export async function findFriendRelationsForUserIds({
   return { friendships, receivedRequests, sentRequests };
 }
 
+// 현재 사용자의 친구 관계와 이름·이메일 검색 조건을 조회 조건으로 만든다.
 function buildFriendshipWhere({
   query,
   userId,
