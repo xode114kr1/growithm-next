@@ -19,16 +19,19 @@ export async function sendFriendRequest({
   requesterId: string;
   targetUserId: string;
 }) {
+  // 본인에게 보내는 요청인지 확인
   if (requesterId === targetUserId) {
     return;
   }
 
+  // 요청 대상 사용자가 존재하는지 확인
   const targetUser = await findUserById(targetUserId);
 
   if (!targetUser) {
     return;
   }
 
+  // 이미 친구 관계인지 확인
   const friendPair = createSortedFriendPair(requesterId, targetUserId);
   const existingFriendship = await findFriendship(friendPair);
 
@@ -36,6 +39,7 @@ export async function sendFriendRequest({
     return;
   }
 
+  // 상대방에게 받은 친구 요청이 있는지 확인
   const receivedRequest = await findFriendRequest({
     addresseeId: requesterId,
     requesterId: targetUserId,
