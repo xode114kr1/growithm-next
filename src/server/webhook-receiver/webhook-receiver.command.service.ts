@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getRepositoryFullName } from "@/server/github/github-webhook.helper";
+import { getRepositoryFullName } from "@/server/github/github.mapper";
 import { enqueueWebhookDelivery } from "@/server/webhook-receiver/webhook-receiver.gateway";
 import {
   markWebhookDeliveryFailed,

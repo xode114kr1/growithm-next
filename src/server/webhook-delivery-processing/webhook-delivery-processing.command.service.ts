@@ -19,8 +19,8 @@ import {
   updateWebhookDeliveryStatus,
   updateWebhookDeliveryStatusById,
 } from "@/server/webhook-delivery-processing/webhook-delivery-processing.repository";
-import { getRepositoryFullName } from "@/server/github/github-webhook.helper";
-import { isRetryableGitHubFileError } from "@/server/github/github-file.error";
+import { isRetryableGitHubFileError } from "@/server/github/github.errors";
+import { getRepositoryFullName } from "@/server/github/github.mapper";
 import type { GitHubReadmeChange, GitHubWebhookPayload } from "@/types/github";
 
 type WebhookDeliveryProcessingResult = {

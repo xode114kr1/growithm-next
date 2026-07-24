@@ -3,7 +3,7 @@ import "server-only";
 import {
   isRetryableGitHubStatus,
   RetryableGitHubFileError,
-} from "@/server/github/github-file.error";
+} from "@/server/github/github.errors";
 import {
   encodeGitHubPath,
   getGitHubContentErrorMessage,
