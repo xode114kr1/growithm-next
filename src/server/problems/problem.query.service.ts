@@ -50,14 +50,16 @@ export async function getProblems({
     };
   }
 
-  const rows = await findProblems({
+  const problems = await findProblems({
     cursor,
     filters,
     pageSize: PROBLEM_PAGE_SIZE,
     userId,
   });
-  const hasNextPage = rows.length > PROBLEM_PAGE_SIZE;
-  const items = rows.slice(0, PROBLEM_PAGE_SIZE).map(createProblemListItem);
+  const hasNextPage = problems.length > PROBLEM_PAGE_SIZE;
+  const items = problems
+    .slice(0, PROBLEM_PAGE_SIZE)
+    .map(createProblemListItem);
   const lastItem = items.at(-1);
 
   return {
