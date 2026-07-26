@@ -15,6 +15,7 @@ import type {
   StudyListItem,
   StudyMember,
   StudyMemberFilters,
+  StudyOverviewSummary,
   StudyTier,
 } from "@/types/study";
 
@@ -49,6 +50,13 @@ type StudyListItemRow = {
   id: string;
   owner: { name: string | null };
   ownerId: string;
+  score: number;
+  title: string;
+};
+
+type StudySummaryRow = {
+  description: string | null;
+  id: string;
   score: number;
   title: string;
 };
@@ -143,6 +151,22 @@ export function createStudyListItem(
     score: study.score,
     tier,
     title: study.title,
+  };
+}
+
+// 스터디 조회 결과를 개요 화면의 기본 정보로 변환한다.
+export function createStudySummary(
+  study: StudySummaryRow,
+): StudyOverviewSummary {
+  const tier = getStudyTier(study.score);
+
+  return {
+    description: study.description ?? "아직 스터디 설명이 없습니다.",
+    id: study.id,
+    name: study.title,
+    nextTierScore: getNextTierScore(tier),
+    score: study.score,
+    tier,
   };
 }
 
