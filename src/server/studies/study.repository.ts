@@ -599,10 +599,12 @@ export async function rejectStudyInviteRecord({
   inviteId: string;
   userId: string;
 }) {
-  await prisma.studyInvite.updateMany({
+  const result = await prisma.studyInvite.updateMany({
     data: { status: "CANCELED" },
     where: { id: inviteId, status: "PENDING", targetUserId: userId },
   });
+
+  return result.count > 0;
 }
 
 // 소유한 스터디와 초대 대상 사용자 및 멤버 여부를 조회한다.
