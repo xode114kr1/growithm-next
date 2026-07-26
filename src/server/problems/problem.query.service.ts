@@ -118,12 +118,12 @@ export async function getPendingProblems(
 ): Promise<PendingProblem[]> {
   if (!userId) return [];
 
-  const rows = await findPendingProblemsByUserId({
+  const pendingProblems = await findPendingProblemsByUserId({
     limit: PENDING_PROBLEM_LIMIT,
     userId,
   });
 
-  return rows.map(createPendingProblem);
+  return pendingProblems.map(createPendingProblem);
 }
 
 // 사용자의 전체 문제 제출 수를 조회한다.
