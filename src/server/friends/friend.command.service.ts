@@ -60,7 +60,9 @@ export async function cancelFriendRequest({
   requesterId: string;
   requestId: string;
 }) {
-  await deleteSentFriendRequest({ requesterId, requestId });
+  const isCanceled = await deleteSentFriendRequest({ requesterId, requestId });
+
+  return isCanceled;
 }
 
 // 현재 사용자가 받은 친구 요청을 거절한다.
@@ -71,7 +73,12 @@ export async function rejectFriendRequest({
   addresseeId: string;
   requestId: string;
 }) {
-  await rejectReceivedFriendRequest({ addresseeId, requestId });
+  const isRejected = await rejectReceivedFriendRequest({
+    addresseeId,
+    requestId,
+  });
+
+  return isRejected;
 }
 
 // 받은 친구 요청을 수락하고 친구 관계를 생성한다.
@@ -82,7 +89,12 @@ export async function acceptFriendRequest({
   addresseeId: string;
   requestId: string;
 }) {
-  await acceptFriendRequestRecord({ addresseeId, requestId });
+  const isAccepted = await acceptFriendRequestRecord({
+    addresseeId,
+    requestId,
+  });
+
+  return isAccepted;
 }
 
 // 현재 사용자와 대상 사용자의 친구 관계를 삭제한다.
@@ -94,8 +106,9 @@ export async function deleteFriend({
   friendUserId: string;
 }) {
   const friendPair = createSortedFriendPair(currentUserId, friendUserId);
+  const isDeleted = await deleteFriendship(friendPair);
 
-  await deleteFriendship(friendPair);
+  return isDeleted;
 }
 
 function createSortedFriendPair(

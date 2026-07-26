@@ -259,12 +259,14 @@ export async function deleteSentFriendRequest({
   requesterId: string;
   requestId: string;
 }) {
-  await prisma.friendRequest.deleteMany({
+  const result = await prisma.friendRequest.deleteMany({
     where: {
       id: requestId,
       requesterId,
     },
   });
+
+  return result.count > 0;
 }
 
 // 수신자와 요청 ID가 일치하는 받은 친구 요청을 거절 처리한다.
@@ -275,12 +277,14 @@ export async function rejectReceivedFriendRequest({
   addresseeId: string;
   requestId: string;
 }) {
-  await prisma.friendRequest.deleteMany({
+  const result = await prisma.friendRequest.deleteMany({
     where: {
       addresseeId,
       id: requestId,
     },
   });
+
+  return result.count > 0;
 }
 
 // 받은 요청을 삭제한 경우에만 친구 관계를 생성한다.
@@ -330,7 +334,9 @@ export async function deleteFriendship(friendPair: {
   userAId: string;
   userBId: string;
 }) {
-  await prisma.friendship.deleteMany({
+  const result = await prisma.friendship.deleteMany({
     where: friendPair,
   });
+
+  return result.count > 0;
 }
