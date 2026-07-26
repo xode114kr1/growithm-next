@@ -1,7 +1,6 @@
 import "server-only";
 
 import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
-import { getProblemExperienceScore } from "@/server/problems/problem.command.service";
 import {
   fetchGitHubRawCode,
   fetchGitHubReadmeContent,
@@ -22,6 +21,7 @@ import {
 import { isRetryableGitHubFileError } from "@/server/github/github.errors";
 import { getRepositoryFullName } from "@/server/github/github.mapper";
 import type { GitHubReadmeChange, GitHubWebhookPayload } from "@/types/github";
+import { getProblemExperienceScore } from "@/utils/problem";
 
 type WebhookDeliveryProcessingResult = {
   deliveryId?: string;
