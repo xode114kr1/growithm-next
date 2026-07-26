@@ -107,7 +107,9 @@ export async function getProblemTierDistribution(
 ): Promise<ProblemTierBucket[]> {
   if (!userId) return createProblemTierBuckets([]);
 
-  return createProblemTierBuckets(await findProblemTiersByUserId(userId));
+  const problemTiers = await findProblemTiersByUserId(userId);
+
+  return createProblemTierBuckets(problemTiers);
 }
 
 // 메모 작성이 필요한 사용자의 최근 대기 문제를 조회한다.
