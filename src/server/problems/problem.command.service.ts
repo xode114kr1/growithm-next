@@ -24,7 +24,13 @@ export async function updateProblemMemo({
   problemId: string;
   userId: string;
 }) {
-  return updateProblemMemoRecord({ memo, problemId, userId });
+  const isUpdated = await updateProblemMemoRecord({
+    memo,
+    problemId,
+    userId,
+  });
+
+  return isUpdated;
 }
 
 // 완료한 문제를 권한이 있는 스터디에 공유하고 점수를 반영한다.
