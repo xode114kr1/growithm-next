@@ -1,16 +1,23 @@
 import "server-only";
 
 import {
+  createOwnedStudy,
+  createOwnedStudyInvite,
+  createOwnedStudyMembers,
   createStudyContributions,
   createStudyInviteItem,
   createStudyForProblemSharing,
   createStudyLayoutData,
   createStudyListItem,
+  createStudyMemberPreviews,
   createStudyMembers,
+  createStudyProblemDetail,
+  createStudyProblemListItem,
+  createStudyProblemMemberNames,
+  createStudyProblemTiers,
+  createStudyRecentProblem,
   createStudyStats,
   createStudySummary,
-  getUserDisplayName,
-  normalizeCategories,
 } from "@/server/studies/study.mapper";
 import {
   aggregateOwnedStudyMemberActivity,
@@ -53,7 +60,6 @@ import type {
   StudyProblemListItem,
   StudyRecentProblem,
 } from "@/types/study";
-import { formatShortDate } from "@/utils/date";
 
 // 문제를 공유할 수 있는 사용자의 스터디 목록을 조회한다.
 export async function getStudiesForProblemSharing({
@@ -212,11 +218,7 @@ export async function getStudyMemberPreviews({
     return null;
   }
 
-  return study.members.map((member) => ({
-    avatar: member.user.image,
-    name: getUserDisplayName(member.user.name),
-    role: member.userId === study.ownerId ? "owner" : "member",
-  }));
+  return createStudyMemberPreviews(study);
 }
 
 // 스터디 개요 화면의 최근 공유 문제를 조회한다.
@@ -233,12 +235,7 @@ export async function getRecentStudyProblems({
     userId,
   });
 
-  return problems.map((share) => ({
-    platform: share.problemSubmission.platform,
-    solvedBy: getUserDisplayName(share.user.name),
-    tier: share.problemSubmission.tier ?? "-",
-    title: share.problemSubmission.title,
-  }));
+  return problems.map(createStudyRecentProblem);
 }
 
 // 스터디 소유자 관리 화면의 설정 정보를 조회한다.
@@ -255,11 +252,7 @@ export async function getOwnedStudy({
     return null;
   }
 
-  return {
-    description: study.description ?? "아직 스터디 설명이 없습니다.",
-    id: study.id,
-    name: study.title,
-  };
+  return createOwnedStudy(study);
 }
 
 // 스터디 소유자 관리 화면의 멤버와 활동 정보를 조회한다.
@@ -279,43 +272,11 @@ export async function getOwnedStudyMembers({
     return null;
   }
 
-  const activityByUserId = new Map(
-    activityByMember.map((activity) => [activity.userId, activity]),
-  );
-
-  const members = study.members.map((member): OwnerMember => {
-    const activity = activityByUserId.get(member.userId);
-
-    return {
-      avatar: member.user.image,
-      contribution: activity?._sum.score ?? 0,
-      id: member.id,
-      isCurrentUser: member.userId === userId,
-      joinedAt: formatShortDate(member.joinedAt),
-      lastActive: formatShortDate(activity?._max.sharedAt ?? member.joinedAt),
-      name: getUserDisplayName(member.user.name),
-      role: member.userId === study.ownerId ? "OWNER" : member.role,
-    };
+  return createOwnedStudyMembers({
+    activities: activityByMember,
+    study,
+    userId,
   });
-
-  if (!members.some((member) => member.role === "OWNER")) {
-    const ownerActivity = activityByUserId.get(study.ownerId);
-
-    members.unshift({
-      avatar: study.owner.image,
-      contribution: ownerActivity?._sum.score ?? 0,
-      id: study.ownerId,
-      isCurrentUser: study.ownerId === userId,
-      joinedAt: formatShortDate(study.createdAt),
-      lastActive: formatShortDate(
-        ownerActivity?._max.sharedAt ?? study.createdAt,
-      ),
-      name: getUserDisplayName(study.owner.name),
-      role: "OWNER",
-    });
-  }
-
-  return members;
 }
 
 // 스터디 소유자 관리 화면의 대기 중인 초대를 조회한다.
@@ -328,11 +289,7 @@ export async function getOwnedStudyPendingInvites({
 }): Promise<OwnerInvite[]> {
   const invites = await findOwnedStudyPendingInvites({ studyId, userId });
 
-  return invites.map((invite) => ({
-    id: invite.id,
-    status: "Pending",
-    target: invite.target,
-  }));
+  return invites.map(createOwnedStudyInvite);
 }
 
 export const STUDY_PROBLEM_PAGE_SIZE = 10;
@@ -368,17 +325,7 @@ export async function getStudyProblems({
 
   return {
     hasNextPage,
-    items: pageShares.map((share) => ({
-      categories: normalizeCategories(share.problemSubmission.categories),
-      code: `${share.problemSubmission.platform}-${share.problemSubmission.problemId}`,
-      id: share.problemSubmission.id,
-      platform: share.problemSubmission.platform,
-      sharedAtLabel: formatShortDate(share.sharedAt),
-      sharedBy: getUserDisplayName(share.user.name),
-      status: share.problemSubmission.status,
-      tier: share.problemSubmission.tier,
-      title: share.problemSubmission.title,
-    })),
+    items: pageShares.map(createStudyProblemListItem),
     nextCursor: hasNextPage && lastShare ? lastShare.id : null,
   };
 }
@@ -399,24 +346,7 @@ export async function getStudyProblemDetail({
     return null;
   }
 
-  return {
-    categories: normalizeCategories(share.problemSubmission.categories),
-    code: `${share.problemSubmission.platform}-${share.problemSubmission.problemId}`,
-    description: share.problemSubmission.description,
-    id: share.problemSubmission.id,
-    link: share.problemSubmission.link,
-    memo: share.problemSubmission.memo,
-    platform: share.problemSubmission.platform,
-    score: share.problemSubmission.score,
-    scoreMax: share.problemSubmission.scoreMax,
-    sharedAtLabel: formatShortDate(share.sharedAt),
-    sharedBy: getUserDisplayName(share.user.name),
-    solutionCode: share.problemSubmission.code,
-    status: share.problemSubmission.status,
-    submittedAtText: share.problemSubmission.submittedAtText,
-    tier: share.problemSubmission.tier,
-    title: share.problemSubmission.title,
-  };
+  return createStudyProblemDetail(share);
 }
 
 // 스터디에 공유된 전체 문제 수를 조회한다.
@@ -446,10 +376,7 @@ export async function getStudyProblemMemberNames({
     return null;
   }
 
-  return members
-    .map((member) => member.name)
-    .map(getUserDisplayName)
-    .filter((name, index, names) => names.indexOf(name) === index);
+  return createStudyProblemMemberNames(members);
 }
 
 // 스터디 문제 필터에 필요한 고유 티어를 조회한다.
@@ -462,5 +389,5 @@ export async function getStudyProblemTiers({
 }): Promise<string[]> {
   const tiers = await findStudyProblemTiers({ studyId, userId });
 
-  return tiers.flatMap((problem) => problem.tier ?? []);
+  return createStudyProblemTiers(tiers);
 }

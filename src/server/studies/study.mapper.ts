@@ -9,6 +9,9 @@ import {
 } from "@/utils/score";
 import { getTierProgress } from "@/utils/study";
 import type {
+  OwnerInvite,
+  OwnerMember,
+  OwnerStudy,
   ProblemShareTargetStudy,
   StudyContributionItem,
   StudyInviteItem,
@@ -16,8 +19,12 @@ import type {
   StudyListItem,
   StudyMember,
   StudyMemberFilters,
+  StudyOverviewMember,
   StudyOverviewStats,
   StudyOverviewSummary,
+  StudyProblemDetail,
+  StudyProblemListItem,
+  StudyRecentProblem,
   StudyTier,
 } from "@/types/study";
 
@@ -84,6 +91,17 @@ type StudyContributionScoreRow = {
   userId: string;
 };
 
+type StudyMemberPreviewRow = {
+  members: {
+    user: {
+      image: string | null;
+      name: string | null;
+    };
+    userId: string;
+  }[];
+  ownerId: string;
+};
+
 type StudyMemberActivityRow = {
   _max: { sharedAt: Date | null };
   _sum: { score: number | null };
@@ -99,6 +117,88 @@ type StudyMemberRow = {
     name: string | null;
   };
   userId: string;
+};
+
+type StudyRecentProblemRow = {
+  problemSubmission: {
+    platform: string;
+    tier: string | null;
+    title: string;
+  };
+  user: { name: string | null };
+};
+
+type OwnedStudyRow = {
+  description: string | null;
+  id: string;
+  title: string;
+};
+
+type OwnedStudyMembersRow = {
+  createdAt: Date;
+  members: {
+    id: string;
+    joinedAt: Date;
+    role: OwnerMember["role"];
+    user: {
+      image: string | null;
+      name: string | null;
+    };
+    userId: string;
+  }[];
+  owner: {
+    image: string | null;
+    name: string | null;
+  };
+  ownerId: string;
+};
+
+type OwnedStudyInviteRow = {
+  id: string;
+  target: string;
+};
+
+type StudyProblemListItemRow = {
+  problemSubmission: {
+    categories: unknown;
+    id: string;
+    platform: string;
+    problemId: string;
+    status: StudyProblemListItem["status"];
+    tier: string | null;
+    title: string;
+  };
+  sharedAt: Date;
+  user: { name: string | null };
+};
+
+type StudyProblemDetailRow = {
+  problemSubmission: {
+    categories: unknown;
+    code: string | null;
+    description: string | null;
+    id: string;
+    link: string | null;
+    memo: string | null;
+    platform: string;
+    problemId: string;
+    score: number | null;
+    scoreMax: number | null;
+    status: StudyProblemDetail["status"];
+    submittedAtText: string | null;
+    tier: string | null;
+    title: string;
+  };
+  sharedAt: Date;
+  user: { name: string | null };
+};
+
+type StudyProblemMemberRow = {
+  name: string | null;
+};
+
+type StudyProblemTierRow = {
+  tier: string | null;
 };
 
 // 스터디 티어 진행도를 점수 범위 문자열로 만든다.
@@ -222,6 +322,17 @@ export function createStudyContributions(
   }));
 }
 
+// 스터디 멤버 조회 결과를 개요 화면의 미리보기 목록으로 변환한다.
+export function createStudyMemberPreviews(
+  study: StudyMemberPreviewRow,
+): StudyOverviewMember[] {
+  return study.members.map((member) => ({
+    avatar: member.user.image,
+    name: getUserDisplayName(member.user.name),
+    role: member.userId === study.ownerId ? "owner" : "member",
+  }));
+}
+
 // 스터디 멤버와 활동 집계를 화면용 목록으로 변환하고 정렬한다.
 export function createStudyMembers({
   activities,
@@ -270,8 +381,146 @@ export function createStudyMembers({
   return studyMembers;
 }
 
+// 최근 공유 문제 조회 결과를 개요 화면의 문제 항목으로 변환한다.
+export function createStudyRecentProblem(
+  share: StudyRecentProblemRow,
+): StudyRecentProblem {
+  return {
+    platform: share.problemSubmission.platform,
+    solvedBy: getUserDisplayName(share.user.name),
+    tier: share.problemSubmission.tier ?? "-",
+    title: share.problemSubmission.title,
+  };
+}
+
+// 소유 스터디 조회 결과를 관리 화면의 설정 정보로 변환한다.
+export function createOwnedStudy(study: OwnedStudyRow): OwnerStudy {
+  return {
+    description: study.description ?? "아직 스터디 설명이 없습니다.",
+    id: study.id,
+    name: study.title,
+  };
+}
+
+// 소유 스터디의 멤버와 활동 집계를 관리 화면의 멤버 목록으로 변환한다.
+export function createOwnedStudyMembers({
+  activities,
+  study,
+  userId,
+}: {
+  activities: StudyMemberActivityRow[];
+  study: OwnedStudyMembersRow;
+  userId: string;
+}): OwnerMember[] {
+  const activityByUserId = new Map(
+    activities.map((activity) => [activity.userId, activity]),
+  );
+
+  const members = study.members.map((member): OwnerMember => {
+    const activity = activityByUserId.get(member.userId);
+
+    return {
+      avatar: member.user.image,
+      contribution: activity?._sum.score ?? 0,
+      id: member.id,
+      isCurrentUser: member.userId === userId,
+      joinedAt: formatShortDate(member.joinedAt),
+      lastActive: formatShortDate(activity?._max.sharedAt ?? member.joinedAt),
+      name: getUserDisplayName(member.user.name),
+      role: member.userId === study.ownerId ? "OWNER" : member.role,
+    };
+  });
+
+  if (!members.some((member) => member.role === "OWNER")) {
+    const ownerActivity = activityByUserId.get(study.ownerId);
+
+    members.unshift({
+      avatar: study.owner.image,
+      contribution: ownerActivity?._sum.score ?? 0,
+      id: study.ownerId,
+      isCurrentUser: study.ownerId === userId,
+      joinedAt: formatShortDate(study.createdAt),
+      lastActive: formatShortDate(
+        ownerActivity?._max.sharedAt ?? study.createdAt,
+      ),
+      name: getUserDisplayName(study.owner.name),
+      role: "OWNER",
+    });
+  }
+
+  return members;
+}
+
+// 대기 중인 스터디 초대를 소유자 관리 화면의 초대 항목으로 변환한다.
+export function createOwnedStudyInvite(
+  invite: OwnedStudyInviteRow,
+): OwnerInvite {
+  return {
+    id: invite.id,
+    status: "Pending",
+    target: invite.target,
+  };
+}
+
+// 공유 문제 조회 결과를 스터디 문제 목록 항목으로 변환한다.
+export function createStudyProblemListItem(
+  share: StudyProblemListItemRow,
+): StudyProblemListItem {
+  return {
+    categories: normalizeCategories(share.problemSubmission.categories),
+    code: `${share.problemSubmission.platform}-${share.problemSubmission.problemId}`,
+    id: share.problemSubmission.id,
+    platform: share.problemSubmission.platform,
+    sharedAtLabel: formatShortDate(share.sharedAt),
+    sharedBy: getUserDisplayName(share.user.name),
+    status: share.problemSubmission.status,
+    tier: share.problemSubmission.tier,
+    title: share.problemSubmission.title,
+  };
+}
+
+// 공유 문제 조회 결과를 스터디 문제 상세 정보로 변환한다.
+export function createStudyProblemDetail(
+  share: StudyProblemDetailRow,
+): StudyProblemDetail {
+  return {
+    categories: normalizeCategories(share.problemSubmission.categories),
+    code: `${share.problemSubmission.platform}-${share.problemSubmission.problemId}`,
+    description: share.problemSubmission.description,
+    id: share.problemSubmission.id,
+    link: share.problemSubmission.link,
+    memo: share.problemSubmission.memo,
+    platform: share.problemSubmission.platform,
+    score: share.problemSubmission.score,
+    scoreMax: share.problemSubmission.scoreMax,
+    sharedAtLabel: formatShortDate(share.sharedAt),
+    sharedBy: getUserDisplayName(share.user.name),
+    solutionCode: share.problemSubmission.code,
+    status: share.problemSubmission.status,
+    submittedAtText: share.problemSubmission.submittedAtText,
+    tier: share.problemSubmission.tier,
+    title: share.problemSubmission.title,
+  };
+}
+
+// 문제를 공유한 스터디 멤버를 중복 없는 표시 이름 목록으로 변환한다.
+export function createStudyProblemMemberNames(
+  members: StudyProblemMemberRow[],
+): string[] {
+  return members
+    .map((member) => getUserDisplayName(member.name))
+    .filter((name, index, names) => names.indexOf(name) === index);
+}
+
+// 문제 티어 조회 결과에서 티어 문자열 목록을 만든다.
+export function createStudyProblemTiers(
+  problems: StudyProblemTierRow[],
+): string[] {
+  return problems.flatMap((problem) => problem.tier ?? []);
+}
+
 // 알 수 없는 카테고리 값을 문자열 배열로 정리한다.
-export function normalizeCategories(categories: unknown): string[] {
+function normalizeCategories(categories: unknown): string[] {
   if (!Array.isArray(categories)) {
     return [];
   }
