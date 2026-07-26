@@ -4,12 +4,15 @@ import { formatRelativeDate } from "@/utils/date";
 import {
   getNextScoreTierScore,
   getScoreProgressLabel,
+  getStudyTier,
   studyScoreTierThresholds,
 } from "@/utils/score";
+import { getTierProgress } from "@/utils/study";
 import type {
   ProblemShareTargetStudy,
   StudyInviteItem,
   StudyLayoutData,
+  StudyListItem,
   StudyTier,
 } from "@/types/study";
 
@@ -35,6 +38,16 @@ type StudyInviteItemRow = {
 type StudyLayoutRow = {
   id: string;
   ownerId: string;
+  title: string;
+};
+
+type StudyListItemRow = {
+  _count: { members: number };
+  description: string | null;
+  id: string;
+  owner: { name: string | null };
+  ownerId: string;
+  score: number;
   title: string;
 };
 
@@ -89,6 +102,28 @@ export function createStudyLayoutData(
     id: study.id,
     isOwner: study.ownerId === userId,
     name: study.title,
+  };
+}
+
+// 스터디 조회 결과를 목록용 데이터로 변환한다.
+export function createStudyListItem(
+  study: StudyListItemRow,
+  userId: string,
+): StudyListItem {
+  const tier = getStudyTier(study.score);
+  const progress = getTierProgress(study.score, tier);
+
+  return {
+    description: study.description ?? "아직 스터디 설명이 없습니다.",
+    id: study.id,
+    isOwner: study.ownerId === userId,
+    memberCount: study._count.members,
+    ownerName: study.owner.name ?? "Unknown",
+    progress,
+    progressLabel: getProgressLabel(study.score, tier),
+    score: study.score,
+    tier,
+    title: study.title,
   };
 }
 

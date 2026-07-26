@@ -6,8 +6,8 @@ import {
   createStudyInviteItem,
   createStudyForProblemSharing,
   createStudyLayoutData,
+  createStudyListItem,
   getNextTierScore,
-  getProgressLabel,
   getUserDisplayName,
   normalizeCategories,
 } from "@/server/studies/study.mapper";
@@ -54,7 +54,6 @@ import type {
 } from "@/types/study";
 import { formatShortDate } from "@/utils/date";
 import { getStudyTier } from "@/utils/score";
-import { getTierProgress } from "@/utils/study";
 
 // 문제를 공유할 수 있는 사용자의 스터디 목록을 조회한다.
 export async function getStudiesForProblemSharing({
@@ -110,23 +109,7 @@ export async function getUserStudies(
 
   const studies = await findUserStudies(userId);
 
-  return studies.map((study) => {
-    const tier = getStudyTier(study.score);
-    const progress = getTierProgress(study.score, tier);
-
-    return {
-      description: study.description ?? "아직 스터디 설명이 없습니다.",
-      id: study.id,
-      isOwner: study.ownerId === userId,
-      memberCount: study._count.members,
-      ownerName: study.owner.name ?? "Unknown",
-      progress,
-      progressLabel: getProgressLabel(study.score, tier),
-      score: study.score,
-      tier,
-      title: study.title,
-    };
-  });
+  return studies.map((study) => createStudyListItem(study, userId));
 }
 
 // 스터디 멤버 화면의 멤버와 활동·기여도 정보를 조회한다.
