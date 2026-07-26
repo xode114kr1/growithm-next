@@ -10,6 +10,7 @@ import {
 import { getTierProgress } from "@/utils/study";
 import type {
   ProblemShareTargetStudy,
+  StudyContributionItem,
   StudyInviteItem,
   StudyLayoutData,
   StudyListItem,
@@ -69,6 +70,18 @@ type StudyStatsRow = {
 type StudyProblemShareCounts = {
   totalSolved: number;
   weeklySolved: number;
+};
+
+type StudyContributionRow = {
+  members: {
+    user: { name: string | null };
+    userId: string;
+  }[];
+};
+
+type StudyContributionScoreRow = {
+  _sum: { score: number | null };
+  userId: string;
 };
 
 type StudyMemberActivityRow = {
@@ -189,6 +202,24 @@ export function createStudyStats(
     memberCount: study.members.length,
     ...problemShareCounts,
   };
+}
+
+// 스터디 멤버와 공유 점수 집계를 기여도 목록으로 변환한다.
+export function createStudyContributions(
+  study: StudyContributionRow,
+  contributionScores: StudyContributionScoreRow[],
+): StudyContributionItem[] {
+  const scoreByUserId = new Map(
+    contributionScores.map((contribution) => [
+      contribution.userId,
+      contribution._sum.score ?? 0,
+    ]),
+  );
+
+  return study.members.map((member) => ({
+    name: getUserDisplayName(member.user.name),
+    score: scoreByUserId.get(member.userId) ?? 0,
+  }));
 }
 
 // 스터디 멤버와 활동 집계를 화면용 목록으로 변환하고 정렬한다.

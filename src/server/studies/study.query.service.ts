@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  createStudyContributions,
   createStudyInviteItem,
   createStudyForProblemSharing,
   createStudyLayoutData,
@@ -194,17 +195,7 @@ export async function getStudyContribution({
     return null;
   }
 
-  const scoreByUserId = new Map(
-    contributionScores.map((contribution) => [
-      contribution.userId,
-      contribution._sum.score ?? 0,
-    ]),
-  );
-
-  return study.members.map((member) => ({
-    name: getUserDisplayName(member.user.name),
-    score: scoreByUserId.get(member.userId) ?? 0,
-  }));
+  return createStudyContributions(study, contributionScores);
 }
 
 // 스터디 개요 화면의 멤버 목록을 조회한다.
