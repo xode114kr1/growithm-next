@@ -4,10 +4,10 @@ import {
   countProblems,
   countProblemsByUserId,
   findAvailableProblemTiers,
-  findPendingProblemsByUserId,
+  findPendingProblems,
   findProblemDetail,
   findProblems,
-  findProblemTiersByUserId,
+  findProblemTiers,
 } from "@/server/problems/problem.repository";
 import {
   createPendingProblem,
@@ -107,7 +107,7 @@ export async function getProblemTierDistribution(
 ): Promise<ProblemTierBucket[]> {
   if (!userId) return createProblemTierBuckets([]);
 
-  const problemTiers = await findProblemTiersByUserId(userId);
+  const problemTiers = await findProblemTiers(userId);
 
   return createProblemTierBuckets(problemTiers);
 }
@@ -118,7 +118,7 @@ export async function getPendingProblems(
 ): Promise<PendingProblem[]> {
   if (!userId) return [];
 
-  const pendingProblems = await findPendingProblemsByUserId({
+  const pendingProblems = await findPendingProblems({
     limit: PENDING_PROBLEM_LIMIT,
     userId,
   });
