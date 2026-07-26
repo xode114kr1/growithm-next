@@ -201,6 +201,10 @@ type StudyProblemTierRow = {
   tier: string | null;
 };
 
+type StudyInviteResult = {
+  error: string | null;
+};
+
 // 스터디 티어 진행도를 점수 범위 문자열로 만든다.
 export function getProgressLabel(score: number, tier: StudyTier) {
   return getScoreProgressLabel(score, tier, studyScoreTierThresholds);
@@ -241,6 +245,13 @@ export function createStudyInviteItem(
     studyTitle: invite.study.title,
     timeLabel: formatRelativeDate(invite.createdAt),
   };
+}
+
+// 스터디 초대 명령의 처리 결과를 만든다.
+export function createStudyInviteResult(
+  error: string | null,
+): StudyInviteResult {
+  return { error };
 }
 
 // 스터디 조회 결과를 상세 레이아웃용 데이터로 변환한다.

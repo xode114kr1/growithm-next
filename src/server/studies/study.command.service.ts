@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { StudyMemberRole } from "@/generated/prisma/enums";
+import { createStudyInviteResult } from "@/server/studies/study.mapper";
 import {
   acceptStudyInviteRecord,
   cancelStudyInviteRecord,
@@ -66,10 +67,35 @@ export async function createStudyInvite({
     userId,
   });
 
-  if (!study) return { error: "초대를 보낼 수 있는 스터디를 찾을 수 없습니다." };
-  if (!targetUser) return { error: "해당 사용자 이름 또는 이메일을 찾을 수 없습니다." };
-  if (targetUser.id === userId) return { error: "본인은 초대할 수 없습니다." };
-  if (existingMember) return { error: "이미 스터디에 참여 중인 사용자입니다." };
+  if (!study) {
+    const inviteResult = createStudyInviteResult(
+      "초대를 보낼 수 있는 스터디를 찾을 수 없습니다.",
+    );
+
+    return inviteResult;
+  }
+
+  if (!targetUser) {
+    const inviteResult = createStudyInviteResult(
+      "해당 사용자 이름 또는 이메일을 찾을 수 없습니다.",
+    );
+
+    return inviteResult;
+  }
+
+  if (targetUser.id === userId) {
+    const inviteResult = createStudyInviteResult("본인은 초대할 수 없습니다.");
+
+    return inviteResult;
+  }
+
+  if (existingMember) {
+    const inviteResult = createStudyInviteResult(
+      "이미 스터디에 참여 중인 사용자입니다.",
+    );
+
+    return inviteResult;
+  }
 
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + INVITE_EXPIRATION_DAYS);
@@ -80,7 +106,10 @@ export async function createStudyInvite({
     targetUserId: targetUser.id,
     userId,
   });
-  return { error: null };
+
+  const inviteResult = createStudyInviteResult(null);
+
+  return inviteResult;
 }
 
 // 소유자가 보낸 대기 초대를 취소한다.
