@@ -5,7 +5,16 @@ import {
   getScoreProgressLabel,
   studyScoreTierThresholds,
 } from "@/utils/score";
-import type { StudyTier } from "@/types/study";
+import type { ProblemShareTargetStudy, StudyTier } from "@/types/study";
+
+type ProblemShareTargetStudyRow = {
+  _count: { members: number };
+  id: string;
+  owner: { name: string | null };
+  problemShares: { id: string }[];
+  score: number;
+  title: string;
+};
 
 // 스터디 티어 진행도를 점수 범위 문자열로 만든다.
 export function getProgressLabel(score: number, tier: StudyTier) {
@@ -20,6 +29,20 @@ export function getNextTierScore(tier: StudyTier) {
 // 사용자 이름이 없을 때 사용할 표시 이름을 결정한다.
 export function getUserDisplayName(name: string | null) {
   return name || "Unknown";
+}
+
+// 문제 공유 대상 스터디 조회 결과를 화면용 데이터로 변환한다.
+export function createProblemShareTargetStudy(
+  study: ProblemShareTargetStudyRow,
+): ProblemShareTargetStudy {
+  return {
+    hasShared: study.problemShares.length > 0,
+    id: study.id,
+    memberCount: study._count.members,
+    ownerName: study.owner.name ?? "Unknown",
+    score: study.score,
+    title: study.title,
+  };
 }
 
 // 알 수 없는 카테고리 값을 문자열 배열로 정리한다.

@@ -3,6 +3,7 @@ import "server-only";
 import { cache } from "react";
 
 import {
+  createProblemShareTargetStudy,
   getNextTierScore,
   getProgressLabel,
   getUserDisplayName,
@@ -67,14 +68,7 @@ export async function getProblemShareTargetStudies({
 
   const studies = await findProblemShareTargetStudies({ problemId, userId });
 
-  return studies.map((study) => ({
-    hasShared: study.problemShares.length > 0,
-    id: study.id,
-    memberCount: study._count.members,
-    ownerName: study.owner.name ?? "Unknown",
-    score: study.score,
-    title: study.title,
-  }));
+  return studies.map(createProblemShareTargetStudy);
 }
 
 // 사용자에게 도착한 유효한 대기 중 스터디 초대를 조회한다.
