@@ -7,6 +7,7 @@ import {
   createStudyForProblemSharing,
   createStudyLayoutData,
   createStudyListItem,
+  createStudyMembers,
   getNextTierScore,
   getUserDisplayName,
   normalizeCategories,
@@ -131,43 +132,11 @@ export async function getStudyMembers({
     return null;
   }
 
-  const activityByUserId = new Map(
-    activityByMember.map((activity) => [activity.userId, activity]),
-  );
-
-  const members = study.members.map((member) => {
-    const activity = activityByUserId.get(member.userId);
-    const lastActiveAt = activity?._max.sharedAt ?? member.joinedAt;
-
-    return {
-      avatar: member.user.image,
-      contribution: activity?._sum.score ?? 0,
-      id: member.id,
-      joinedAt: formatShortDate(member.joinedAt),
-      joinedAtTime: member.joinedAt.getTime(),
-      lastActive: formatShortDate(lastActiveAt),
-      lastActiveTime: lastActiveAt.getTime(),
-      name: getUserDisplayName(member.user.name),
-      role: member.role,
-      userId: member.userId,
-    };
+  return createStudyMembers({
+    activities: activityByMember,
+    members: study.members,
+    sort: filters.sort,
   });
-
-  if (filters.sort === "lastActive") {
-    return members.toSorted(
-      (firstMember, secondMember) =>
-        secondMember.lastActiveTime - firstMember.lastActiveTime,
-    );
-  }
-
-  if (filters.sort === "contribution") {
-    return members.toSorted(
-      (firstMember, secondMember) =>
-        secondMember.contribution - firstMember.contribution,
-    );
-  }
-
-  return members;
 }
 
 const getStudyMembersSource = cache(

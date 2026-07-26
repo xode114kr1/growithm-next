@@ -1,6 +1,6 @@
 import "server-only";
 
-import { formatRelativeDate } from "@/utils/date";
+import { formatRelativeDate, formatShortDate } from "@/utils/date";
 import {
   getNextScoreTierScore,
   getScoreProgressLabel,
@@ -13,6 +13,8 @@ import type {
   StudyInviteItem,
   StudyLayoutData,
   StudyListItem,
+  StudyMember,
+  StudyMemberFilters,
   StudyTier,
 } from "@/types/study";
 
@@ -49,6 +51,23 @@ type StudyListItemRow = {
   ownerId: string;
   score: number;
   title: string;
+};
+
+type StudyMemberActivityRow = {
+  _max: { sharedAt: Date | null };
+  _sum: { score: number | null };
+  userId: string;
+};
+
+type StudyMemberRow = {
+  id: string;
+  joinedAt: Date;
+  role: StudyMember["role"];
+  user: {
+    image: string | null;
+    name: string | null;
+  };
+  userId: string;
 };
 
 // 스터디 티어 진행도를 점수 범위 문자열로 만든다.
@@ -125,6 +144,54 @@ export function createStudyListItem(
     tier,
     title: study.title,
   };
+}
+
+// 스터디 멤버와 활동 집계를 화면용 목록으로 변환하고 정렬한다.
+export function createStudyMembers({
+  activities,
+  members,
+  sort,
+}: {
+  activities: StudyMemberActivityRow[];
+  members: StudyMemberRow[];
+  sort: StudyMemberFilters["sort"];
+}): StudyMember[] {
+  const activityByUserId = new Map(
+    activities.map((activity) => [activity.userId, activity]),
+  );
+  const studyMembers = members.map((member) => {
+    const activity = activityByUserId.get(member.userId);
+    const lastActiveAt = activity?._max.sharedAt ?? member.joinedAt;
+
+    return {
+      avatar: member.user.image,
+      contribution: activity?._sum.score ?? 0,
+      id: member.id,
+      joinedAt: formatShortDate(member.joinedAt),
+      joinedAtTime: member.joinedAt.getTime(),
+      lastActive: formatShortDate(lastActiveAt),
+      lastActiveTime: lastActiveAt.getTime(),
+      name: getUserDisplayName(member.user.name),
+      role: member.role,
+      userId: member.userId,
+    };
+  });
+
+  if (sort === "lastActive") {
+    return studyMembers.toSorted(
+      (firstMember, secondMember) =>
+        secondMember.lastActiveTime - firstMember.lastActiveTime,
+    );
+  }
+
+  if (sort === "contribution") {
+    return studyMembers.toSorted(
+      (firstMember, secondMember) =>
+        secondMember.contribution - firstMember.contribution,
+    );
+  }
+
+  return studyMembers;
 }
 
 // 알 수 없는 카테고리 값을 문자열 배열로 정리한다.
