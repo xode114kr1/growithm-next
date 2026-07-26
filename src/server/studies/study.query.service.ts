@@ -6,6 +6,7 @@ import {
   createStudyLayoutData,
   createStudyListItem,
   createStudyMembers,
+  createStudyStats,
   createStudySummary,
   getUserDisplayName,
   normalizeCategories,
@@ -173,10 +174,7 @@ export async function getStudyStats({
     return null;
   }
 
-  return {
-    memberCount: members.members.length,
-    ...problemShareCounts,
-  };
+  return createStudyStats(members, problemShareCounts);
 }
 
 // 스터디 개요 화면의 멤버별 기여도를 조회한다.

@@ -15,6 +15,7 @@ import type {
   StudyListItem,
   StudyMember,
   StudyMemberFilters,
+  StudyOverviewStats,
   StudyOverviewSummary,
   StudyTier,
 } from "@/types/study";
@@ -59,6 +60,15 @@ type StudySummaryRow = {
   id: string;
   score: number;
   title: string;
+};
+
+type StudyStatsRow = {
+  members: { userId: string }[];
+};
+
+type StudyProblemShareCounts = {
+  totalSolved: number;
+  weeklySolved: number;
 };
 
 type StudyMemberActivityRow = {
@@ -167,6 +177,17 @@ export function createStudySummary(
     nextTierScore: getNextTierScore(tier),
     score: study.score,
     tier,
+  };
+}
+
+// 스터디 멤버와 문제 공유 집계를 개요 화면의 통계로 변환한다.
+export function createStudyStats(
+  study: StudyStatsRow,
+  problemShareCounts: StudyProblemShareCounts,
+): StudyOverviewStats {
+  return {
+    memberCount: study.members.length,
+    ...problemShareCounts,
   };
 }
 
