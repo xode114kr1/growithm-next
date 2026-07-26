@@ -32,7 +32,7 @@ export function getUserDisplayName(name: string | null) {
 }
 
 // 문제 공유 대상 스터디 조회 결과를 화면용 데이터로 변환한다.
-export function createProblemShareTargetStudy(
+export function createStudyForProblemSharing(
   study: ProblemShareTargetStudyRow,
 ): ProblemShareTargetStudy {
   return {

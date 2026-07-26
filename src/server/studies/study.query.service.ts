@@ -3,7 +3,7 @@ import "server-only";
 import { cache } from "react";
 
 import {
-  createProblemShareTargetStudy,
+  createStudyForProblemSharing,
   getNextTierScore,
   getProgressLabel,
   getUserDisplayName,
@@ -55,7 +55,7 @@ import { getStudyTier } from "@/utils/score";
 import { getTierProgress } from "@/utils/study";
 
 // 문제를 공유할 수 있는 사용자의 스터디 목록을 조회한다.
-export async function getProblemShareTargetStudies({
+export async function getStudiesForProblemSharing({
   problemId,
   userId,
 }: {
@@ -68,7 +68,7 @@ export async function getProblemShareTargetStudies({
 
   const studies = await findProblemShareTargetStudies({ problemId, userId });
 
-  return studies.map(createProblemShareTargetStudy);
+  return studies.map(createStudyForProblemSharing);
 }
 
 // 사용자에게 도착한 유효한 대기 중 스터디 초대를 조회한다.

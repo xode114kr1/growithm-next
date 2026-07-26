@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth/auth";
 
 import { getProblemDetail } from "@/server/problems/problem.query.service";
-import { getProblemShareTargetStudies } from "@/server/studies/study.query.service";
+import { getStudiesForProblemSharing } from "@/server/studies/study.query.service";
 import {
   ProblemDescription,
   ProblemMetadata,
@@ -33,7 +33,7 @@ export default async function ProblemDetailPage({
 
   const [problem, shareTargetStudies] = await Promise.all([
     getProblemDetail({ id: problemId, userId }),
-    getProblemShareTargetStudies({
+    getStudiesForProblemSharing({
       problemId,
       userId,
     }),
