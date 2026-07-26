@@ -9,6 +9,7 @@ import {
 import type {
   ProblemShareTargetStudy,
   StudyInviteItem,
+  StudyLayoutData,
   StudyTier,
 } from "@/types/study";
 
@@ -29,6 +30,12 @@ type StudyInviteItemRow = {
     name: string | null;
   };
   study: { title: string };
+};
+
+type StudyLayoutRow = {
+  id: string;
+  ownerId: string;
+  title: string;
 };
 
 // 스터디 티어 진행도를 점수 범위 문자열로 만든다.
@@ -70,6 +77,18 @@ export function createStudyInviteItem(
     invitedByName: getUserDisplayName(invite.invitedBy.name),
     studyTitle: invite.study.title,
     timeLabel: formatRelativeDate(invite.createdAt),
+  };
+}
+
+// 스터디 조회 결과를 상세 레이아웃용 데이터로 변환한다.
+export function createStudyLayoutData(
+  study: StudyLayoutRow,
+  userId: string,
+): StudyLayoutData {
+  return {
+    id: study.id,
+    isOwner: study.ownerId === userId,
+    name: study.title,
   };
 }
 

@@ -5,6 +5,7 @@ import { cache } from "react";
 import {
   createStudyInviteItem,
   createStudyForProblemSharing,
+  createStudyLayoutData,
   getNextTierScore,
   getProgressLabel,
   getUserDisplayName,
@@ -98,11 +99,7 @@ export async function getStudyLayoutData({
     return null;
   }
 
-  return {
-    id: study.id,
-    isOwner: study.ownerId === userId,
-    name: study.title,
-  };
+  return createStudyLayoutData(study, userId);
 }
 
 // 사용자가 참여하거나 소유한 스터디 목록을 조회한다.
