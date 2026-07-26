@@ -3,6 +3,7 @@ import "server-only";
 import { cache } from "react";
 
 import {
+  createStudyInviteItem,
   createStudyForProblemSharing,
   getNextTierScore,
   getProgressLabel,
@@ -50,7 +51,7 @@ import type {
   StudyProblemListItem,
   StudyRecentProblem,
 } from "@/types/study";
-import { formatRelativeDate, formatShortDate } from "@/utils/date";
+import { formatShortDate } from "@/utils/date";
 import { getStudyTier } from "@/utils/score";
 import { getTierProgress } from "@/utils/study";
 
@@ -78,13 +79,7 @@ export async function getPendingInvites(
   if (!userId) return [];
   const invites = await findPendingInvites(userId);
 
-  return invites.map((invite) => ({
-    id: invite.id,
-    invitedByAvatar: invite.invitedBy.image,
-    invitedByName: getUserDisplayName(invite.invitedBy.name),
-    studyTitle: invite.study.title,
-    timeLabel: formatRelativeDate(invite.createdAt),
-  }));
+  return invites.map(createStudyInviteItem);
 }
 
 // 스터디 상세 레이아웃에 필요한 접근 권한과 기본 정보를 조회한다.
