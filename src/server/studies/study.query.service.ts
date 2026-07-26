@@ -1,7 +1,5 @@
 import "server-only";
 
-import { cache } from "react";
-
 import {
   createStudyInviteItem,
   createStudyForProblemSharing,
@@ -139,11 +137,6 @@ export async function getStudyMembers({
   });
 }
 
-const getStudyMembersSource = cache(
-  async (studyId: string, userId: string) =>
-    findStudyMembers({ studyId, userId }),
-);
-
 // 스터디 개요 화면의 기본 정보와 티어 정보를 조회한다.
 export async function getStudySummary({
   studyId,
@@ -182,7 +175,7 @@ export async function getStudyStats({
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
   const [members, problemShareCounts] = await Promise.all([
-    getStudyMembersSource(studyId, userId),
+    findStudyMembers({ studyId, userId }),
     countStudyProblemShares({ oneWeekAgo, studyId, userId }),
   ]);
 
@@ -205,7 +198,7 @@ export async function getStudyContribution({
   userId: string;
 }): Promise<StudyContributionItem[] | null> {
   const [study, contributionScores] = await Promise.all([
-    getStudyMembersSource(studyId, userId),
+    findStudyMembers({ studyId, userId }),
     sumStudyProblemShareScoresByUser({ studyId, userId }),
   ]);
 
@@ -234,7 +227,7 @@ export async function getStudyMemberPreviews({
   studyId: string;
   userId: string;
 }): Promise<StudyOverviewMember[] | null> {
-  const study = await getStudyMembersSource(studyId, userId);
+  const study = await findStudyMembers({ studyId, userId });
 
   if (!study) {
     return null;
