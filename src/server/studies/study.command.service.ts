@@ -1,7 +1,6 @@
 import "server-only";
 
 import type { StudyMemberRole } from "@/generated/prisma/enums";
-import { createStudyInviteResult } from "@/server/studies/study.mapper";
 import {
   acceptStudyInviteRecord,
   cancelStudyInviteRecord,
@@ -16,6 +15,11 @@ import {
 } from "@/server/studies/study.repository";
 
 const INVITE_EXPIRATION_DAYS = 7;
+
+// 스터디 초대 명령의 처리 결과를 만든다.
+function createStudyInviteResult(error: string | null) {
+  return { error };
+}
 
 // 스터디를 생성하고 생성된 스터디 ID를 반환한다.
 export async function createStudy(input: {

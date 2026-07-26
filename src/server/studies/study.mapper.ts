@@ -25,7 +25,6 @@ import type {
   StudyProblemDetail,
   StudyProblemListItem,
   StudyRecentProblem,
-  StudyTier,
 } from "@/types/study";
 
 type ProblemShareTargetStudyRow = {
@@ -201,22 +200,8 @@ type StudyProblemTierRow = {
   tier: string | null;
 };
 
-type StudyInviteResult = {
-  error: string | null;
-};
-
-// 스터디 티어 진행도를 점수 범위 문자열로 만든다.
-export function getProgressLabel(score: number, tier: StudyTier) {
-  return getScoreProgressLabel(score, tier, studyScoreTierThresholds);
-}
-
-// 스터디 티어의 다음 티어 진입 점수를 반환한다.
-export function getNextTierScore(tier: StudyTier) {
-  return getNextScoreTierScore(tier, studyScoreTierThresholds);
-}
-
 // 사용자 이름이 없을 때 사용할 표시 이름을 결정한다.
-export function getUserDisplayName(name: string | null) {
+function getUserDisplayName(name: string | null) {
   return name || "Unknown";
 }
 
@@ -247,13 +232,6 @@ export function createStudyInviteItem(
   };
 }
 
-// 스터디 초대 명령의 처리 결과를 만든다.
-export function createStudyInviteResult(
-  error: string | null,
-): StudyInviteResult {
-  return { error };
-}
-
 // 스터디 조회 결과를 상세 레이아웃용 데이터로 변환한다.
 export function createStudyLayoutData(
   study: StudyLayoutRow,
@@ -281,7 +259,11 @@ export function createStudyListItem(
     memberCount: study._count.members,
     ownerName: study.owner.name ?? "Unknown",
     progress,
-    progressLabel: getProgressLabel(study.score, tier),
+    progressLabel: getScoreProgressLabel(
+      study.score,
+      tier,
+      studyScoreTierThresholds,
+    ),
     score: study.score,
     tier,
     title: study.title,
@@ -298,7 +280,7 @@ export function createStudySummary(
     description: study.description ?? "아직 스터디 설명이 없습니다.",
     id: study.id,
     name: study.title,
-    nextTierScore: getNextTierScore(tier),
+    nextTierScore: getNextScoreTierScore(tier, studyScoreTierThresholds),
     score: study.score,
     tier,
   };
