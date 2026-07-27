@@ -11,25 +11,11 @@ import {
   isValidGitHubWebhookSignature,
   parseGitHubWebhookPayload,
 } from "@/server/webhook-receiver/webhook-receiver.schema";
+import type {
+  ReceiveGitHubWebhookInput,
+  ReceiveGitHubWebhookResult,
+} from "@/server/webhook-receiver/webhook-receiver.types";
 import type { GitHubWebhookPayload } from "@/types/github";
-
-type ReceiveGitHubWebhookInput = {
-  deliveryId: string | null;
-  event: string | null;
-  rawBody: string;
-  signature: string | null;
-};
-
-type ReceiveGitHubWebhookResult = {
-  body: {
-    deliveryId?: string;
-    message: string;
-    queueMessageId?: string | null;
-    status?: string;
-    webhookDeliveryId?: string;
-  };
-  status?: number;
-};
 
 // GitHub 웹훅을 검증하고 delivery를 저장한 뒤 처리 Queue에 등록한다.
 export async function receiveGitHubWebhook({
@@ -71,7 +57,9 @@ export async function receiveGitHubWebhook({
   }
 
   const webhookPayload = payload as GitHubWebhookPayload;
+
   const repositoryFullName = getRepositoryFullName(webhookPayload);
+
   const delivery = await saveWebhookDelivery({
     deliveryId,
     event: event ?? "unknown",
@@ -108,10 +96,26 @@ export async function receiveGitHubWebhook({
     };
   }
 
+  const queueResult = await enqueueSavedWebhookDelivery({
+    deliveryId,
+    webhookDeliveryId: delivery.id,
+  });
+
+  return queueResult;
+}
+
+// 저장된 delivery를 Queue에 발행하고 처리 상태를 갱신한다.
+async function enqueueSavedWebhookDelivery({
+  deliveryId,
+  webhookDeliveryId,
+}: {
+  deliveryId: string;
+  webhookDeliveryId: string;
+}): Promise<ReceiveGitHubWebhookResult> {
   let queueMessageId: string | null;
 
   try {
-    queueMessageId = await enqueueWebhookDelivery(delivery.id);
+    queueMessageId = await enqueueWebhookDelivery(webhookDeliveryId);
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Vercel Queue 발행 실패";
@@ -126,7 +130,7 @@ export async function receiveGitHubWebhook({
         deliveryId,
         message: "GitHub 웹훅 처리 작업 등록에 실패했습니다.",
         status: "FAILED",
-        webhookDeliveryId: delivery.id,
+        webhookDeliveryId,
       },
       status: 503,
     };
@@ -140,7 +144,7 @@ export async function receiveGitHubWebhook({
       message: "GitHub push 웹훅을 수신했습니다.",
       queueMessageId,
       status: "QUEUED",
-      webhookDeliveryId: delivery.id,
+      webhookDeliveryId,
     },
     status: 202,
   };
