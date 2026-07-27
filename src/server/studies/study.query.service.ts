@@ -19,6 +19,7 @@ import {
   createStudyStats,
   createStudySummary,
 } from "@/server/studies/study.mapper";
+import type { StudyProblemPage } from "@/server/studies/study.types";
 import {
   aggregateOwnedStudyMemberActivity,
   aggregateStudyMemberActivity,
@@ -57,7 +58,6 @@ import type {
   StudyOverviewSummary,
   StudyProblemDetail,
   StudyProblemFilters,
-  StudyProblemListItem,
   StudyRecentProblem,
 } from "@/types/study";
 
@@ -293,12 +293,6 @@ export async function getOwnedStudyPendingInvites({
 }
 
 export const STUDY_PROBLEM_PAGE_SIZE = 10;
-
-type StudyProblemPage = {
-  hasNextPage: boolean;
-  items: StudyProblemListItem[];
-  nextCursor: string | null;
-};
 
 // 스터디에 공유된 문제 목록을 조회한다.
 export async function getStudyProblems({

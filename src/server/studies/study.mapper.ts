@@ -9,6 +9,27 @@ import {
 } from "@/utils/score";
 import { getTierProgress } from "@/utils/study";
 import type {
+  OwnedStudyInviteRow,
+  OwnedStudyMembersInput,
+  OwnedStudyRow,
+  ProblemShareTargetStudyRow,
+  StudyContributionRow,
+  StudyContributionScoreRow,
+  StudyInviteItemRow,
+  StudyLayoutRow,
+  StudyListItemRow,
+  StudyMemberPreviewRow,
+  StudyMembersInput,
+  StudyProblemDetailRow,
+  StudyProblemListItemRow,
+  StudyProblemMemberRow,
+  StudyProblemShareCounts,
+  StudyProblemTierRow,
+  StudyRecentProblemRow,
+  StudyStatsRow,
+  StudySummaryRow,
+} from "@/server/studies/study.types";
+import type {
   OwnerInvite,
   OwnerMember,
   OwnerStudy,
@@ -18,7 +39,6 @@ import type {
   StudyLayoutData,
   StudyListItem,
   StudyMember,
-  StudyMemberFilters,
   StudyOverviewMember,
   StudyOverviewStats,
   StudyOverviewSummary,
@@ -26,179 +46,6 @@ import type {
   StudyProblemListItem,
   StudyRecentProblem,
 } from "@/types/study";
-
-type ProblemShareTargetStudyRow = {
-  _count: { members: number };
-  id: string;
-  owner: { name: string | null };
-  problemShares: { id: string }[];
-  score: number;
-  title: string;
-};
-
-type StudyInviteItemRow = {
-  createdAt: Date;
-  id: string;
-  invitedBy: {
-    image: string | null;
-    name: string | null;
-  };
-  study: { title: string };
-};
-
-type StudyLayoutRow = {
-  id: string;
-  ownerId: string;
-  title: string;
-};
-
-type StudyListItemRow = {
-  _count: { members: number };
-  description: string | null;
-  id: string;
-  owner: { name: string | null };
-  ownerId: string;
-  score: number;
-  title: string;
-};
-
-type StudySummaryRow = {
-  description: string | null;
-  id: string;
-  score: number;
-  title: string;
-};
-
-type StudyStatsRow = {
-  members: { userId: string }[];
-};
-
-type StudyProblemShareCounts = {
-  totalSolved: number;
-  weeklySolved: number;
-};
-
-type StudyContributionRow = {
-  members: {
-    user: { name: string | null };
-    userId: string;
-  }[];
-};
-
-type StudyContributionScoreRow = {
-  _sum: { score: number | null };
-  userId: string;
-};
-
-type StudyMemberPreviewRow = {
-  members: {
-    user: {
-      image: string | null;
-      name: string | null;
-    };
-    userId: string;
-  }[];
-  ownerId: string;
-};
-
-type StudyMemberActivityRow = {
-  _max: { sharedAt: Date | null };
-  _sum: { score: number | null };
-  userId: string;
-};
-
-type StudyMemberRow = {
-  id: string;
-  joinedAt: Date;
-  role: StudyMember["role"];
-  user: {
-    image: string | null;
-    name: string | null;
-  };
-  userId: string;
-};
-
-type StudyRecentProblemRow = {
-  problemSubmission: {
-    platform: string;
-    tier: string | null;
-    title: string;
-  };
-  user: { name: string | null };
-};
-
-type OwnedStudyRow = {
-  description: string | null;
-  id: string;
-  title: string;
-};
-
-type OwnedStudyMembersRow = {
-  createdAt: Date;
-  members: {
-    id: string;
-    joinedAt: Date;
-    role: OwnerMember["role"];
-    user: {
-      image: string | null;
-      name: string | null;
-    };
-    userId: string;
-  }[];
-  owner: {
-    image: string | null;
-    name: string | null;
-  };
-  ownerId: string;
-};
-
-type OwnedStudyInviteRow = {
-  id: string;
-  target: string;
-};
-
-type StudyProblemListItemRow = {
-  problemSubmission: {
-    categories: unknown;
-    id: string;
-    platform: string;
-    problemId: string;
-    status: StudyProblemListItem["status"];
-    tier: string | null;
-    title: string;
-  };
-  sharedAt: Date;
-  user: { name: string | null };
-};
-
-type StudyProblemDetailRow = {
-  problemSubmission: {
-    categories: unknown;
-    code: string | null;
-    description: string | null;
-    id: string;
-    link: string | null;
-    memo: string | null;
-    platform: string;
-    problemId: string;
-    score: number | null;
-    scoreMax: number | null;
-    status: StudyProblemDetail["status"];
-    submittedAtText: string | null;
-    tier: string | null;
-    title: string;
-  };
-  sharedAt: Date;
-  user: { name: string | null };
-};
-
-type StudyProblemMemberRow = {
-  name: string | null;
-};
-
-type StudyProblemTierRow = {
-  tier: string | null;
-};
 
 // 사용자 이름이 없을 때 사용할 표시 이름을 결정한다.
 function getUserDisplayName(name: string | null) {
@@ -331,11 +178,7 @@ export function createStudyMembers({
   activities,
   members,
   sort,
-}: {
-  activities: StudyMemberActivityRow[];
-  members: StudyMemberRow[];
-  sort: StudyMemberFilters["sort"];
-}): StudyMember[] {
+}: StudyMembersInput): StudyMember[] {
   const activityByUserId = new Map(
     activities.map((activity) => [activity.userId, activity]),
   );
@@ -400,11 +243,7 @@ export function createOwnedStudyMembers({
   activities,
   study,
   userId,
-}: {
-  activities: StudyMemberActivityRow[];
-  study: OwnedStudyMembersRow;
-  userId: string;
-}): OwnerMember[] {
+}: OwnedStudyMembersInput): OwnerMember[] {
   const activityByUserId = new Map(
     activities.map((activity) => [activity.userId, activity]),
   );
