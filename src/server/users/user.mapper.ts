@@ -5,7 +5,6 @@ import type {
   FriendSearchResult,
 } from "@/types/friend";
 import type {
-  PersonalScoreTier,
   UserPersonalTier,
   UserProfile,
   UserSummary,
@@ -19,27 +18,6 @@ import {
   getScoreTierProgress,
   personalScoreTierThresholds,
 } from "@/utils/score";
-
-// 개인 점수의 현재 티어 내 진행률을 계산한다.
-function getPersonalTierProgress(
-  score: number,
-  tier: PersonalScoreTier,
-) {
-  return getScoreTierProgress(score, tier, personalScoreTierThresholds);
-}
-
-// 개인 티어 진행도를 점수 범위 문자열로 만든다.
-function getPersonalProgressLabel(
-  score: number,
-  tier: PersonalScoreTier,
-) {
-  return getScoreProgressLabel(score, tier, personalScoreTierThresholds);
-}
-
-// 개인 티어의 다음 티어 진입 점수를 반환한다.
-function getNextPersonalTierScore(tier: PersonalScoreTier) {
-  return getNextScoreTierScore(tier, personalScoreTierThresholds);
-}
 
 // 사용자 이름이 없을 때 사용할 표시 이름을 결정한다.
 export function getUserDisplayName(name: string | null, email: string | null) {
@@ -93,9 +71,17 @@ export function createPersonalTier(score: number): UserPersonalTier {
   const tier = getPersonalTier(score);
 
   return {
-    nextTierScore: getNextPersonalTierScore(tier),
-    progress: getPersonalTierProgress(score, tier),
-    progressLabel: getPersonalProgressLabel(score, tier),
+    nextTierScore: getNextScoreTierScore(tier, personalScoreTierThresholds),
+    progress: getScoreTierProgress(
+      score,
+      tier,
+      personalScoreTierThresholds,
+    ),
+    progressLabel: getScoreProgressLabel(
+      score,
+      tier,
+      personalScoreTierThresholds,
+    ),
     score,
     tier,
   };
