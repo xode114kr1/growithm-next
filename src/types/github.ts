@@ -1,14 +1,3 @@
-export type GitHubWebhookRequestBody = {
-  owner?: unknown;
-  repo?: unknown;
-  repositoryUrl?: unknown;
-};
-
-export type GitHubRepositoryInput = {
-  owner: string;
-  repo: string;
-};
-
 export type GitHubRepositoryWebhookSummary = {
   repositoryFullName: string;
 };

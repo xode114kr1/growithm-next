@@ -2,18 +2,11 @@ import "server-only";
 
 import type {
   GitHubRepositoryInput,
+  GitHubWebhookResponse,
   GitHubWebhookRequestBody,
-} from "@/types/github";
+} from "@/server/webhook-registration/webhook-registration.types";
 
 const repositoryNamePattern = /^[A-Za-z0-9_.-]+$/;
-
-export type GitHubWebhookResponse = {
-  config?: {
-    url?: unknown;
-  };
-  id?: unknown;
-  message?: unknown;
-};
 
 // 요청 본문에서 유효한 GitHub 저장소 정보를 추출한다.
 export function parseRepository(

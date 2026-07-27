@@ -4,19 +4,12 @@ import { getGitHubWebhookErrorMessage } from "@/server/webhook-registration/webh
 import {
   getGitHubWebhookId,
   isGitHubWebhookList,
-  type GitHubWebhookResponse,
 } from "@/server/webhook-registration/webhook-registration.schema";
-
-type GitHubWebhookClientError = {
-  message: string;
-  ok: false;
-  status: number;
-};
-
-type GitHubWebhookSummary = {
-  hookId: number | null;
-  url: string | null;
-};
+import type {
+  GitHubWebhookClientError,
+  GitHubWebhookResponse,
+  GitHubWebhookSummary,
+} from "@/server/webhook-registration/webhook-registration.types";
 
 // GitHub 저장소의 웹훅 목록을 조회한다.
 export async function fetchGitHubWebhooks({

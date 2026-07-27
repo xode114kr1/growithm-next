@@ -9,21 +9,10 @@ import {
   upsertGitHubRepositoryWebhook,
 } from "@/server/webhook-registration/webhook-registration.repository";
 import { parseRepository } from "@/server/webhook-registration/webhook-registration.schema";
-import type { GitHubWebhookRequestBody } from "@/types/github";
-
-type RegisterGitHubWebhookResult =
-  | {
-      body: {
-        hookId: number | null;
-        message: string;
-        repository: { owner: string; repo: string };
-      };
-      status?: never;
-    }
-  | {
-      body: { message: string };
-      status: number;
-    };
+import type {
+  GitHubWebhookRequestBody,
+  RegisterGitHubWebhookResult,
+} from "@/server/webhook-registration/webhook-registration.types";
 
 // 사용자 저장소에 GitHub 웹훅을 등록하고 연결 정보를 저장한다.
 export async function registerGitHubWebhook({

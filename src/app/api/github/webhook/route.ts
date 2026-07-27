@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth/auth";
 import { registerGitHubWebhook } from "@/server/webhook-registration/webhook-registration.command.service";
-import type { GitHubWebhookRequestBody } from "@/types/github";
+import type { GitHubWebhookRequestBody } from "@/server/webhook-registration/webhook-registration.types";
 
 export async function POST(request: Request) {
   const session = await auth();
