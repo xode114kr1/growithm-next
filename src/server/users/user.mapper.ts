@@ -5,6 +5,11 @@ import type {
   FriendSearchResult,
 } from "@/types/friend";
 import type {
+  FriendshipRow,
+  ReceivedFriendRequestRow,
+  SentFriendRequestRow,
+} from "@/server/friends/friend.types";
+import type {
   UserPersonalTier,
   UserProfile,
   UserSummary,
@@ -49,21 +54,6 @@ type UserProfileRow = UserSummaryRow & {
     submittedAtText: string | null;
   }[];
   todaySolvedCount: number;
-};
-
-type FriendshipRow = {
-  userAId: string;
-  userBId: string;
-};
-
-type ReceivedFriendRequestRow = {
-  id: string;
-  requesterId: string;
-};
-
-type SentFriendRequestRow = {
-  addresseeId: string;
-  id: string;
 };
 
 // 점수를 기반으로 개인 티어 표시 데이터를 구성한다.

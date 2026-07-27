@@ -7,3 +7,18 @@ export type FriendUserRow = {
   name: string | null;
   score: number;
 };
+
+export type FriendshipRow = {
+  userAId: string;
+  userBId: string;
+};
+
+export type ReceivedFriendRequestRow = {
+  id: string;
+  requesterId: string;
+};
+
+export type SentFriendRequestRow = {
+  addresseeId: string;
+  id: string;
+};
