@@ -1,7 +1,7 @@
 import "server-only";
 
 import { prisma } from "@/lib/prisma";
-import type { UserSummaryRow } from "@/server/users/user.mapper";
+import type { UserSummaryRow } from "@/server/users/user.types";
 
 const userSummarySelect = {
   email: true,

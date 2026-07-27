@@ -5,6 +5,10 @@ import type {
   UserProfile,
   UserSummary,
 } from "@/types/user";
+import type {
+  UserProfileRow,
+  UserSummaryRow,
+} from "@/server/users/user.types";
 
 import { formatShortDate, formatSubmittedDateText } from "@/utils/date";
 import {
@@ -24,28 +28,6 @@ export function getUserDisplayName(name: string | null, email: string | null) {
 export function getUserAvatar(image: string | null) {
   return image || "https://avatars.githubusercontent.com/u/0?v=4";
 }
-
-export type UserSummaryRow = {
-  email: string | null;
-  id: string;
-  image: string | null;
-  name: string | null;
-  score: number;
-};
-
-type UserProfileRow = UserSummaryRow & {
-  _count: {
-    problemSubmissions: number;
-  };
-  accounts: {
-    providerAccountId: string;
-  }[];
-  problemSubmissions: {
-    createdAt: Date;
-    submittedAtText: string | null;
-  }[];
-  todaySolvedCount: number;
-};
 
 // 점수를 기반으로 개인 티어 표시 데이터를 구성한다.
 export function createPersonalTier(score: number): UserPersonalTier {
