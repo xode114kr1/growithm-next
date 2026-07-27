@@ -1,8 +1,8 @@
 import "server-only";
 
 import {
+  createGitHubWebhook,
   fetchGitHubWebhooks,
-  postGitHubWebhook,
 } from "@/server/webhook-registration/webhook-registration.gateway";
 import {
   findGitHubAccessToken,
@@ -125,7 +125,7 @@ async function ensureGitHubWebhook({
     return { hookId: existingHookId, ok: true as const };
   }
 
-  return postGitHubWebhook({
+  return createGitHubWebhook({
     accessToken,
     owner,
     repo,

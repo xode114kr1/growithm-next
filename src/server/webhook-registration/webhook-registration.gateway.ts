@@ -55,7 +55,7 @@ export async function fetchGitHubWebhooks({
 }
 
 // GitHub 저장소에 push 웹훅을 생성한다.
-export async function postGitHubWebhook({
+export async function createGitHubWebhook({
   accessToken,
   owner,
   repo,
