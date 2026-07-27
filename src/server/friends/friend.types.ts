@@ -1,5 +1,7 @@
 import "server-only";
 
+import type { UserSummary } from "@/types/user";
+
 export type FriendUserRow = {
   email: string | null;
   id: string;
@@ -21,4 +23,12 @@ export type ReceivedFriendRequestRow = {
 export type SentFriendRequestRow = {
   addresseeId: string;
   id: string;
+};
+
+export type FriendSearchResultsInput = {
+  friendships: FriendshipRow[];
+  receivedRequests: ReceivedFriendRequestRow[];
+  sentRequests: SentFriendRequestRow[];
+  userId: string;
+  users: UserSummary[];
 };

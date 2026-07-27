@@ -1,15 +1,6 @@
 import "server-only";
 
 import type {
-  FriendRelationStatus,
-  FriendSearchResult,
-} from "@/types/friend";
-import type {
-  FriendshipRow,
-  ReceivedFriendRequestRow,
-  SentFriendRequestRow,
-} from "@/server/friends/friend.types";
-import type {
   UserPersonalTier,
   UserProfile,
   UserSummary,
@@ -102,47 +93,4 @@ export function createUserProfile(user: UserProfileRow): UserProfile {
     solvedCount: user._count.problemSubmissions,
     todaySolvedCount: user.todaySolvedCount,
   };
-}
-
-// 사용자 요약과 친구 관계 조회 결과를 검색 결과로 합친다.
-export function createFriendSearchResults({
-  friendships,
-  receivedRequests,
-  sentRequests,
-  userId,
-  users,
-}: {
-  friendships: FriendshipRow[];
-  receivedRequests: ReceivedFriendRequestRow[];
-  sentRequests: SentFriendRequestRow[];
-  userId: string;
-  users: UserSummary[];
-}): FriendSearchResult[] {
-  const relationStatusByUserId = new Map<string, FriendRelationStatus>();
-  const requestIdByUserId = new Map<string, string>();
-
-  for (const friendship of friendships) {
-    const friendUserId =
-      friendship.userAId === userId
-        ? friendship.userBId
-        : friendship.userAId;
-
-    relationStatusByUserId.set(friendUserId, "friend");
-  }
-
-  for (const request of receivedRequests) {
-    relationStatusByUserId.set(request.requesterId, "received_request");
-    requestIdByUserId.set(request.requesterId, request.id);
-  }
-
-  for (const request of sentRequests) {
-    relationStatusByUserId.set(request.addresseeId, "sent_request");
-    requestIdByUserId.set(request.addresseeId, request.id);
-  }
-
-  return users.map((user) => ({
-    ...user,
-    relationStatus: relationStatusByUserId.get(user.id) ?? "none",
-    requestId: requestIdByUserId.get(user.id),
-  }));
 }

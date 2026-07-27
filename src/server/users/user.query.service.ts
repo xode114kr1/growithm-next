@@ -1,12 +1,12 @@
 import "server-only";
 
+import { createFriendSearchResults } from "@/server/friends/friend.mapper";
+import { getFriendRelationsForUserIds } from "@/server/friends/friend.query.service";
 import {
-  createFriendSearchResults,
   createPersonalTier,
   createUserProfile,
   createUserSummary,
 } from "@/server/users/user.mapper";
-import { getFriendRelationsForUserIds } from "@/server/friends/friend.query.service";
 import {
   findUserProfile,
   findUsersByQuery,
