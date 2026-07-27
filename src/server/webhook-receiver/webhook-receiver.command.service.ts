@@ -110,22 +110,11 @@ export async function receiveGitHubWebhook({
 
   let queueMessageId: string | null;
 
-  console.info("[WebhookQueue] publish.started", {
-    deliveryId,
-    webhookDeliveryId: delivery.id,
-  });
-
   try {
     queueMessageId = await enqueueWebhookDelivery(delivery.id);
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Vercel Queue 발행 실패";
-
-    console.error("[WebhookQueue] publish.failed", {
-      deliveryId,
-      errorMessage,
-      webhookDeliveryId: delivery.id,
-    });
 
     await markWebhookDeliveryFailed({
       deliveryId,
@@ -144,12 +133,6 @@ export async function receiveGitHubWebhook({
   }
 
   await markWebhookDeliveryQueued(deliveryId);
-
-  console.info("[WebhookQueue] publish.succeeded", {
-    deliveryId,
-    queueMessageId,
-    webhookDeliveryId: delivery.id,
-  });
 
   return {
     body: {
