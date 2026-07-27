@@ -64,7 +64,7 @@ export async function registerGitHubWebhook({
     };
   }
 
-  const webhook = await createGitHubWebhook({
+  const webhook = await ensureGitHubWebhook({
     accessToken: account.access_token,
     owner: repository.owner,
     repo: repository.repo,
@@ -97,7 +97,7 @@ export async function registerGitHubWebhook({
 }
 
 // 저장소에 기존 웹훅이 없으면 새 GitHub 웹훅을 생성한다.
-async function createGitHubWebhook({
+async function ensureGitHubWebhook({
   accessToken,
   owner,
   repo,
