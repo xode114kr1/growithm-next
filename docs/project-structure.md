@@ -167,8 +167,16 @@ server/
 - `[domain].mapper.ts`
   - Prisma 결과, 외부 API 응답, 도메인 객체, 화면 반환 모델 사이의 변환을 담당한다.
   - DB나 외부 API에 직접 접근하지 않는다.
+  - 조회 결과를 그대로 반환하지 않고 화면이나 유스케이스에서 필요한 형태로 가공할 때 사용한다.
+  - mapper가 받는 조회 행, 복합 입력 타입은 mapper 안에 선언하지 않고 `[domain].types.ts`에 둔다.
+  - 다른 함수를 그대로 호출해 반환하는 불필요한 wrapper 함수는 작성하지 않는다.
+  - 한 mapper에서만 사용하는 필드 정규화 함수는 private 함수로 둘 수 있다.
+  - 여러 mapper나 화면에서 재사용하는 단일 값의 기본값 처리, 문자열 표시 변환은 `src/utils`에 둔다.
 - `[domain].types.ts`
   - 해당 서버 도메인 내부에서만 사용하는 입력, 출력, 도메인 타입을 둔다.
+  - repository 조회 결과는 `...Row`, mapper의 복합 입력은 `...Input`, 페이지 조회 결과는 `...Page`처럼 역할이 드러나는 이름을 사용한다.
+  - mapper나 service에서 함께 사용하는 이름 있는 타입은 해당 파일 안에 선언하지 않고 이 파일에서 가져온다.
+  - 한 함수에서만 사용하는 단순한 service 또는 repository 매개변수 객체까지 반드시 분리하지는 않는다.
   - 클라이언트와 공유해야 하는 타입만 `src/types`에 둔다.
 - `[domain].errors.ts`
   - 해당 도메인에서 사용하는 명시적인 오류 타입을 둔다.
@@ -215,6 +223,8 @@ actions.ts / route.ts
 
 여러 라우트나 기능에서 공유하는 타입을 둔다.
 특정 페이지에서만 사용하는 타입은 해당 라우트 내부에 둔다.
+서버 내부 조회 결과나 mapper 입력 타입은 이곳에 두지 않고
+`src/server/[domain]/[domain].types.ts`에 둔다.
 
 ```text
 types/
@@ -229,6 +239,9 @@ types/
 날짜 포맷팅, 문자열 표시 변환, 숫자 계산, 공용 UI 표시값 계산 등이 여기에 해당한다.
 DB, 외부 API, 실행 환경에 의존하지 않는 계산·변환 로직은 특정 도메인과 관련되어 있어도
 여러 서비스나 화면에서 재사용한다면 `src/utils`에 둘 수 있다.
+예를 들어 nullable 이름을 안전한 표시 이름으로 바꾸거나, 이미지가 없을 때 기본 URL을
+반환하는 함수가 여러 mapper 또는 화면에서 사용되면 mapper가 아니라 `src/utils`에 둔다.
+특정 mapper의 한 필드 변환에만 필요한 private helper는 mapper에 유지한다.
 
 ```text
 utils/
@@ -281,8 +294,9 @@ docs/
 5. 외부 라이브러리 설정이나 공용 인스턴스인가?
    - `src/lib`에 둔다.
 
-6. 여러 곳에서 공유하는 타입인가?
-   - `src/types`에 둔다.
+6. 타입인가?
+   - 서버 도메인 내부에서만 사용하는 타입은 `src/server/[domain]/[domain].types.ts`에 둔다.
+   - 클라이언트와 서버가 공유하는 타입은 `src/types`에 둔다.
 
 7. 여러 영역에서 공통으로 사용하는 순수 계산 또는 변환 함수인가?
    - `src/utils`에 둔다.
@@ -298,6 +312,7 @@ docs/
 | DB 접근 파일          | `[domain].repository.ts`  | `user.repository.ts`         |
 | 입력 검증 파일        | `[domain].schema.ts`      | `user.schema.ts`             |
 | 데이터 변환 파일      | `[domain].mapper.ts`      | `user.mapper.ts`             |
+| 서버 내부 타입 파일   | `[domain].types.ts`       | `user.types.ts`              |
 | 외부 연동 파일        | `[domain].gateway.ts`     | `github.gateway.ts`          |
 | 타입 파일             | camelCase 또는 kebab-case | `user.ts`, `api-response.ts` |
 | 유틸 함수 파일        | camelCase                 | `formatDate.ts`              |
@@ -404,16 +419,20 @@ project-root/
 │  │  └─ prisma.ts                    # PostgreSQL용 PrismaClient 인스턴스
 │  ├─ server/                         # 도메인별 서버 비즈니스 로직
 │  │  ├─ friends/
-│  │  │  ├─ friend.service.ts
+│  │  │  ├─ friend.query.service.ts
+│  │  │  ├─ friend.command.service.ts
 │  │  │  ├─ friend.repository.ts
 │  │  │  ├─ friend.schema.ts
-│  │  │  └─ friend.mapper.ts
+│  │  │  ├─ friend.mapper.ts
+│  │  │  └─ friend.types.ts
 │  │  ├─ problems/
 │  │  ├─ studies/
-│  │  │  ├─ study.service.ts
+│  │  │  ├─ study.query.service.ts
+│  │  │  ├─ study.command.service.ts
 │  │  │  ├─ study.repository.ts
 │  │  │  ├─ study.schema.ts
-│  │  │  └─ study.mapper.ts
+│  │  │  ├─ study.mapper.ts
+│  │  │  └─ study.types.ts
 │  │  ├─ users/
 │  │  ├─ webhook-delivery-processing/
 │  │  ├─ webhook-receiver/
@@ -472,11 +491,13 @@ src/
 │  │  ├─ problem.command.service.ts    # 문제 상태 변경 유스케이스
 │  │  ├─ problem.repository.ts         # 문제 DB 접근과 트랜잭션
 │  │  ├─ problem.schema.ts             # 문제 입력 검증
-│  │  └─ problem.mapper.ts             # 문제 데이터 변환
+│  │  ├─ problem.mapper.ts             # 문제 데이터 변환
+│  │  └─ problem.types.ts              # 문제 서버 내부 타입
 │  └─ users/
-│     ├─ user.service.ts
+│     ├─ user.query.service.ts
 │     ├─ user.repository.ts
-│     └─ user.mapper.ts
+│     ├─ user.mapper.ts
+│     └─ user.types.ts
 ├─ types/
 │  ├─ problem.ts                     # 문제 리소스 타입
 │  └─ user.ts                        # 사용자 리소스 타입
@@ -495,6 +516,8 @@ src/
 - Prisma를 사용하는 DB 접근과 트랜잭션은 `[domain].repository.ts`에 둔다.
 - 입력값과 외부 API 응답값 검증은 `[domain].schema.ts`에 둔다.
 - 데이터 형태 변환은 `[domain].mapper.ts`에 둔다.
+- 서버 내부 조회 행, mapper 복합 입력, service 페이지 결과 타입은 `[domain].types.ts`에 둔다.
+- 클라이언트와 공유하는 화면 반환 타입은 `src/types/[domain].ts`에 둔다.
 - 외부 API 호출은 `[domain].gateway.ts`에 둔다.
 - service가 커질 때만 query service와 command service로 분리한다.
 - `src/utils`에는 여러 영역에서 공통으로 사용하는 순수 계산, 변환 및 표시 함수를 둔다.
@@ -580,8 +603,9 @@ Growithm에서 새 파일을 추가할 때는 아래 순서로 위치를 결정�
    - `src/components/ui`, `src/components/layout`에 둔다.
 5. 인증, DB 클라이언트 등 애플리케이션 인프라인가?
    - `src/lib`에 둔다.
-6. 여러 영역에서 공유하는 타입인가?
-   - `src/types`에 둔다.
+6. 타입인가?
+   - 서버 도메인 내부에서만 사용하는 타입은 `src/server/[domain]/[domain].types.ts`에 둔다.
+   - 클라이언트와 서버가 공유하는 타입은 `src/types`에 둔다.
 7. 여러 영역에서 공통으로 사용하는 순수 계산, 변환 또는 표시 함수인가?
    - `src/utils`에 둔다.
 8. 도구가 자동 생성한 코드인가?
