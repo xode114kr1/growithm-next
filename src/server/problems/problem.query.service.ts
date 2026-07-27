@@ -15,22 +15,16 @@ import {
   createProblemListItem,
   createProblemTierBuckets,
 } from "@/server/problems/problem.mapper";
+import type { ProblemListPage } from "@/server/problems/problem.types";
 import type {
   PendingProblem,
   ProblemDetail,
   ProblemFiltersState,
-  ProblemListItem,
   ProblemTierBucket,
 } from "@/types/problem";
 
 export const PROBLEM_PAGE_SIZE = 25;
 const PENDING_PROBLEM_LIMIT = 3;
-
-type ProblemListPage = {
-  hasNextPage: boolean;
-  items: ProblemListItem[];
-  nextCursor: string | null;
-};
 
 // 필터와 커서 조건에 맞는 문제 목록을 화면용 데이터로 조회한다.
 export async function getProblems({
