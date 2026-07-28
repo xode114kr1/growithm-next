@@ -76,17 +76,17 @@ export function getProblemFileChangeFromPushPayload(
   }
 
   const commitSha = getAfterCommitSha(payload);
-
-  const readmePaths = payload.commits.flatMap(getReadmePathsFromCommit);
-  const codePaths = payload.commits.flatMap(getCodePathsFromCommit);
-  const readmePath = readmePaths.at(-1);
+  const [commit] = payload.commits;
+  const changedPaths = getChangedPathsFromCommit(commit);
+  const readmePath = changedPaths.find(isReadmePath) ?? null;
+  const codePath = changedPaths.find(isCodePath) ?? null;
 
   if (!commitSha || !readmePath) {
     return null;
   }
 
   return {
-    codePath: findCodePathForReadme(readmePath, codePaths),
+    codePath,
     commitSha,
     path: readmePath,
   };
@@ -99,26 +99,14 @@ function getAfterCommitSha(payload: GitHubWebhookPayload) {
     : null;
 }
 
-// GitHub 커밋에서 추가되거나 수정된 README 경로를 추출한다.
-function getReadmePathsFromCommit(commit: unknown) {
+// GitHub 커밋에서 추가되거나 수정된 파일 경로를 추출한다.
+function getChangedPathsFromCommit(commit: unknown) {
   if (!isPushCommit(commit)) {
     return [];
   }
 
   return [...getStringArray(commit.added), ...getStringArray(commit.modified)]
-    .map((path) => path.trim())
-    .filter(isReadmePath);
-}
-
-// GitHub 커밋에서 추가되거나 수정된 풀이 코드 경로를 추출한다.
-function getCodePathsFromCommit(commit: unknown) {
-  if (!isPushCommit(commit)) {
-    return [];
-  }
-
-  return [...getStringArray(commit.added), ...getStringArray(commit.modified)]
-    .map((path) => path.trim())
-    .filter(isCodePath);
+    .map((path) => path.trim());
 }
 
 // 값이 GitHub push 커밋 객체인지 확인한다.
@@ -143,24 +131,6 @@ function isCodePath(path: string) {
   return (
     path !== "" && !isReadmePath(path) && !path.toLowerCase().endsWith(".md")
   );
-}
-
-// README와 같은 디렉터리에 변경된 풀이 코드 경로를 찾는다.
-function findCodePathForReadme(readmePath: string, codePaths: string[]) {
-  const readmeDirectory = getDirectoryPath(readmePath);
-
-  return (
-    codePaths.find(
-      (codePath) => getDirectoryPath(codePath) === readmeDirectory,
-    ) ?? null
-  );
-}
-
-// 파일 경로에서 상위 디렉터리 경로를 추출한다.
-function getDirectoryPath(path: string) {
-  const lastSlashIndex = path.lastIndexOf("/");
-
-  return lastSlashIndex === -1 ? "" : path.slice(0, lastSlashIndex);
 }
 
 type ProblemReadmeDraft = Partial<ParsedProblemReadme> & {
