@@ -61,16 +61,19 @@ export async function shareProblemWithStudies({
     return createProblemShareError("공유할 수 있는 스터디를 찾을 수 없습니다.");
   }
 
-  const shareScore = isWithinDayDifference({
+  const isWithinShareScorePeriod = isWithinDayDifference({
     currentTime: new Date(),
     dayDifference: PROBLEM_SHARE_SCORE_DAY_DIFFERENCE,
     targetTime: problem.submittedAtText,
-  })
-    ? getProblemExperienceScore({
-        platform: problem.platform,
-        tier: problem.tier,
-      })
-    : 0;
+  });
+  let shareScore = 0;
+
+  if (isWithinShareScorePeriod) {
+    shareScore = getProblemExperienceScore({
+      platform: problem.platform,
+      tier: problem.tier,
+    });
+  }
 
   const newStudyIds = await createProblemShares({
     problemId: problem.id,
