@@ -40,6 +40,7 @@ export async function receiveGitHubWebhook({
     };
   }
 
+  // Schema: 요청 서명이 GitHub 웹훅 시크릿과 일치하는지 검증한다.
   if (!isValidGitHubWebhookSignature(rawBody, signature, webhookSecret)) {
     return {
       body: { message: "GitHub 웹훅 서명이 올바르지 않습니다." },
@@ -47,6 +48,7 @@ export async function receiveGitHubWebhook({
     };
   }
 
+  // Schema: 요청 본문을 저장 가능한 JSON payload로 파싱한다.
   const payload = parseGitHubWebhookPayload(rawBody);
 
   if (!payload) {
@@ -58,8 +60,10 @@ export async function receiveGitHubWebhook({
 
   const webhookPayload = payload as GitHubWebhookPayload;
 
+  // Mapper: payload에서 저장소 전체 이름을 추출한다.
   const repositoryFullName = getRepositoryFullName(webhookPayload);
 
+  // Repository: delivery를 중복 없이 저장한다.
   const delivery = await saveWebhookDelivery({
     deliveryId,
     event: event ?? "unknown",
@@ -96,6 +100,7 @@ export async function receiveGitHubWebhook({
     };
   }
 
+  // Command: 저장한 push delivery를 Queue 처리 흐름으로 넘긴다.
   const queueResult = await enqueueSavedWebhookDelivery({
     deliveryId,
     webhookDeliveryId: delivery.id,
@@ -115,11 +120,13 @@ async function enqueueSavedWebhookDelivery({
   let queueMessageId: string | null;
 
   try {
+    // Gateway: 저장된 delivery의 처리 작업을 Queue에 발행한다.
     queueMessageId = await enqueueWebhookDelivery(webhookDeliveryId);
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Vercel Queue 발행 실패";
 
+    // Repository: Queue 발행 실패 상태와 오류 메시지를 저장한다.
     await markWebhookDeliveryFailed({
       deliveryId,
       errorMessage,
@@ -136,6 +143,7 @@ async function enqueueSavedWebhookDelivery({
     };
   }
 
+  // Repository: Queue 발행이 완료된 delivery 상태를 갱신한다.
   await markWebhookDeliveryQueued(deliveryId);
 
   return {
