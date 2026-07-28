@@ -75,18 +75,17 @@ export async function shareProblemWithStudies({
     });
   }
 
-  const newStudyIds = await createProblemShares({
+  const sharedStudyIds = await createProblemShares({
     problemId: problem.id,
     shareScore,
     studyIds: authorizedStudyIds,
     userId,
   });
-  const skippedCount = studyIds.length - newStudyIds.length;
 
-  return { error: null, newStudyIds, skippedCount };
+  return { error: null, newStudyIds: sharedStudyIds };
 }
 
 // 문제 공유 실패 결과를 일관된 형태로 생성한다.
 function createProblemShareError(error: string): ProblemShareResult {
-  return { error, newStudyIds: [], skippedCount: 0 };
+  return { error, newStudyIds: [] };
 }

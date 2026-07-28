@@ -83,7 +83,6 @@ export type ProblemDetail = {
 export type ProblemShareResult = {
   error: string | null;
   newStudyIds: string[];
-  skippedCount: number;
 };
 
 export type ProblemTierBucketName =
