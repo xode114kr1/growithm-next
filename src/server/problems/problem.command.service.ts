@@ -46,19 +46,17 @@ export async function shareProblemWithStudies({
   const problem = await findOwnedProblemForSharing({ problemId, userId });
 
   if (!problem) {
-    return createProblemShareError("공유할 수 있는 문제를 찾을 수 없습니다.");
+    return { newStudyIds: [] };
   }
 
   if (problem.status !== ProblemSubmissionStatus.COMPLETED) {
-    return createProblemShareError(
-      "메모 작성이 완료된 문제만 공유할 수 있습니다.",
-    );
+    return { newStudyIds: [] };
   }
 
   const authorizedStudyIds = await findAuthorizedStudyIds({ studyIds, userId });
 
   if (authorizedStudyIds.length === 0) {
-    return createProblemShareError("공유할 수 있는 스터디를 찾을 수 없습니다.");
+    return { newStudyIds: [] };
   }
 
   const isWithinShareScorePeriod = isWithinDayDifference({
@@ -82,10 +80,5 @@ export async function shareProblemWithStudies({
     userId,
   });
 
-  return { error: null, newStudyIds: sharedStudyIds };
-}
-
-// 문제 공유 실패 결과를 일관된 형태로 생성한다.
-function createProblemShareError(error: string): ProblemShareResult {
-  return { error, newStudyIds: [] };
+  return { newStudyIds: sharedStudyIds };
 }

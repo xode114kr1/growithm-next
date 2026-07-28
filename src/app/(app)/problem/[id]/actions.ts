@@ -80,10 +80,6 @@ export async function shareProblemToStudies(
 
   const result = await shareProblemWithStudies({ problemId, studyIds, userId });
 
-  if (result.error) {
-    return createShareErrorState(result.error);
-  }
-
   revalidatePath(`/problem/${problemId}`);
   revalidatePath("/problem");
   revalidatePath("/study");
