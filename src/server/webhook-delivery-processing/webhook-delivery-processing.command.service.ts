@@ -35,6 +35,7 @@ export async function processGitHubWebhookDelivery(
   webhookDeliveryId: string,
 ): Promise<WebhookDeliveryProcessingResult> {
   try {
+    // Repository: 처리할 웹훅 delivery 조회
     const delivery = await getWebhookDeliveryForProcessing(webhookDeliveryId);
 
     if (!delivery) {
@@ -58,6 +59,8 @@ export async function processGitHubWebhookDelivery(
     }
 
     const deliveryId = delivery.deliveryId;
+
+    // Repository: 웹훅 delivery 처리 권한 획득
     const claimed = await claimWebhookDeliveryForProcessing(webhookDeliveryId);
 
     if (!claimed) {
@@ -69,10 +72,13 @@ export async function processGitHubWebhookDelivery(
     }
 
     const webhookPayload = delivery.payload as GitHubWebhookPayload;
+
+    // Mapper: 웹훅 payload에서 저장소 전체 이름 추출
     const repositoryFullName =
       delivery.repositoryFullName ?? getRepositoryFullName(webhookPayload);
 
     if (!repositoryFullName) {
+      // Repository: 저장소 정보가 없는 delivery 실패 상태 갱신
       await updateWebhookDeliveryStatus({
         deliveryId,
         errorMessage: "GitHub repository 정보를 찾을 수 없습니다.",
@@ -85,10 +91,12 @@ export async function processGitHubWebhookDelivery(
       };
     }
 
+    // Mapper: GitHub push payload에서 변경된 문제 파일 추출
     const problemFileChange =
       getProblemFileChangeFromPushPayload(webhookPayload);
 
     if (!problemFileChange) {
+      // Repository: 문제 파일 변경이 없는 delivery 완료 상태 갱신
       await updateWebhookDeliveryStatus({
         deliveryId,
         status: "PROCESSED",
@@ -101,12 +109,14 @@ export async function processGitHubWebhookDelivery(
       };
     }
 
+    // Repository: 저장소 소유자와 GitHub access token 조회
     const repositoryOwner = await getRepositoryOwner(
       repositoryFullName,
       webhookPayload,
     );
 
     if (!repositoryOwner) {
+      // Repository: 저장소 소유자 정보가 없는 delivery 실패 상태 갱신
       await updateWebhookDeliveryStatus({
         deliveryId,
         errorMessage:
@@ -121,6 +131,7 @@ export async function processGitHubWebhookDelivery(
       };
     }
 
+    // Command: 변경된 문제 파일 처리
     return processChangedProblemFile({
       accessToken: repositoryOwner.accessToken,
       deliveryId,
@@ -133,6 +144,7 @@ export async function processGitHubWebhookDelivery(
     const errorMessage =
       error instanceof Error ? error.message : "웹훅 Delivery 재시도 대기";
 
+    // Repository: 재시도할 delivery 대기 상태 갱신
     await updateWebhookDeliveryStatusById({
       errorMessage,
       status: "RETRY_PENDING",
@@ -159,6 +171,7 @@ async function processChangedProblemFile({
   userId: string;
   webhookDeliveryId: string;
 }) {
+  // Command: 변경된 풀이 코드와 README 조회
   const [codeResult, readmeResult] = await Promise.all([
     fetchChangedCodeContent(problemFileChange, repositoryFullName),
     fetchChangedReadme({
@@ -175,6 +188,7 @@ async function processChangedProblemFile({
   }
 
   if (!readmeResult.readme) {
+    // Repository: README 조회에 실패한 delivery 상태 갱신
     await updateWebhookDeliveryStatus({
       deliveryId,
       errorMessage: "README를 조회할 수 없습니다.",
@@ -187,11 +201,13 @@ async function processChangedProblemFile({
     };
   }
 
+  // Mapper: README에서 문제 정보 추출
   const parsedReadme = parseProblemReadme(readmeResult.readme.text);
 
   if (!parsedReadme) {
     const errorMessage = "README에서 문제 정보를 파싱할 수 없습니다.";
 
+    // Repository: 문제 정보 파싱에 실패한 delivery 상태 갱신
     await updateWebhookDeliveryStatus({
       deliveryId,
       errorMessage,
@@ -204,11 +220,13 @@ async function processChangedProblemFile({
     };
   }
 
+  // Utils: 문제 경험치 점수 계산
   const experienceScore = getProblemExperienceScore({
     platform: parsedReadme.platform,
     tier: parsedReadme.tier,
   });
 
+  // Repository: 문제 제출 저장과 delivery 처리 완료
   await saveProblemSubmissionAndCompleteDelivery({
     submission: {
       accuracy: parsedReadme.accuracy,
@@ -251,6 +269,7 @@ async function fetchChangedCodeContent(
     return { code: null, retryableError: null };
   }
 
+  // Mapper: 변경된 풀이 코드의 GitHub 원본 URL 생성
   const codeUrl = buildRawGitHubContentUrl({
     commitSha: problemFileChange.commitSha,
     path: problemFileChange.codePath,
@@ -258,10 +277,12 @@ async function fetchChangedCodeContent(
   });
 
   try {
+    // Gateway: GitHub에서 변경된 풀이 코드 조회
     const result = await fetchGitHubRawCode(codeUrl);
 
     return { code: result.code, retryableError: null };
   } catch (error) {
+    // Error: GitHub 파일 조회 오류의 재시도 가능 여부 확인
     return {
       code: null,
       retryableError: isRetryableGitHubFileError(error) ? error : null,
@@ -280,6 +301,7 @@ async function fetchChangedReadme({
   repositoryFullName: string;
 }) {
   try {
+    // Gateway: GitHub에서 변경된 README 조회
     const readme = await fetchGitHubReadmeContent({
       accessToken,
       commitSha: problemFileChange.commitSha,
@@ -289,6 +311,7 @@ async function fetchChangedReadme({
 
     return { readme, retryableError: null };
   } catch (error) {
+    // Error: GitHub 파일 조회 오류의 재시도 가능 여부 확인
     return {
       readme: null,
       retryableError: isRetryableGitHubFileError(error) ? error : null,
