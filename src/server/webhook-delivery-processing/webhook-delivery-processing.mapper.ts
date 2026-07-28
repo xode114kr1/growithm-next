@@ -88,7 +88,7 @@ export function getProblemFileChangeFromPushPayload(
   return {
     codePath,
     commitSha,
-    path: readmePath,
+    readmePath,
   };
 }
 

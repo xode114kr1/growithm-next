@@ -301,7 +301,7 @@ async function fetchChangedReadme({
     const readme = await fetchGitHubReadmeContent({
       accessToken,
       commitSha: problemFileChange.commitSha,
-      path: problemFileChange.path,
+      path: problemFileChange.readmePath,
       repositoryFullName,
     });
 

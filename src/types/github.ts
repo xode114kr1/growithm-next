@@ -22,5 +22,5 @@ export type GitHubWebhookPayload = {
 export type GitHubReadmeChange = {
   codePath: string | null;
   commitSha: string;
-  path: string;
+  readmePath: string;
 };
