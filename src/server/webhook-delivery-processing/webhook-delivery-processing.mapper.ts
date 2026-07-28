@@ -76,7 +76,7 @@ export function getProblemFileChangeFromPushPayload(
   }
 
   const commitSha = getAfterCommitSha(payload);
-  const [commit] = payload.commits;
+  const commit = payload.commits[0];
   const changedPaths = getChangedPathsFromCommit(commit);
   const readmePath = changedPaths.find(isReadmePath) ?? null;
   const codePath = changedPaths.find(isCodePath) ?? null;
@@ -105,8 +105,10 @@ function getChangedPathsFromCommit(commit: unknown) {
     return [];
   }
 
-  return [...getStringArray(commit.added), ...getStringArray(commit.modified)]
-    .map((path) => path.trim());
+  return [
+    ...getStringArray(commit.added),
+    ...getStringArray(commit.modified),
+  ].map((path) => path.trim());
 }
 
 // 값이 GitHub push 커밋 객체인지 확인한다.
