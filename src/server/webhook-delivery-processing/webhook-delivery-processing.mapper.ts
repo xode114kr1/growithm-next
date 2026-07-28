@@ -96,7 +96,9 @@ export function getProblemFileChangeFromPushPayload(
 
 // GitHub push payload에서 최종 커밋 SHA를 추출한다.
 function getAfterCommitSha(payload: GitHubWebhookPayload) {
-  return typeof payload.after === "string" && payload.after ? payload.after : null;
+  return typeof payload.after === "string" && payload.after
+    ? payload.after
+    : null;
 }
 
 // GitHub 커밋에서 추가되거나 수정된 README 경로를 추출한다.
@@ -149,7 +151,9 @@ function isReadmePath(path: string) {
 
 // 경로가 처리 가능한 풀이 코드 파일인지 확인한다.
 function isCodePath(path: string) {
-  return path !== "" && !isReadmePath(path) && !path.toLowerCase().endsWith(".md");
+  return (
+    path !== "" && !isReadmePath(path) && !path.toLowerCase().endsWith(".md")
+  );
 }
 
 // README와 같은 디렉터리에 변경된 풀이 코드 경로를 찾는다.
@@ -157,8 +161,9 @@ function findCodePathForReadme(readmePath: string, codePaths: string[]) {
   const readmeDirectory = getDirectoryPath(readmePath);
 
   return (
-    codePaths.find((codePath) => getDirectoryPath(codePath) === readmeDirectory) ??
-    null
+    codePaths.find(
+      (codePath) => getDirectoryPath(codePath) === readmeDirectory,
+    ) ?? null
   );
 }
 

@@ -27,9 +27,12 @@ export async function fetchGitHubRawCode(url: string) {
       signal: AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS),
     });
   } catch (error) {
-    throw new RetryableGitHubFileError("GitHub 코드 조회 요청에 실패했습니다.", {
-      cause: error,
-    });
+    throw new RetryableGitHubFileError(
+      "GitHub 코드 조회 요청에 실패했습니다.",
+      {
+        cause: error,
+      },
+    );
   }
 
   if (!response.ok) {
@@ -76,14 +79,17 @@ export async function fetchGitHubReadmeContent({
       repositoryFullName,
     });
   } catch (error) {
-    throw new RetryableGitHubFileError("GitHub README 조회 요청에 실패했습니다.", {
-      cause: error,
-    });
+    throw new RetryableGitHubFileError(
+      "GitHub README 조회 요청에 실패했습니다.",
+      {
+        cause: error,
+      },
+    );
   }
 
-  const data = (await response.json().catch(() => null)) as
-    | GitHubContentResponse
-    | null;
+  const data = (await response
+    .json()
+    .catch(() => null)) as GitHubContentResponse | null;
 
   if (!response.ok) {
     const message = getGitHubContentErrorMessage(response.status, data);

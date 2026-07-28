@@ -96,7 +96,8 @@ async function processGitHubWebhookDeliveryCommand(
   if (!claimed) {
     return {
       deliveryId,
-      message: "다른 Consumer가 이미 처리 중이거나 처리를 완료한 delivery입니다.",
+      message:
+        "다른 Consumer가 이미 처리 중이거나 처리를 완료한 delivery입니다.",
       status: "CLAIM_SKIPPED",
     };
   }
@@ -189,7 +190,8 @@ async function processChangedProblemFile({
       repositoryFullName,
     }),
   ]);
-  const retryableError = codeResult.retryableError ?? readmeResult.retryableError;
+  const retryableError =
+    codeResult.retryableError ?? readmeResult.retryableError;
 
   if (retryableError) {
     throw retryableError;

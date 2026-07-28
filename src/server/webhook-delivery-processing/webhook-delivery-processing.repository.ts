@@ -9,7 +9,9 @@ import { getRepositoryOwnerId } from "@/server/webhook-delivery-processing/webho
 import type { GitHubWebhookPayload } from "@/types/github";
 
 // 문제 처리에 필요한 저장된 웹훅 delivery를 조회한다.
-export async function getWebhookDeliveryForProcessing(webhookDeliveryId: string) {
+export async function getWebhookDeliveryForProcessing(
+  webhookDeliveryId: string,
+) {
   return prisma.webhookDelivery.findUnique({
     select: {
       deliveryId: true,

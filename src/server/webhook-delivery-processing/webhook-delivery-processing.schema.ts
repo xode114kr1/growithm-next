@@ -48,7 +48,11 @@ export function isGitHubFileContentResponse(
 export function validateParsedProblemReadme(
   parsedReadme: Partial<ParsedProblemReadme>,
 ): ParsedProblemReadme | null {
-  if (!parsedReadme.platform || !parsedReadme.problemId || !parsedReadme.title) {
+  if (
+    !parsedReadme.platform ||
+    !parsedReadme.problemId ||
+    !parsedReadme.title
+  ) {
     return null;
   }
 
