@@ -19,7 +19,6 @@ import {
   updateWebhookDeliveryStatusById,
 } from "@/server/webhook-delivery-processing/webhook-delivery-processing.repository";
 import { isRetryableGitHubFileError } from "@/server/github/github.errors";
-import { getRepositoryFullName } from "@/server/github/github.mapper";
 import type { GitHubReadmeChange, GitHubWebhookPayload } from "@/types/github";
 import { getProblemExperienceScore } from "@/utils/problem";
 
@@ -72,10 +71,7 @@ export async function processGitHubWebhookDelivery(
     }
 
     const webhookPayload = delivery.payload as GitHubWebhookPayload;
-
-    // Mapper: 웹훅 payload에서 저장소 전체 이름 추출
-    const repositoryFullName =
-      delivery.repositoryFullName ?? getRepositoryFullName(webhookPayload);
+    const repositoryFullName = delivery.repositoryFullName;
 
     if (!repositoryFullName) {
       // Repository: 저장소 정보가 없는 delivery 실패 상태 갱신

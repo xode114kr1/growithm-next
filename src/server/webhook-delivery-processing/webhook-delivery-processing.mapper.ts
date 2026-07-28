@@ -10,7 +10,6 @@ import type { GitHubReadmeChange, GitHubWebhookPayload } from "@/types/github";
 
 type GitHubPushCommit = {
   added?: unknown;
-  id?: unknown;
   modified?: unknown;
 };
 
@@ -76,9 +75,8 @@ export function getProblemFileChangeFromPushPayload(
     return null;
   }
 
-  const commitSha =
-    getAfterCommitSha(payload) ??
-    getCommitSha(payload.commits[payload.commits.length - 1]);
+  const commitSha = getAfterCommitSha(payload);
+
   const readmePaths = payload.commits.flatMap(getReadmePathsFromCommit);
   const codePaths = payload.commits.flatMap(getCodePathsFromCommit);
   const readmePath = readmePaths.at(-1);
@@ -121,15 +119,6 @@ function getCodePathsFromCommit(commit: unknown) {
   return [...getStringArray(commit.added), ...getStringArray(commit.modified)]
     .map((path) => path.trim())
     .filter(isCodePath);
-}
-
-// GitHub push 커밋 객체에서 커밋 SHA를 추출한다.
-function getCommitSha(commit: unknown) {
-  if (!isPushCommit(commit)) {
-    return null;
-  }
-
-  return typeof commit.id === "string" && commit.id ? commit.id : null;
 }
 
 // 값이 GitHub push 커밋 객체인지 확인한다.
