@@ -58,17 +58,7 @@ export async function getRepositoryOwner(
     return getRepositoryOwnerFromPayload(repositoryFullName, payload);
   }
 
-  const account = await prisma.account.findFirst({
-    select: { access_token: true },
-    where: { provider: "github", userId: repositoryWebhook.userId },
-  });
-
-  if (!account?.access_token) return null;
-
-  return {
-    accessToken: account.access_token,
-    userId: repositoryWebhook.userId,
-  };
+  return { userId: repositoryWebhook.userId };
 }
 
 // 웹훅 payload의 GitHub 소유자 ID로 연결된 사용자를 찾는다.
@@ -81,11 +71,11 @@ async function getRepositoryOwnerFromPayload(
   if (!ownerId) return null;
 
   const account = await prisma.account.findFirst({
-    select: { access_token: true, userId: true },
+    select: { userId: true },
     where: { provider: "github", providerAccountId: ownerId },
   });
 
-  if (!account?.access_token) return null;
+  if (!account) return null;
 
   await prisma.gitHubRepositoryWebhook.upsert({
     create: { repositoryFullName, userId: account.userId },
@@ -93,7 +83,7 @@ async function getRepositoryOwnerFromPayload(
     where: { repositoryFullName },
   });
 
-  return { accessToken: account.access_token, userId: account.userId };
+  return { userId: account.userId };
 }
 
 type ProblemSubmissionInput = {
@@ -249,10 +239,7 @@ export async function updateWebhookDeliveryStatusById({
 }
 
 type WebhookDeliveryProcessingStatus =
-  | "FAILED"
-  | "PROCESSING"
-  | "PROCESSED"
-  | "RETRY_PENDING";
+  "FAILED" | "PROCESSING" | "PROCESSED" | "RETRY_PENDING";
 
 // 웹훅 delivery 처리가 종료된 상태인지 확인한다.
 function isCompletedDeliveryStatus(status: WebhookDeliveryProcessingStatus) {

@@ -109,7 +109,7 @@ async function processGitHubPushDelivery({
     return;
   }
 
-  // Repository: 저장소 소유자와 GitHub access token 조회
+  // Repository: 저장소 소유자 조회
   const repositoryOwner = await getRepositoryOwner(
     repositoryFullName,
     webhookPayload,
@@ -119,8 +119,7 @@ async function processGitHubPushDelivery({
     // Repository: 저장소 소유자 정보가 없는 delivery 실패 상태 갱신
     await updateWebhookDeliveryStatus({
       deliveryId,
-      errorMessage:
-        "Repository에 연결된 GitHub access token을 찾을 수 없습니다.",
+      errorMessage: "Repository에 연결된 사용자를 찾을 수 없습니다.",
       status: "FAILED",
     });
 
@@ -129,7 +128,6 @@ async function processGitHubPushDelivery({
 
   // Command: 변경된 문제 파일 처리
   await processChangedProblemFile({
-    accessToken: repositoryOwner.accessToken,
     deliveryId,
     problemFileChange,
     repositoryFullName,
@@ -140,14 +138,12 @@ async function processGitHubPushDelivery({
 
 // 변경된 문제 파일을 조회하고 문제 제출 저장 결과에 따라 delivery를 완료한다.
 async function processChangedProblemFile({
-  accessToken,
   deliveryId,
   problemFileChange,
   repositoryFullName,
   userId,
   webhookDeliveryId,
 }: {
-  accessToken: string;
   deliveryId: string;
   problemFileChange: GitHubReadmeChange;
   repositoryFullName: string;
@@ -158,7 +154,6 @@ async function processChangedProblemFile({
   const [codeResult, metadataResult] = await Promise.all([
     fetchChangedCodeContent(problemFileChange, repositoryFullName),
     fetchChangedProblemMetadata({
-      accessToken,
       problemFileChange,
       repositoryFullName,
     }),
@@ -262,18 +257,15 @@ async function fetchChangedCodeContent(
 
 // 변경된 문제 정보 파일을 조회한다.
 async function fetchChangedProblemMetadata({
-  accessToken,
   problemFileChange,
   repositoryFullName,
 }: {
-  accessToken: string;
   problemFileChange: GitHubReadmeChange;
   repositoryFullName: string;
 }) {
   try {
     // Gateway: GitHub에서 변경된 문제 정보 조회
     const metadata = await fetchGitHubProblemMetadata({
-      accessToken,
       commitSha: problemFileChange.commitSha,
       path: problemFileChange.readmePath,
       repositoryFullName,

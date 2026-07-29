@@ -59,12 +59,10 @@ export async function fetchGitHubRawCode(url: string) {
 
 // 특정 커밋의 문제 정보를 GitHub API에서 조회한다.
 export async function fetchGitHubProblemMetadata({
-  accessToken,
   commitSha,
   path,
   repositoryFullName,
 }: {
-  accessToken: string;
   commitSha: string;
   path: string;
   repositoryFullName: string;
@@ -73,7 +71,6 @@ export async function fetchGitHubProblemMetadata({
 
   try {
     response = await fetchGitHubContent({
-      accessToken,
       commitSha,
       path,
       repositoryFullName,
@@ -120,12 +117,10 @@ export async function fetchGitHubProblemMetadata({
 
 // GitHub Contents API에서 특정 커밋의 파일 응답을 조회한다.
 async function fetchGitHubContent({
-  accessToken,
   commitSha,
   path,
   repositoryFullName,
 }: {
-  accessToken: string;
   commitSha: string;
   path: string;
   repositoryFullName: string;
@@ -135,7 +130,6 @@ async function fetchGitHubContent({
     {
       headers: {
         Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${accessToken}`,
         "X-GitHub-Api-Version": "2022-11-28",
       },
       signal: AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS),
