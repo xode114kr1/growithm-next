@@ -1,9 +1,6 @@
 import "server-only";
 
-import {
-  fetchGitHubCodeContent,
-  fetchGitHubProblemMetadata,
-} from "@/server/webhook-delivery-processing/webhook-delivery-processing.gateway";
+import { fetchGitHubRawContent } from "@/server/webhook-delivery-processing/webhook-delivery-processing.gateway";
 import {
   createProblemSubmission,
   getProblemFileChangeFromPushPayload,
@@ -153,12 +150,12 @@ async function processChangedProblemFile({
 }) {
   // Command: 변경된 풀이 코드와 문제 정보 조회
   const [code, metadataText] = await Promise.all([
-    fetchGitHubCodeContent({
+    fetchGitHubRawContent({
       commitSha: problemFileChange.commitSha,
       path: problemFileChange.codePath,
       repositoryFullName,
     }),
-    fetchGitHubProblemMetadata({
+    fetchGitHubRawContent({
       commitSha: problemFileChange.commitSha,
       path: problemFileChange.metadataPath,
       repositoryFullName,
