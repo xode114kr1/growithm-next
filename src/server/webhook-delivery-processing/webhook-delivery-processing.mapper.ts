@@ -219,10 +219,9 @@ function parseProgrammersMetadata(text: string): ProblemMetadataDraft {
   const accuracyMatch = text.match(/정확성:\s*([\d.]+)%/);
   if (accuracyMatch) result.accuracy = Number.parseFloat(accuracyMatch[1]);
 
-  const scoreMatch = text.match(/합계:\s*([\d.]+)\s*\/\s*([\d.]+)/);
+  const scoreMatch = text.match(/합계:\s*[\d.]+\s*\/\s*([\d.]+)/);
   if (scoreMatch) {
-    result.score = Number.parseFloat(scoreMatch[1]);
-    result.scoreMax = Number.parseFloat(scoreMatch[2]);
+    result.scoreMax = Number.parseFloat(scoreMatch[1]);
   }
 
   const dateMatch = text.match(/### 제출 일자\s+(.+)/);

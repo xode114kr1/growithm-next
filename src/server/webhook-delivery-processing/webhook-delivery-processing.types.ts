@@ -13,7 +13,6 @@ export type ParsedProblemMetadata = {
   memory?: string;
   platform: ProblemPlatform;
   problemId: string;
-  score?: number;
   scoreMax?: number;
   submittedAtText?: string;
   tier?: string;
