@@ -152,7 +152,7 @@ async function processChangedProblemFile({
   webhookDeliveryId: string;
 }) {
   // Command: 변경된 풀이 코드와 문제 정보 조회
-  const [code, metadata] = await Promise.all([
+  const [code, metadataText] = await Promise.all([
     fetchGitHubCodeContent({
       commitSha: problemFileChange.commitSha,
       path: problemFileChange.codePath,
@@ -165,7 +165,7 @@ async function processChangedProblemFile({
     }),
   ]);
 
-  if (!metadata) {
+  if (!metadataText) {
     // Repository: 문제 정보 조회에 실패한 delivery 상태 갱신
     await updateWebhookDeliveryStatus({
       deliveryId,
@@ -177,7 +177,7 @@ async function processChangedProblemFile({
   }
 
   // Mapper: 문제 정보 파일에서 제출 정보 추출
-  const parsedMetadata = parseProblemMetadata(metadata.text);
+  const parsedMetadata = parseProblemMetadata(metadataText);
 
   if (!parsedMetadata) {
     const errorMessage = "문제 정보를 파싱할 수 없습니다.";
@@ -201,7 +201,8 @@ async function processChangedProblemFile({
   // Mapper: 문제 제출 저장 데이터 생성
   const submission = createProblemSubmission({
     code,
-    metadata,
+    commitSha: problemFileChange.commitSha,
+    metadataPath: problemFileChange.metadataPath,
     parsedMetadata,
     repositoryFullName,
     score: experienceScore,

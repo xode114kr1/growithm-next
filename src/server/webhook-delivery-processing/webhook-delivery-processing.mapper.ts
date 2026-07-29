@@ -36,7 +36,8 @@ export function parseProblemMetadata(text: string) {
 // 파싱한 문제 정보를 문제 제출 저장 데이터로 변환한다.
 export function createProblemSubmission({
   code,
-  metadata,
+  commitSha,
+  metadataPath,
   parsedMetadata,
   repositoryFullName,
   score,
@@ -46,11 +47,11 @@ export function createProblemSubmission({
     accuracy: parsedMetadata.accuracy,
     categories: parsedMetadata.categories,
     code,
-    commitSha: metadata.commitSha,
+    commitSha,
     description: parsedMetadata.description,
     link: parsedMetadata.link,
     memory: parsedMetadata.memory,
-    metadataPath: metadata.path,
+    metadataPath,
     platform: parsedMetadata.platform,
     problemId: parsedMetadata.problemId,
     repositoryFullName,

@@ -4,7 +4,6 @@ import {
   isRetryableGitHubStatus,
   RetryableGitHubFileError,
 } from "@/server/github/github.errors";
-import type { GitHubProblemMetadata } from "@/types/github";
 
 const GITHUB_REQUEST_TIMEOUT_MS = 10_000;
 
@@ -44,18 +43,13 @@ export async function fetchGitHubProblemMetadata({
   commitSha: string;
   path: string;
   repositoryFullName: string;
-}): Promise<GitHubProblemMetadata | null> {
+}): Promise<string | null> {
   const url = `https://raw.githubusercontent.com/${repositoryFullName}/${commitSha}/${encodeGitHubPath(path)}`;
-  const text = await fetchGitHubRawContent({
+
+  return fetchGitHubRawContent({
     errorMessage: "GitHub 문제 정보 조회",
     url,
   });
-
-  if (text === null) {
-    return null;
-  }
-
-  return { commitSha, path, text };
 }
 
 // GitHub Raw URL에서 파일 내용을 조회한다.

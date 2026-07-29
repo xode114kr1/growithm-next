@@ -2,12 +2,6 @@ export type GitHubRepositoryWebhookSummary = {
   repositoryFullName: string;
 };
 
-export type GitHubProblemMetadata = {
-  commitSha: string;
-  path: string;
-  text: string;
-};
-
 export type GitHubWebhookPayload = {
   after?: unknown;
   commits?: unknown;

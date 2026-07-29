@@ -4,7 +4,6 @@ import type {
   ProblemPlatform,
   ProblemSubmissionStatus,
 } from "@/generated/prisma/enums";
-import type { GitHubProblemMetadata } from "@/types/github";
 
 export type ParsedProblemMetadata = {
   accuracy?: number;
@@ -24,7 +23,8 @@ export type ParsedProblemMetadata = {
 
 export type CreateProblemSubmissionInput = {
   code: string | null;
-  metadata: GitHubProblemMetadata;
+  commitSha: string;
+  metadataPath: string;
   parsedMetadata: ParsedProblemMetadata;
   repositoryFullName: string;
   score: number;
