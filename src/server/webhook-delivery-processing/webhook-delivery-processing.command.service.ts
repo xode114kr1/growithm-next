@@ -3,7 +3,7 @@ import "server-only";
 import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import {
   fetchGitHubRawCode,
-  fetchGitHubReadmeContent,
+  fetchGitHubProblemMetadata,
 } from "@/server/webhook-delivery-processing/webhook-delivery-processing.gateway";
 import {
   buildRawGitHubContentUrl,
@@ -154,27 +154,27 @@ async function processChangedProblemFile({
   userId: string;
   webhookDeliveryId: string;
 }) {
-  // Command: 변경된 풀이 코드와 README 조회
-  const [codeResult, readmeResult] = await Promise.all([
+  // Command: 변경된 풀이 코드와 문제 정보 조회
+  const [codeResult, metadataResult] = await Promise.all([
     fetchChangedCodeContent(problemFileChange, repositoryFullName),
-    fetchChangedReadme({
+    fetchChangedProblemMetadata({
       accessToken,
       problemFileChange,
       repositoryFullName,
     }),
   ]);
   const retryableError =
-    codeResult.retryableError ?? readmeResult.retryableError;
+    codeResult.retryableError ?? metadataResult.retryableError;
 
   if (retryableError) {
     throw retryableError;
   }
 
-  if (!readmeResult.readme) {
-    // Repository: README 조회에 실패한 delivery 상태 갱신
+  if (!metadataResult.metadata) {
+    // Repository: 문제 정보 조회에 실패한 delivery 상태 갱신
     await updateWebhookDeliveryStatus({
       deliveryId,
-      errorMessage: "README를 조회할 수 없습니다.",
+      errorMessage: "문제 정보를 조회할 수 없습니다.",
       status: "FAILED",
     });
 
@@ -182,7 +182,7 @@ async function processChangedProblemFile({
   }
 
   // Mapper: README에서 문제 정보 추출
-  const parsedReadme = parseProblemReadme(readmeResult.readme.text);
+  const parsedReadme = parseProblemReadme(metadataResult.metadata.text);
 
   if (!parsedReadme) {
     const errorMessage = "README에서 문제 정보를 파싱할 수 없습니다.";
@@ -209,13 +209,13 @@ async function processChangedProblemFile({
       accuracy: parsedReadme.accuracy,
       categories: parsedReadme.categories,
       code: codeResult.code,
-      commitSha: readmeResult.readme.commitSha,
+      commitSha: metadataResult.metadata.commitSha,
       description: parsedReadme.description,
       link: parsedReadme.link,
       memory: parsedReadme.memory,
       platform: parsedReadme.platform,
       problemId: parsedReadme.problemId,
-      readmePath: readmeResult.readme.path,
+      readmePath: metadataResult.metadata.path,
       repositoryFullName,
       score: experienceScore,
       scoreMax: parsedReadme.scoreMax,
@@ -260,8 +260,8 @@ async function fetchChangedCodeContent(
   }
 }
 
-// 변경된 README 파일을 조회한다.
-async function fetchChangedReadme({
+// 변경된 문제 정보 파일을 조회한다.
+async function fetchChangedProblemMetadata({
   accessToken,
   problemFileChange,
   repositoryFullName,
@@ -271,19 +271,19 @@ async function fetchChangedReadme({
   repositoryFullName: string;
 }) {
   try {
-    // Gateway: GitHub에서 변경된 README 조회
-    const readme = await fetchGitHubReadmeContent({
+    // Gateway: GitHub에서 변경된 문제 정보 조회
+    const metadata = await fetchGitHubProblemMetadata({
       accessToken,
       commitSha: problemFileChange.commitSha,
       path: problemFileChange.readmePath,
       repositoryFullName,
     });
 
-    return { readme, retryableError: null };
+    return { metadata, retryableError: null };
   } catch (error) {
     // Error: GitHub 파일 조회 오류의 재시도 가능 여부 확인
     return {
-      readme: null,
+      metadata: null,
       retryableError: isRetryableGitHubFileError(error) ? error : null,
     };
   }

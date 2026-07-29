@@ -2,7 +2,7 @@ export type GitHubRepositoryWebhookSummary = {
   repositoryFullName: string;
 };
 
-export type GitHubReadmeContent = {
+export type GitHubProblemMetadata = {
   commitSha: string;
   path: string;
   text: string;

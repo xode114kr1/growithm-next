@@ -6,17 +6,17 @@ import {
 } from "@/server/github/github.errors";
 import {
   encodeGitHubPath,
-  getGitHubContentErrorMessage,
+  getGitHubProblemMetadataErrorMessage,
 } from "@/server/webhook-delivery-processing/webhook-delivery-processing.mapper";
 import {
   isGitHubFileContentResponse,
   type GitHubContentResponse,
 } from "@/server/webhook-delivery-processing/webhook-delivery-processing.schema";
-import type { GitHubReadmeContent } from "@/types/github";
+import type { GitHubProblemMetadata } from "@/types/github";
 
 const GITHUB_REQUEST_TIMEOUT_MS = 10_000;
 const MAX_CODE_SIZE_BYTES = 1024 * 1024;
-const MAX_README_SIZE_BYTES = 2 * 1024 * 1024;
+const MAX_PROBLEM_METADATA_SIZE_BYTES = 2 * 1024 * 1024;
 
 // GitHub raw content URL에서 풀이 코드 파일을 조회한다.
 export async function fetchGitHubRawCode(url: string) {
@@ -57,8 +57,8 @@ export async function fetchGitHubRawCode(url: string) {
   };
 }
 
-// 특정 커밋의 README 내용을 GitHub API에서 조회한다.
-export async function fetchGitHubReadmeContent({
+// 특정 커밋의 문제 정보를 GitHub API에서 조회한다.
+export async function fetchGitHubProblemMetadata({
   accessToken,
   commitSha,
   path,
@@ -68,7 +68,7 @@ export async function fetchGitHubReadmeContent({
   commitSha: string;
   path: string;
   repositoryFullName: string;
-}): Promise<GitHubReadmeContent> {
+}): Promise<GitHubProblemMetadata> {
   let response: Response;
 
   try {
@@ -80,7 +80,7 @@ export async function fetchGitHubReadmeContent({
     });
   } catch (error) {
     throw new RetryableGitHubFileError(
-      "GitHub README 조회 요청에 실패했습니다.",
+      "GitHub 문제 정보 조회 요청에 실패했습니다.",
       {
         cause: error,
       },
@@ -92,7 +92,7 @@ export async function fetchGitHubReadmeContent({
     .catch(() => null)) as GitHubContentResponse | null;
 
   if (!response.ok) {
-    const message = getGitHubContentErrorMessage(response.status, data);
+    const message = getGitHubProblemMetadataErrorMessage(response.status, data);
 
     if (isRetryableGitHubStatus(response.status)) {
       throw new RetryableGitHubFileError(message);
@@ -102,11 +102,11 @@ export async function fetchGitHubReadmeContent({
   }
 
   if (!isGitHubFileContentResponse(data)) {
-    throw new Error("GitHub README 응답 형식이 올바르지 않습니다.");
+    throw new Error("GitHub 문제 정보 응답 형식이 올바르지 않습니다.");
   }
 
-  if (data.size > MAX_README_SIZE_BYTES) {
-    throw new Error("GitHub README 파일 크기가 2MB 제한을 초과했습니다.");
+  if (data.size > MAX_PROBLEM_METADATA_SIZE_BYTES) {
+    throw new Error("GitHub 문제 정보 파일 크기가 2MB 제한을 초과했습니다.");
   }
 
   return {

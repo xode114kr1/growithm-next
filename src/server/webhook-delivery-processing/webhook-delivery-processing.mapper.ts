@@ -31,16 +31,16 @@ export function encodeGitHubPath(path: string) {
   return path.split("/").map(encodeURIComponent).join("/");
 }
 
-// GitHub README 조회 실패 응답을 오류 메시지로 변환한다.
-export function getGitHubContentErrorMessage(
+// GitHub 문제 정보 조회 실패 응답을 오류 메시지로 변환한다.
+export function getGitHubProblemMetadataErrorMessage(
   status: number,
   data: GitHubContentResponse | null,
 ) {
   if (typeof data?.message === "string" && data.message) {
-    return `GitHub README 조회 실패: ${data.message}`;
+    return `GitHub 문제 정보 조회 실패: ${data.message}`;
   }
 
-  return `GitHub README 조회 실패: HTTP ${status}`;
+  return `GitHub 문제 정보 조회 실패: HTTP ${status}`;
 }
 
 // 플랫폼 형식을 판별해 README의 문제 정보를 파싱한다.
