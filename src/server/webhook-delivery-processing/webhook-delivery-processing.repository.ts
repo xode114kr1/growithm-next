@@ -11,9 +11,7 @@ export async function getWebhookDeliveryForProcessing(
 ) {
   return prisma.webhookDelivery.findUnique({
     select: {
-      deliveryId: true,
       event: true,
-      id: true,
       payload: true,
       repositoryFullName: true,
       status: true,
@@ -175,26 +173,6 @@ export async function saveProblemSubmissionAndCompleteDelivery({
 
 // 저장된 웹훅 delivery의 처리 상태와 오류를 갱신한다.
 export async function updateWebhookDeliveryStatus({
-  deliveryId,
-  errorMessage,
-  status,
-}: {
-  deliveryId: string;
-  errorMessage?: string;
-  status: WebhookDeliveryProcessingStatus;
-}) {
-  await prisma.webhookDelivery.update({
-    data: {
-      errorMessage,
-      processedAt: isCompletedDeliveryStatus(status) ? new Date() : null,
-      status,
-    },
-    where: { deliveryId },
-  });
-}
-
-// Queue 메시지의 내부 ID로 저장된 웹훅 delivery 상태를 갱신한다.
-export async function updateWebhookDeliveryStatusById({
   errorMessage,
   status,
   webhookDeliveryId,

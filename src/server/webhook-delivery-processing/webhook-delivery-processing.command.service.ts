@@ -12,7 +12,6 @@ import {
   getWebhookDeliveryForProcessing,
   saveProblemSubmissionAndCompleteDelivery,
   updateWebhookDeliveryStatus,
-  updateWebhookDeliveryStatusById,
 } from "@/server/webhook-delivery-processing/webhook-delivery-processing.repository";
 import type {
   GitHubProblemFileChange,
@@ -32,7 +31,6 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
 
     // Command: GitHub push delivery 처리
     await processGitHubPushDelivery({
-      deliveryId: delivery.deliveryId,
       repositoryFullName: delivery.repositoryFullName,
       webhookDeliveryId,
       webhookPayload: delivery.payload as GitHubWebhookPayload,
@@ -42,7 +40,7 @@ export async function processGitHubWebhookDelivery(webhookDeliveryId: string) {
       error instanceof Error ? error.message : "웹훅 Delivery 재시도 대기";
 
     // Repository: 재시도할 delivery 대기 상태 갱신
-    await updateWebhookDeliveryStatusById({
+    await updateWebhookDeliveryStatus({
       errorMessage,
       status: "RETRY_PENDING",
       webhookDeliveryId,
@@ -73,12 +71,10 @@ async function claimProcessablePushDelivery(webhookDeliveryId: string) {
 
 // GitHub push delivery에서 변경된 문제 파일과 저장소 소유자를 확인한다.
 async function processGitHubPushDelivery({
-  deliveryId,
   repositoryFullName,
   webhookDeliveryId,
   webhookPayload,
 }: {
-  deliveryId: string;
   repositoryFullName: string | null;
   webhookDeliveryId: string;
   webhookPayload: GitHubWebhookPayload;
@@ -86,9 +82,9 @@ async function processGitHubPushDelivery({
   if (!repositoryFullName) {
     // Repository: 저장소 정보가 없는 delivery 실패 상태 갱신
     await updateWebhookDeliveryStatus({
-      deliveryId,
       errorMessage: "GitHub repository 정보를 찾을 수 없습니다.",
       status: "FAILED",
+      webhookDeliveryId,
     });
 
     return;
@@ -100,8 +96,8 @@ async function processGitHubPushDelivery({
   if (!problemFileChange) {
     // Repository: 문제 파일 변경이 없는 delivery 완료 상태 갱신
     await updateWebhookDeliveryStatus({
-      deliveryId,
       status: "PROCESSED",
+      webhookDeliveryId,
     });
 
     return;
@@ -116,9 +112,9 @@ async function processGitHubPushDelivery({
   if (!repositoryOwner) {
     // Repository: 저장소 소유자 정보가 없는 delivery 실패 상태 갱신
     await updateWebhookDeliveryStatus({
-      deliveryId,
       errorMessage: "Repository에 연결된 사용자를 찾을 수 없습니다.",
       status: "FAILED",
+      webhookDeliveryId,
     });
 
     return;
@@ -126,7 +122,6 @@ async function processGitHubPushDelivery({
 
   // Command: 변경된 문제 파일 처리
   await processChangedProblemFile({
-    deliveryId,
     problemFileChange,
     repositoryFullName,
     userId: repositoryOwner.userId,
@@ -136,13 +131,11 @@ async function processGitHubPushDelivery({
 
 // 변경된 문제 파일을 조회하고 문제 제출 저장 결과에 따라 delivery를 완료한다.
 async function processChangedProblemFile({
-  deliveryId,
   problemFileChange,
   repositoryFullName,
   userId,
   webhookDeliveryId,
 }: {
-  deliveryId: string;
   problemFileChange: GitHubProblemFileChange;
   repositoryFullName: string;
   userId: string;
@@ -165,9 +158,9 @@ async function processChangedProblemFile({
   if (!metadataText) {
     // Repository: 문제 정보 조회에 실패한 delivery 상태 갱신
     await updateWebhookDeliveryStatus({
-      deliveryId,
       errorMessage: "문제 정보를 조회할 수 없습니다.",
       status: "FAILED",
+      webhookDeliveryId,
     });
 
     return;
@@ -181,9 +174,9 @@ async function processChangedProblemFile({
 
     // Repository: 문제 정보 파싱에 실패한 delivery 상태 갱신
     await updateWebhookDeliveryStatus({
-      deliveryId,
       errorMessage,
       status: "FAILED",
+      webhookDeliveryId,
     });
 
     return;
