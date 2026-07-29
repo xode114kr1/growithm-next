@@ -8,7 +8,7 @@ import {
 import {
   buildRawGitHubContentUrl,
   getProblemFileChangeFromPushPayload,
-  parseProblemReadme,
+  parseProblemMetadata,
 } from "@/server/webhook-delivery-processing/webhook-delivery-processing.mapper";
 import {
   claimWebhookDeliveryForProcessing,
@@ -19,7 +19,10 @@ import {
   updateWebhookDeliveryStatusById,
 } from "@/server/webhook-delivery-processing/webhook-delivery-processing.repository";
 import { isRetryableGitHubFileError } from "@/server/github/github.errors";
-import type { GitHubReadmeChange, GitHubWebhookPayload } from "@/types/github";
+import type {
+  GitHubProblemFileChange,
+  GitHubWebhookPayload,
+} from "@/types/github";
 import { getProblemExperienceScore } from "@/utils/problem";
 
 // 저장된 GitHub push delivery를 문제 제출 데이터로 처리한다.
@@ -145,7 +148,7 @@ async function processChangedProblemFile({
   webhookDeliveryId,
 }: {
   deliveryId: string;
-  problemFileChange: GitHubReadmeChange;
+  problemFileChange: GitHubProblemFileChange;
   repositoryFullName: string;
   userId: string;
   webhookDeliveryId: string;
@@ -176,11 +179,11 @@ async function processChangedProblemFile({
     return;
   }
 
-  // Mapper: README에서 문제 정보 추출
-  const parsedReadme = parseProblemReadme(metadataResult.metadata.text);
+  // Mapper: 문제 정보 파일에서 제출 정보 추출
+  const parsedMetadata = parseProblemMetadata(metadataResult.metadata.text);
 
-  if (!parsedReadme) {
-    const errorMessage = "README에서 문제 정보를 파싱할 수 없습니다.";
+  if (!parsedMetadata) {
+    const errorMessage = "문제 정보를 파싱할 수 없습니다.";
 
     // Repository: 문제 정보 파싱에 실패한 delivery 상태 갱신
     await updateWebhookDeliveryStatus({
@@ -194,31 +197,31 @@ async function processChangedProblemFile({
 
   // Utils: 문제 경험치 점수 계산
   const experienceScore = getProblemExperienceScore({
-    platform: parsedReadme.platform,
-    tier: parsedReadme.tier,
+    platform: parsedMetadata.platform,
+    tier: parsedMetadata.tier,
   });
 
   // Repository: 문제 제출 저장과 delivery 처리 완료
   await saveProblemSubmissionAndCompleteDelivery({
     submission: {
-      accuracy: parsedReadme.accuracy,
-      categories: parsedReadme.categories,
+      accuracy: parsedMetadata.accuracy,
+      categories: parsedMetadata.categories,
       code: codeResult.code,
       commitSha: metadataResult.metadata.commitSha,
-      description: parsedReadme.description,
-      link: parsedReadme.link,
-      memory: parsedReadme.memory,
-      platform: parsedReadme.platform,
-      problemId: parsedReadme.problemId,
-      readmePath: metadataResult.metadata.path,
+      description: parsedMetadata.description,
+      link: parsedMetadata.link,
+      memory: parsedMetadata.memory,
+      platform: parsedMetadata.platform,
+      problemId: parsedMetadata.problemId,
+      metadataPath: metadataResult.metadata.path,
       repositoryFullName,
       score: experienceScore,
-      scoreMax: parsedReadme.scoreMax,
+      scoreMax: parsedMetadata.scoreMax,
       status: ProblemSubmissionStatus.PENDING,
-      submittedAtText: parsedReadme.submittedAtText,
-      tier: parsedReadme.tier,
-      time: parsedReadme.time,
-      title: parsedReadme.title,
+      submittedAtText: parsedMetadata.submittedAtText,
+      tier: parsedMetadata.tier,
+      time: parsedMetadata.time,
+      title: parsedMetadata.title,
       userId,
     },
     webhookDeliveryId,
@@ -227,7 +230,7 @@ async function processChangedProblemFile({
 
 // 변경된 풀이 코드 파일을 조회한다.
 async function fetchChangedCodeContent(
-  problemFileChange: GitHubReadmeChange,
+  problemFileChange: GitHubProblemFileChange,
   repositoryFullName: string,
 ) {
   if (!problemFileChange.codePath) {
@@ -260,14 +263,14 @@ async function fetchChangedProblemMetadata({
   problemFileChange,
   repositoryFullName,
 }: {
-  problemFileChange: GitHubReadmeChange;
+  problemFileChange: GitHubProblemFileChange;
   repositoryFullName: string;
 }) {
   try {
     // Gateway: GitHub에서 변경된 문제 정보 조회
     const metadata = await fetchGitHubProblemMetadata({
       commitSha: problemFileChange.commitSha,
-      path: problemFileChange.readmePath,
+      path: problemFileChange.metadataPath,
       repositoryFullName,
     });
 

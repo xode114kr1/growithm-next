@@ -96,7 +96,7 @@ type ProblemSubmissionInput = {
   memory?: string;
   platform: ProblemPlatform;
   problemId: string;
-  readmePath: string;
+  metadataPath: string;
   repositoryFullName: string;
   score: number;
   scoreMax?: number;
@@ -119,22 +119,22 @@ export async function saveProblemSubmissionAndCompleteDelivery({
   await prisma.$transaction(async (tx) => {
     const {
       commitSha,
-      readmePath,
+      metadataPath,
       repositoryFullName,
       score,
       userId,
       ...submissionData
     } = submission;
-    const submissionKey = `${repositoryFullName}:${commitSha}:${readmePath}`;
+    const submissionKey = `${repositoryFullName}:${commitSha}:${metadataPath}`;
     // 동일 제출의 upsert와 점수 계산을 직렬화해 동시 Consumer의 이중 반영을 막는다.
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${submissionKey}, 0))`;
 
     const existingSubmission = await tx.problemSubmission.findUnique({
       select: { score: true, userId: true },
       where: {
-        repositoryFullName_commitSha_readmePath: {
+        repositoryFullName_commitSha_metadataPath: {
           commitSha,
-          readmePath,
+          metadataPath,
           repositoryFullName,
         },
       },
@@ -143,7 +143,7 @@ export async function saveProblemSubmissionAndCompleteDelivery({
     await tx.problemSubmission.upsert({
       create: {
         commitSha,
-        readmePath,
+        metadataPath,
         repositoryFullName,
         score,
         ...submissionData,
@@ -157,9 +157,9 @@ export async function saveProblemSubmissionAndCompleteDelivery({
         webhookDeliveryId,
       },
       where: {
-        repositoryFullName_commitSha_readmePath: {
+        repositoryFullName_commitSha_metadataPath: {
           commitSha,
-          readmePath,
+          metadataPath,
           repositoryFullName,
         },
       },

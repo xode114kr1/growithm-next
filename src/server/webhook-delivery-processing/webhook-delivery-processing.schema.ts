@@ -11,7 +11,7 @@ export type GitHubContentResponse = {
   type?: unknown;
 };
 
-export type ParsedProblemReadme = {
+export type ParsedProblemMetadata = {
   accuracy?: number;
   categories?: string[];
   description?: string;
@@ -44,19 +44,19 @@ export function isGitHubFileContentResponse(
   );
 }
 
-// 파싱된 README에 필수 문제 정보가 있는지 검증한다.
-export function validateParsedProblemReadme(
-  parsedReadme: Partial<ParsedProblemReadme>,
-): ParsedProblemReadme | null {
+// 파싱된 문제 정보에 필수 값이 있는지 검증한다.
+export function validateParsedProblemMetadata(
+  parsedMetadata: Partial<ParsedProblemMetadata>,
+): ParsedProblemMetadata | null {
   if (
-    !parsedReadme.platform ||
-    !parsedReadme.problemId ||
-    !parsedReadme.title
+    !parsedMetadata.platform ||
+    !parsedMetadata.problemId ||
+    !parsedMetadata.title
   ) {
     return null;
   }
 
-  return parsedReadme as ParsedProblemReadme;
+  return parsedMetadata as ParsedProblemMetadata;
 }
 
 // Queue 메시지에 처리할 웹훅 delivery ID가 있는지 검증한다.

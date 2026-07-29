@@ -19,8 +19,8 @@ export type GitHubWebhookPayload = {
   };
 };
 
-export type GitHubReadmeChange = {
+export type GitHubProblemFileChange = {
   codePath: string | null;
   commitSha: string;
-  readmePath: string;
+  metadataPath: string;
 };

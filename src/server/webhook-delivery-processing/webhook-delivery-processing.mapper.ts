@@ -3,10 +3,13 @@ import "server-only";
 import { ProblemPlatform } from "@/generated/prisma/client";
 import {
   type GitHubContentResponse,
-  type ParsedProblemReadme,
-  validateParsedProblemReadme,
+  type ParsedProblemMetadata,
+  validateParsedProblemMetadata,
 } from "@/server/webhook-delivery-processing/webhook-delivery-processing.schema";
-import type { GitHubReadmeChange, GitHubWebhookPayload } from "@/types/github";
+import type {
+  GitHubProblemFileChange,
+  GitHubWebhookPayload,
+} from "@/types/github";
 
 type GitHubPushCommit = {
   added?: unknown;
@@ -43,14 +46,14 @@ export function getGitHubProblemMetadataErrorMessage(
   return `GitHub 문제 정보 조회 실패: HTTP ${status}`;
 }
 
-// 플랫폼 형식을 판별해 README의 문제 정보를 파싱한다.
-export function parseProblemReadme(text: string) {
+// 플랫폼 형식을 판별해 문제 정보를 파싱한다.
+export function parseProblemMetadata(text: string) {
   if (text.includes("https://www.acmicpc.net/problem/")) {
-    return validateParsedProblemReadme(parseBaekjoonReadme(text));
+    return validateParsedProblemMetadata(parseBaekjoonMetadata(text));
   }
 
   if (text.includes("https://school.programmers.co.kr/")) {
-    return validateParsedProblemReadme(parseProgrammersReadme(text));
+    return validateParsedProblemMetadata(parseProgrammersMetadata(text));
   }
 
   return null;
@@ -67,10 +70,10 @@ export function getRepositoryOwnerId(payload: GitHubWebhookPayload) {
   return typeof ownerId === "string" && ownerId ? ownerId : null;
 }
 
-// GitHub push payload에서 처리할 문제의 README와 풀이 코드 경로를 추출한다.
+// GitHub push payload에서 처리할 문제 정보와 풀이 코드 경로를 추출한다.
 export function getProblemFileChangeFromPushPayload(
   payload: GitHubWebhookPayload,
-): GitHubReadmeChange | null {
+): GitHubProblemFileChange | null {
   if (!Array.isArray(payload.commits)) {
     return null;
   }
@@ -78,17 +81,17 @@ export function getProblemFileChangeFromPushPayload(
   const commitSha = getAfterCommitSha(payload);
   const commit = payload.commits[0];
   const changedPaths = getChangedPathsFromCommit(commit);
-  const readmePath = changedPaths.find(isReadmePath) ?? null;
+  const metadataPath = changedPaths.find(isProblemMetadataPath) ?? null;
   const codePath = changedPaths.find(isCodePath) ?? null;
 
-  if (!commitSha || !readmePath) {
+  if (!commitSha || !metadataPath) {
     return null;
   }
 
   return {
     codePath,
     commitSha,
-    readmePath,
+    metadataPath,
   };
 }
 
@@ -123,25 +126,27 @@ function getStringArray(value: unknown) {
     : [];
 }
 
-// 경로가 README 파일을 가리키는지 확인한다.
-function isReadmePath(path: string) {
+// 경로가 문제 정보 파일을 가리키는지 확인한다.
+function isProblemMetadataPath(path: string) {
   return /(^|\/)README\.md$/i.test(path);
 }
 
 // 경로가 처리 가능한 풀이 코드 파일인지 확인한다.
 function isCodePath(path: string) {
   return (
-    path !== "" && !isReadmePath(path) && !path.toLowerCase().endsWith(".md")
+    path !== "" &&
+    !isProblemMetadataPath(path) &&
+    !path.toLowerCase().endsWith(".md")
   );
 }
 
-type ProblemReadmeDraft = Partial<ParsedProblemReadme> & {
+type ProblemMetadataDraft = Partial<ParsedProblemMetadata> & {
   platform: ProblemPlatform;
 };
 
-// 백준 README에서 문제 제출 정보를 추출한다.
-function parseBaekjoonReadme(text: string): ProblemReadmeDraft {
-  const result: ProblemReadmeDraft = {
+// 백준 문제 정보 파일에서 문제 제출 정보를 추출한다.
+function parseBaekjoonMetadata(text: string): ProblemMetadataDraft {
+  const result: ProblemMetadataDraft = {
     platform: ProblemPlatform.BAEKJOON,
   };
 
@@ -172,9 +177,9 @@ function parseBaekjoonReadme(text: string): ProblemReadmeDraft {
   return result;
 }
 
-// 프로그래머스 README에서 문제 제출 정보를 추출한다.
-function parseProgrammersReadme(text: string): ProblemReadmeDraft {
-  const result: ProblemReadmeDraft = {
+// 프로그래머스 문제 정보 파일에서 문제 제출 정보를 추출한다.
+function parseProgrammersMetadata(text: string): ProblemMetadataDraft {
+  const result: ProblemMetadataDraft = {
     platform: ProblemPlatform.PROGRAMMERS,
   };
 
