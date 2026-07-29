@@ -1,11 +1,18 @@
 import "server-only";
 
-import { ProblemPlatform } from "@/generated/prisma/client";
+import {
+  ProblemPlatform,
+  ProblemSubmissionStatus,
+} from "@/generated/prisma/enums";
 import {
   type GitHubContentResponse,
-  type ParsedProblemMetadata,
   validateParsedProblemMetadata,
 } from "@/server/webhook-delivery-processing/webhook-delivery-processing.schema";
+import type {
+  CreateProblemSubmissionInput,
+  ParsedProblemMetadata,
+  ProblemSubmissionInput,
+} from "@/server/webhook-delivery-processing/webhook-delivery-processing.types";
 import type {
   GitHubProblemFileChange,
   GitHubWebhookPayload,
@@ -57,6 +64,38 @@ export function parseProblemMetadata(text: string) {
   }
 
   return null;
+}
+
+// 파싱한 문제 정보를 문제 제출 저장 데이터로 변환한다.
+export function createProblemSubmission({
+  code,
+  metadata,
+  parsedMetadata,
+  repositoryFullName,
+  score,
+  userId,
+}: CreateProblemSubmissionInput): ProblemSubmissionInput {
+  return {
+    accuracy: parsedMetadata.accuracy,
+    categories: parsedMetadata.categories,
+    code,
+    commitSha: metadata.commitSha,
+    description: parsedMetadata.description,
+    link: parsedMetadata.link,
+    memory: parsedMetadata.memory,
+    metadataPath: metadata.path,
+    platform: parsedMetadata.platform,
+    problemId: parsedMetadata.problemId,
+    repositoryFullName,
+    score,
+    scoreMax: parsedMetadata.scoreMax,
+    status: ProblemSubmissionStatus.PENDING,
+    submittedAtText: parsedMetadata.submittedAtText,
+    tier: parsedMetadata.tier,
+    time: parsedMetadata.time,
+    title: parsedMetadata.title,
+    userId,
+  };
 }
 
 // GitHub 웹훅 payload에서 저장소 소유자 ID를 추출한다.

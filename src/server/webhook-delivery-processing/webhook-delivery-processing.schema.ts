@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { ProblemPlatform } from "@/generated/prisma/client";
+import type { ParsedProblemMetadata } from "@/server/webhook-delivery-processing/webhook-delivery-processing.types";
 import type { WebhookDeliveryQueueMessage } from "@/types/queue";
 
 export type GitHubContentResponse = {
@@ -9,22 +9,6 @@ export type GitHubContentResponse = {
   message?: unknown;
   size?: unknown;
   type?: unknown;
-};
-
-export type ParsedProblemMetadata = {
-  accuracy?: number;
-  categories?: string[];
-  description?: string;
-  link?: string;
-  memory?: string;
-  platform: ProblemPlatform;
-  problemId: string;
-  score?: number;
-  scoreMax?: number;
-  submittedAtText?: string;
-  tier?: string;
-  time?: string;
-  title: string;
 };
 
 // GitHub 파일 응답이 Base64 파일 응답인지 검증한다.

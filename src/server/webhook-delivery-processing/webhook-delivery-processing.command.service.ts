@@ -1,12 +1,12 @@
 import "server-only";
 
-import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import {
   fetchGitHubRawCode,
   fetchGitHubProblemMetadata,
 } from "@/server/webhook-delivery-processing/webhook-delivery-processing.gateway";
 import {
   buildRawGitHubContentUrl,
+  createProblemSubmission,
   getProblemFileChangeFromPushPayload,
   parseProblemMetadata,
 } from "@/server/webhook-delivery-processing/webhook-delivery-processing.mapper";
@@ -201,29 +201,19 @@ async function processChangedProblemFile({
     tier: parsedMetadata.tier,
   });
 
+  // Mapper: 문제 제출 저장 데이터 생성
+  const submission = createProblemSubmission({
+    code: codeResult.code,
+    metadata: metadataResult.metadata,
+    parsedMetadata,
+    repositoryFullName,
+    score: experienceScore,
+    userId,
+  });
+
   // Repository: 문제 제출 저장과 delivery 처리 완료
   await saveProblemSubmissionAndCompleteDelivery({
-    submission: {
-      accuracy: parsedMetadata.accuracy,
-      categories: parsedMetadata.categories,
-      code: codeResult.code,
-      commitSha: metadataResult.metadata.commitSha,
-      description: parsedMetadata.description,
-      link: parsedMetadata.link,
-      memory: parsedMetadata.memory,
-      platform: parsedMetadata.platform,
-      problemId: parsedMetadata.problemId,
-      metadataPath: metadataResult.metadata.path,
-      repositoryFullName,
-      score: experienceScore,
-      scoreMax: parsedMetadata.scoreMax,
-      status: ProblemSubmissionStatus.PENDING,
-      submittedAtText: parsedMetadata.submittedAtText,
-      tier: parsedMetadata.tier,
-      time: parsedMetadata.time,
-      title: parsedMetadata.title,
-      userId,
-    },
+    submission,
     webhookDeliveryId,
   });
 }

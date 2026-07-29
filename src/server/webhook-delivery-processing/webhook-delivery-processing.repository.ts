@@ -1,11 +1,8 @@
 import "server-only";
 
-import type {
-  ProblemPlatform,
-  ProblemSubmissionStatus,
-} from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { getRepositoryOwnerId } from "@/server/webhook-delivery-processing/webhook-delivery-processing.mapper";
+import type { ProblemSubmissionInput } from "@/server/webhook-delivery-processing/webhook-delivery-processing.types";
 import type { GitHubWebhookPayload } from "@/types/github";
 
 // 문제 처리에 필요한 저장된 웹훅 delivery를 조회한다.
@@ -85,28 +82,6 @@ async function getRepositoryOwnerFromPayload(
 
   return { userId: account.userId };
 }
-
-type ProblemSubmissionInput = {
-  accuracy?: number;
-  categories?: string[];
-  code: string | null;
-  commitSha: string;
-  description?: string;
-  link?: string;
-  memory?: string;
-  platform: ProblemPlatform;
-  problemId: string;
-  metadataPath: string;
-  repositoryFullName: string;
-  score: number;
-  scoreMax?: number;
-  status: ProblemSubmissionStatus;
-  submittedAtText?: string;
-  tier?: string;
-  time?: string;
-  title: string;
-  userId: string;
-};
 
 // 문제 제출과 사용자 점수를 반영하고 웹훅 delivery 처리를 완료한다.
 export async function saveProblemSubmissionAndCompleteDelivery({
