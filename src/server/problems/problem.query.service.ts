@@ -2,7 +2,6 @@ import "server-only";
 
 import {
   countProblems,
-  countProblemsByUserId,
   findAvailableProblemTiers,
   findPendingProblems,
   findProblemDetail,
@@ -122,5 +121,5 @@ export async function getPendingProblems(
 
 // 사용자의 전체 문제 제출 수를 조회한다.
 export async function getSolvedProblemCount(userId: string | undefined) {
-  return userId ? countProblemsByUserId(userId) : 0;
+  return userId ? countProblems({ userId }) : 0;
 }

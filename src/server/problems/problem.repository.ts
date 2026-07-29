@@ -137,11 +137,6 @@ export async function findPendingProblems({
   });
 }
 
-// 사용자의 전체 문제 제출 수를 조회한다.
-export async function countProblemsByUserId(userId: string) {
-  return prisma.problemSubmission.count({ where: { userId } });
-}
-
 // 사용자가 소유한 문제 제출의 메모와 상태를 갱신한다.
 export async function updateProblemMemoRecord({
   memo,
