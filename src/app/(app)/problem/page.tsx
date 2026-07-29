@@ -8,7 +8,6 @@ import {
   getAvailableProblemTiers,
   getProblemCount,
   getProblems,
-  PROBLEM_PAGE_SIZE,
 } from "@/server/problems/problem.query.service";
 import { parseProblemFilters } from "@/server/problems/problem.schema";
 import ProblemFilters from "./_components/problem-filters";
@@ -39,14 +38,13 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
   const filters = parseProblemFilters(params);
 
   // fetch
-  const [tiers, unfilteredTotalCount, totalCount, initialItems] =
+  const [tiers, unfilteredTotalCount, totalCount, problemPage] =
     await Promise.all([
       getAvailableProblemTiers(userId),
       getProblemCount(userId),
       getProblemCount(userId, filters),
       getProblems({
         filters,
-        page: 1,
         userId,
       }),
     ]);
@@ -70,8 +68,9 @@ export default async function ProblemPage({ searchParams }: ProblemPageProps) {
           currentTime={new Date().toISOString()}
           emptyStateReason={emptyStateReason}
           filters={filters}
-          initialHasNextPage={PROBLEM_PAGE_SIZE < totalCount}
-          initialItems={initialItems}
+          initialHasNextPage={problemPage.hasNextPage}
+          initialItems={problemPage.items}
+          initialNextCursor={problemPage.nextCursor}
           key={createProblemListKey(filters)}
         />
       </div>

@@ -67,7 +67,7 @@ export async function saveWebhookDelivery({
     where: { deliveryId },
   });
 
-  if (isRetryableDeliveryStatus(existingDelivery.status)) {
+  if (existingDelivery.status === "FAILED") {
     const retriedDelivery = await prisma.webhookDelivery.updateMany({
       data: {
         errorMessage: null,
@@ -101,8 +101,3 @@ type WebhookDeliveryStatus =
   | "FAILED"
   | "IGNORED"
   | "RECEIVED";
-
-// 웹훅 처리 상태가 재시도 가능한 상태인지 확인한다.
-function isRetryableDeliveryStatus(status: string) {
-  return status === "FAILED";
-}

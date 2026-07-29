@@ -1,14 +1,25 @@
 import "server-only";
 
-import { cache } from "react";
-
 import {
-  getNextTierScore,
-  getProgressLabel,
-  getStudyTier,
-  getUserDisplayName,
-  normalizeCategories,
+  createOwnedStudy,
+  createOwnedStudyInvite,
+  createOwnedStudyMembers,
+  createStudyContributions,
+  createStudyInviteItem,
+  createStudyForProblemSharing,
+  createStudyLayoutData,
+  createStudyListItem,
+  createStudyMemberPreviews,
+  createStudyMembers,
+  createStudyProblemDetail,
+  createStudyProblemListItem,
+  createStudyProblemMemberNames,
+  createStudyProblemTiers,
+  createStudyRecentProblem,
+  createStudyStats,
+  createStudySummary,
 } from "@/server/studies/study.mapper";
+import type { StudyProblemPage } from "@/server/studies/study.types";
 import {
   aggregateOwnedStudyMemberActivity,
   aggregateStudyMemberActivity,
@@ -47,14 +58,11 @@ import type {
   StudyOverviewSummary,
   StudyProblemDetail,
   StudyProblemFilters,
-  StudyProblemListItem,
   StudyRecentProblem,
 } from "@/types/study";
-import { formatRelativeDate, formatShortDate } from "@/utils/date";
-import { getTierProgress } from "@/utils/study";
 
 // 문제를 공유할 수 있는 사용자의 스터디 목록을 조회한다.
-export async function getProblemShareTargetStudies({
+export async function getStudiesForProblemSharing({
   problemId,
   userId,
 }: {
@@ -67,14 +75,7 @@ export async function getProblemShareTargetStudies({
 
   const studies = await findProblemShareTargetStudies({ problemId, userId });
 
-  return studies.map((study) => ({
-    hasShared: study.problemShares.length > 0,
-    id: study.id,
-    memberCount: study._count.members,
-    ownerName: study.owner.name ?? "Unknown",
-    score: study.score,
-    title: study.title,
-  }));
+  return studies.map(createStudyForProblemSharing);
 }
 
 // 사용자에게 도착한 유효한 대기 중 스터디 초대를 조회한다.
@@ -84,13 +85,7 @@ export async function getPendingInvites(
   if (!userId) return [];
   const invites = await findPendingInvites(userId);
 
-  return invites.map((invite) => ({
-    id: invite.id,
-    invitedByAvatar: invite.invitedBy.image,
-    invitedByName: getUserDisplayName(invite.invitedBy.name),
-    studyTitle: invite.study.title,
-    timeLabel: formatRelativeDate(invite.createdAt),
-  }));
+  return invites.map(createStudyInviteItem);
 }
 
 // 스터디 상세 레이아웃에 필요한 접근 권한과 기본 정보를 조회한다.
@@ -109,11 +104,7 @@ export async function getStudyLayoutData({
     return null;
   }
 
-  return {
-    id: study.id,
-    isOwner: study.ownerId === userId,
-    name: study.title,
-  };
+  return createStudyLayoutData(study, userId);
 }
 
 // 사용자가 참여하거나 소유한 스터디 목록을 조회한다.
@@ -124,23 +115,7 @@ export async function getUserStudies(
 
   const studies = await findUserStudies(userId);
 
-  return studies.map((study) => {
-    const tier = getStudyTier(study.score);
-    const progress = getTierProgress(study.score, tier);
-
-    return {
-      description: study.description ?? "아직 스터디 설명이 없습니다.",
-      id: study.id,
-      isOwner: study.ownerId === userId,
-      memberCount: study._count.members,
-      ownerName: study.owner.name ?? "Unknown",
-      progress,
-      progressLabel: getProgressLabel(study.score, tier),
-      score: study.score,
-      tier,
-      title: study.title,
-    };
-  });
+  return studies.map((study) => createStudyListItem(study, userId));
 }
 
 // 스터디 멤버 화면의 멤버와 활동·기여도 정보를 조회한다.
@@ -162,49 +137,12 @@ export async function getStudyMembers({
     return null;
   }
 
-  const activityByUserId = new Map(
-    activityByMember.map((activity) => [activity.userId, activity]),
-  );
-
-  const members = study.members.map((member) => {
-    const activity = activityByUserId.get(member.userId);
-    const lastActiveAt = activity?._max.sharedAt ?? member.joinedAt;
-
-    return {
-      avatar: member.user.image,
-      contribution: activity?._sum.score ?? 0,
-      id: member.id,
-      joinedAt: formatShortDate(member.joinedAt),
-      joinedAtTime: member.joinedAt.getTime(),
-      lastActive: formatShortDate(lastActiveAt),
-      lastActiveTime: lastActiveAt.getTime(),
-      name: getUserDisplayName(member.user.name),
-      role: member.role,
-      userId: member.userId,
-    };
+  return createStudyMembers({
+    activities: activityByMember,
+    members: study.members,
+    sort: filters.sort,
   });
-
-  if (filters.sort === "lastActive") {
-    return members.toSorted(
-      (firstMember, secondMember) =>
-        secondMember.lastActiveTime - firstMember.lastActiveTime,
-    );
-  }
-
-  if (filters.sort === "contribution") {
-    return members.toSorted(
-      (firstMember, secondMember) =>
-        secondMember.contribution - firstMember.contribution,
-    );
-  }
-
-  return members;
 }
-
-const getStudyMembersSource = cache(
-  async (studyId: string, userId: string) =>
-    findStudyMembers({ studyId, userId }),
-);
 
 // 스터디 개요 화면의 기본 정보와 티어 정보를 조회한다.
 export async function getStudySummary({
@@ -220,16 +158,7 @@ export async function getStudySummary({
     return null;
   }
 
-  const tier = getStudyTier(study.score);
-
-  return {
-    description: study.description ?? "아직 스터디 설명이 없습니다.",
-    id: study.id,
-    name: study.title,
-    nextTierScore: getNextTierScore(tier),
-    score: study.score,
-    tier,
-  };
+  return createStudySummary(study);
 }
 
 // 스터디 개요 화면의 풀이 통계를 조회한다.
@@ -244,7 +173,7 @@ export async function getStudyStats({
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
   const [members, problemShareCounts] = await Promise.all([
-    getStudyMembersSource(studyId, userId),
+    findStudyMembers({ studyId, userId }),
     countStudyProblemShares({ oneWeekAgo, studyId, userId }),
   ]);
 
@@ -252,10 +181,7 @@ export async function getStudyStats({
     return null;
   }
 
-  return {
-    memberCount: members.members.length,
-    ...problemShareCounts,
-  };
+  return createStudyStats(members, problemShareCounts);
 }
 
 // 스터디 개요 화면의 멤버별 기여도를 조회한다.
@@ -267,7 +193,7 @@ export async function getStudyContribution({
   userId: string;
 }): Promise<StudyContributionItem[] | null> {
   const [study, contributionScores] = await Promise.all([
-    getStudyMembersSource(studyId, userId),
+    findStudyMembers({ studyId, userId }),
     sumStudyProblemShareScoresByUser({ studyId, userId }),
   ]);
 
@@ -275,17 +201,7 @@ export async function getStudyContribution({
     return null;
   }
 
-  const scoreByUserId = new Map(
-    contributionScores.map((contribution) => [
-      contribution.userId,
-      contribution._sum.score ?? 0,
-    ]),
-  );
-
-  return study.members.map((member) => ({
-    name: getUserDisplayName(member.user.name),
-    score: scoreByUserId.get(member.userId) ?? 0,
-  }));
+  return createStudyContributions(study, contributionScores);
 }
 
 // 스터디 개요 화면의 멤버 목록을 조회한다.
@@ -296,17 +212,13 @@ export async function getStudyMemberPreviews({
   studyId: string;
   userId: string;
 }): Promise<StudyOverviewMember[] | null> {
-  const study = await getStudyMembersSource(studyId, userId);
+  const study = await findStudyMembers({ studyId, userId });
 
   if (!study) {
     return null;
   }
 
-  return study.members.map((member) => ({
-    avatar: member.user.image,
-    name: getUserDisplayName(member.user.name),
-    role: member.userId === study.ownerId ? "owner" : "member",
-  }));
+  return createStudyMemberPreviews(study);
 }
 
 // 스터디 개요 화면의 최근 공유 문제를 조회한다.
@@ -323,12 +235,7 @@ export async function getRecentStudyProblems({
     userId,
   });
 
-  return problems.map((share) => ({
-    platform: share.problemSubmission.platform,
-    solvedBy: getUserDisplayName(share.user.name),
-    tier: share.problemSubmission.tier ?? "-",
-    title: share.problemSubmission.title,
-  }));
+  return problems.map(createStudyRecentProblem);
 }
 
 // 스터디 소유자 관리 화면의 설정 정보를 조회한다.
@@ -345,11 +252,7 @@ export async function getOwnedStudy({
     return null;
   }
 
-  return {
-    description: study.description ?? "아직 스터디 설명이 없습니다.",
-    id: study.id,
-    name: study.title,
-  };
+  return createOwnedStudy(study);
 }
 
 // 스터디 소유자 관리 화면의 멤버와 활동 정보를 조회한다.
@@ -369,43 +272,11 @@ export async function getOwnedStudyMembers({
     return null;
   }
 
-  const activityByUserId = new Map(
-    activityByMember.map((activity) => [activity.userId, activity]),
-  );
-
-  const members = study.members.map((member): OwnerMember => {
-    const activity = activityByUserId.get(member.userId);
-
-    return {
-      avatar: member.user.image,
-      contribution: activity?._sum.score ?? 0,
-      id: member.id,
-      isCurrentUser: member.userId === userId,
-      joinedAt: formatShortDate(member.joinedAt),
-      lastActive: formatShortDate(activity?._max.sharedAt ?? member.joinedAt),
-      name: getUserDisplayName(member.user.name),
-      role: member.userId === study.ownerId ? "OWNER" : member.role,
-    };
+  return createOwnedStudyMembers({
+    activities: activityByMember,
+    study,
+    userId,
   });
-
-  if (!members.some((member) => member.role === "OWNER")) {
-    const ownerActivity = activityByUserId.get(study.ownerId);
-
-    members.unshift({
-      avatar: study.owner.image,
-      contribution: ownerActivity?._sum.score ?? 0,
-      id: study.ownerId,
-      isCurrentUser: study.ownerId === userId,
-      joinedAt: formatShortDate(study.createdAt),
-      lastActive: formatShortDate(
-        ownerActivity?._max.sharedAt ?? study.createdAt,
-      ),
-      name: getUserDisplayName(study.owner.name),
-      role: "OWNER",
-    });
-  }
-
-  return members;
 }
 
 // 스터디 소유자 관리 화면의 대기 중인 초대를 조회한다.
@@ -418,46 +289,39 @@ export async function getOwnedStudyPendingInvites({
 }): Promise<OwnerInvite[]> {
   const invites = await findOwnedStudyPendingInvites({ studyId, userId });
 
-  return invites.map((invite) => ({
-    id: invite.id,
-    status: "Pending",
-    target: invite.target,
-  }));
+  return invites.map(createOwnedStudyInvite);
 }
 
 export const STUDY_PROBLEM_PAGE_SIZE = 10;
 
 // 스터디에 공유된 문제 목록을 조회한다.
 export async function getStudyProblems({
+  cursor = null,
   filters,
-  page,
   studyId,
   userId,
 }: {
+  cursor?: string | null;
   filters: StudyProblemFilters;
-  page: number;
   studyId: string;
   userId: string;
-}): Promise<StudyProblemListItem[]> {
+}): Promise<StudyProblemPage> {
   const shares = await findStudyProblems({
+    cursor,
     filters,
-    page,
     pageSize: STUDY_PROBLEM_PAGE_SIZE,
     studyId,
     userId,
   });
+  const hasNextPage = shares.length > STUDY_PROBLEM_PAGE_SIZE;
+  const pageShares = shares.slice(0, STUDY_PROBLEM_PAGE_SIZE);
+  const lastShare = pageShares.at(-1);
 
-  return shares.map((share) => ({
-    categories: normalizeCategories(share.problemSubmission.categories),
-    code: `${share.problemSubmission.platform}-${share.problemSubmission.problemId}`,
-    id: share.problemSubmission.id,
-    platform: share.problemSubmission.platform,
-    sharedAtLabel: formatShortDate(share.sharedAt),
-    sharedBy: getUserDisplayName(share.user.name),
-    status: share.problemSubmission.status,
-    tier: share.problemSubmission.tier,
-    title: share.problemSubmission.title,
-  }));
+  return {
+    hasNextPage,
+    items: pageShares.map(createStudyProblemListItem),
+    nextCursor: hasNextPage && lastShare ? lastShare.id : null,
+  };
 }
 
 // 스터디에 공유된 문제의 모달 상세 정보를 조회한다.
@@ -476,24 +340,7 @@ export async function getStudyProblemDetail({
     return null;
   }
 
-  return {
-    categories: normalizeCategories(share.problemSubmission.categories),
-    code: `${share.problemSubmission.platform}-${share.problemSubmission.problemId}`,
-    description: share.problemSubmission.description,
-    id: share.problemSubmission.id,
-    link: share.problemSubmission.link,
-    memo: share.problemSubmission.memo,
-    platform: share.problemSubmission.platform,
-    score: share.problemSubmission.score,
-    scoreMax: share.problemSubmission.scoreMax,
-    sharedAtLabel: formatShortDate(share.sharedAt),
-    sharedBy: getUserDisplayName(share.user.name),
-    solutionCode: share.problemSubmission.code,
-    status: share.problemSubmission.status,
-    submittedAtText: share.problemSubmission.submittedAtText,
-    tier: share.problemSubmission.tier,
-    title: share.problemSubmission.title,
-  };
+  return createStudyProblemDetail(share);
 }
 
 // 스터디에 공유된 전체 문제 수를 조회한다.
@@ -523,10 +370,7 @@ export async function getStudyProblemMemberNames({
     return null;
   }
 
-  return members
-    .map((member) => member.name)
-    .map(getUserDisplayName)
-    .filter((name, index, names) => names.indexOf(name) === index);
+  return createStudyProblemMemberNames(members);
 }
 
 // 스터디 문제 필터에 필요한 고유 티어를 조회한다.
@@ -539,5 +383,5 @@ export async function getStudyProblemTiers({
 }): Promise<string[]> {
   const tiers = await findStudyProblemTiers({ studyId, userId });
 
-  return tiers.flatMap((problem) => problem.tier ?? []);
+  return createStudyProblemTiers(tiers);
 }

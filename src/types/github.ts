@@ -1,22 +1,5 @@
-export type GitHubWebhookRequestBody = {
-  owner?: unknown;
-  repo?: unknown;
-  repositoryUrl?: unknown;
-};
-
-export type GitHubRepositoryInput = {
-  owner: string;
-  repo: string;
-};
-
 export type GitHubRepositoryWebhookSummary = {
   repositoryFullName: string;
-};
-
-export type GitHubReadmeContent = {
-  commitSha: string;
-  path: string;
-  text: string;
 };
 
 export type GitHubWebhookPayload = {
@@ -30,8 +13,8 @@ export type GitHubWebhookPayload = {
   };
 };
 
-export type GitHubReadmeChange = {
+export type GitHubProblemFileChange = {
   codePath: string | null;
   commitSha: string;
-  path: string;
+  metadataPath: string;
 };

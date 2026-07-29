@@ -7,5 +7,7 @@ import type { GitHubRepositoryWebhookSummary } from "@/types/github";
 export async function getLatestGitHubRepositoryWebhook(
   userId: string,
 ): Promise<GitHubRepositoryWebhookSummary | null> {
-  return findLatestGitHubRepositoryWebhook(userId);
+  const webhook = await findLatestGitHubRepositoryWebhook(userId);
+
+  return webhook;
 }

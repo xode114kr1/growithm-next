@@ -1,7 +1,34 @@
-import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
+import {
+  ProblemPlatform,
+  ProblemSubmissionStatus,
+} from "@/generated/prisma/enums";
 import type { ProblemTierBucketName } from "@/types/problem";
 
 export const PROBLEM_SHARE_SCORE_DAY_DIFFERENCE = 2;
+
+const baekjoonBaseScores: Record<string, number> = {
+  bronze: 1,
+  diamond: 6_250_000,
+  gold: 2_500,
+  platinum: 125_000,
+  silver: 50,
+};
+
+const baekjoonTierMultipliers: Record<string, number> = {
+  i: 5,
+  ii: 4,
+  iii: 3,
+  iv: 2,
+  v: 1,
+};
+
+const programmersLevelScores: Record<number, number> = {
+  1: 3,
+  2: 150,
+  3: 7_500,
+  4: 375_000,
+  5: 18_750_000,
+};
 
 const programmersLevelTiers: Partial<Record<number, ProblemTierBucketName>> = {
   1: "BRONZE",
@@ -58,6 +85,31 @@ export function getSubmittedLabel(submittedAtText: string | null) {
   return submittedAtText ?? "제출됨";
 }
 
+// 플랫폼과 티어를 기준으로 문제 경험치 점수를 계산한다.
+export function getProblemExperienceScore({
+  platform,
+  tier,
+}: {
+  platform: ProblemPlatform;
+  tier: string | null | undefined;
+}) {
+  if (!tier) return 0;
+
+  if (platform === ProblemPlatform.BAEKJOON) {
+    return (
+      getBaekjoonExperienceScore(tier) || getProgrammersExperienceScore(tier)
+    );
+  }
+
+  if (platform === ProblemPlatform.PROGRAMMERS) {
+    return (
+      getProgrammersExperienceScore(tier) || getBaekjoonExperienceScore(tier)
+    );
+  }
+
+  return 0;
+}
+
 // 플랫폼별 원본 난이도를 Growithm 문제 티어로 변환한다.
 export function getGrowithmProblemTier(tier: string | null) {
   const normalizedTier = tier?.trim().toLowerCase() ?? "";
@@ -75,4 +127,28 @@ export function getGrowithmProblemTier(tier: string | null) {
   return growithmProblemTiers.has(tierName as ProblemTierBucketName)
     ? (tierName as ProblemTierBucketName)
     : null;
+}
+
+// 백준 티어 문자열을 경험치 점수로 변환한다.
+function getBaekjoonExperienceScore(tier: string) {
+  const normalizedTier = tier.trim().toLowerCase();
+  const tierMatch = normalizedTier.match(
+    /(bronze|silver|gold|platinum|diamond)\s+(i{1,3}|iv|v)\b/,
+  );
+
+  if (!tierMatch) return 0;
+
+  const baseScore = baekjoonBaseScores[tierMatch[1]];
+  const multiplier = baekjoonTierMultipliers[tierMatch[2]];
+
+  return baseScore && multiplier ? baseScore * multiplier : 0;
+}
+
+// 프로그래머스 레벨 문자열을 경험치 점수로 변환한다.
+function getProgrammersExperienceScore(tier: string) {
+  const levelMatch = tier.trim().toLowerCase().match(/(?:lv\.?|level)\s*(\d+)/);
+
+  if (!levelMatch) return 0;
+
+  return programmersLevelScores[Number(levelMatch[1])] ?? 0;
 }

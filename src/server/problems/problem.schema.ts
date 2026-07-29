@@ -18,12 +18,6 @@ export function parseProblemFilters(
   };
 }
 
-export function parseProblemPage(page: string | string[] | undefined) {
-  const parsedPage = Number(parseStringParam(page));
-
-  return Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
-}
-
 function parseProblemPlatform(platform: string | string[] | undefined) {
   const value = parseStringParam(platform);
 

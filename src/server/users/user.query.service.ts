@@ -1,21 +1,19 @@
 import "server-only";
 
+import { createFriendSearchResults } from "@/server/friends/friend.mapper";
+import { getFriendRelationsForUserIds } from "@/server/friends/friend.query.service";
 import {
   createPersonalTier,
+  createUserProfile,
   createUserSummary,
 } from "@/server/users/user.mapper";
-import { getFriendRelationsForUserIds } from "@/server/friends/friend.query.service";
 import {
   findUserProfile,
   findUsersByQuery,
   findUserScore,
 } from "@/server/users/user.repository";
-import type {
-  FriendRelationStatus,
-  FriendSearchResult,
-} from "@/types/friend";
+import type { FriendSearchResult } from "@/types/friend";
 import type { UserPersonalTier, UserProfile } from "@/types/user";
-import { formatShortDate, formatSubmittedDateText } from "@/utils/date";
 
 // 사용자의 점수를 조회해 개인 티어 정보를 만든다.
 export async function getUserPersonalTier(
@@ -40,19 +38,7 @@ export async function getUserProfile(
     return null;
   }
 
-  const latestSubmission = user.problemSubmissions[0];
-
-  return {
-    ...createUserSummary(user),
-    githubId: user.accounts[0]?.providerAccountId ?? null,
-    latestSolvedAt: latestSubmission
-      ? formatSubmittedDateText(latestSubmission.submittedAtText) ??
-        formatShortDate(latestSubmission.createdAt)
-      : null,
-    score: user.score,
-    solvedCount: user._count.problemSubmissions,
-    todaySolvedCount: user.todaySolvedCount,
-  };
+  return createUserProfile(user);
 }
 
 // 검색어와 일치하는 사용자 목록을 현재 사용자 제외 후 조회한다.
@@ -80,31 +66,11 @@ export async function searchUsersWithRelation({
       userId: excludedUserId,
       userIds: userSummaries.map((user) => user.id),
     });
-  const relationStatusByUserId = new Map<string, FriendRelationStatus>();
-  const requestIdByUserId = new Map<string, string>();
-
-  for (const friendship of friendships) {
-    relationStatusByUserId.set(
-      friendship.userAId === excludedUserId
-        ? friendship.userBId
-        : friendship.userAId,
-      "friend",
-    );
-  }
-
-  for (const request of receivedRequests) {
-    relationStatusByUserId.set(request.requesterId, "received_request");
-    requestIdByUserId.set(request.requesterId, request.id);
-  }
-
-  for (const request of sentRequests) {
-    relationStatusByUserId.set(request.addresseeId, "sent_request");
-    requestIdByUserId.set(request.addresseeId, request.id);
-  }
-
-  return userSummaries.map((user) => ({
-    ...user,
-    relationStatus: relationStatusByUserId.get(user.id) ?? "none",
-    requestId: requestIdByUserId.get(user.id),
-  }));
+  return createFriendSearchResults({
+    friendships,
+    receivedRequests,
+    sentRequests,
+    userId: excludedUserId,
+    users: userSummaries,
+  });
 }

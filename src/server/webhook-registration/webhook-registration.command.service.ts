@@ -1,29 +1,18 @@
 import "server-only";
 
 import {
+  createGitHubWebhook,
   fetchGitHubWebhooks,
-  postGitHubWebhook,
 } from "@/server/webhook-registration/webhook-registration.gateway";
 import {
   findGitHubAccessToken,
   upsertGitHubRepositoryWebhook,
 } from "@/server/webhook-registration/webhook-registration.repository";
 import { parseRepository } from "@/server/webhook-registration/webhook-registration.schema";
-import type { GitHubWebhookRequestBody } from "@/types/github";
-
-type RegisterGitHubWebhookResult =
-  | {
-      body: {
-        hookId: number | null;
-        message: string;
-        repository: { owner: string; repo: string };
-      };
-      status?: never;
-    }
-  | {
-      body: { message: string };
-      status: number;
-    };
+import type {
+  GitHubWebhookRequestBody,
+  RegisterGitHubWebhookResult,
+} from "@/server/webhook-registration/webhook-registration.types";
 
 // 사용자 저장소에 GitHub 웹훅을 등록하고 연결 정보를 저장한다.
 export async function registerGitHubWebhook({
@@ -64,7 +53,7 @@ export async function registerGitHubWebhook({
     };
   }
 
-  const webhook = await createGitHubWebhook({
+  const webhook = await ensureGitHubWebhook({
     accessToken: account.access_token,
     owner: repository.owner,
     repo: repository.repo,
@@ -97,7 +86,7 @@ export async function registerGitHubWebhook({
 }
 
 // 저장소에 기존 웹훅이 없으면 새 GitHub 웹훅을 생성한다.
-async function createGitHubWebhook({
+async function ensureGitHubWebhook({
   accessToken,
   owner,
   repo,
@@ -125,7 +114,7 @@ async function createGitHubWebhook({
     return { hookId: existingHookId, ok: true as const };
   }
 
-  return postGitHubWebhook({
+  return createGitHubWebhook({
     accessToken,
     owner,
     repo,

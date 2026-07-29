@@ -1,60 +1,69 @@
 import "server-only";
 
-import { ProblemPlatform } from "@/generated/prisma/client";
 import {
-  type GitHubContentResponse,
-  type ParsedProblemReadme,
-  validateParsedProblemReadme,
-} from "@/server/webhook-delivery-processing/webhook-delivery-processing.schema";
-import type { GitHubReadmeChange, GitHubWebhookPayload } from "@/types/github";
+  ProblemPlatform,
+  ProblemSubmissionStatus,
+} from "@/generated/prisma/enums";
+import { validateParsedProblemMetadata } from "@/server/webhook-delivery-processing/webhook-delivery-processing.schema";
+import type {
+  CreateProblemSubmissionInput,
+  ParsedProblemMetadata,
+  ProblemSubmissionInput,
+} from "@/server/webhook-delivery-processing/webhook-delivery-processing.types";
+import type {
+  GitHubProblemFileChange,
+  GitHubWebhookPayload,
+} from "@/types/github";
 
 type GitHubPushCommit = {
   added?: unknown;
-  id?: unknown;
   modified?: unknown;
 };
 
-// 커밋과 파일 경로를 사용해 GitHub 원본 파일 URL을 만든다.
-export function buildRawGitHubContentUrl({
-  commitSha,
-  path,
-  repositoryFullName,
-}: {
-  commitSha: string;
-  path: string;
-  repositoryFullName: string;
-}) {
-  return `https://raw.githubusercontent.com/${repositoryFullName}/${commitSha}/${encodeGitHubPath(path)}`;
-}
-
-// GitHub API 요청에 사용할 파일 경로의 각 구간을 인코딩한다.
-export function encodeGitHubPath(path: string) {
-  return path.split("/").map(encodeURIComponent).join("/");
-}
-
-// GitHub README 조회 실패 응답을 오류 메시지로 변환한다.
-export function getGitHubContentErrorMessage(
-  status: number,
-  data: GitHubContentResponse | null,
-) {
-  if (typeof data?.message === "string" && data.message) {
-    return `GitHub README 조회 실패: ${data.message}`;
-  }
-
-  return `GitHub README 조회 실패: HTTP ${status}`;
-}
-
-// 플랫폼 형식을 판별해 README의 문제 정보를 파싱한다.
-export function parseProblemReadme(text: string) {
+// 플랫폼 형식을 판별해 문제 정보를 파싱한다.
+export function parseProblemMetadata(text: string) {
   if (text.includes("https://www.acmicpc.net/problem/")) {
-    return validateParsedProblemReadme(parseBaekjoonReadme(text));
+    return validateParsedProblemMetadata(parseBaekjoonMetadata(text));
   }
 
   if (text.includes("https://school.programmers.co.kr/")) {
-    return validateParsedProblemReadme(parseProgrammersReadme(text));
+    return validateParsedProblemMetadata(parseProgrammersMetadata(text));
   }
 
   return null;
+}
+
+// 파싱한 문제 정보를 문제 제출 저장 데이터로 변환한다.
+export function createProblemSubmission({
+  code,
+  commitSha,
+  metadataPath,
+  parsedMetadata,
+  repositoryFullName,
+  score,
+  userId,
+}: CreateProblemSubmissionInput): ProblemSubmissionInput {
+  return {
+    accuracy: parsedMetadata.accuracy,
+    categories: parsedMetadata.categories,
+    code,
+    commitSha,
+    description: parsedMetadata.description,
+    link: parsedMetadata.link,
+    memory: parsedMetadata.memory,
+    metadataPath,
+    platform: parsedMetadata.platform,
+    problemId: parsedMetadata.problemId,
+    repositoryFullName,
+    score,
+    scoreMax: parsedMetadata.scoreMax,
+    status: ProblemSubmissionStatus.PENDING,
+    submittedAtText: parsedMetadata.submittedAtText,
+    tier: parsedMetadata.tier,
+    time: parsedMetadata.time,
+    title: parsedMetadata.title,
+    userId,
+  };
 }
 
 // GitHub 웹훅 payload에서 저장소 소유자 ID를 추출한다.
@@ -68,66 +77,48 @@ export function getRepositoryOwnerId(payload: GitHubWebhookPayload) {
   return typeof ownerId === "string" && ownerId ? ownerId : null;
 }
 
-// GitHub push payload에서 처리할 문제의 README와 풀이 코드 경로를 추출한다.
+// GitHub push payload에서 처리할 문제 정보와 풀이 코드 경로를 추출한다.
 export function getProblemFileChangeFromPushPayload(
   payload: GitHubWebhookPayload,
-): GitHubReadmeChange | null {
+): GitHubProblemFileChange | null {
   if (!Array.isArray(payload.commits)) {
     return null;
   }
 
-  const commitSha =
-    getAfterCommitSha(payload) ??
-    getCommitSha(payload.commits[payload.commits.length - 1]);
-  const readmePaths = payload.commits.flatMap(getReadmePathsFromCommit);
-  const codePaths = payload.commits.flatMap(getCodePathsFromCommit);
-  const readmePath = readmePaths.at(-1);
+  const commitSha = getAfterCommitSha(payload);
+  const commit = payload.commits[0];
+  const changedPaths = getChangedPathsFromCommit(commit);
+  const metadataPath = changedPaths.find(isProblemMetadataPath) ?? null;
+  const codePath = changedPaths.find(isCodePath) ?? null;
 
-  if (!commitSha || !readmePath) {
+  if (!commitSha || !metadataPath) {
     return null;
   }
 
   return {
-    codePath: findCodePathForReadme(readmePath, codePaths),
+    codePath,
     commitSha,
-    path: readmePath,
+    metadataPath,
   };
 }
 
 // GitHub push payload에서 최종 커밋 SHA를 추출한다.
 function getAfterCommitSha(payload: GitHubWebhookPayload) {
-  return typeof payload.after === "string" && payload.after ? payload.after : null;
+  return typeof payload.after === "string" && payload.after
+    ? payload.after
+    : null;
 }
 
-// GitHub 커밋에서 추가되거나 수정된 README 경로를 추출한다.
-function getReadmePathsFromCommit(commit: unknown) {
+// GitHub 커밋에서 추가되거나 수정된 파일 경로를 추출한다.
+function getChangedPathsFromCommit(commit: unknown) {
   if (!isPushCommit(commit)) {
     return [];
   }
 
-  return [...getStringArray(commit.added), ...getStringArray(commit.modified)]
-    .map((path) => path.trim())
-    .filter(isReadmePath);
-}
-
-// GitHub 커밋에서 추가되거나 수정된 풀이 코드 경로를 추출한다.
-function getCodePathsFromCommit(commit: unknown) {
-  if (!isPushCommit(commit)) {
-    return [];
-  }
-
-  return [...getStringArray(commit.added), ...getStringArray(commit.modified)]
-    .map((path) => path.trim())
-    .filter(isCodePath);
-}
-
-// GitHub push 커밋 객체에서 커밋 SHA를 추출한다.
-function getCommitSha(commit: unknown) {
-  if (!isPushCommit(commit)) {
-    return null;
-  }
-
-  return typeof commit.id === "string" && commit.id ? commit.id : null;
+  return [
+    ...getStringArray(commit.added),
+    ...getStringArray(commit.modified),
+  ].map((path) => path.trim());
 }
 
 // 값이 GitHub push 커밋 객체인지 확인한다.
@@ -142,40 +133,27 @@ function getStringArray(value: unknown) {
     : [];
 }
 
-// 경로가 README 파일을 가리키는지 확인한다.
-function isReadmePath(path: string) {
+// 경로가 문제 정보 파일을 가리키는지 확인한다.
+function isProblemMetadataPath(path: string) {
   return /(^|\/)README\.md$/i.test(path);
 }
 
 // 경로가 처리 가능한 풀이 코드 파일인지 확인한다.
 function isCodePath(path: string) {
-  return path !== "" && !isReadmePath(path) && !path.toLowerCase().endsWith(".md");
-}
-
-// README와 같은 디렉터리에 변경된 풀이 코드 경로를 찾는다.
-function findCodePathForReadme(readmePath: string, codePaths: string[]) {
-  const readmeDirectory = getDirectoryPath(readmePath);
-
   return (
-    codePaths.find((codePath) => getDirectoryPath(codePath) === readmeDirectory) ??
-    null
+    path !== "" &&
+    !isProblemMetadataPath(path) &&
+    !path.toLowerCase().endsWith(".md")
   );
 }
 
-// 파일 경로에서 상위 디렉터리 경로를 추출한다.
-function getDirectoryPath(path: string) {
-  const lastSlashIndex = path.lastIndexOf("/");
-
-  return lastSlashIndex === -1 ? "" : path.slice(0, lastSlashIndex);
-}
-
-type ProblemReadmeDraft = Partial<ParsedProblemReadme> & {
+type ProblemMetadataDraft = Partial<ParsedProblemMetadata> & {
   platform: ProblemPlatform;
 };
 
-// 백준 README에서 문제 제출 정보를 추출한다.
-function parseBaekjoonReadme(text: string): ProblemReadmeDraft {
-  const result: ProblemReadmeDraft = {
+// 백준 문제 정보 파일에서 문제 제출 정보를 추출한다.
+function parseBaekjoonMetadata(text: string): ProblemMetadataDraft {
+  const result: ProblemMetadataDraft = {
     platform: ProblemPlatform.BAEKJOON,
   };
 
@@ -206,9 +184,9 @@ function parseBaekjoonReadme(text: string): ProblemReadmeDraft {
   return result;
 }
 
-// 프로그래머스 README에서 문제 제출 정보를 추출한다.
-function parseProgrammersReadme(text: string): ProblemReadmeDraft {
-  const result: ProblemReadmeDraft = {
+// 프로그래머스 문제 정보 파일에서 문제 제출 정보를 추출한다.
+function parseProgrammersMetadata(text: string): ProblemMetadataDraft {
+  const result: ProblemMetadataDraft = {
     platform: ProblemPlatform.PROGRAMMERS,
   };
 
@@ -241,10 +219,9 @@ function parseProgrammersReadme(text: string): ProblemReadmeDraft {
   const accuracyMatch = text.match(/정확성:\s*([\d.]+)%/);
   if (accuracyMatch) result.accuracy = Number.parseFloat(accuracyMatch[1]);
 
-  const scoreMatch = text.match(/합계:\s*([\d.]+)\s*\/\s*([\d.]+)/);
+  const scoreMatch = text.match(/합계:\s*[\d.]+\s*\/\s*([\d.]+)/);
   if (scoreMatch) {
-    result.score = Number.parseFloat(scoreMatch[1]);
-    result.scoreMax = Number.parseFloat(scoreMatch[2]);
+    result.scoreMax = Number.parseFloat(scoreMatch[1]);
   }
 
   const dateMatch = text.match(/### 제출 일자\s+(.+)/);

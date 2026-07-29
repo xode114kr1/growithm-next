@@ -1,6 +1,11 @@
 import "server-only";
 
-import { ProblemPlatform } from "@/generated/prisma/enums";
+import type {
+  PendingProblemRow,
+  ProblemDetailRow,
+  ProblemListItemRow,
+  ProblemTierRow,
+} from "@/server/problems/problem.types";
 import type {
   PendingProblem,
   ProblemDetail,
@@ -26,17 +31,9 @@ const PROGRAMMERS_LEVEL_BUCKETS: Record<number, string> = {
 };
 
 // 문제 목록 조회 결과를 화면 표시 데이터로 변환한다.
-export function createProblemListItem(row: {
-  categories: unknown;
-  createdAt: Date;
-  id: string;
-  platform: ProblemPlatform;
-  problemId: string;
-  status: ProblemListItem["status"];
-  submittedAtText: string | null;
-  tier: string | null;
-  title: string;
-}): ProblemListItem {
+export function createProblemListItem(
+  row: ProblemListItemRow,
+): ProblemListItem {
   return {
     categories: normalizeProblemCategories(row.categories),
     code: `${row.platform}-${row.problemId}`,
@@ -52,9 +49,7 @@ export function createProblemListItem(row: {
 }
 
 // 문제 상세 조회 결과를 화면 표시 데이터로 변환한다.
-export function createProblemDetail(
-  row: Omit<ProblemDetail, "categories"> & { categories: unknown },
-): ProblemDetail {
+export function createProblemDetail(row: ProblemDetailRow): ProblemDetail {
   return {
     ...row,
     categories: normalizeProblemCategories(row.categories),
@@ -62,14 +57,7 @@ export function createProblemDetail(
 }
 
 // 문제 조회 결과를 대기 문제 표시 데이터로 변환한다.
-export function createPendingProblem(row: {
-  id: string;
-  platform: ProblemPlatform;
-  problemId: string;
-  submittedAtText: string | null;
-  tier: string | null;
-  title: string;
-}): PendingProblem {
+export function createPendingProblem(row: PendingProblemRow): PendingProblem {
   return {
     id: row.id,
     platform: row.platform,
@@ -82,7 +70,7 @@ export function createPendingProblem(row: {
 
 // 문제 티어별 개수를 차트용 버킷 데이터로 집계한다.
 export function createProblemTierBuckets(
-  rows: Array<{ tier: string | null }>,
+  rows: ProblemTierRow[],
 ): ProblemTierBucket[] {
   const counts = new Map<string, number>();
 

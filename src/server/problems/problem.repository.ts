@@ -5,19 +5,20 @@ import { ProblemSubmissionStatus } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import type { ProblemFiltersState, ProblemSort } from "@/types/problem";
 
-// 필터와 페이지 조건에 맞는 문제 제출 목록을 조회한다.
+// 필터와 커서 조건에 맞는 문제 제출 목록을 조회한다.
 export async function findProblems({
+  cursor,
   filters,
-  page,
   pageSize,
   userId,
 }: {
+  cursor: string | null;
   filters: ProblemFiltersState;
-  page: number;
   pageSize: number;
   userId: string;
 }) {
   return prisma.problemSubmission.findMany({
+    cursor: cursor ? { id: cursor } : undefined,
     orderBy: buildProblemOrderBy(filters.sort),
     select: {
       categories: true,
@@ -30,8 +31,8 @@ export async function findProblems({
       tier: true,
       title: true,
     },
-    skip: (page - 1) * pageSize,
-    take: pageSize,
+    skip: cursor ? 1 : 0,
+    take: pageSize + 1,
     where: {
       ...buildProblemWhere(filters),
       userId,
@@ -103,7 +104,7 @@ export async function findProblemDetail({
 }
 
 // 사용자의 문제 제출 티어 목록을 조회한다.
-export async function findProblemTiersByUserId(userId: string) {
+export async function findProblemTiers(userId: string) {
   return prisma.problemSubmission.findMany({
     select: { tier: true },
     where: { userId },
@@ -111,7 +112,7 @@ export async function findProblemTiersByUserId(userId: string) {
 }
 
 // 사용자의 최근 대기 문제를 조회한다.
-export async function findPendingProblemsByUserId({
+export async function findPendingProblems({
   limit,
   userId,
 }: {
@@ -134,11 +135,6 @@ export async function findPendingProblemsByUserId({
       userId,
     },
   });
-}
-
-// 사용자의 전체 문제 제출 수를 조회한다.
-export async function countProblemsByUserId(userId: string) {
-  return prisma.problemSubmission.count({ where: { userId } });
 }
 
 // 사용자가 소유한 문제 제출의 메모와 상태를 갱신한다.
