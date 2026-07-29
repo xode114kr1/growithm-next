@@ -3,10 +3,7 @@ import "server-only";
 import type { Prisma } from "@/generated/prisma/client";
 import type { StudyMemberRole } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
-import type {
-  StudyMemberFilters,
-  StudyProblemFilters,
-} from "@/types/study";
+import type { StudyMemberFilters, StudyProblemFilters } from "@/types/study";
 
 // 스터디 접근 권한을 소유자 또는 멤버 조건으로 구성한다.
 const accessibleStudyWhere = (studyId: string, userId: string) => ({
@@ -700,16 +697,16 @@ export async function updateStudyMemberRoleRecord({
   studyId: string;
   userId: string;
 }) {
-  const study = await prisma.study.findFirst({
-    select: { ownerId: true },
-    where: { id: studyId, ownerId: userId },
-  });
-  if (!study) return false;
-
   const result = await prisma.studyMember.updateMany({
     data: { role },
-    where: { id: memberId, studyId, userId: { not: study.ownerId } },
+    where: {
+      id: memberId,
+      study: { ownerId: userId },
+      studyId,
+      userId: { not: userId },
+    },
   });
+
   return result.count > 0;
 }
 
@@ -723,15 +720,15 @@ export async function removeStudyMemberRecord({
   studyId: string;
   userId: string;
 }) {
-  const study = await prisma.study.findFirst({
-    select: { ownerId: true },
-    where: { id: studyId, ownerId: userId },
-  });
-  if (!study) return false;
-
   const result = await prisma.studyMember.deleteMany({
-    where: { id: memberId, studyId, userId: { not: study.ownerId } },
+    where: {
+      id: memberId,
+      study: { ownerId: userId },
+      studyId,
+      userId: { not: userId },
+    },
   });
+
   return result.count > 0;
 }
 
