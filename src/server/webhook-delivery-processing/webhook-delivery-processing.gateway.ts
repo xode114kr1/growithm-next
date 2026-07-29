@@ -4,11 +4,6 @@ import {
   isRetryableGitHubStatus,
   RetryableGitHubFileError,
 } from "@/server/github/github.errors";
-import { getGitHubProblemMetadataErrorMessage } from "@/server/webhook-delivery-processing/webhook-delivery-processing.mapper";
-import {
-  isGitHubFileContentResponse,
-  type GitHubContentResponse,
-} from "@/server/webhook-delivery-processing/webhook-delivery-processing.schema";
 import type { GitHubProblemMetadata } from "@/types/github";
 
 const GITHUB_REQUEST_TIMEOUT_MS = 10_000;
@@ -35,41 +30,15 @@ export async function fetchGitHubCodeContent({
   }
 
   const url = `https://raw.githubusercontent.com/${repositoryFullName}/${commitSha}/${encodeGitHubPath(path)}`;
-  let response: Response;
 
-  try {
-    response = await fetch(url, {
-      signal: AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS),
-    });
-  } catch (error) {
-    throw new RetryableGitHubFileError(
-      "GitHub 코드 조회 요청에 실패했습니다.",
-      {
-        cause: error,
-      },
-    );
-  }
-
-  if (!response.ok) {
-    if (isRetryableGitHubStatus(response.status)) {
-      throw new RetryableGitHubFileError(
-        `GitHub 코드 조회 실패: HTTP ${response.status}`,
-      );
-    }
-
-    return null;
-  }
-
-  const contentLength = Number(response.headers.get("content-length"));
-
-  if (Number.isFinite(contentLength) && contentLength > MAX_CODE_SIZE_BYTES) {
-    return null;
-  }
-
-  return readResponseTextWithSizeLimit(response, MAX_CODE_SIZE_BYTES);
+  return fetchGitHubRawContent({
+    errorMessage: "GitHub 코드 조회",
+    maxSizeBytes: MAX_CODE_SIZE_BYTES,
+    url,
+  });
 }
 
-// 특정 커밋의 문제 정보를 GitHub API에서 조회한다.
+// 특정 커밋의 문제 정보 파일을 GitHub에서 조회한다.
 export async function fetchGitHubProblemMetadata({
   commitSha,
   path,
@@ -79,57 +48,59 @@ export async function fetchGitHubProblemMetadata({
   path: string;
   repositoryFullName: string;
 }): Promise<GitHubProblemMetadata | null> {
+  const url = `https://raw.githubusercontent.com/${repositoryFullName}/${commitSha}/${encodeGitHubPath(path)}`;
+  const text = await fetchGitHubRawContent({
+    errorMessage: "GitHub 문제 정보 조회",
+    maxSizeBytes: MAX_PROBLEM_METADATA_SIZE_BYTES,
+    url,
+  });
+
+  if (text === null) {
+    return null;
+  }
+
+  return { commitSha, path, text };
+}
+
+// GitHub Raw URL에서 제한된 크기의 파일 내용을 조회한다.
+async function fetchGitHubRawContent({
+  errorMessage,
+  maxSizeBytes,
+  url,
+}: {
+  errorMessage: string;
+  maxSizeBytes: number;
+  url: string;
+}) {
   let response: Response;
 
   try {
-    response = await fetch(
-      `https://api.github.com/repos/${repositoryFullName}/contents/${encodeGitHubPath(path)}?ref=${encodeURIComponent(commitSha)}`,
-      {
-        headers: {
-          Accept: "application/vnd.github+json",
-          "X-GitHub-Api-Version": "2022-11-28",
-        },
-        signal: AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS),
-      },
-    );
+    response = await fetch(url, {
+      signal: AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS),
+    });
   } catch (error) {
-    throw new RetryableGitHubFileError(
-      "GitHub 문제 정보 조회 요청에 실패했습니다.",
-      {
-        cause: error,
-      },
-    );
+    throw new RetryableGitHubFileError(`${errorMessage} 요청에 실패했습니다.`, {
+      cause: error,
+    });
   }
 
-  const data = (await response
-    .json()
-    .catch(() => null)) as GitHubContentResponse | null;
-
   if (!response.ok) {
-    const message = getGitHubProblemMetadataErrorMessage(response.status, data);
-
     if (isRetryableGitHubStatus(response.status)) {
-      throw new RetryableGitHubFileError(message);
+      throw new RetryableGitHubFileError(
+        `${errorMessage} 실패: HTTP ${response.status}`,
+      );
     }
 
     return null;
   }
 
-  if (!isGitHubFileContentResponse(data)) {
+  const contentLength = Number(response.headers.get("content-length"));
+
+  if (Number.isFinite(contentLength) && contentLength > maxSizeBytes) {
     return null;
   }
 
-  if (data.size > MAX_PROBLEM_METADATA_SIZE_BYTES) {
-    return null;
-  }
-
-  return {
-    commitSha,
-    path,
-    text: Buffer.from(data.content.replace(/\s/g, ""), "base64").toString(
-      "utf8",
-    ),
-  };
+  return readResponseTextWithSizeLimit(response, maxSizeBytes);
 }
 
 // Content-Length가 없는 응답도 제한 크기까지만 읽는다.
