@@ -1,4 +1,38 @@
 import type { ScoreTierThreshold } from "@/types/score";
+import type { PersonalScoreTier } from "@/types/user";
+
+export const personalScoreTierThresholds = [
+  { minScore: 1_000_000, tier: "Diamond" },
+  { minScore: 100_000, tier: "Platinum" },
+  { minScore: 10_000, tier: "Gold" },
+  { minScore: 1_000, tier: "Silver" },
+  { minScore: 0, tier: "Bronze" },
+] satisfies Array<ScoreTierThreshold<PersonalScoreTier>>;
+
+export const studyScoreTierThresholds = [
+  { minScore: 5_000_000, tier: "Diamond" },
+  { minScore: 500_000, tier: "Platinum" },
+  { minScore: 50_000, tier: "Gold" },
+  { minScore: 5_000, tier: "Silver" },
+  { minScore: 0, tier: "Bronze" },
+] satisfies Array<ScoreTierThreshold>;
+
+// 개인 점수에 해당하는 티어를 계산한다.
+export function getPersonalTier(score: number): PersonalScoreTier {
+  return (
+    personalScoreTierThresholds.find(
+      (threshold) => score >= threshold.minScore,
+    )?.tier ?? "Bronze"
+  );
+}
+
+// 스터디 점수에 해당하는 티어를 계산한다.
+export function getStudyTier(score: number) {
+  return (
+    studyScoreTierThresholds.find((threshold) => score >= threshold.minScore)
+      ?.tier ?? "Bronze"
+  );
+}
 
 // 점수와 티어 기준표를 사용해 현재 티어를 결정한다.
 export function getScoreTier<TTier extends string>(

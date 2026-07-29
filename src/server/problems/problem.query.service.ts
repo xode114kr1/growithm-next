@@ -2,12 +2,11 @@ import "server-only";
 
 import {
   countProblems,
-  countProblemsByUserId,
   findAvailableProblemTiers,
-  findPendingProblemsByUserId,
+  findPendingProblems,
   findProblemDetail,
   findProblems,
-  findProblemTiersByUserId,
+  findProblemTiers,
 } from "@/server/problems/problem.repository";
 import {
   createPendingProblem,
@@ -15,22 +14,16 @@ import {
   createProblemListItem,
   createProblemTierBuckets,
 } from "@/server/problems/problem.mapper";
+import type { ProblemListPage } from "@/server/problems/problem.types";
 import type {
   PendingProblem,
   ProblemDetail,
   ProblemFiltersState,
-  ProblemListItem,
   ProblemTierBucket,
 } from "@/types/problem";
 
 export const PROBLEM_PAGE_SIZE = 25;
 const PENDING_PROBLEM_LIMIT = 3;
-
-type ProblemListPage = {
-  hasNextPage: boolean;
-  items: ProblemListItem[];
-  nextCursor: string | null;
-};
 
 // 필터와 커서 조건에 맞는 문제 목록을 화면용 데이터로 조회한다.
 export async function getProblems({
@@ -50,14 +43,16 @@ export async function getProblems({
     };
   }
 
-  const rows = await findProblems({
+  const problems = await findProblems({
     cursor,
     filters,
     pageSize: PROBLEM_PAGE_SIZE,
     userId,
   });
-  const hasNextPage = rows.length > PROBLEM_PAGE_SIZE;
-  const items = rows.slice(0, PROBLEM_PAGE_SIZE).map(createProblemListItem);
+  const hasNextPage = problems.length > PROBLEM_PAGE_SIZE;
+  const items = problems
+    .slice(0, PROBLEM_PAGE_SIZE)
+    .map(createProblemListItem);
   const lastItem = items.at(-1);
 
   return {
@@ -105,7 +100,9 @@ export async function getProblemTierDistribution(
 ): Promise<ProblemTierBucket[]> {
   if (!userId) return createProblemTierBuckets([]);
 
-  return createProblemTierBuckets(await findProblemTiersByUserId(userId));
+  const problemTiers = await findProblemTiers(userId);
+
+  return createProblemTierBuckets(problemTiers);
 }
 
 // 메모 작성이 필요한 사용자의 최근 대기 문제를 조회한다.
@@ -114,15 +111,15 @@ export async function getPendingProblems(
 ): Promise<PendingProblem[]> {
   if (!userId) return [];
 
-  const rows = await findPendingProblemsByUserId({
+  const pendingProblems = await findPendingProblems({
     limit: PENDING_PROBLEM_LIMIT,
     userId,
   });
 
-  return rows.map(createPendingProblem);
+  return pendingProblems.map(createPendingProblem);
 }
 
 // 사용자의 전체 문제 제출 수를 조회한다.
 export async function getSolvedProblemCount(userId: string | undefined) {
-  return userId ? countProblemsByUserId(userId) : 0;
+  return userId ? countProblems({ userId }) : 0;
 }

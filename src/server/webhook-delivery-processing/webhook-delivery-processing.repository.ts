@@ -1,20 +1,17 @@
 import "server-only";
 
-import type {
-  ProblemPlatform,
-  ProblemSubmissionStatus,
-} from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { getRepositoryOwnerId } from "@/server/webhook-delivery-processing/webhook-delivery-processing.mapper";
+import type { ProblemSubmissionInput } from "@/server/webhook-delivery-processing/webhook-delivery-processing.types";
 import type { GitHubWebhookPayload } from "@/types/github";
 
 // 문제 처리에 필요한 저장된 웹훅 delivery를 조회한다.
-export async function getWebhookDeliveryForProcessing(webhookDeliveryId: string) {
+export async function getWebhookDeliveryForProcessing(
+  webhookDeliveryId: string,
+) {
   return prisma.webhookDelivery.findUnique({
     select: {
-      deliveryId: true,
       event: true,
-      id: true,
       payload: true,
       repositoryFullName: true,
       status: true,
@@ -56,17 +53,7 @@ export async function getRepositoryOwner(
     return getRepositoryOwnerFromPayload(repositoryFullName, payload);
   }
 
-  const account = await prisma.account.findFirst({
-    select: { access_token: true },
-    where: { provider: "github", userId: repositoryWebhook.userId },
-  });
-
-  if (!account?.access_token) return null;
-
-  return {
-    accessToken: account.access_token,
-    userId: repositoryWebhook.userId,
-  };
+  return { userId: repositoryWebhook.userId };
 }
 
 // 웹훅 payload의 GitHub 소유자 ID로 연결된 사용자를 찾는다.
@@ -79,11 +66,11 @@ async function getRepositoryOwnerFromPayload(
   if (!ownerId) return null;
 
   const account = await prisma.account.findFirst({
-    select: { access_token: true, userId: true },
+    select: { userId: true },
     where: { provider: "github", providerAccountId: ownerId },
   });
 
-  if (!account?.access_token) return null;
+  if (!account) return null;
 
   await prisma.gitHubRepositoryWebhook.upsert({
     create: { repositoryFullName, userId: account.userId },
@@ -91,30 +78,8 @@ async function getRepositoryOwnerFromPayload(
     where: { repositoryFullName },
   });
 
-  return { accessToken: account.access_token, userId: account.userId };
+  return { userId: account.userId };
 }
-
-type ProblemSubmissionInput = {
-  accuracy?: number;
-  categories?: string[];
-  code: string | null;
-  commitSha: string;
-  description?: string;
-  link?: string;
-  memory?: string;
-  platform: ProblemPlatform;
-  problemId: string;
-  readmePath: string;
-  repositoryFullName: string;
-  score: number;
-  scoreMax?: number;
-  status: ProblemSubmissionStatus;
-  submittedAtText?: string;
-  tier?: string;
-  time?: string;
-  title: string;
-  userId: string;
-};
 
 // 문제 제출과 사용자 점수를 반영하고 웹훅 delivery 처리를 완료한다.
 export async function saveProblemSubmissionAndCompleteDelivery({
@@ -127,22 +92,22 @@ export async function saveProblemSubmissionAndCompleteDelivery({
   await prisma.$transaction(async (tx) => {
     const {
       commitSha,
-      readmePath,
+      metadataPath,
       repositoryFullName,
       score,
       userId,
       ...submissionData
     } = submission;
-    const submissionKey = `${repositoryFullName}:${commitSha}:${readmePath}`;
+    const submissionKey = `${repositoryFullName}:${commitSha}:${metadataPath}`;
     // 동일 제출의 upsert와 점수 계산을 직렬화해 동시 Consumer의 이중 반영을 막는다.
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${submissionKey}, 0))`;
 
     const existingSubmission = await tx.problemSubmission.findUnique({
       select: { score: true, userId: true },
       where: {
-        repositoryFullName_commitSha_readmePath: {
+        repositoryFullName_commitSha_metadataPath: {
           commitSha,
-          readmePath,
+          metadataPath,
           repositoryFullName,
         },
       },
@@ -151,7 +116,7 @@ export async function saveProblemSubmissionAndCompleteDelivery({
     await tx.problemSubmission.upsert({
       create: {
         commitSha,
-        readmePath,
+        metadataPath,
         repositoryFullName,
         score,
         ...submissionData,
@@ -165,9 +130,9 @@ export async function saveProblemSubmissionAndCompleteDelivery({
         webhookDeliveryId,
       },
       where: {
-        repositoryFullName_commitSha_readmePath: {
+        repositoryFullName_commitSha_metadataPath: {
           commitSha,
-          readmePath,
+          metadataPath,
           repositoryFullName,
         },
       },
@@ -208,26 +173,6 @@ export async function saveProblemSubmissionAndCompleteDelivery({
 
 // 저장된 웹훅 delivery의 처리 상태와 오류를 갱신한다.
 export async function updateWebhookDeliveryStatus({
-  deliveryId,
-  errorMessage,
-  status,
-}: {
-  deliveryId: string;
-  errorMessage?: string;
-  status: WebhookDeliveryProcessingStatus;
-}) {
-  await prisma.webhookDelivery.update({
-    data: {
-      errorMessage,
-      processedAt: isCompletedDeliveryStatus(status) ? new Date() : null,
-      status,
-    },
-    where: { deliveryId },
-  });
-}
-
-// Queue 메시지의 내부 ID로 저장된 웹훅 delivery 상태를 갱신한다.
-export async function updateWebhookDeliveryStatusById({
   errorMessage,
   status,
   webhookDeliveryId,
@@ -247,10 +192,7 @@ export async function updateWebhookDeliveryStatusById({
 }
 
 type WebhookDeliveryProcessingStatus =
-  | "FAILED"
-  | "PROCESSING"
-  | "PROCESSED"
-  | "RETRY_PENDING";
+  "FAILED" | "PROCESSING" | "PROCESSED" | "RETRY_PENDING";
 
 // 웹훅 delivery 처리가 종료된 상태인지 확인한다.
 function isCompletedDeliveryStatus(status: WebhookDeliveryProcessingStatus) {

@@ -147,6 +147,7 @@ export async function findFriendRelationsForUserIds({
   return { friendships, receivedRequests, sentRequests };
 }
 
+// 현재 사용자의 친구 관계와 이름·이메일 검색 조건을 조회 조건으로 만든다.
 function buildFriendshipWhere({
   query,
   userId,
@@ -191,55 +192,44 @@ function buildFriendshipWhere({
   };
 }
 
-// 사용자 ID에 해당하는 사용자의 존재 여부를 조회한다.
-export async function findUserById(userId: string) {
-  return prisma.user.findUnique({
+// 정렬된 사용자 ID에 해당하는 친구 관계를 조회한다.
+export async function findFriendship(friendPair: {
+  userAId: string;
+  userBId: string;
+}) {
+  return prisma.friendship.findUnique({
     select: {
       id: true,
     },
     where: {
-      id: userId,
+      userAId_userBId: friendPair,
     },
   });
 }
 
-// 정규화된 친구 관계와 반대 방향 친구 요청을 함께 조회한다.
-export async function findFriendshipAndReceivedRequest({
-  friendPair,
+// 요청자와 수신자가 일치하는 친구 요청을 조회한다.
+export async function findFriendRequest({
+  addresseeId,
   requesterId,
-  targetUserId,
 }: {
-  friendPair: { userAId: string; userBId: string };
+  addresseeId: string;
   requesterId: string;
-  targetUserId: string;
 }) {
-  const [existingFriendship, receivedRequest] = await Promise.all([
-    prisma.friendship.findUnique({
-      select: {
-        id: true,
+  return prisma.friendRequest.findUnique({
+    select: {
+      id: true,
+    },
+    where: {
+      requesterId_addresseeId: {
+        addresseeId,
+        requesterId,
       },
-      where: {
-        userAId_userBId: friendPair,
-      },
-    }),
-    prisma.friendRequest.findUnique({
-      select: {
-        id: true,
-      },
-      where: {
-        requesterId_addresseeId: {
-          addresseeId: requesterId,
-          requesterId: targetUserId,
-        },
-      },
-    }),
-  ]);
-
-  return { existingFriendship, receivedRequest };
+    },
+  });
 }
 
 // 동일 방향 친구 요청을 중복 없이 저장한다.
-export async function upsertFriendRequest({
+export async function createFriendRequest({
   requesterId,
   targetUserId,
 }: {
@@ -269,12 +259,14 @@ export async function deleteSentFriendRequest({
   requesterId: string;
   requestId: string;
 }) {
-  await prisma.friendRequest.deleteMany({
+  const result = await prisma.friendRequest.deleteMany({
     where: {
       id: requestId,
       requesterId,
     },
   });
+
+  return result.count > 0;
 }
 
 // 수신자와 요청 ID가 일치하는 받은 친구 요청을 거절 처리한다.
@@ -285,12 +277,14 @@ export async function rejectReceivedFriendRequest({
   addresseeId: string;
   requestId: string;
 }) {
-  await prisma.friendRequest.deleteMany({
+  const result = await prisma.friendRequest.deleteMany({
     where: {
       addresseeId,
       id: requestId,
     },
   });
+
+  return result.count > 0;
 }
 
 // 받은 요청을 삭제한 경우에만 친구 관계를 생성한다.
@@ -340,7 +334,9 @@ export async function deleteFriendship(friendPair: {
   userAId: string;
   userBId: string;
 }) {
-  await prisma.friendship.deleteMany({
+  const result = await prisma.friendship.deleteMany({
     where: friendPair,
   });
+
+  return result.count > 0;
 }

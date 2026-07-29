@@ -104,7 +104,7 @@ export async function findProblemDetail({
 }
 
 // 사용자의 문제 제출 티어 목록을 조회한다.
-export async function findProblemTiersByUserId(userId: string) {
+export async function findProblemTiers(userId: string) {
   return prisma.problemSubmission.findMany({
     select: { tier: true },
     where: { userId },
@@ -112,7 +112,7 @@ export async function findProblemTiersByUserId(userId: string) {
 }
 
 // 사용자의 최근 대기 문제를 조회한다.
-export async function findPendingProblemsByUserId({
+export async function findPendingProblems({
   limit,
   userId,
 }: {
@@ -135,11 +135,6 @@ export async function findPendingProblemsByUserId({
       userId,
     },
   });
-}
-
-// 사용자의 전체 문제 제출 수를 조회한다.
-export async function countProblemsByUserId(userId: string) {
-  return prisma.problemSubmission.count({ where: { userId } });
 }
 
 // 사용자가 소유한 문제 제출의 메모와 상태를 갱신한다.

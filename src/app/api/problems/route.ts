@@ -4,7 +4,6 @@ import { auth } from "@/lib/auth/auth";
 import { getProblems } from "@/server/problems/problem.query.service";
 import { parseProblemFilters } from "@/server/problems/problem.schema";
 import type {
-  ProblemInfiniteScrollRequest,
   ProblemInfiniteScrollResponse,
   ProblemPageSearchParams,
 } from "@/types/problem";
@@ -23,19 +22,9 @@ export async function GET(request: NextRequest) {
 
   const params = createProblemSearchParams(request.nextUrl.searchParams);
   const filters = parseProblemFilters(params);
-  const query: ProblemInfiniteScrollRequest = {
-    filters: {
-      platform: filters.platform,
-      q: filters.q,
-      tier: filters.tier,
-    },
-    cursor: params.cursor ?? null,
-    sort: filters.sort,
-  };
-  const problemFilters = { ...query.filters, sort: query.sort };
   const problemPage = await getProblems({
-    cursor: query.cursor,
-    filters: problemFilters,
+    cursor: params.cursor ?? null,
+    filters,
     userId,
   });
   const response: ProblemInfiniteScrollResponse = {

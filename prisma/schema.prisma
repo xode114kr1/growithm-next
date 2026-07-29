@@ -115,7 +115,7 @@ model ProblemSubmission {
   webhookDeliveryId  String?                 @map("webhook_delivery_id")
   repositoryFullName String                  @map("repository_full_name")
   commitSha          String                  @map("commit_sha")
-  readmePath         String                  @map("readme_path")
+  metadataPath       String                  @map("metadata_path")
   code               String?                 @db.Text
   memo               String?                 @db.Text
   status             ProblemSubmissionStatus @default(PENDING)
@@ -139,7 +139,7 @@ model ProblemSubmission {
   webhookDelivery WebhookDelivery?    @relation(fields: [webhookDeliveryId], references: [id], onDelete: SetNull)
   studyShares     StudyProblemShare[]
 
-  @@unique([repositoryFullName, commitSha, readmePath])
+  @@unique([repositoryFullName, commitSha, metadataPath], map: "problem_submissions_repository_commit_metadata_key")
   @@index([userId])
   @@index([webhookDeliveryId])
   @@index([status])

@@ -7,7 +7,6 @@ import {
 } from "@/server/studies/study.query.service";
 import { parseStudyProblemFilters } from "@/server/studies/study.schema";
 import type {
-  StudyProblemInfiniteScrollRequest,
   StudyProblemInfiniteScrollResponse,
   StudyProblemPageSearchParams,
 } from "@/types/study";
@@ -38,19 +37,9 @@ export async function GET(
     request.nextUrl.searchParams,
   );
   const filters = parseStudyProblemFilters(searchParams);
-  const query: StudyProblemInfiniteScrollRequest = {
-    filters: {
-      member: filters.member,
-      platform: filters.platform,
-      tier: filters.tier,
-    },
-    cursor: searchParams.cursor ?? null,
-    sort: filters.sort,
-  };
-  const studyProblemFilters = { ...query.filters, sort: query.sort };
   const studyProblemPage = await getStudyProblems({
-    cursor: query.cursor,
-    filters: studyProblemFilters,
+    cursor: searchParams.cursor ?? null,
+    filters,
     studyId,
     userId,
   });

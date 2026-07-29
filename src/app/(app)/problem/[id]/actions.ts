@@ -17,7 +17,6 @@ export type ProblemMemoActionState = ActionState & {
 
 export type ProblemShareActionState = ActionState & {
   sharedCount: number;
-  skippedCount: number;
 };
 
 export async function updateProblemMemo(
@@ -81,10 +80,6 @@ export async function shareProblemToStudies(
 
   const result = await shareProblemWithStudies({ problemId, studyIds, userId });
 
-  if (result.error) {
-    return createShareErrorState(result.error);
-  }
-
   revalidatePath(`/problem/${problemId}`);
   revalidatePath("/problem");
   revalidatePath("/study");
@@ -97,7 +92,6 @@ export async function shareProblemToStudies(
   return {
     error: null,
     sharedCount: result.newStudyIds.length,
-    skippedCount: result.skippedCount,
     status: "success",
   };
 }
@@ -132,7 +126,6 @@ function createShareErrorState(error: string): ProblemShareActionState {
   return {
     error,
     sharedCount: 0,
-    skippedCount: 0,
     status: "error",
   };
 }

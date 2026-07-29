@@ -27,7 +27,6 @@ type ProblemShareModalProps = {
 const initialShareState: ProblemShareActionState = {
   error: null,
   sharedCount: 0,
-  skippedCount: 0,
   status: "idle",
 };
 
