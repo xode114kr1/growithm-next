@@ -10,10 +10,3 @@ export class RetryableGitHubFileError extends Error {
 export function isRetryableGitHubStatus(status: number) {
   return status === 408 || status === 429 || status >= 500;
 }
-
-// 오류가 재시도 가능한 GitHub 파일 조회 실패인지 확인한다.
-export function isRetryableGitHubFileError(
-  error: unknown,
-): error is RetryableGitHubFileError {
-  return error instanceof RetryableGitHubFileError;
-}

@@ -23,24 +23,6 @@ type GitHubPushCommit = {
   modified?: unknown;
 };
 
-// 커밋과 파일 경로를 사용해 GitHub 원본 파일 URL을 만든다.
-export function buildRawGitHubContentUrl({
-  commitSha,
-  path,
-  repositoryFullName,
-}: {
-  commitSha: string;
-  path: string;
-  repositoryFullName: string;
-}) {
-  return `https://raw.githubusercontent.com/${repositoryFullName}/${commitSha}/${encodeGitHubPath(path)}`;
-}
-
-// GitHub API 요청에 사용할 파일 경로의 각 구간을 인코딩한다.
-export function encodeGitHubPath(path: string) {
-  return path.split("/").map(encodeURIComponent).join("/");
-}
-
 // GitHub 문제 정보 조회 실패 응답을 오류 메시지로 변환한다.
 export function getGitHubProblemMetadataErrorMessage(
   status: number,

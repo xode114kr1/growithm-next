@@ -4,10 +4,7 @@ import {
   isRetryableGitHubStatus,
   RetryableGitHubFileError,
 } from "@/server/github/github.errors";
-import {
-  encodeGitHubPath,
-  getGitHubProblemMetadataErrorMessage,
-} from "@/server/webhook-delivery-processing/webhook-delivery-processing.mapper";
+import { getGitHubProblemMetadataErrorMessage } from "@/server/webhook-delivery-processing/webhook-delivery-processing.mapper";
 import {
   isGitHubFileContentResponse,
   type GitHubContentResponse,
@@ -18,8 +15,26 @@ const GITHUB_REQUEST_TIMEOUT_MS = 10_000;
 const MAX_CODE_SIZE_BYTES = 1024 * 1024;
 const MAX_PROBLEM_METADATA_SIZE_BYTES = 2 * 1024 * 1024;
 
-// GitHub raw content URL에서 풀이 코드 파일을 조회한다.
-export async function fetchGitHubRawCode(url: string) {
+// GitHub API 요청에 사용할 파일 경로의 각 구간을 인코딩한다.
+function encodeGitHubPath(path: string) {
+  return path.split("/").map(encodeURIComponent).join("/");
+}
+
+// 특정 커밋의 풀이 코드 파일을 GitHub에서 조회한다.
+export async function fetchGitHubCodeContent({
+  commitSha,
+  path,
+  repositoryFullName,
+}: {
+  commitSha: string;
+  path: string | null;
+  repositoryFullName: string;
+}): Promise<string | null> {
+  if (!path) {
+    return null;
+  }
+
+  const url = `https://raw.githubusercontent.com/${repositoryFullName}/${commitSha}/${encodeGitHubPath(path)}`;
   let response: Response;
 
   try {
@@ -42,19 +57,16 @@ export async function fetchGitHubRawCode(url: string) {
       );
     }
 
-    return { code: null, status: response.status };
+    return null;
   }
 
   const contentLength = Number(response.headers.get("content-length"));
 
   if (Number.isFinite(contentLength) && contentLength > MAX_CODE_SIZE_BYTES) {
-    throw new Error("GitHub 코드 파일 크기가 1MB 제한을 초과했습니다.");
+    return null;
   }
 
-  return {
-    code: await readResponseTextWithSizeLimit(response, MAX_CODE_SIZE_BYTES),
-    status: response.status,
-  };
+  return readResponseTextWithSizeLimit(response, MAX_CODE_SIZE_BYTES);
 }
 
 // 특정 커밋의 문제 정보를 GitHub API에서 조회한다.
@@ -66,15 +78,20 @@ export async function fetchGitHubProblemMetadata({
   commitSha: string;
   path: string;
   repositoryFullName: string;
-}): Promise<GitHubProblemMetadata> {
+}): Promise<GitHubProblemMetadata | null> {
   let response: Response;
 
   try {
-    response = await fetchGitHubContent({
-      commitSha,
-      path,
-      repositoryFullName,
-    });
+    response = await fetch(
+      `https://api.github.com/repos/${repositoryFullName}/contents/${encodeGitHubPath(path)}?ref=${encodeURIComponent(commitSha)}`,
+      {
+        headers: {
+          Accept: "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+        signal: AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS),
+      },
+    );
   } catch (error) {
     throw new RetryableGitHubFileError(
       "GitHub 문제 정보 조회 요청에 실패했습니다.",
@@ -95,15 +112,15 @@ export async function fetchGitHubProblemMetadata({
       throw new RetryableGitHubFileError(message);
     }
 
-    throw new Error(message);
+    return null;
   }
 
   if (!isGitHubFileContentResponse(data)) {
-    throw new Error("GitHub 문제 정보 응답 형식이 올바르지 않습니다.");
+    return null;
   }
 
   if (data.size > MAX_PROBLEM_METADATA_SIZE_BYTES) {
-    throw new Error("GitHub 문제 정보 파일 크기가 2MB 제한을 초과했습니다.");
+    return null;
   }
 
   return {
@@ -115,33 +132,11 @@ export async function fetchGitHubProblemMetadata({
   };
 }
 
-// GitHub Contents API에서 특정 커밋의 파일 응답을 조회한다.
-async function fetchGitHubContent({
-  commitSha,
-  path,
-  repositoryFullName,
-}: {
-  commitSha: string;
-  path: string;
-  repositoryFullName: string;
-}) {
-  return fetch(
-    `https://api.github.com/repos/${repositoryFullName}/contents/${encodeGitHubPath(path)}?ref=${encodeURIComponent(commitSha)}`,
-    {
-      headers: {
-        Accept: "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-      signal: AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS),
-    },
-  );
-}
-
 // Content-Length가 없는 응답도 제한 크기까지만 읽는다.
 async function readResponseTextWithSizeLimit(
   response: Response,
   maxSizeBytes: number,
-) {
+): Promise<string | null> {
   if (!response.body) {
     return "";
   }
@@ -161,7 +156,7 @@ async function readResponseTextWithSizeLimit(
 
     if (size > maxSizeBytes) {
       await reader.cancel();
-      throw new Error("GitHub 코드 파일 크기가 1MB 제한을 초과했습니다.");
+      return null;
     }
 
     chunks.push(value);

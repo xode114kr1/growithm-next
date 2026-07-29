@@ -1,11 +1,10 @@
 import "server-only";
 
 import {
-  fetchGitHubRawCode,
+  fetchGitHubCodeContent,
   fetchGitHubProblemMetadata,
 } from "@/server/webhook-delivery-processing/webhook-delivery-processing.gateway";
 import {
-  buildRawGitHubContentUrl,
   createProblemSubmission,
   getProblemFileChangeFromPushPayload,
   parseProblemMetadata,
@@ -18,7 +17,6 @@ import {
   updateWebhookDeliveryStatus,
   updateWebhookDeliveryStatusById,
 } from "@/server/webhook-delivery-processing/webhook-delivery-processing.repository";
-import { isRetryableGitHubFileError } from "@/server/github/github.errors";
 import type {
   GitHubProblemFileChange,
   GitHubWebhookPayload,
@@ -154,21 +152,20 @@ async function processChangedProblemFile({
   webhookDeliveryId: string;
 }) {
   // Command: 변경된 풀이 코드와 문제 정보 조회
-  const [codeResult, metadataResult] = await Promise.all([
-    fetchChangedCodeContent(problemFileChange, repositoryFullName),
-    fetchChangedProblemMetadata({
-      problemFileChange,
+  const [code, metadata] = await Promise.all([
+    fetchGitHubCodeContent({
+      commitSha: problemFileChange.commitSha,
+      path: problemFileChange.codePath,
+      repositoryFullName,
+    }),
+    fetchGitHubProblemMetadata({
+      commitSha: problemFileChange.commitSha,
+      path: problemFileChange.metadataPath,
       repositoryFullName,
     }),
   ]);
-  const retryableError =
-    codeResult.retryableError ?? metadataResult.retryableError;
 
-  if (retryableError) {
-    throw retryableError;
-  }
-
-  if (!metadataResult.metadata) {
+  if (!metadata) {
     // Repository: 문제 정보 조회에 실패한 delivery 상태 갱신
     await updateWebhookDeliveryStatus({
       deliveryId,
@@ -180,7 +177,7 @@ async function processChangedProblemFile({
   }
 
   // Mapper: 문제 정보 파일에서 제출 정보 추출
-  const parsedMetadata = parseProblemMetadata(metadataResult.metadata.text);
+  const parsedMetadata = parseProblemMetadata(metadata.text);
 
   if (!parsedMetadata) {
     const errorMessage = "문제 정보를 파싱할 수 없습니다.";
@@ -203,8 +200,8 @@ async function processChangedProblemFile({
 
   // Mapper: 문제 제출 저장 데이터 생성
   const submission = createProblemSubmission({
-    code: codeResult.code,
-    metadata: metadataResult.metadata,
+    code,
+    metadata,
     parsedMetadata,
     repositoryFullName,
     score: experienceScore,
@@ -216,60 +213,4 @@ async function processChangedProblemFile({
     submission,
     webhookDeliveryId,
   });
-}
-
-// 변경된 풀이 코드 파일을 조회한다.
-async function fetchChangedCodeContent(
-  problemFileChange: GitHubProblemFileChange,
-  repositoryFullName: string,
-) {
-  if (!problemFileChange.codePath) {
-    return { code: null, retryableError: null };
-  }
-
-  // Mapper: 변경된 풀이 코드의 GitHub 원본 URL 생성
-  const codeUrl = buildRawGitHubContentUrl({
-    commitSha: problemFileChange.commitSha,
-    path: problemFileChange.codePath,
-    repositoryFullName,
-  });
-
-  try {
-    // Gateway: GitHub에서 변경된 풀이 코드 조회
-    const result = await fetchGitHubRawCode(codeUrl);
-
-    return { code: result.code, retryableError: null };
-  } catch (error) {
-    // Error: GitHub 파일 조회 오류의 재시도 가능 여부 확인
-    return {
-      code: null,
-      retryableError: isRetryableGitHubFileError(error) ? error : null,
-    };
-  }
-}
-
-// 변경된 문제 정보 파일을 조회한다.
-async function fetchChangedProblemMetadata({
-  problemFileChange,
-  repositoryFullName,
-}: {
-  problemFileChange: GitHubProblemFileChange;
-  repositoryFullName: string;
-}) {
-  try {
-    // Gateway: GitHub에서 변경된 문제 정보 조회
-    const metadata = await fetchGitHubProblemMetadata({
-      commitSha: problemFileChange.commitSha,
-      path: problemFileChange.metadataPath,
-      repositoryFullName,
-    });
-
-    return { metadata, retryableError: null };
-  } catch (error) {
-    // Error: GitHub 파일 조회 오류의 재시도 가능 여부 확인
-    return {
-      metadata: null,
-      retryableError: isRetryableGitHubFileError(error) ? error : null,
-    };
-  }
 }
