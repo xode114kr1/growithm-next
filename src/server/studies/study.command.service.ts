@@ -16,11 +16,6 @@ import {
 
 const INVITE_EXPIRATION_DAYS = 7;
 
-// 스터디 초대 명령의 처리 결과를 만든다.
-function createStudyInviteResult(error: string | null) {
-  return { error };
-}
-
 // 스터디를 생성하고 생성된 스터디 ID를 반환한다.
 export async function createStudy(input: {
   description: string;
@@ -72,33 +67,23 @@ export async function createStudyInvite({
   });
 
   if (!study) {
-    const inviteResult = createStudyInviteResult(
-      "초대를 보낼 수 있는 스터디를 찾을 수 없습니다.",
-    );
-
-    return inviteResult;
+    return {
+      error: "초대를 보낼 수 있는 스터디를 찾을 수 없습니다.",
+    };
   }
 
   if (!targetUser) {
-    const inviteResult = createStudyInviteResult(
-      "해당 사용자 이름 또는 이메일을 찾을 수 없습니다.",
-    );
-
-    return inviteResult;
+    return {
+      error: "해당 사용자 이름 또는 이메일을 찾을 수 없습니다.",
+    };
   }
 
   if (targetUser.id === userId) {
-    const inviteResult = createStudyInviteResult("본인은 초대할 수 없습니다.");
-
-    return inviteResult;
+    return { error: "본인은 초대할 수 없습니다." };
   }
 
   if (existingMember) {
-    const inviteResult = createStudyInviteResult(
-      "이미 스터디에 참여 중인 사용자입니다.",
-    );
-
-    return inviteResult;
+    return { error: "이미 스터디에 참여 중인 사용자입니다." };
   }
 
   const expiresAt = new Date();
@@ -111,9 +96,7 @@ export async function createStudyInvite({
     userId,
   });
 
-  const inviteResult = createStudyInviteResult(null);
-
-  return inviteResult;
+  return { error: null };
 }
 
 // 소유자가 보낸 대기 초대를 취소한다.
