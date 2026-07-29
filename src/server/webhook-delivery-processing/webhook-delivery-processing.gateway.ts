@@ -5,8 +5,6 @@ import {
   RetryableGitHubFileError,
 } from "@/server/github/github.errors";
 
-const GITHUB_REQUEST_TIMEOUT_MS = 10_000;
-
 // GitHub API 요청에 사용할 파일 경로의 각 구간을 인코딩한다.
 function encodeGitHubPath(path: string) {
   return path.split("/").map(encodeURIComponent).join("/");
@@ -30,9 +28,7 @@ export async function fetchGitHubRawContent({
   let response: Response;
 
   try {
-    response = await fetch(url, {
-      signal: AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS),
-    });
+    response = await fetch(url);
   } catch (error) {
     throw new RetryableGitHubFileError(
       "GitHub 파일 조회 요청에 실패했습니다.",
