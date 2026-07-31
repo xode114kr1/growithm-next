@@ -21,7 +21,6 @@ export function useWindowVirtualizedList<
 }): {
   containerRef: React.RefObject<TContainerElement | null>;
   rowVirtualizer: Virtualizer<Window, Element>;
-  scrollMargin: number;
   totalSize: number;
   virtualItems: VirtualItem[];
 } {
@@ -57,7 +56,6 @@ export function useWindowVirtualizedList<
   return {
     containerRef,
     rowVirtualizer,
-    scrollMargin,
     totalSize: rowVirtualizer.getTotalSize(),
     virtualItems: rowVirtualizer.getVirtualItems(),
   };
