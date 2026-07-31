@@ -13,12 +13,10 @@ export function useWindowVirtualizedList<
 >({
   count,
   estimateSize,
-  getItemKey,
   overscan = DEFAULT_OVERSCAN_COUNT,
 }: {
   count: number;
   estimateSize: () => number;
-  getItemKey?: (index: number) => string | number;
   overscan?: number;
 }): {
   containerRef: React.RefObject<TContainerElement | null>;
@@ -52,7 +50,6 @@ export function useWindowVirtualizedList<
   const rowVirtualizer = useWindowVirtualizer({
     count,
     estimateSize,
-    getItemKey,
     overscan,
     scrollMargin,
   });

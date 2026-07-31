@@ -41,7 +41,6 @@ export default function ProblemList({
     useWindowVirtualizedList<HTMLElement>({
       count: items.length,
       estimateSize: () => PROBLEM_ROW_ESTIMATE_HEIGHT,
-      getItemKey: (index) => items[index]?.id ?? index,
       overscan: PROBLEM_LIST_OVERSCAN,
     });
 

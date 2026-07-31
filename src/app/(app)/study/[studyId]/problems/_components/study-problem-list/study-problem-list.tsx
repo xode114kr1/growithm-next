@@ -47,7 +47,6 @@ export default function StudyProblemList({
     useWindowVirtualizedList<HTMLElement>({
       count: items.length,
       estimateSize: () => STUDY_PROBLEM_ROW_ESTIMATE_HEIGHT,
-      getItemKey: (index) => items[index]?.id ?? index,
       overscan: STUDY_PROBLEM_LIST_OVERSCAN,
     });
 
